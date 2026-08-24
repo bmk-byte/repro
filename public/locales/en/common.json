@@ -1,0 +1,120 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "cards": {
+      "totalCases": "Total Cases",
+      "successRate": "Success Rate",
+      "activeCases": "Active Cases"
+    },
+    "charts": {
+      "monthlyTrends": "Monthly Trends",
+      "caseDistribution": "Case Distribution",
+      "africaDistribution": "Case Distribution Across Africa"
+    }
+  },
+  "cases": {
+    "title": "Cases Database",
+    "search": "Search cases...",
+    "table": {
+      "caseName": "Case Name",
+      "dateFiled": "Date Filed",
+      "jurisdiction": "Jurisdiction",
+      "themes": "Themes",
+      "outcome": "Outcome",
+      "courtLevel": "Court Level",
+      "noResults": "No cases found",
+      "loading": "Loading cases..."
+    },
+    "filters": {
+      "allCountries": "All Countries",
+      "allTypes": "All Types",
+      "litigation": "Litigation",
+      "rapidResponse": "Rapid Response"
+    },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "onHold": "On Hold"
+    }
+  },
+  "laws": {
+    "title": "Acts & Policies",
+    "search": "Search laws and policies...",
+    "filters": {
+      "allCountries": "All Countries",
+      "allTypes": "All Types",
+      "acts": "Acts",
+      "policies": "Policies"
+    },
+    "categories": {
+      "criminalLaw": "Criminal Law",
+      "healthcare": "Healthcare",
+      "humanRights": "Human Rights",
+      "constitutionalLaw": "Constitutional Law",
+      "familyLaw": "Family Law"
+    },
+    "upload": {
+      "title": "Upload Legal Document",
+      "dropzone": {
+        "text": "Drop your PDF file here or click to browse",
+        "maxSize": "Maximum file size: 10MB"
+      },
+      "form": {
+        "title": "Title",
+        "description": "Description",
+        "country": "Country",
+        "type": "Type",
+        "category": "Category"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "upload": "Upload Document",
+        "uploading": "Uploading..."
+      }
+    },
+    "actions": {
+      "view": "View",
+      "download": "Download"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in to your account",
+      "email": "Email address",
+      "password": "Password",
+      "button": "Sign in",
+      "noAccount": "Don't have an account? Sign up"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "fullName": "Full Name",
+      "email": "Email address",
+      "password": "Password",
+      "button": "Sign up",
+      "haveAccount": "Already have an account? Sign in"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "update": "Update",
+    "delete": "Delete",
+    "view": "View",
+    "download": "Download",
+    "search": "Search",
+    "filters": "Filters",
+    "noResults": "No results found",
+    "processing": "Processing..."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "cases": "Cases",
+    "uploadCase": "Upload Case",
+    "actsAndPolicies": "Acts & Policies",
+    "settings": "Settings",
+    "logout": "Logout"
+  }
+}

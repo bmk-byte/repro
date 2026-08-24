@@ -1,0 +1,120 @@
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "cards": {
+      "totalCases": "Total des cas",
+      "successRate": "Taux de réussite",
+      "activeCases": "Cas actifs"
+    },
+    "charts": {
+      "monthlyTrends": "Tendances mensuelles",
+      "caseDistribution": "Distribution des cas",
+      "africaDistribution": "Distribution des cas en Afrique"
+    }
+  },
+  "cases": {
+    "title": "Base de données des cas",
+    "search": "Rechercher des cas...",
+    "table": {
+      "caseName": "Nom du cas",
+      "dateFiled": "Date de dépôt",
+      "jurisdiction": "Juridiction",
+      "themes": "Thèmes",
+      "outcome": "Résultat",
+      "courtLevel": "Niveau de tribunal",
+      "noResults": "Aucun cas trouvé",
+      "loading": "Chargement des cas..."
+    },
+    "filters": {
+      "allCountries": "Tous les pays",
+      "allTypes": "Tous les types",
+      "litigation": "Contentieux",
+      "rapidResponse": "Réponse rapide"
+    },
+    "status": {
+      "pending": "En attente",
+      "inProgress": "En cours",
+      "completed": "Terminé",
+      "onHold": "En suspens"
+    }
+  },
+  "laws": {
+    "title": "Lois et politiques",
+    "search": "Rechercher des lois et politiques...",
+    "filters": {
+      "allCountries": "Tous les pays",
+      "allTypes": "Tous les types",
+      "acts": "Lois",
+      "policies": "Politiques"
+    },
+    "categories": {
+      "criminalLaw": "Droit pénal",
+      "healthcare": "Santé",
+      "humanRights": "Droits humains",
+      "constitutionalLaw": "Droit constitutionnel",
+      "familyLaw": "Droit de la famille"
+    },
+    "upload": {
+      "title": "Télécharger un document juridique",
+      "dropzone": {
+        "text": "Déposez votre fichier PDF ici ou cliquez pour parcourir",
+        "maxSize": "Taille maximale du fichier : 10MB"
+      },
+      "form": {
+        "title": "Titre",
+        "description": "Description",
+        "country": "Pays",
+        "type": "Type",
+        "category": "Catégorie"
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "upload": "Télécharger le document",
+        "uploading": "Téléchargement..."
+      }
+    },
+    "actions": {
+      "view": "Voir",
+      "download": "Télécharger"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Connectez-vous à votre compte",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "button": "Se connecter",
+      "noAccount": "Pas de compte ? Inscrivez-vous"
+    },
+    "signUp": {
+      "title": "Créez votre compte",
+      "fullName": "Nom complet",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "button": "S'inscrire",
+      "haveAccount": "Déjà un compte ? Connectez-vous"
+    }
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "update": "Mettre à jour",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "download": "Télécharger",
+    "search": "Rechercher",
+    "filters": "Filtres",
+    "noResults": "Aucun résultat trouvé",
+    "processing": "Traitement en cours..."
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "cases": "Cas",
+    "uploadCase": "Télécharger un cas",
+    "actsAndPolicies": "Lois et politiques",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  }
+}

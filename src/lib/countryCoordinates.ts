@@ -1,0 +1,66 @@
+export interface CountryCoordinate {
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
+export const AFRICAN_COUNTRY_COORDINATES: Record<string, [number, number]> = {
+  'Nigeria': [9.0820, 8.6753],
+  'Kenya': [-0.0236, 37.9062],
+  'South Africa': [-30.5595, 22.9375],
+  'Ethiopia': [9.1450, 40.4897],
+  'Ghana': [7.9465, -1.0232],
+  'Uganda': [1.3733, 32.2903],
+  'Tanzania': [-6.3690, 34.8888],
+  'Rwanda': [-1.9403, 29.8739],
+  'Zambia': [-13.1339, 27.8493],
+  'Zimbabwe': [-19.0154, 29.1549],
+  'Malawi': [-13.2543, 34.3015],
+  'Mozambique': [-18.6657, 35.5296],
+  'Botswana': [-22.3285, 24.6849],
+  'Namibia': [-22.9576, 18.4904],
+  'Senegal': [14.4974, -14.4524],
+  'Ivory Coast': [7.5400, -5.5471],
+  'Cameroon': [7.3697, 12.3547],
+  'Mali': [17.5707, -3.9962],
+  'Burkina Faso': [12.2383, -1.5616],
+  'Niger': [17.6078, 8.0817],
+  'Chad': [15.4542, 18.7322],
+  'Sudan': [12.8628, 30.2176],
+  'South Sudan': [6.8770, 31.3070],
+  'Somalia': [5.1521, 46.1996],
+  'Eritrea': [15.1794, 39.7823],
+  'Djibouti': [11.8251, 42.5903],
+  'Burundi': [-3.3731, 29.9189],
+  'Liberia': [6.4281, -9.4295],
+  'Sierra Leone': [8.4606, -11.7799],
+  'Guinea': [9.9456, -9.6966],
+  'Togo': [8.6195, 0.8248],
+  'Benin': [9.3077, 2.3158],
+  'Gabon': [-0.8037, 11.6094],
+  'Republic of Congo': [-0.2280, 15.8277],
+  'Democratic Republic of Congo': [-4.0383, 21.7587],
+  'Central African Republic': [6.6111, 20.9394],
+  'Equatorial Guinea': [1.6508, 10.2679],
+  'Lesotho': [-29.6100, 28.2336],
+  'Eswatini': [-26.5225, 31.4659],
+  'Mauritius': [-20.3484, 57.5522],
+  'Seychelles': [-4.6796, 55.4920],
+  'Comoros': [-11.8750, 43.8722],
+  'Madagascar': [-18.7669, 46.8691],
+  'Egypt': [26.8206, 30.8025],
+  'Libya': [26.3351, 17.2283],
+  'Tunisia': [33.8869, 9.5375],
+  'Algeria': [28.0339, 1.6596],
+  'Morocco': [31.7917, -7.0926],
+  'Mauritania': [21.0079, -10.9408],
+  'Angola': [-11.2027, 17.8739],
+  'Cape Verde': [16.5388, -23.0418],
+  'Gambia': [13.4432, -15.3101],
+  'Guinea-Bissau': [11.8037, -15.1804],
+  'Sao Tome and Principe': [0.1864, 6.6131],
+};
+
+export function getCountryCoordinates(countryName: string): [number, number] | null {
+  return AFRICAN_COUNTRY_COORDINATES[countryName] || null;
+}

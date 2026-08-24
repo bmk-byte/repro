@@ -1,0 +1,120 @@
+{
+  "dashboard": {
+    "title": "Dashibodi",
+    "cards": {
+      "totalCases": "Jumla ya Kesi",
+      "successRate": "Kiwango cha Mafanikio",
+      "activeCases": "Kesi Zinazoendelea"
+    },
+    "charts": {
+      "monthlyTrends": "Mwenendo wa Kila Mwezi",
+      "caseDistribution": "Usambazaji wa Kesi",
+      "africaDistribution": "Usambazaji wa Kesi Afrika"
+    }
+  },
+  "cases": {
+    "title": "Hifadhidata ya Kesi",
+    "search": "Tafuta kesi...",
+    "table": {
+      "caseName": "Jina la Kesi",
+      "dateFiled": "Tarehe ya Kufunguliwa",
+      "jurisdiction": "Mamlaka",
+      "themes": "Mada",
+      "outcome": "Matokeo",
+      "courtLevel": "Ngazi ya Mahakama",
+      "noResults": "Hakuna kesi zilizopatikana",
+      "loading": "Inapakia kesi..."
+    },
+    "filters": {
+      "allCountries": "Nchi Zote",
+      "allTypes": "Aina Zote",
+      "litigation": "Mashtaka",
+      "rapidResponse": "Msaada wa Haraka"
+    },
+    "status": {
+      "pending": "Inasubiri",
+      "inProgress": "Inaendelea",
+      "completed": "Imekamilika",
+      "onHold": "Imesimamishwa"
+    }
+  },
+  "laws": {
+    "title": "Sheria na Sera",
+    "search": "Tafuta sheria na sera...",
+    "filters": {
+      "allCountries": "Nchi Zote",
+      "allTypes": "Aina Zote",
+      "acts": "Sheria",
+      "policies": "Sera"
+    },
+    "categories": {
+      "criminalLaw": "Sheria ya Jinai",
+      "healthcare": "Afya",
+      "humanRights": "Haki za Binadamu",
+      "constitutionalLaw": "Sheria ya Katiba",
+      "familyLaw": "Sheria ya Familia"
+    },
+    "upload": {
+      "title": "Pakia Hati ya Kisheria",
+      "dropzone": {
+        "text": "Dondosha faili yako ya PDF hapa au bofya kuchagua",
+        "maxSize": "Ukubwa wa juu wa faili: 10MB"
+      },
+      "form": {
+        "title": "Kichwa",
+        "description": "Maelezo",
+        "country": "Nchi",
+        "type": "Aina",
+        "category": "Kategoria"
+      },
+      "buttons": {
+        "cancel": "Ghairi",
+        "upload": "Pakia Hati",
+        "uploading": "Inapakia..."
+      }
+    },
+    "actions": {
+      "view": "Tazama",
+      "download": "Pakua"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Ingia kwenye akaunti yako",
+      "email": "Anwani ya barua pepe",
+      "password": "Nywila",
+      "button": "Ingia",
+      "noAccount": "Huna akaunti? Jisajili"
+    },
+    "signUp": {
+      "title": "Tengeneza akaunti yako",
+      "fullName": "Jina kamili",
+      "email": "Anwani ya barua pepe",
+      "password": "Nywila",
+      "button": "Jisajili",
+      "haveAccount": "Una akaunti? Ingia"
+    }
+  },
+  "common": {
+    "loading": "Inapakia...",
+    "error": "Hitilafu imetokea",
+    "save": "Hifadhi",
+    "cancel": "Ghairi",
+    "update": "Sasisha",
+    "delete": "Futa",
+    "view": "Tazama",
+    "download": "Pakua",
+    "search": "Tafuta",
+    "filters": "Vichujio",
+    "noResults": "Hakuna matokeo yaliyopatikana",
+    "processing": "Inachakata..."
+  },
+  "navigation": {
+    "dashboard": "Dashibodi",
+    "cases": "Kesi",
+    "uploadCase": "Pakia Kesi",
+    "actsAndPolicies": "Sheria na Sera",
+    "settings": "Mipangilio",
+    "logout": "Toka"
+  }
+}

@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #9C1D20;
+  --color-primary-dark: #7A1518;
+  --color-primary-light: #B73538;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-gray-900;
+  }
+
+  /* Improve text rendering for SEO and accessibility */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Form elements */
+  input:focus, 
+  textarea:focus, 
+  select:focus {
+    @apply border-primary ring-1 ring-primary outline-none;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark transition-colors duration-200;
+  }
+
+  /* Links */
+  .link-primary {
+    @apply text-primary hover:text-primary-dark transition-colors duration-200;
+  }
+
+   /* Section titles with enhanced typography */
+   .section-title {
+     @apply text-4xl font-bold text-gray-900 tracking-tight leading-tight;
+   }
+
+   /* Enhanced card styles */
+   .enhanced-card {
+     @apply bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100;
+   }
+
+   .enhanced-card:hover {
+     @apply border-primary/20;
+   }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/50 rounded-full hover:bg-primary/70;
+}
+
+/* Responsive utilities */
+@layer utilities {
+  .xs\:flex {
+    @media (min-width: 480px) {
+      display: flex;
+    }
+  }
+  
+  .xs\:hidden {
+    @media (min-width: 480px) {
+      display: none;
+    }
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Animation utility classes */
+.fade-in {
+  animation: fadeIn 1.5s ease-in-out forwards;
+}
+
+.slide-up {
+  animation: slideUp 0.8s ease-out forwards;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Animated background pattern */
+.animated-bg {
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Reveal animation for scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}

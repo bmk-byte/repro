@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Blocking: catches real type regressions. This currently passes clean —
+      # keep it that way rather than loosening it.
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Informational for now: the existing codebase has a large pre-existing
+      # lint backlog (unused vars, exhaustive-deps warnings) across most
+      # components. Fixing that backlog is tracked separately — this step
+      # reports it without blocking merges until that cleanup lands, at
+      # which point `continue-on-error` should be removed.
+      - name: Lint (non-blocking — see comment above)
+        run: npm run lint
+        continue-on-error: true

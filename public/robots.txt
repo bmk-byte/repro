@@ -1,0 +1,28 @@
+# Robots.txt for ReproPulse - Afya Na Haki
+# https://repropulseafyanahaki.org/robots.txt
+
+User-agent: *
+Allow: /
+
+# Optimize crawling for important content
+Allow: /cases/*
+Allow: /judgments/*
+Allow: /laws/*
+Allow: /resources/*
+
+# Sitemap location
+Sitemap: https://repropulseafyanahaki.org/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Block access to admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /src/
+Disallow: /node_modules/
+Disallow: /dist/
+Disallow: /.env
+Disallow: /package.json
+Disallow: /package-lock.json
