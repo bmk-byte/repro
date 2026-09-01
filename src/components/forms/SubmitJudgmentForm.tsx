@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, X, ChevronRight, ChevronLeft } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import MultiStepFormProgress from './MultiStepFormProgress';
+import { createSafeDisplayName } from '../../lib/sanitize';
+
+const devLog = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
 
 interface SubmitJudgmentFormProps {
   onSuccess?: () => void;
@@ -19,6 +24,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [countries, setCountries] = useState<{ id: string, name: string }[]>([]);
   const [formData, setFormData] = useState({
     // Basic Information
@@ -90,7 +96,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         console.error('pending_judgments table does not exist or is not accessible');
         toast.error('Database configuration issue detected. Please contact support.');
       } else {
-        console.log('pending_judgments table verified successfully');
+        devLog('pending_judgments table verified successfully');
       }
     } catch (error) {
       console.error('Error verifying pending_judgments table:', error);
@@ -116,13 +122,21 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles: File[], rejections: FileRejection[]) => {
+      if (rejections.length > 0) {
+        const reason = rejections[0].errors[0];
+        setFileError(
+          reason?.code === 'file-too-large'
+            ? 'That file is larger than 10MB. Please choose a smaller PDF.'
+            : reason?.code === 'file-invalid-type'
+              ? 'Only PDF files are accepted.'
+              : reason?.message || 'That file could not be accepted.'
+        );
+        return;
+      }
       if (acceptedFiles[0]) {
-        if (acceptedFiles[0].size > 10 * 1024 * 1024) {
-          toast.error('File size must be less than 10MB');
-          return;
-        }
+        setFileError(null);
         setFile(acceptedFiles[0]);
       }
     },
@@ -277,31 +291,48 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     }
   };
 
-  const validateCurrentStep = (): boolean => {
-    switch (currentStep) {
+  const getMissingFields = (step: number): string[] => {
+    switch (step) {
       case 0: // Basic Info
-        return !!formData.title && !!formData.summary && !!formData.country_id;
+        return [
+          !formData.title && 'Title',
+          !formData.summary && 'Summary',
+          !formData.country_id && 'Country',
+        ].filter((v): v is string => !!v);
       case 1: // Judgment Details
-        return !!formData.citation && !!formData.court_judgment && !!formData.judgment_date_judgment;
+        return [
+          !formData.citation && 'Citation',
+          !formData.court_judgment && 'Court',
+          !formData.judgment_date_judgment && 'Judgment Date',
+        ].filter((v): v is string => !!v);
       case 2: // Parties
-        return !!formData.timeline_status;
+        return [!formData.timeline_status && 'Timeline Status'].filter((v): v is string => !!v);
       case 3: // Legal Framework
-        return !!formData.judicial_body_type && !!formData.judicial_body && 
-               !!formData.legal_framework_type;
+        return [
+          !formData.judicial_body_type && 'Judicial Body Type',
+          !formData.judicial_body && 'Judicial Body',
+          !formData.legal_framework_type && 'Legal Framework Type',
+        ].filter((v): v is string => !!v);
       case 4: // Categories
-        return !!formData.case_impact && formData.case_categories.length > 0;
+        return [
+          !formData.case_impact && 'Case Impact',
+          formData.case_categories.length === 0 && 'at least one Category',
+        ].filter((v): v is string => !!v);
       case 5: // Document
-        return !!file;
+        return [!file && 'a supporting Document'].filter((v): v is string => !!v);
       default:
-        return true;
+        return [];
     }
   };
 
+  const validateCurrentStep = (): boolean => getMissingFields(currentStep).length === 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateCurrentStep()) {
-      toast.error('Please fill in all required fields');
+
+    const missing = getMissingFields(currentStep);
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(', ')}`);
       return;
     }
     
@@ -460,7 +491,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judgment Title *
               </label>
               <input
@@ -469,13 +500,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.title}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Enter a descriptive title for the judgment"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judgment Summary *
               </label>
               <textarea
@@ -484,13 +515,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Provide a brief summary of the judgment"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Country/Jurisdiction *
               </label>
               <select
@@ -498,7 +529,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.country_id}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select a country</option>
                 {countries.map(country => (
@@ -513,7 +544,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Citation *
               </label>
               <input
@@ -522,13 +553,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.citation}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., [2023] KEHC 123"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Media Neutral Citation
               </label>
               <input
@@ -536,13 +567,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 name="media_neutral_citation"
                 value={formData.media_neutral_citation}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., [2023] eKLR 123"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Court *
               </label>
               <input
@@ -551,13 +582,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.court_judgment}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., High Court of Kenya"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Case Number
               </label>
               <input
@@ -565,13 +596,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 name="case_number_judgment"
                 value={formData.case_number_judgment}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., Petition No. 123 of 2023"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judges
               </label>
               <input
@@ -579,13 +610,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 name="judges_judgment"
                 value={formData.judges_judgment}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., Justice John Doe, Justice Jane Smith"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judgment Date *
               </label>
               <input
@@ -594,19 +625,19 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.judgment_date_judgment}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Language
               </label>
               <select
                 name="language_judgment"
                 value={formData.language_judgment}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="English">English</option>
                 <option value="French">French</option>
@@ -616,14 +647,14 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judgment Type
               </label>
               <select
                 name="type_judgment"
                 value={formData.type_judgment}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="Final Judgment">Final Judgment</option>
                 <option value="Interim Order">Interim Order</option>
@@ -634,7 +665,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Flynote
               </label>
               <textarea
@@ -642,7 +673,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.flynote_judgment}
                 onChange={handleInputChange}
                 rows={3}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Enter the flynote or headnote of the judgment"
               />
             </div>
@@ -653,7 +684,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Timeline Status *
               </label>
               <select
@@ -661,7 +692,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.timeline_status}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select status</option>
                 <option value="filed">Filed</option>
@@ -672,7 +703,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Litigants
               </label>
               <div className="flex space-x-2">
@@ -681,7 +712,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                   value={newLitigant}
                   onChange={(e) => setNewLitigant(e.target.value)}
                   placeholder="Add a litigant"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -711,7 +742,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Defending Institutions
               </label>
               <div className="flex space-x-2">
@@ -720,7 +751,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                   value={newDefendingInstitution}
                   onChange={(e) => setNewDefendingInstitution(e.target.value)}
                   placeholder="Add a defending institution"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -755,7 +786,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judicial Body Type *
               </label>
               <select
@@ -763,7 +794,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.judicial_body_type}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select type</option>
                 <option value="National Court">National Court</option>
@@ -772,7 +803,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judicial Body *
               </label>
               <input
@@ -781,7 +812,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.judicial_body}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., Supreme Court of Kenya"
               />
             </div>
@@ -793,15 +824,15 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                   name="regional_appeals"
                   checked={formData.regional_appeals}
                   onChange={handleCheckboxChange}
-                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                  className="rounded border-stone-300 text-primary focus:ring-primary"
                 />
-                <span className="text-sm font-medium text-gray-700">Regional Appeals</span>
+                <span className="text-sm font-medium text-stone-700">Regional Appeals</span>
               </label>
             </div>
 
             {formData.regional_appeals && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-stone-700">
                   Regional Bodies
                 </label>
                 <div className="flex space-x-2">
@@ -810,7 +841,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                     value={newRegionalBody}
                     onChange={(e) => setNewRegionalBody(e.target.value)}
                     placeholder="Add a regional body"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -841,7 +872,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Legal Framework Type *
               </label>
               <select
@@ -849,7 +880,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 value={formData.legal_framework_type}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select type</option>
                 <option value="Domestic Law">Domestic Law</option>
@@ -860,7 +891,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
             {(formData.legal_framework_type === 'Domestic Law' || formData.legal_framework_type === 'Both') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-stone-700">
                   Domestic Laws
                 </label>
                 <div className="flex space-x-2">
@@ -869,7 +900,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                     value={newDomesticLaw}
                     onChange={(e) => setNewDomesticLaw(e.target.value)}
                     placeholder="Add a domestic law"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -901,7 +932,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
             {(formData.legal_framework_type === 'International Law' || formData.legal_framework_type === 'Both') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-stone-700">
                   International Laws
                 </label>
                 <div className="flex space-x-2">
@@ -910,7 +941,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                     value={newInternationalLaw}
                     onChange={(e) => setNewInternationalLaw(e.target.value)}
                     placeholder="Add an international law"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -941,7 +972,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Protocols
               </label>
               <div className="flex space-x-2">
@@ -950,7 +981,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                   value={newProtocol}
                   onChange={(e) => setNewProtocol(e.target.value)}
                   placeholder="Add a protocol"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -985,7 +1016,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Case Impact *
               </label>
               <textarea
@@ -994,16 +1025,16 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Describe the impact of this judgment"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Case Categories *
               </label>
-              <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-md">
+              <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-stone-200 rounded-md">
                 {[
                   'Access to Safe Abortion',
                   'Maternal Health and Mortality',
@@ -1032,9 +1063,9 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                       type="checkbox"
                       checked={formData.case_categories.includes(category)}
                       onChange={() => handleCategoryToggle(category)}
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                      className="rounded border-stone-300 text-primary focus:ring-primary"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{category}</span>
+                    <span className="ml-2 text-sm text-stone-700">{category}</span>
                   </label>
                 ))}
               </div>
@@ -1046,42 +1077,55 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Upload Judgment Document *
               </label>
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                  file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'
+                  isDragActive
+                    ? 'border-primary bg-primary/5'
+                    : file
+                      ? 'border-primary bg-primary/5'
+                      : fileError
+                        ? 'border-danger bg-danger-light/40'
+                        : 'border-stone-300 hover:border-primary'
                 }`}
               >
-                <input {...getInputProps()} />
+                <input {...getInputProps()} aria-label="Upload judgment document (PDF)" />
                 {file ? (
-                  <div className="flex items-center justify-center space-x-3">
-                    <Upload className="h-6 w-6 text-primary" />
-                    <span className="text-gray-900">{file.name}</span>
+                  <div className="flex items-center justify-center gap-3">
+                    <Upload className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
+                    <span className="text-stone-900 text-sm font-medium">{createSafeDisplayName(file.name)}</span>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      className="text-gray-500 hover:text-red-500"
+                      aria-label="Remove selected file"
+                      className="text-stone-500 hover:text-danger"
                     >
                       <X className="h-5 w-5" />
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600">Drop your PDF file here or click to browse</p>
-                    <p className="text-sm text-gray-500 mt-2">Maximum file size: 10MB</p>
-                    <p className="text-sm text-gray-600 mt-4 italic">
+                    <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
+                    <p className="text-stone-600">Drop your PDF file here or click to browse</p>
+                    <p className="text-sm text-stone-500 mt-2">Maximum file size: 10MB</p>
+                    <p className="text-sm text-stone-600 mt-4 italic">
                       This document serves to capture any additional important information relevant to the judgment that may not have been included in the form fields.
                     </p>
                   </div>
                 )}
               </div>
+              {fileError && (
+                <p role="alert" className="mt-2 flex items-center gap-1.5 text-sm text-danger">
+                  <AlertCircle className="h-4 w-4 flex-none" />
+                  {fileError}
+                </p>
+              )}
             </div>
 
             {!isDirectUpload && (
@@ -1118,12 +1162,21 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       
       <form onSubmit={handleSubmit} className="mt-6">
         {renderStepContent()}
-        
-        <div className="mt-8 flex justify-between">
+
+        {(() => {
+          const missing = getMissingFields(currentStep);
+          return missing.length > 0 ? (
+            <p role="status" className="mt-4 text-sm text-danger text-right">
+              Before you continue, please fill in: {missing.join(', ')}
+            </p>
+          ) : null;
+        })()}
+
+        <div className="mt-4 flex justify-between">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
           >
             Cancel
           </button>
@@ -1133,7 +1186,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
               <button
                 type="button"
                 onClick={prevStep}
-                className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex items-center px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Previous

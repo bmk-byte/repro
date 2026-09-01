@@ -1,7 +1,7 @@
 import React from 'react';
-import { X } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { Modal, Input, Textarea, Select, Button } from './ui';
 
 interface EditCaseModalProps {
   isOpen: boolean;
@@ -28,7 +28,6 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
   });
 
   React.useEffect(() => {
-    // Update form data when caseData changes
     if (caseData) {
       setFormData({
         case_filed: caseData.case_filed || '',
@@ -66,130 +65,86 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Edit Case</h2>
-          <button 
-            onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Edit Case"
+      size="lg"
+      footer={
+        <>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" form="edit-case-form" loading={loading}>
+            {loading ? 'Saving…' : 'Save Changes'}
+          </Button>
+        </>
+      }
+    >
+      <form id="edit-case-form" onSubmit={handleSubmit} className="space-y-6">
+        <Input
+          label="Case Title"
+          name="case_filed"
+          value={formData.case_filed}
+          onChange={handleChange}
+          required
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Case Title</label>
-            <input
-              type="text"
-              name="case_filed"
-              value={formData.case_filed}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+        <Textarea
+          label="Case Summary"
+          name="case_summary"
+          value={formData.case_summary}
+          onChange={handleChange}
+          rows={4}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Case Summary</label>
-            <textarea
-              name="case_summary"
-              value={formData.case_summary}
-              onChange={handleChange}
-              rows={4}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+        <Select
+          label="Status"
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+        >
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="on_hold">On Hold</option>
+        </Select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            >
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="on_hold">On Hold</option>
-            </select>
-          </div>
+        <Input
+          label="Court"
+          name="court"
+          value={formData.court}
+          onChange={handleChange}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Court</label>
-            <input
-              type="text"
-              name="court"
-              value={formData.court}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+        <Input
+          label="Nature of Case"
+          name="nature_of_case"
+          value={formData.nature_of_case}
+          onChange={handleChange}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Nature of Case</label>
-            <input
-              type="text"
-              name="nature_of_case"
-              value={formData.nature_of_case}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+        <Textarea
+          label="Action Taken"
+          name="action_taken"
+          value={formData.action_taken}
+          onChange={handleChange}
+          rows={3}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Action Taken</label>
-            <textarea
-              name="action_taken"
-              value={formData.action_taken}
-              onChange={handleChange}
-              rows={3}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Next Steps</label>
-            <textarea
-              name="next_steps"
-              value={formData.next_steps}
-              onChange={handleChange}
-              rows={3}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <Textarea
+          label="Next Steps"
+          name="next_steps"
+          value={formData.next_steps}
+          onChange={handleChange}
+          rows={3}
+        />
+      </form>
+    </Modal>
   );
 }
 

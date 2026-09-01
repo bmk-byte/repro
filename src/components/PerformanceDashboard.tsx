@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Card, Title, Tab, TabList, TabGroup, TabPanel, TabPanels } from '@tremor/react';
 import { RefreshCw } from 'lucide-react';
 import { supabase, testConnection, handleSupabaseError, queryWithRetry } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import TimelineVisualization from './TimelineVisualization';
-import GeographicIntelligence from './GeographicIntelligence';
-import OutcomeMetricsDashboard from './OutcomeMetricsDashboard';
-import LegalFrameworkAnalysis from './LegalFrameworkAnalysis';
-import StakeholderAnalytics from './StakeholderAnalytics';
-import HealthIndicatorIntegration from './HealthIndicatorIntegration';
-import ReportGenerationSystem from './ReportGenerationSystem';
-import PerformanceTrackingModule from './PerformanceTrackingModule';
-import ActorsInstitutionsModule from './ActorsInstitutionsModule';
+import { LoadingState } from './ui';
+
+// Nine sub-tabs, each a separate heavy module (maps, charts). Lazy-loading
+// per-tab means visiting "Advanced" only downloads whichever sub-tab is
+// actually opened, not all nine at once.
+const TimelineVisualization = lazy(() => import('./TimelineVisualization'));
+const GeographicIntelligence = lazy(() => import('./GeographicIntelligence'));
+const OutcomeMetricsDashboard = lazy(() => import('./OutcomeMetricsDashboard'));
+const LegalFrameworkAnalysis = lazy(() => import('./LegalFrameworkAnalysis'));
+const StakeholderAnalytics = lazy(() => import('./StakeholderAnalytics'));
+const HealthIndicatorIntegration = lazy(() => import('./HealthIndicatorIntegration'));
+const ReportGenerationSystem = lazy(() => import('./ReportGenerationSystem'));
+const PerformanceTrackingModule = lazy(() => import('./PerformanceTrackingModule'));
+const ActorsInstitutionsModule = lazy(() => import('./ActorsInstitutionsModule'));
 
 interface PerformanceDashboardProps {
   isModerator: boolean;
@@ -194,47 +199,65 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ isModerator
 
           <TabPanels>
             <TabPanel value="timeline">
-              <TimelineVisualization />
+              <Suspense fallback={<LoadingState label="Loading timeline…" />}>
+                <TimelineVisualization />
+              </Suspense>
             </TabPanel>
 
             <TabPanel value="geographic">
-              <GeographicIntelligence 
-                connectionError={connectionError} 
-                setConnectionError={setConnectionError}
-              />
+              <Suspense fallback={<LoadingState label="Loading map…" />}>
+                <GeographicIntelligence
+                  connectionError={connectionError}
+                  setConnectionError={setConnectionError}
+                />
+              </Suspense>
             </TabPanel>
 
             <TabPanel value="outcomes">
-              <OutcomeMetricsDashboard />
+              <Suspense fallback={<LoadingState label="Loading outcomes…" />}>
+                <OutcomeMetricsDashboard />
+              </Suspense>
             </TabPanel>
 
             <TabPanel value="legal">
-              <LegalFrameworkAnalysis />
+              <Suspense fallback={<LoadingState label="Loading legal framework analysis…" />}>
+                <LegalFrameworkAnalysis />
+              </Suspense>
             </TabPanel>
 
             <TabPanel value="stakeholders">
-              <StakeholderAnalytics />
+              <Suspense fallback={<LoadingState label="Loading stakeholder analytics…" />}>
+                <StakeholderAnalytics />
+              </Suspense>
             </TabPanel>
 
             <TabPanel value="health">
-              <HealthIndicatorIntegration 
-                connectionError={connectionError}
-                setConnectionError={setConnectionError}
-              />
+              <Suspense fallback={<LoadingState label="Loading health indicators…" />}>
+                <HealthIndicatorIntegration
+                  connectionError={connectionError}
+                  setConnectionError={setConnectionError}
+                />
+              </Suspense>
             </TabPanel>
 
             {isModerator && (
               <TabPanel value="reports">
-                <ReportGenerationSystem />
+                <Suspense fallback={<LoadingState label="Loading report generator…" />}>
+                  <ReportGenerationSystem />
+                </Suspense>
               </TabPanel>
             )}
 
             <TabPanel value="performance">
-              <PerformanceTrackingModule />
+              <Suspense fallback={<LoadingState label="Loading performance tracking…" />}>
+                <PerformanceTrackingModule />
+              </Suspense>
             </TabPanel>
 
             <TabPanel value="actors">
-              <ActorsInstitutionsModule />
+              <Suspense fallback={<LoadingState label="Loading actors & institutions…" />}>
+                <ActorsInstitutionsModule />
+              </Suspense>
             </TabPanel>
           </TabPanels>
         </TabGroup>

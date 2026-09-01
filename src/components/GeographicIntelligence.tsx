@@ -180,7 +180,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
         <select
           value={selectedRegion}
           onChange={(e) => setSelectedRegion(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {regions.map(region => (
             <option key={region} value={region}>
@@ -274,7 +274,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
 
           {countryData.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-stone-50 p-4 rounded-lg">
                 <Flex>
                   <MapPin className="h-5 w-5 text-primary" />
                   <Text className="font-medium">Top Case Countries</Text>
@@ -286,7 +286,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
                         <Text>{country.name}</Text>
                         <Text className="font-medium">{country.total} cases</Text>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-stone-200 rounded-full h-2">
                         <div 
                           className="bg-primary h-2 rounded-full" 
                           style={{ 
@@ -299,7 +299,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
                 </div>
               </div>
               
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-stone-50 p-4 rounded-lg">
                 <Flex>
                   <Map className="h-5 w-5 text-blue-500" />
                   <Text className="font-medium">Regional Distribution</Text>
@@ -322,7 +322,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
                           <Text>{region}</Text>
                           <Text className="font-medium">{regionCount} cases</Text>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-stone-200 rounded-full h-2">
                           <div 
                             className="bg-blue-500 h-2 rounded-full" 
                             style={{ width: `${percentage}%` }}

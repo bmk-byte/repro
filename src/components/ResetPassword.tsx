@@ -42,24 +42,24 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4 py-12">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg border border-stone-100">
         <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-primary">
           <LockKeyhole className="h-6 w-6" />
         </div>
-        <h1 className="text-center text-2xl font-semibold text-gray-900">Create a new password</h1>
-        <p className="mt-2 text-center text-sm leading-6 text-gray-600">
+        <h1 className="text-center text-2xl font-semibold text-stone-900">Create a new password</h1>
+        <p className="mt-2 text-center text-sm leading-6 text-stone-600">
           Choose a new password for your ReproPulse account.
         </p>
         {ready ? (
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-stone-700">
               New password
-              <input required type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+              <input required type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 block w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
             </label>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-stone-700">
               Confirm new password
-              <input required type="password" minLength={8} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
+              <input required type="password" minLength={8} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="mt-2 block w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
             </label>
             <button disabled={loading} className="w-full rounded-md bg-primary px-4 py-2.5 font-medium text-white transition hover:bg-primary-dark disabled:opacity-60">
               {loading ? 'Updating password...' : 'Update password'}

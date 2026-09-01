@@ -61,7 +61,7 @@ const BenefitsSection = () => {
             Benefits
           </motion.h2>
           <motion.p 
-            className="mt-3 text-lg text-gray-500"
+            className="mt-3 text-lg text-stone-500"
             variants={itemVariants}
           >
             Empowering different stakeholders in the pursuit of reproductive justice
@@ -89,10 +89,10 @@ const BenefitsSection = () => {
                 <div className="inline-flex p-4 bg-primary/10 rounded-xl mb-6 text-primary">
                   {benefit.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 className="text-xl font-semibold text-stone-900 mb-4">
                   {benefit.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-stone-600 leading-relaxed">
                   {benefit.description}
                 </p>
               </motion.div>

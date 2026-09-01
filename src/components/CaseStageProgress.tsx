@@ -50,7 +50,7 @@ const CaseStageProgress: React.FC<CaseStageProgressProps> = ({
             </span>
           </div>
         </div>
-        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-stone-200">
           <div 
             style={{ width: `${completionPercentage}%` }} 
             className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"
@@ -68,18 +68,18 @@ const CaseStageProgress: React.FC<CaseStageProgressProps> = ({
               ) : stage.status === 'In Progress' ? (
                 <Clock className="h-5 w-5 text-blue-500 mr-2" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-gray-400 mr-2" />
+                <AlertCircle className="h-5 w-5 text-stone-400 mr-2" />
               )}
               <span className={`text-sm ${
                 stage.status === 'Completed' ? 'text-green-700' : 
                 stage.status === 'In Progress' ? 'text-blue-700' : 
-                'text-gray-500'
+                'text-stone-500'
               }`}>
                 {stage.stage_name}
               </span>
             </div>
             {showCounts && stage.count !== undefined && (
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-stone-700">
                 {stage.count}
               </span>
             )}
@@ -88,7 +88,7 @@ const CaseStageProgress: React.FC<CaseStageProgressProps> = ({
       </div>
 
       {/* Summary */}
-      <div className="flex justify-between text-xs text-gray-500 mt-2">
+      <div className="flex justify-between text-xs text-stone-500 mt-2">
         <span>{completedStages} completed</span>
         <span>{inProgressStages} in progress</span>
         <span>{totalStages - completedStages - inProgressStages} pending</span>

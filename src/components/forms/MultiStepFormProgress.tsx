@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Circle } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface MultiStepFormProgressProps {
   steps: string[];
@@ -7,76 +7,67 @@ interface MultiStepFormProgressProps {
   onStepClick?: (step: number) => void;
 }
 
-const MultiStepFormProgress: React.FC<MultiStepFormProgressProps> = ({ 
-  steps, 
+const MultiStepFormProgress: React.FC<MultiStepFormProgressProps> = ({
+  steps,
   currentStep,
-  onStepClick 
+  onStepClick,
 }) => {
   return (
-    <div className="w-full py-4">
-      <div className="flex items-center justify-between">
+    <nav aria-label="Form progress" className="w-full py-4">
+      <ol className="flex items-center justify-between">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
-          const isClickable = onStepClick && index < currentStep;
-          
+          const isClickable = !!onStepClick && index < currentStep;
+
           return (
-            <React.Fragment key={index}>
-              {/* Step circle */}
-              <div 
-                className={`relative flex items-center justify-center w-8 h-8 rounded-full border-2 
-                  ${isCompleted 
-                    ? 'bg-primary border-primary text-white' 
-                    : isCurrent 
-                      ? 'border-primary text-primary' 
-                      : 'border-gray-300 text-gray-300'
-                  }
-                  ${isClickable ? 'cursor-pointer' : ''}
-                `}
-                onClick={() => isClickable ? onStepClick(index) : null}
+            <li key={step} className="flex items-center flex-1 last:flex-none">
+              <button
+                type="button"
+                onClick={() => isClickable && onStepClick(index)}
+                disabled={!isClickable}
+                aria-current={isCurrent ? 'step' : undefined}
+                aria-label={`Step ${index + 1}: ${step}${isCompleted ? ' (completed)' : isCurrent ? ' (current)' : ''}`}
+                className={[
+                  'relative flex items-center justify-center w-8 h-8 rounded-full border-2 flex-none transition-colors',
+                  isCompleted
+                    ? 'bg-primary border-primary text-white'
+                    : isCurrent
+                      ? 'border-primary text-primary'
+                      : 'border-stone-300 text-stone-300',
+                  isClickable ? 'cursor-pointer' : 'cursor-default',
+                ].join(' ')}
               >
-                {isCompleted ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <span className="text-sm font-medium">{index + 1}</span>
-                )}
-              </div>
-              
-              {/* Connector line */}
+                {isCompleted ? <Check className="w-4 h-4" aria-hidden="true" /> : <span className="text-sm font-medium">{index + 1}</span>}
+              </button>
+
               {index < steps.length - 1 && (
-                <div className="flex-1 mx-2">
-                  <div 
-                    className={`h-1 ${
-                      index < currentStep ? 'bg-primary' : 'bg-gray-300'
-                    }`}
-                  />
+                <div className="flex-1 mx-2" aria-hidden="true">
+                  <div className={`h-1 rounded-full transition-colors ${index < currentStep ? 'bg-primary' : 'bg-stone-300'}`} />
                 </div>
               )}
-            </React.Fragment>
+            </li>
           );
         })}
-      </div>
-      
-      {/* Step labels */}
-      <div className="flex items-center justify-between mt-2">
+      </ol>
+
+      <ol className="flex items-center justify-between mt-2">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
-          
+
           return (
-            <div 
-              key={index} 
-              className={`text-xs font-medium text-center ${
-                isCompleted || isCurrent ? 'text-gray-700' : 'text-gray-400'
-              }`}
+            <li
+              key={step}
+              className={`text-xs font-medium text-center ${isCompleted || isCurrent ? 'text-stone-700' : 'text-stone-400'}`}
               style={{ width: `${100 / steps.length}%` }}
             >
               {step}
-            </div>
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ol>
+    </nav>
   );
 };
 

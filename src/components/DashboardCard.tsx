@@ -1,66 +1,52 @@
 import React from 'react';
-import { Files, TrendingUp, Activity, Gavel } from 'lucide-react';
+import { Files, TrendingUp, TrendingDown, Gavel } from 'lucide-react';
 
 interface DashboardCardProps {
   title: string;
   value: string | number;
   change: string;
   type: 'cases' | 'success' | 'judgments';
-  imageUrl?: string;
   onClick?: () => void;
 }
 
-const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, change, type, imageUrl, onClick }) => {
-  const isPositive = change.startsWith('+');
+const iconByType = {
+  cases: Files,
+  success: TrendingUp,
+  judgments: Gavel,
+} as const;
 
-  const getIcon = () => {
-    switch (type) {
-      case 'cases':
-        return <Files className="h-6 w-6 text-white" />;
-      case 'success':
-        return <TrendingUp className="h-6 w-6 text-white" />;
-      case 'judgments':
-        return <Gavel className="h-6 w-6 text-white" />;
-      default:
-        return <Files className="h-6 w-6 text-white" />;
-    }
-  };
+/**
+ * Solid brand-colored stat card. Previously relied on a hardcoded,
+ * near-permanent Supabase Storage signed URL as a background image with no
+ * fallback — if that URL ever broke, the card rendered white text on a
+ * white background. This version has no external dependency.
+ */
+const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, change, type, onClick }) => {
+  const isPositive = change.startsWith('+');
+  const Icon = iconByType[type] ?? Files;
+  const TrendIcon = isPositive ? TrendingUp : TrendingDown;
 
   return (
     <button
       onClick={onClick}
-      className="group w-full text-left cursor-pointer relative overflow-hidden rounded-lg p-6 transition-all duration-300 transform hover:scale-105"
+      className="group w-full text-left rounded-xl p-6 bg-gradient-to-br from-primary to-primary-dark shadow-card hover:shadow-raised transition-shadow duration-200"
     >
-      {/* Background Image */}
-      {imageUrl && (
-        <img
-          src={imageUrl}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover   transition-opacity duration-300"
-        />
-      )}
-      
-      {/* Color Overlay */}
-      <div className="absolute inset-0 transition-colors duration-300" />
-      
-      {/* Content */}
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-white text-l font-medium uppercase">{title}</h1>
-          <div className="p-2 rounded-lg">
-            {getIcon()}
-          </div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-white/90 text-sm font-medium uppercase tracking-wide">{title}</h3>
+        <div className="p-2 rounded-lg bg-white/15">
+          <Icon className="h-5 w-5 text-white" aria-hidden="true" />
         </div>
-        <div className="flex items-baseline">
-          <p className="text-2xl font-semibold text-white">{value}</p>
-          <span
-            className={`ml-2 text-sm font-medium ${
-              isPositive ? 'text-green-200' : 'text-red-200'
-            }`}
-          >
-            {change}
-          </span>
-        </div>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <p className="text-3xl font-serif font-semibold text-white">{value}</p>
+        <span
+          className={`inline-flex items-center gap-1 text-sm font-medium ${
+            isPositive ? 'text-white' : 'text-white/70'
+          }`}
+        >
+          <TrendIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          {change}
+        </span>
       </div>
     </button>
   );

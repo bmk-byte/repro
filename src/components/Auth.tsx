@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { validateModeratorOrganization } from '../lib/moderatorService';
 import toast from 'react-hot-toast';
-import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff, Check, X, CircleAlert as AlertCircle, Home } from 'lucide-react';
+import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff, Check, X } from 'lucide-react';
 import { PARTNER_ORGANIZATIONS, OTHER_ORGANIZATION_VALUE } from '../constants/organizations';
+import { Input, Select, Button } from './ui';
 
 interface AuthProps {
   onSuccess?: () => void;
@@ -325,9 +326,9 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
   // Get password strength color
   const getPasswordStrengthColor = () => {
-    if (passwordStrength < 40) return 'bg-red-500';
-    if (passwordStrength < 70) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (passwordStrength < 40) return 'bg-danger';
+    if (passwordStrength < 70) return 'bg-warning';
+    return 'bg-success';
   };
 
   // Get password strength text
@@ -338,30 +339,30 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-stone-100 flex flex-col">
       <div className="flex-grow flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex flex-col items-center">
             {onBack && (
               <button
                 onClick={onBack}
-                className="self-start mb-4 flex items-center text-gray-600 hover:text-primary transition-colors"
+                className="self-start mb-4 flex items-center text-sm text-stone-600 hover:text-primary transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 <span>Back to Home</span>
               </button>
             )}
-            <div className="flex items-center justify-center space-x-2">
+            <div className="flex items-center justify-center gap-2">
               <Scale className="h-10 w-10 text-primary" />
-              <span className="text-3xl font-bold text-primary">ReproPulse</span>
+              <span className="font-serif text-3xl font-semibold text-primary">ReproPulse</span>
             </div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-serif font-semibold text-stone-900">
               {isForgotPassword ? 'Reset your password' : isSignUp ? 'Create your account' : 'Sign in to your account'}
             </h2>
           </div>
 
           <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="bg-white py-8 px-4 shadow-card rounded-lg sm:px-10 border border-stone-200">
                 <motion.form
                     className="space-y-6"
                     onSubmit={handleAuth}
@@ -369,92 +370,54 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                     transition={{ duration: 0.5 }}
                   >
                     {!isForgotPassword && isSignUp && (
-                    <div>
-                      <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-                        Full Name
-                      </label>
-                      <div className="mt-1 relative">
-                        <input
-                          id="fullName"
-                          name="fullName"
-                          type="text"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                          placeholder="Enter your full name"
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                          <HelpCircle 
-                            className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-help" 
+                      <Input
+                        label="Full Name"
+                        id="fullName"
+                        name="fullName"
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Enter your full name"
+                        rightElement={
+                          <HelpCircle
+                            className="h-5 w-5 text-stone-400 hover:text-stone-500 cursor-help"
                             title="Enter your full name as it appears on official documents."
                           />
-                        </div>
-                      </div>
-                    </div>
+                        }
+                      />
                   )}
-                  
+
                   {!isForgotPassword && isSignUp && (
-                    <div>
-                      <label htmlFor="profession" className="block text-sm font-medium text-gray-700">
-                        Profession
-                      </label>
-                      <div className="mt-1">
-                        <input
-                          id="profession"
-                          name="profession"
-                          type="text"
-                          value={profession}
-                          onChange={(e) => setProfession(e.target.value)}
-                          className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                          placeholder="e.g. Lawyer, Researcher, Advocate"
-                        />
-                      </div>
-                    </div>
+                    <Input
+                      label="Profession"
+                      id="profession"
+                      name="profession"
+                      type="text"
+                      value={profession}
+                      onChange={(e) => setProfession(e.target.value)}
+                      placeholder="e.g. Lawyer, Researcher, Advocate"
+                    />
                   )}
-                  
+
                   {!isForgotPassword && isSignUp && (
                     <div className="space-y-4">
-                      <div>
-                        <label htmlFor="organization" className="block text-sm font-medium text-gray-700">
-                          Organization <span className="text-red-500">*</span>
-                        </label>
-                        <div className="mt-1 relative">
-                          <select
-                            id="organization"
-                            name="organization"
-                            required
-                            value={selectedOrganization}
-                            onChange={handleOrganizationChange}
-                            className={`appearance-none block w-full px-3 py-2 border ${
-                              validationErrors.organization ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-primary focus:border-primary'
-                            } rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm`}
-                          >
-                            <option value="">Select your organization</option>
-                            {PARTNER_ORGANIZATIONS.map((org) => (
-                              <option key={org} value={org}>
-                                {org}
-                              </option>
-                            ))}
-                            <option value={OTHER_ORGANIZATION_VALUE}>{OTHER_ORGANIZATION_VALUE} (specify below)</option>
-                          </select>
-                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <HelpCircle
-                              className="h-5 w-5 text-gray-400"
-                              title="Select the organization you are affiliated with from the dropdown. Choose 'Other' if your organization is not listed."
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      {validationErrors.organization && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="mt-2 text-sm text-red-500 flex items-start"
-                        >
-                          <X className="h-4 w-4 mr-1 mt-0.5 shrink-0" />
-                          <span>{validationErrors.organization}</span>
-                        </motion.p>
-                      )}
+                      <Select
+                        label="Organization"
+                        id="organization"
+                        name="organization"
+                        required
+                        value={selectedOrganization}
+                        onChange={handleOrganizationChange}
+                        error={validationErrors.organization}
+                      >
+                        <option value="">Select your organization</option>
+                        {PARTNER_ORGANIZATIONS.map((org) => (
+                          <option key={org} value={org}>
+                            {org}
+                          </option>
+                        ))}
+                        <option value={OTHER_ORGANIZATION_VALUE}>{OTHER_ORGANIZATION_VALUE} (specify below)</option>
+                      </Select>
 
                       {showCustomOrganization && (
                         <motion.div
@@ -463,105 +426,70 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <label htmlFor="customOrganization" className="block text-sm font-medium text-gray-700">
-                            Organization Name <span className="text-red-500">*</span>
-                          </label>
-                          <div className="mt-1 relative">
-                            <input
-                              id="customOrganization"
-                              name="customOrganization"
-                              type="text"
-                              required
-                              value={customOrganization}
-                              onChange={handleCustomOrganizationChange}
-                              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                              placeholder="Enter your organization name"
-                            />
-                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <Input
+                            label="Organization Name"
+                            id="customOrganization"
+                            name="customOrganization"
+                            type="text"
+                            required
+                            value={customOrganization}
+                            onChange={handleCustomOrganizationChange}
+                            placeholder="Enter your organization name"
+                            rightElement={
                               <HelpCircle
-                                className="h-5 w-5 text-gray-400"
+                                className="h-5 w-5 text-stone-400"
                                 title="Enter the full name of your organization."
                               />
-                            </div>
-                          </div>
+                            }
+                          />
                         </motion.div>
                       )}
                     </div>
                   )}
-                  
-                  {!isForgotPassword && isSignUp && (
-                    <div>
-                      <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
-                        Phone Number
-                      </label>
-                      <div className="mt-1">
-                        <input
-                          id="phoneNumber"
-                          name="phoneNumber"
-                          type="tel"
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                          placeholder="+1234567890"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                      Email address
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (validationErrors.email) handleEmailValidation();
-                        }}
-                        onBlur={handleEmailValidation}
-                        aria-invalid={!!validationErrors.email}
-                        aria-describedby={validationErrors.email ? "email-error" : undefined}
-                        className={`appearance-none block w-full px-3 py-2 border ${
-                          validationErrors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-primary focus:border-primary'
-                        } rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm`}
-                        placeholder="you@example.com"
-                      />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <HelpCircle 
-                          className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-help" 
-                          title={isSignUp ? "This email will be used to log in to your account and for account recovery." : "Enter the email address associated with your account."}
-                        />
-                      </div>
-                    </div>
-                    {validationErrors.email && (
-                      <motion.p 
-                        id="email-error"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-2 text-sm text-red-500 flex items-center"
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        {validationErrors.email}
-                      </motion.p>
-                    )}
-                  </div>
 
-                  {!isForgotPassword && <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                      Password
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
+                  {!isForgotPassword && isSignUp && (
+                    <Input
+                      label="Phone Number"
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="+1234567890"
+                    />
+                  )}
+
+                  <Input
+                    label="Email address"
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (validationErrors.email) handleEmailValidation();
+                    }}
+                    onBlur={handleEmailValidation}
+                    error={validationErrors.email}
+                    placeholder="you@example.com"
+                    rightElement={
+                      <HelpCircle
+                        className="h-5 w-5 text-stone-400 hover:text-stone-500 cursor-help"
+                        title={isSignUp ? "This email will be used to log in to your account and for account recovery." : "Enter the email address associated with your account."}
+                      />
+                    }
+                  />
+
+                  {!isForgotPassword && (
+                    <div>
+                      <Input
+                        label="Password"
                         id="password"
                         name="password"
-                        type={showPassword ? "text" : "password"}
-                        autoComplete={isSignUp ? "new-password" : "current-password"}
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete={isSignUp ? 'new-password' : 'current-password'}
                         required
                         value={password}
                         onChange={(e) => {
@@ -573,51 +501,37 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                           if (isSignUp) setPasswordTouched(true);
                           handlePasswordValidation();
                         }}
-                        aria-invalid={!!validationErrors.password}
-                        aria-describedby={validationErrors.password ? "password-error" : undefined}
-                        className={`appearance-none block w-full px-3 py-2 border ${
-                          validationErrors.password ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-primary focus:border-primary'
-                        } rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm pr-10`}
-                        placeholder={isSignUp ? "Create a strong password" : "Enter your password"}
+                        error={validationErrors.password}
+                        placeholder={isSignUp ? 'Create a strong password' : 'Enter your password'}
+                        rightElement={
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="text-stone-400 hover:text-stone-500"
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                            <HelpCircle
+                              className="h-5 w-5 text-stone-400 hover:text-stone-500 cursor-help"
+                              title={isSignUp
+                                ? 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
+                                : 'Enter the password associated with your account.'}
+                            />
+                          </div>
+                        }
                       />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center space-x-1">
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                          aria-label={showPassword ? "Hide password" : "Show password"}
-                        >
-                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
-                        <HelpCircle 
-                          className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-help" 
-                          title={isSignUp 
-                            ? "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
-                            : "Enter the password associated with your account."}
-                        />
-                      </div>
-                    </div>
-                    {validationErrors.password && (
-                      <motion.p 
-                        id="password-error"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-2 text-sm text-red-500 flex items-center"
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        {validationErrors.password}
-                      </motion.p>
-                    )}
 
                     {/* Password strength meter (only for signup) */}
                     {isSignUp && passwordTouched && (
                       <div className="mt-2">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs font-medium text-gray-700">Password strength</span>
+                          <span className="text-xs font-medium text-stone-700">Password strength</span>
                           <span className="text-xs font-medium">{getPasswordStrengthText()}</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <motion.div 
+                        <div className="w-full bg-stone-200 rounded-full h-2.5">
+                          <motion.div
                             className={`h-2.5 rounded-full ${getPasswordStrengthColor()}`}
                             style={{ width: `${passwordStrength}%` }}
                             initial={{ width: 0 }}
@@ -625,17 +539,17 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                             transition={{ duration: 0.3 }}
                           ></motion.div>
                         </div>
-                        
+
                         {/* Password requirements */}
                         <div className="mt-3 space-y-2">
                           {passwordRequirements.map((req, index) => (
                             <div key={index} className="flex items-center">
                               {req.met ? (
-                                <Check className="h-4 w-4 text-green-500 mr-2" />
+                                <Check className="h-4 w-4 text-success mr-2" />
                               ) : (
-                                <X className="h-4 w-4 text-gray-400 mr-2" />
+                                <X className="h-4 w-4 text-stone-400 mr-2" />
                               )}
-                              <span className={`text-xs ${req.met ? 'text-green-500' : 'text-gray-500'}`}>
+                              <span className={`text-xs ${req.met ? 'text-success' : 'text-stone-500'}`}>
                                 {req.text}
                               </span>
                             </div>
@@ -643,23 +557,24 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                         </div>
                       </div>
                     )}
-                  </div>}
+                    </div>
+                  )}
 
                   {!isForgotPassword && !isSignUp && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center">
                         <input
                           id="remember-me"
                           name="remember-me"
                           type="checkbox"
-                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-stone-300 rounded"
                           title="Keep me signed in on this device"
                         />
-                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                        <label htmlFor="remember-me" className="ml-2 block text-sm text-stone-700">
                           Remember me
                         </label>
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-stone-500">
                         <button
                           type="button"
                           onClick={() => {
@@ -675,15 +590,9 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                     </div>
                   )}
 
-                  <div>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? 'Processing...' : isForgotPassword ? 'Send reset instructions' : isSignUp ? 'Sign up' : 'Sign in'}
-                    </button>
-                  </div>
+                  <Button type="submit" loading={loading} className="w-full">
+                    {loading ? 'Processing...' : isForgotPassword ? 'Send reset instructions' : isSignUp ? 'Sign up' : 'Sign in'}
+                  </Button>
                 </motion.form>
 
               <div className="mt-6">

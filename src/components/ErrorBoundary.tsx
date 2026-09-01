@@ -32,10 +32,10 @@ export default class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-          <div className="max-w-md w-full rounded-xl bg-white p-8 shadow-lg border border-gray-100 text-center">
-            <h1 className="text-2xl font-semibold text-gray-900">Something went wrong</h1>
-            <p className="mt-3 text-sm text-gray-600 leading-6">
+        <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+          <div className="max-w-md w-full rounded-xl bg-white p-8 shadow-lg border border-stone-100 text-center">
+            <h1 className="text-2xl font-semibold text-stone-900">Something went wrong</h1>
+            <p className="mt-3 text-sm text-stone-600 leading-6">
               The dashboard encountered an unexpected error. Reloading the page should fix it.
             </p>
             <button

@@ -214,7 +214,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
         <select
           value={selectedJurisdiction}
           onChange={(e) => setSelectedJurisdiction(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {jurisdictions.map(jurisdiction => (
             <option key={jurisdiction} value={jurisdiction}>
@@ -370,7 +370,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
             <Card>
               <Title>Case Resolution Progress</Title>
               <div className="mt-4 space-y-4">
-                <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="p-3 bg-stone-50 rounded-lg">
                   <Text className="font-medium">Overall Resolution Rate</Text>
                   <Flex className="mt-2">
                     <Text>Resolved vs. Total Cases</Text>
@@ -385,7 +385,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
                   />
                 </div>
                 
-                <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="p-3 bg-stone-50 rounded-lg">
                   <Text className="font-medium">Success Rate</Text>
                   <Flex className="mt-2">
                     <Text>Successful outcomes</Text>
@@ -394,7 +394,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
                   <ProgressBar value={stats.successRate} color="green" className="mt-2" />
                 </div>
                 
-                <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="p-3 bg-stone-50 rounded-lg">
                   <Text className="font-medium">Case Completion</Text>
                   <Flex className="mt-2">
                     <Text>Completed cases</Text>
@@ -412,17 +412,17 @@ const OutcomeMetricsDashboard: React.FC = () => {
             </Card>
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-6 p-4 bg-stone-50 rounded-lg">
             <Flex>
               <div>
                 <Text className="font-medium">Overall Success Rate</Text>
                 <Text className="mt-1 text-2xl font-bold text-green-600">{stats.successRate}%</Text>
-                <Text className="text-gray-500 text-sm">Based on resolved cases</Text>
+                <Text className="text-stone-500 text-sm">Based on resolved cases</Text>
               </div>
               <div className="text-right">
                 <Text className="font-medium">Key Performance Indicators</Text>
-                <Text className="text-gray-500 text-sm">Total Cases: {stats.totalCases}</Text>
-                <Text className="text-gray-500 text-sm">
+                <Text className="text-stone-500 text-sm">Total Cases: {stats.totalCases}</Text>
+                <Text className="text-stone-500 text-sm">
                   Resolution Rate: {stats.totalCases > 0 ? Math.round(((stats.totalCases - stats.ongoing) / stats.totalCases) * 100) : 0}%
                 </Text>
               </div>

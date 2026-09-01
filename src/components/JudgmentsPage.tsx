@@ -6,6 +6,7 @@ import JudgmentCard from './JudgmentCard';
 import JudgmentDetails from './JudgmentDetails';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { sanitizeSearchTerm } from '../lib/sanitize';
+import { Button, Select, Badge, LoadingState, EmptyState } from './ui';
 
 const JudgmentsPage = () => {
   const [judgments, setJudgments] = React.useState<any[]>([]);
@@ -220,53 +221,34 @@ const JudgmentsPage = () => {
     
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
-        <button
+        <Button
           key={i}
+          size="sm"
+          variant={currentPage === i ? 'primary' : 'outline'}
           onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 mx-1 rounded-md ${
-            currentPage === i
-              ? 'bg-primary text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-          }`}
         >
           {i}
-        </button>
+        </Button>
       );
     }
-    
+
     return (
       <div className="flex items-center justify-center mt-8 flex-wrap gap-2">
-        <button
-          onClick={() => handlePageChange(1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1 mx-1 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <Button size="sm" variant="outline" onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
           First
-        </button>
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1 mx-1 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
           Previous
-        </button>
-        
+        </Button>
+
         {pages}
-        
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 mx-1 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+
+        <Button size="sm" variant="outline" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
           Next
-        </button>
-        <button
-          onClick={() => handlePageChange(totalPages)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 mx-1 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
           Last
-        </button>
+        </Button>
       </div>
     );
   };
@@ -285,167 +267,155 @@ const JudgmentsPage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Judgments</h1>
-        <p className="mt-2 text-gray-600">Browse and search legal judgments</p>
+        <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-stone-900">Judgments</h1>
+        <p className="mt-2 text-stone-600">Browse and search legal judgments</p>
       </div>
 
       {/* Search and Filters */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <label htmlFor="judgments-search" className="sr-only">Search judgments by citation, summary, or flynote</label>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
             <input
+              id="judgments-search"
               type="text"
               placeholder="Search judgments by citation, summary, or flynote..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className="w-full h-10 pl-10 pr-4 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             />
           </div>
-          <button
+          <Button
+            variant="outline"
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            aria-expanded={showAdvancedFilters}
+            icon={<Filter className="h-4 w-4" />}
           >
-            <Filter className="h-4 w-4" />
-            <span>Filters</span>
+            Filters
             {showAdvancedFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </button>
+          </Button>
         </div>
 
         {/* Advanced Filters */}
         {showAdvancedFilters && (
-          <div className="mt-4 p-4 bg-white rounded-lg shadow-md">
+          <div className="mt-4 p-4 bg-white rounded-lg shadow-card border border-stone-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Court</label>
-                <select
-                  value={filters.court}
-                  onChange={(e) => setFilters(prev => ({ ...prev, court: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="">All Courts</option>
-                  {courts.map(court => (
-                    <option key={court} value={court}>{court}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select
-                  value={filters.type}
-                  onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="">All Types</option>
-                  <option value="Final Judgment">Final Judgment</option>
-                  <option value="Interim Order">Interim Order</option>
-                  <option value="Ruling">Ruling</option>
-                  <option value="Consent Judgment">Consent Judgment</option>
-                  <option value="Default Judgment">Default Judgment</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                <select
-                  value={filters.country}
-                  onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="">All Countries</option>
-                  {countries.map(country => (
-                    <option key={country.id} value={country.id}>{country.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                <select
-                  value={filters.language}
-                  onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="">All Languages</option>
-                  {languages.map(language => (
-                    <option key={language} value={language}>{language}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                <select
-                  value={filters.year}
-                  onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="">All Years</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
+              <Select
+                label="Court"
+                value={filters.court}
+                onChange={(e) => setFilters(prev => ({ ...prev, court: e.target.value }))}
+              >
+                <option value="">All Courts</option>
+                {courts.map(court => (
+                  <option key={court} value={court}>{court}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Type"
+                value={filters.type}
+                onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+              >
+                <option value="">All Types</option>
+                <option value="Final Judgment">Final Judgment</option>
+                <option value="Interim Order">Interim Order</option>
+                <option value="Ruling">Ruling</option>
+                <option value="Consent Judgment">Consent Judgment</option>
+                <option value="Default Judgment">Default Judgment</option>
+              </Select>
+
+              <Select
+                label="Country"
+                value={filters.country}
+                onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
+              >
+                <option value="">All Countries</option>
+                {countries.map(country => (
+                  <option key={country.id} value={country.id}>{country.name}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Language"
+                value={filters.language}
+                onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
+              >
+                <option value="">All Languages</option>
+                {languages.map(language => (
+                  <option key={language} value={language}>{language}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Year"
+                value={filters.year}
+                onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}
+              >
+                <option value="">All Years</option>
+                {years.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </Select>
             </div>
-            
+
             {/* Active filters */}
             {(filters.court || filters.type || filters.country || filters.language || filters.year || searchTerm) && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap items-center gap-2 mt-4">
                 {searchTerm && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <Badge tone="primary">
                     Search: {searchTerm}
-                    <button onClick={() => setSearchTerm('')} className="ml-1 text-blue-600 hover:text-blue-800">
+                    <button onClick={() => setSearchTerm('')} aria-label="Clear search filter" className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
-                  </span>
+                  </Badge>
                 )}
-                
+
                 {filters.court && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <Badge tone="primary">
                     Court: {filters.court}
-                    <button onClick={() => setFilters(prev => ({ ...prev, court: '' }))} className="ml-1 text-green-600 hover:text-green-800">
+                    <button onClick={() => setFilters(prev => ({ ...prev, court: '' }))} aria-label="Clear court filter" className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
-                  </span>
+                  </Badge>
                 )}
-                
+
                 {filters.type && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  <Badge tone="primary">
                     Type: {filters.type}
-                    <button onClick={() => setFilters(prev => ({ ...prev, type: '' }))} className="ml-1 text-purple-600 hover:text-purple-800">
+                    <button onClick={() => setFilters(prev => ({ ...prev, type: '' }))} aria-label="Clear type filter" className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
-                  </span>
+                  </Badge>
                 )}
-                
+
                 {filters.country && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <Badge tone="primary">
                     Country: {countries.find(c => c.id === filters.country)?.name}
-                    <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} className="ml-1 text-yellow-600 hover:text-yellow-800">
+                    <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label="Clear country filter" className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
-                  </span>
+                  </Badge>
                 )}
-                
+
                 {filters.language && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  <Badge tone="primary">
                     Language: {filters.language}
-                    <button onClick={() => setFilters(prev => ({ ...prev, language: '' }))} className="ml-1 text-red-600 hover:text-red-800">
+                    <button onClick={() => setFilters(prev => ({ ...prev, language: '' }))} aria-label="Clear language filter" className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
-                  </span>
+                  </Badge>
                 )}
-                
+
                 {filters.year && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  <Badge tone="primary">
                     Year: {filters.year}
-                    <button onClick={() => setFilters(prev => ({ ...prev, year: '' }))} className="ml-1 text-indigo-600 hover:text-indigo-800">
+                    <button onClick={() => setFilters(prev => ({ ...prev, year: '' }))} aria-label="Clear year filter" className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
-                  </span>
+                  </Badge>
                 )}
-                
+
                 <button
                   onClick={clearFilters}
                   className="text-sm text-primary hover:text-primary-dark"
@@ -460,39 +430,27 @@ const JudgmentsPage = () => {
 
       {/* Judgments Grid */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading judgments…" />
       ) : fetchError ? (
-        <div className="text-center py-12">
-          <div className="flex justify-center mb-4">
-            <AlertCircle className="h-12 w-12 text-red-400" />
-          </div>
-          <p className="text-gray-700 font-medium mb-2">Failed to load judgments</p>
-          <p className="text-gray-500 text-sm mb-4">{fetchError}</p>
-          <button
-            onClick={fetchJudgments}
-            className="text-primary hover:text-primary-dark text-sm font-medium"
-          >
-            Try again
-          </button>
-        </div>
+        <EmptyState
+          icon={<AlertCircle className="h-12 w-12" />}
+          title="Failed to load judgments"
+          description={fetchError}
+          action={<Button variant="outline" onClick={fetchJudgments}>Try again</Button>}
+        />
       ) : judgments.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">
-            {searchTerm || filters.court || filters.type || filters.country || filters.language || filters.year
+        <EmptyState
+          title={
+            searchTerm || filters.court || filters.type || filters.country || filters.language || filters.year
               ? 'No judgments found matching your criteria'
-              : 'No judgments found'}
-          </p>
-          {(searchTerm || filters.court || filters.type || filters.country || filters.language || filters.year) && (
-            <button
-              onClick={clearFilters}
-              className="mt-4 text-primary hover:text-primary-dark"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
+              : 'No judgments found'
+          }
+          action={
+            (searchTerm || filters.court || filters.type || filters.country || filters.language || filters.year) && (
+              <Button variant="outline" onClick={clearFilters}>Clear filters</Button>
+            )
+          }
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -500,16 +458,16 @@ const JudgmentsPage = () => {
               <JudgmentCard
                 key={judgment.id}
                 judgment={judgment}
-                onClick={() => setSelectedJudgment(judgment.id)}
+                onClick={setSelectedJudgment}
               />
             ))}
           </div>
-          
+
           {/* Pagination */}
           {renderPagination()}
-          
+
           {/* Results count */}
-          <div className="text-center mt-4 text-sm text-gray-500">
+          <div className="text-center mt-4 text-sm text-stone-500">
             Showing {(currentPage - 1) * 9 + 1} to {Math.min(currentPage * 9, totalJudgments)} of {totalJudgments} judgments
           </div>
         </>

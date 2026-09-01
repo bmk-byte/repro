@@ -272,8 +272,13 @@ const RapidResponseCasesPage: React.FC = () => {
         query = query.or(`case_filed.ilike.%${term}%,case_summary.ilike.%${term}%,client_name.ilike.%${term}%`);
       }
 
-      // Order by priority and creation date
-      query = query.order('priority_level', { ascending: false }).order('created_at', { ascending: false });
+      // Order by priority and creation date, and bound the result — this
+      // list has no pagination UI, so without a cap it fetches every
+      // matching case unbounded as the dataset grows.
+      query = query
+        .order('priority_level', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(0, 499);
 
       const { data, error } = await query;
 
@@ -336,7 +341,7 @@ const RapidResponseCasesPage: React.FC = () => {
       case 'High': return 'bg-orange-100 text-orange-800';
       case 'Medium': return 'bg-blue-100 text-blue-800';
       case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-stone-100 text-stone-800';
     }
   };
 
@@ -346,12 +351,12 @@ const RapidResponseCasesPage: React.FC = () => {
       case 'review': return 'bg-blue-100 text-blue-800';
       case 'action': return 'bg-amber-100 text-amber-800';
       case 'resolution': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-stone-100 text-stone-800';
     }
   };
   
   const getCategoryColor = (category: string) => {
-    if (!category) return 'bg-gray-100 text-gray-800';
+    if (!category) return 'bg-stone-100 text-stone-800';
     
     if (category.includes('Abortion')) return 'bg-purple-100 text-purple-800';
     if (category.includes('Rape')) return 'bg-red-100 text-red-800';
@@ -359,7 +364,7 @@ const RapidResponseCasesPage: React.FC = () => {
     if (category.includes('SGBV')) return 'bg-orange-100 text-orange-800';
     if (category.includes('Incest')) return 'bg-indigo-100 text-indigo-800';
     
-    return 'bg-gray-100 text-gray-800';
+    return 'bg-stone-100 text-stone-800';
   };
 
   const exportToCSV = () => {
@@ -423,7 +428,7 @@ const RapidResponseCasesPage: React.FC = () => {
     if (showForm) {
       return (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <h2 className="text-xl font-semibold text-stone-900 mb-6">
             {editingCase ? 'Edit Rapid Response Case' : 'Create Rapid Response Case'}
           </h2>
           <RapidResponseCaseForm
@@ -455,19 +460,19 @@ const RapidResponseCasesPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
               <input
                 type="text"
                 placeholder="Search cases by title, description, or client name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <Filter className="h-4 w-4" />
                 <span>Filters</span>
@@ -476,7 +481,7 @@ const RapidResponseCasesPage: React.FC = () => {
               <button
                 onClick={exportToCSV}
                 title="Export filtered results to Excel"
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <Download className="h-4 w-4" />
                 <span>Export</span>
@@ -495,14 +500,14 @@ const RapidResponseCasesPage: React.FC = () => {
             <div className="mt-4 space-y-4">
               {/* Time Period Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">Time Period</label>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'week' }))}
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       filters.timePeriod === 'week'
                         ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
                     This Week
@@ -512,7 +517,7 @@ const RapidResponseCasesPage: React.FC = () => {
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       filters.timePeriod === 'month'
                         ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
                     This Month
@@ -522,7 +527,7 @@ const RapidResponseCasesPage: React.FC = () => {
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       filters.timePeriod === 'quarter'
                         ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
                     This Quarter
@@ -532,7 +537,7 @@ const RapidResponseCasesPage: React.FC = () => {
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       filters.timePeriod === 'year'
                         ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
                     This Year
@@ -542,7 +547,7 @@ const RapidResponseCasesPage: React.FC = () => {
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       filters.timePeriod === 'all'
                         ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
                     All Time
@@ -553,11 +558,11 @@ const RapidResponseCasesPage: React.FC = () => {
               {/* Other Filters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Priority</label>
                 <select
                   value={filters.priority}
                   onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="">All Priorities</option>
                   <option value="Urgent">Urgent</option>
@@ -568,11 +573,11 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Status</label>
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="">All Statuses</option>
                   <option value="intake">Intake</option>
@@ -583,11 +588,11 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Partner Organization</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Partner Organization</label>
                 <select
                   value={filters.partner}
                   onChange={(e) => setFilters(prev => ({ ...prev, partner: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="">All Partners</option>
                   {partnerOrganizations.map(partner => (
@@ -597,11 +602,11 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Country</label>
                 <select
                   value={filters.country}
                   onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="">All Countries</option>
                   {countries.map(country => (
@@ -611,11 +616,11 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="">All Categories</option>
                   <option value="Abortion">Abortion</option>
@@ -627,23 +632,23 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Case Owner</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Case Owner</label>
                 <div className="flex items-center space-x-2 mt-2">
                   <input
                     type="checkbox"
                     id="myCases"
                     checked={filters.myCases}
                     onChange={(e) => setFilters(prev => ({ ...prev, myCases: e.target.checked }))}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-stone-300 rounded"
                   />
-                  <label htmlFor="myCases" className="text-sm text-gray-700 cursor-pointer">
+                  <label htmlFor="myCases" className="text-sm text-stone-700 cursor-pointer">
                     Show only my cases
                   </label>
                 </div>
               </div>
               
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Date Range</label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="date"
@@ -652,7 +657,7 @@ const RapidResponseCasesPage: React.FC = () => {
                       ...prev, 
                       dateRange: { ...prev.dateRange, start: e.target.value } 
                     }))}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   />
                   <input
                     type="date"
@@ -661,7 +666,7 @@ const RapidResponseCasesPage: React.FC = () => {
                       ...prev, 
                       dateRange: { ...prev.dateRange, end: e.target.value } 
                     }))}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
@@ -768,7 +773,7 @@ const RapidResponseCasesPage: React.FC = () => {
           {loading ? (
             <div className="p-6 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-gray-500">Loading cases...</p>
+              <p className="mt-2 text-stone-500">Loading cases...</p>
             </div>
           ) : error ? (
             <div className="p-6 text-center">
@@ -783,8 +788,8 @@ const RapidResponseCasesPage: React.FC = () => {
             </div>
           ) : cases.length === 0 ? (
             <div className="p-6 text-center">
-              <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">No rapid response cases found</p>
+              <FileText className="h-8 w-8 text-stone-400 mx-auto mb-2" />
+              <p className="text-stone-500">No rapid response cases found</p>
               <button
                 onClick={handleCreateCase}
                 className="mt-4 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark"
@@ -794,49 +799,49 @@ const RapidResponseCasesPage: React.FC = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-stone-200">
+                <thead className="bg-stone-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Case
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Priority
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Category
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Client
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Filed
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Country
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Partner
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                       Submitted By
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-stone-200">
                   {cases.map((caseItem) => (
                     <tr 
                       key={caseItem.id} 
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className="hover:bg-stone-50 cursor-pointer"
                       onClick={() => handleCaseClick(caseItem.id)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{caseItem.case_filed}</div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">{caseItem.case_summary}</div>
+                          <div className="text-sm font-medium text-stone-900">{caseItem.case_filed}</div>
+                          <div className="text-sm text-stone-500 truncate max-w-xs">{caseItem.case_summary}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -855,24 +860,24 @@ const RapidResponseCasesPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{caseItem.client_name || 'N/A'}</div>
-                        <div className="text-sm text-gray-500">{caseItem.client_email || 'No email'}</div>
+                        <div className="text-sm text-stone-900">{caseItem.client_name || 'N/A'}</div>
+                        <div className="text-sm text-stone-500">{caseItem.client_email || 'No email'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                         {new Date(caseItem.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                         {caseItem.countries?.name || 'Not specified'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                         {caseItem.partner || 'Not specified'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           {caseItem.profiles?.full_name ? (
-                            <span className="text-sm text-gray-900">{caseItem.profiles.full_name}</span>
+                            <span className="text-sm text-stone-900">{caseItem.profiles.full_name}</span>
                           ) : (
-                            <span className="text-sm text-gray-400">Unknown</span>
+                            <span className="text-sm text-stone-400">Unknown</span>
                           )}
                           {caseItem.profiles?.organization && (
                             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600 border border-slate-200 w-fit">
@@ -911,9 +916,9 @@ const RapidResponseCasesPage: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center py-12">
-          <Shield className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Access Denied</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <Shield className="mx-auto h-12 w-12 text-stone-400" />
+          <h3 className="mt-2 text-sm font-medium text-stone-900">Access Denied</h3>
+          <p className="mt-1 text-sm text-stone-500">
             You do not have permission to access the Rapid Response system.
           </p>
           {moderatorError && (
@@ -931,8 +936,8 @@ const RapidResponseCasesPage: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Rapid Response Cases</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-stone-900">Rapid Response Cases</h1>
+          <p className="mt-1 text-sm text-stone-500">
             Track and manage time-sensitive legal response cases
           </p>
           {accessScope === 'organization' && userOrganization && (
@@ -952,7 +957,7 @@ const RapidResponseCasesPage: React.FC = () => {
               className={`px-4 py-2 text-sm font-medium rounded-md ${
                 view === 'dashboard' 
                   ? 'bg-primary text-white' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
               }`}
             >
               Dashboard
@@ -962,7 +967,7 @@ const RapidResponseCasesPage: React.FC = () => {
               className={`px-4 py-2 text-sm font-medium rounded-md ${
                 view === 'list' 
                   ? 'bg-primary text-white' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
               }`}
             >
               All Cases

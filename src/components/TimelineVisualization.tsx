@@ -202,7 +202,7 @@ const TimelineVisualization: React.FC = () => {
         <select
           value={selectedCountry}
           onChange={(e) => setSelectedCountry(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="all">All Countries</option>
           {countries.map(country => (
@@ -271,7 +271,7 @@ const TimelineVisualization: React.FC = () => {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <Calendar className="h-5 w-5 text-amber-500" />
                 <Text className="font-medium">Filed Cases</Text>
@@ -279,10 +279,10 @@ const TimelineVisualization: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold">
                 {data.reduce((sum, item) => sum + item.filed, 0)}
               </Text>
-              <Text className="text-gray-500 text-sm">New cases in period</Text>
+              <Text className="text-stone-500 text-sm">New cases in period</Text>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <Clock className="h-5 w-5 text-blue-500" />
                 <Text className="font-medium">Ongoing Cases</Text>
@@ -290,10 +290,10 @@ const TimelineVisualization: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold">
                 {data.reduce((sum, item) => sum + item.ongoing, 0)}
               </Text>
-              <Text className="text-gray-500 text-sm">Currently in progress</Text>
+              <Text className="text-stone-500 text-sm">Currently in progress</Text>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <CheckCircle className="h-5 w-5 text-green-500" />
                 <Text className="font-medium">Resolved Cases</Text>
@@ -301,10 +301,10 @@ const TimelineVisualization: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold">
                 {data.reduce((sum, item) => sum + item.resolved, 0)}
               </Text>
-              <Text className="text-gray-500 text-sm">Successfully completed</Text>
+              <Text className="text-stone-500 text-sm">Successfully completed</Text>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <XCircle className="h-5 w-5 text-red-500" />
                 <Text className="font-medium">Dismissed Cases</Text>
@@ -312,16 +312,16 @@ const TimelineVisualization: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold">
                 {data.reduce((sum, item) => sum + item.dismissed, 0)}
               </Text>
-              <Text className="text-gray-500 text-sm">Unsuccessful outcomes</Text>
+              <Text className="text-stone-500 text-sm">Unsuccessful outcomes</Text>
             </div>
           </div>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-6 p-4 bg-stone-50 rounded-lg">
             <Flex>
               <div>
                 <Text className="font-medium">Average Resolution Time</Text>
                 <Text className="mt-1 text-2xl font-bold">{averageResolutionTime} days</Text>
-                <Text className="text-gray-500 text-sm">From filing to resolution</Text>
+                <Text className="text-stone-500 text-sm">From filing to resolution</Text>
               </div>
               <div className="text-right">
                 <Text className="font-medium">Case Aging</Text>

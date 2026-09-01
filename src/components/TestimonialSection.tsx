@@ -44,7 +44,7 @@ const itemVariants = {
 
 const TestimonialSection = () => {
   return (
-    <section id="testimonial-section" className="bg-gray-50 py-12" aria-labelledby="testimonials-heading">
+    <section id="testimonial-section" className="bg-stone-50 py-12" aria-labelledby="testimonials-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="text-center"
@@ -61,7 +61,7 @@ const TestimonialSection = () => {
             What Users Say
           </motion.h2>
           <motion.p 
-            className="mt-3 text-lg text-gray-500"
+            className="mt-3 text-lg text-stone-500"
             variants={itemVariants}
           >
             Hear from our community of legal professionals, policymakers, and activists
@@ -89,12 +89,12 @@ const TestimonialSection = () => {
                 <div className="inline-flex p-3 bg-primary/10 rounded-xl mb-6">
                   <Quote className="h-8 w-8 text-primary" />
                 </div>
-                <p className="text-gray-600 italic mb-6 text-lg leading-relaxed">
+                <p className="text-stone-600 italic mb-6 text-lg leading-relaxed">
                   "{testimonial.quote}"
                 </p>
                 <div>
-                  <p className="font-semibold text-gray-900 text-lg">{testimonial.author}</p>
-                  <p className="text-sm text-gray-500">{testimonial.role}</p>
+                  <p className="font-semibold text-stone-900 text-lg">{testimonial.author}</p>
+                  <p className="text-sm text-stone-500">{testimonial.role}</p>
                 </div>
               </motion.div>
             ))}

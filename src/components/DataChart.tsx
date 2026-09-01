@@ -147,7 +147,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
           <p className="font-semibold">Error loading chart data</p>
           <p className="text-sm mt-1">{error}</p>
           {retryCount > 0 && (
-            <p className="text-xs mt-1 text-gray-500">Retry attempt: {retryCount}</p>
+            <p className="text-xs mt-1 text-stone-500">Retry attempt: {retryCount}</p>
           )}
         </div>
         <button 
@@ -165,7 +165,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
   if (data.length === 0) {
     return (
       <div className="h-[300px] w-full flex items-center justify-center">
-        <div className="text-gray-500">No case data available</div>
+        <div className="text-stone-500">No case data available</div>
       </div>
     );
   }

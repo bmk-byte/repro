@@ -210,7 +210,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
           </div>
         ) : (
           <div className="h-72 flex items-center justify-center">
-            <p className="text-gray-500">No case resolution data available</p>
+            <p className="text-stone-500">No case resolution data available</p>
           </div>
         )}
       </Card>

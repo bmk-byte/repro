@@ -533,7 +533,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
       case 'High': return 'bg-orange-100 text-orange-800';
       case 'Medium': return 'bg-blue-100 text-blue-800';
       case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-stone-100 text-stone-800';
     }
   };
 
@@ -543,7 +543,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
       case 'review': return 'bg-blue-100 text-blue-800';
       case 'action': return 'bg-amber-100 text-amber-800';
       case 'resolution': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-stone-100 text-stone-800';
     }
   };
 
@@ -553,7 +553,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
     if (category.includes('Defilement')) return 'bg-pink-100 text-pink-800';
     if (category.includes('SGBV')) return 'bg-orange-100 text-orange-800';
     if (category.includes('Incest')) return 'bg-indigo-100 text-indigo-800';
-    return 'bg-gray-100 text-gray-800';
+    return 'bg-stone-100 text-stone-800';
   };
 
   // Custom colors for priority levels
@@ -571,7 +571,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'quarter' | 'year')}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="week">Last Week</option>
               <option value="month">Last Month</option>
@@ -582,7 +582,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
           >
             <Filter className="h-4 w-4" />
             <span>Filters</span>
@@ -596,14 +596,14 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         </div>
 
         {showFilters && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-4 p-4 bg-stone-50 rounded-lg">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Priority</label>
                 <select
                   value={filters.priority}
                   onChange={(e) => handleFilterChange('priority', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="all">All Priorities</option>
                   {filterOptions.priorities.map(priority => (
@@ -613,11 +613,11 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Stage</label>
                 <select
                   value={filters.stage}
                   onChange={(e) => handleFilterChange('stage', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="all">All Stages</option>
                   {filterOptions.stages.map(stage => (
@@ -627,11 +627,11 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
                 <select
                   value={filters.category}
                   onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="all">All Categories</option>
                   {filterOptions.categories.map(category => (
@@ -641,11 +641,11 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Partner</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Partner</label>
                 <select
                   value={filters.partner}
                   onChange={(e) => handleFilterChange('partner', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="all">All Partners</option>
                   {filterOptions.partners.map(partner => (
@@ -655,11 +655,11 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Country</label>
                 <select
                   value={filters.country}
                   onChange={(e) => handleFilterChange('country', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="all">All Countries</option>
                   {filterOptions.countries.map(country => (
@@ -669,11 +669,11 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Status</label>
                 <select
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="all">All Statuses</option>
                   {filterOptions.statuses.map(status => (
@@ -747,20 +747,20 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           <Card className="bg-white">
             <div className="flex justify-between items-center">
               <div>
-                <Text className="text-gray-500">
+                <Text className="text-stone-500">
                   Showing {stats.totalCases} rapid response cases
                   {hasActiveFilters && ' (filtered)'}
                   {timeRange !== 'year' && ` from the last ${timeRange}`}
                 </Text>
                 {hasActiveFilters && (
-                  <Text className="text-sm text-gray-400 mt-1">
+                  <Text className="text-sm text-stone-400 mt-1">
                     Use filters above to refine results
                   </Text>
                 )}
               </div>
               <button
                 onClick={fetchDashboardData}
-                className="flex items-center space-x-2 px-3 py-1 text-sm text-gray-600 hover:text-primary transition-colors"
+                className="flex items-center space-x-2 px-3 py-1 text-sm text-stone-600 hover:text-primary transition-colors"
                 title="Refresh data"
               >
                 <RefreshCw className="h-4 w-4" />
@@ -774,7 +774,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <Card className="bg-white">
               <Flex>
                 <div>
-                  <Text className="text-gray-500">Total Cases</Text>
+                  <Text className="text-stone-500">Total Cases</Text>
                   <Text className="text-2xl font-bold">{stats.totalCases}</Text>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-primary" />
@@ -784,7 +784,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <Card className="bg-white">
               <Flex>
                 <div>
-                  <Text className="text-gray-500">Active Cases</Text>
+                  <Text className="text-stone-500">Active Cases</Text>
                   <Text className="text-2xl font-bold">{stats.activeCases}</Text>
                 </div>
                 <Clock className="h-8 w-8 text-blue-500" />
@@ -794,7 +794,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <Card className="bg-white">
               <Flex>
                 <div>
-                  <Text className="text-gray-500">Completed Cases</Text>
+                  <Text className="text-stone-500">Completed Cases</Text>
                   <Text className="text-2xl font-bold">{stats.completedCases}</Text>
                 </div>
                 <CheckCircle className="h-8 w-8 text-green-500" />
@@ -804,7 +804,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <Card className="bg-white">
               <Flex>
                 <div>
-                  <Text className="text-gray-500">Avg. Resolution Time</Text>
+                  <Text className="text-stone-500">Avg. Resolution Time</Text>
                   <Text className="text-2xl font-bold">{stats.averageResolutionTime} days</Text>
                 </div>
                 <Calendar className="h-8 w-8 text-amber-500" />
@@ -923,13 +923,13 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                 recentCases.map((caseItem) => (
                   <div 
                     key={caseItem.id} 
-                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer"
                     onClick={() => onCaseClick && onCaseClick(caseItem.id)}
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="text-sm font-medium text-gray-900">{caseItem.case_filed}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{caseItem.countries?.name}</p>
+                        <h3 className="text-sm font-medium text-stone-900">{caseItem.case_filed}</h3>
+                        <p className="text-xs text-stone-500 mt-1">{caseItem.countries?.name}</p>
                       </div>
                       <div className="flex space-x-2">
                         {caseItem.priority_level && (
@@ -949,12 +949,12 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-gray-600 mt-2 line-clamp-2">{caseItem.case_summary}</p>
-                    <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+                    <p className="text-xs text-stone-600 mt-2 line-clamp-2">{caseItem.case_summary}</p>
+                    <div className="flex justify-between items-center mt-2 text-xs text-stone-500">
                       <span>{new Date(caseItem.created_at).toLocaleDateString()}</span>
                       <div className="flex items-center gap-1.5">
                         {caseItem.profiles?.full_name && (
-                          <span className="font-medium text-gray-700">{caseItem.profiles.full_name}</span>
+                          <span className="font-medium text-stone-700">{caseItem.profiles.full_name}</span>
                         )}
                         {caseItem.profiles?.organization && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600 border border-slate-200">

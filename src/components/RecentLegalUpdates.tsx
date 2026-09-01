@@ -141,12 +141,12 @@ const RecentLegalUpdates = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Recent Legal Updates</h2>
+        <h2 className="text-xl font-semibold text-stone-900">Recent Legal Updates</h2>
         <div className="flex items-center space-x-4">
           <select
             value={selectedArea}
             onChange={(e) => setSelectedArea(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Categories</option>
             {categories.map(category => (
@@ -157,7 +157,7 @@ const RecentLegalUpdates = () => {
           <select
             value={selectedJurisdiction}
             onChange={(e) => setSelectedJurisdiction(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Jurisdictions</option>
             {jurisdictions.map(jurisdiction => (
@@ -170,14 +170,14 @@ const RecentLegalUpdates = () => {
               type="date"
               value={dateRange.start}
               onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <span className="text-gray-500">to</span>
+            <span className="text-stone-500">to</span>
             <input
               type="date"
               value={dateRange.end}
               onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
@@ -192,7 +192,7 @@ const RecentLegalUpdates = () => {
           {error}
         </div>
       ) : updates.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-stone-500">
           No recent legal updates found
         </div>
       ) : (
@@ -203,35 +203,35 @@ const RecentLegalUpdates = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="border-b border-gray-200 last:border-0 pb-6 last:pb-0"
+              className="border-b border-stone-200 last:border-0 pb-6 last:pb-0"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-stone-500">
                       {formatDate(update.judgment_date)}
                     </span>
-                    <span className="text-sm text-gray-400">•</span>
+                    <span className="text-sm text-stone-400">•</span>
                     <span className="text-sm font-medium text-primary">
                       {update.countries?.name || 'Unknown'}
                     </span>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-stone-900 mb-2">
                     {update.citation}
                   </h3>
                   <div className="flex items-center space-x-4 mb-3">
-                    <div className="flex items-center text-gray-600">
+                    <div className="flex items-center text-stone-600">
                       <Gavel className="h-4 w-4 mr-1" />
                       <span className="text-sm">{update.court}</span>
                     </div>
                     {update.case_categories && update.case_categories.length > 0 && (
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-stone-600">
                         <Scale className="h-4 w-4 mr-1" />
                         <span className="text-sm">{update.case_categories[0]}</span>
                       </div>
                     )}
                   </div>
-                  <p className="text-gray-600 line-clamp-2 mb-3">
+                  <p className="text-stone-600 line-clamp-2 mb-3">
                     {update.flynote || update.case_summary}
                   </p>
                   {update.case_categories && update.case_categories.length > 0 && (

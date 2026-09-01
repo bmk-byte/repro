@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Upload, X, ChevronRight, ChevronLeft } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import MultiStepFormProgress from './MultiStepFormProgress';
 import { useFormDraft } from '../../hooks/useFormDraft';
+import { createSafeDisplayName } from '../../lib/sanitize';
 
 interface SubmitCaseFormProps {
   onSuccess?: () => void;
@@ -20,6 +21,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [countries, setCountries] = useState<{ id: string, name: string }[]>([]);
   const initialFormData = {
     // Basic Information
@@ -124,13 +126,21 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles: File[], rejections: FileRejection[]) => {
+      if (rejections.length > 0) {
+        const reason = rejections[0].errors[0];
+        setFileError(
+          reason?.code === 'file-too-large'
+            ? 'That file is larger than 10MB. Please choose a smaller PDF.'
+            : reason?.code === 'file-invalid-type'
+              ? 'Only PDF files are accepted.'
+              : reason?.message || 'That file could not be accepted.'
+        );
+        return;
+      }
       if (acceptedFiles[0]) {
-        if (acceptedFiles[0].size > 10 * 1024 * 1024) {
-          toast.error('File size must be less than 10MB');
-          return;
-        }
+        setFileError(null);
         setFile(acceptedFiles[0]);
       }
     },
@@ -285,34 +295,60 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
     }
   };
 
-  const validateCurrentStep = (): boolean => {
-    switch (currentStep) {
+  // Returns the human-readable labels of whatever's still missing on the
+  // current step, so the UI can tell the user exactly what to fill in
+  // instead of a generic "please fill in all required fields."
+  const getMissingFields = (step: number): string[] => {
+    switch (step) {
       case 0: // Basic Info
-        return !!formData.title && !!formData.summary && !!formData.country_id;
+        return [
+          !formData.title && 'Title',
+          !formData.summary && 'Summary',
+          !formData.country_id && 'Country',
+        ].filter((v): v is string => !!v);
       case 1: // Case Details
-        return !!formData.tracking_period && !!formData.programme && !!formData.partner && 
-               !!formData.nature_of_case && !!formData.action_taken && !!formData.action_timeframe && 
-               !!formData.next_steps && !!formData.court;
+        return [
+          !formData.tracking_period && 'Tracking Period',
+          !formData.programme && 'Programme',
+          !formData.partner && 'Partner',
+          !formData.nature_of_case && 'Nature of Case',
+          !formData.action_taken && 'Action Taken',
+          !formData.action_timeframe && 'Action Timeframe',
+          !formData.next_steps && 'Next Steps',
+          !formData.court && 'Court',
+        ].filter((v): v is string => !!v);
       case 2: // Parties
-        return !!formData.timeline_status && formData.litigants.length > 0 && 
-               formData.defending_institutions.length > 0;
+        return [
+          !formData.timeline_status && 'Timeline Status',
+          formData.litigants.length === 0 && 'at least one Litigant',
+          formData.defending_institutions.length === 0 && 'at least one Defending Institution',
+        ].filter((v): v is string => !!v);
       case 3: // Legal Framework
-        return !!formData.judicial_body_type && !!formData.judicial_body && 
-               !!formData.legal_framework_type;
+        return [
+          !formData.judicial_body_type && 'Judicial Body Type',
+          !formData.judicial_body && 'Judicial Body',
+          !formData.legal_framework_type && 'Legal Framework Type',
+        ].filter((v): v is string => !!v);
       case 4: // Categories
-        return !!formData.case_impact && formData.case_categories.length > 0;
+        return [
+          !formData.case_impact && 'Case Impact',
+          formData.case_categories.length === 0 && 'at least one Category',
+        ].filter((v): v is string => !!v);
       case 5: // Document
-        return !!file;
+        return [!file && 'a supporting Document'].filter((v): v is string => !!v);
       default:
-        return true;
+        return [];
     }
   };
+
+  const validateCurrentStep = (): boolean => getMissingFields(currentStep).length === 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateCurrentStep()) {
-      toast.error('Please fill in all required fields');
+    const missing = getMissingFields(currentStep);
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(', ')}`);
       return;
     }
     
@@ -460,7 +496,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Case Title *
               </label>
               <input
@@ -469,13 +505,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.title}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Enter a descriptive title for the case"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Case Summary *
               </label>
               <textarea
@@ -484,13 +520,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Provide a brief summary of the case"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Country/Jurisdiction *
               </label>
               <select
@@ -498,7 +534,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.country_id}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select a country</option>
                 {countries.map(country => (
@@ -513,7 +549,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Tracking Period *
               </label>
               <input
@@ -522,13 +558,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.tracking_period}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., Q1 2025"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Programme *
               </label>
               <input
@@ -537,13 +573,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.programme}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., LIRA Programme"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Partner Organization *
               </label>
               <input
@@ -552,13 +588,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.partner}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., Afya Na Haki"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Court *
               </label>
               <input
@@ -567,13 +603,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.court}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., High Court of Kenya"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Nature of Case *
               </label>
               <textarea
@@ -582,13 +618,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Describe the nature of the case"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Action Taken *
               </label>
               <textarea
@@ -597,13 +633,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Describe the actions taken"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Action Timeframe *
               </label>
               <input
@@ -612,13 +648,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.action_timeframe}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., 3 months"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Next Steps *
               </label>
               <textarea
@@ -627,7 +663,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Describe the next steps"
               />
             </div>
@@ -638,7 +674,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Timeline Status *
               </label>
               <select
@@ -646,7 +682,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.timeline_status}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select status</option>
                 <option value="filed">Filed</option>
@@ -657,7 +693,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Litigants *
               </label>
               <div className="flex space-x-2">
@@ -666,7 +702,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                   value={newLitigant}
                   onChange={(e) => setNewLitigant(e.target.value)}
                   placeholder="Add a litigant"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -696,7 +732,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Defending Institutions *
               </label>
               <div className="flex space-x-2">
@@ -705,7 +741,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                   value={newDefendingInstitution}
                   onChange={(e) => setNewDefendingInstitution(e.target.value)}
                   placeholder="Add a defending institution"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -735,7 +771,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Case Outcome
               </label>
               <textarea
@@ -743,7 +779,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.case_outcome}
                 onChange={handleInputChange}
                 rows={3}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Describe the outcome of the case (if resolved)"
               />
             </div>
@@ -754,7 +790,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judicial Body Type *
               </label>
               <select
@@ -762,7 +798,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.judicial_body_type}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select type</option>
                 <option value="National Court">National Court</option>
@@ -771,7 +807,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Judicial Body *
               </label>
               <input
@@ -780,7 +816,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.judicial_body}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., Supreme Court of Kenya"
               />
             </div>
@@ -792,15 +828,15 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                   name="regional_appeals"
                   checked={formData.regional_appeals}
                   onChange={handleCheckboxChange}
-                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                  className="rounded border-stone-300 text-primary focus:ring-primary"
                 />
-                <span className="text-sm font-medium text-gray-700">Regional Appeals</span>
+                <span className="text-sm font-medium text-stone-700">Regional Appeals</span>
               </label>
             </div>
 
             {formData.regional_appeals && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-stone-700">
                   Regional Bodies
                 </label>
                 <div className="flex space-x-2">
@@ -809,7 +845,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                     value={newRegionalBody}
                     onChange={(e) => setNewRegionalBody(e.target.value)}
                     placeholder="Add a regional body"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -840,7 +876,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Legal Framework Type *
               </label>
               <select
@@ -848,7 +884,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 value={formData.legal_framework_type}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select type</option>
                 <option value="Domestic Law">Domestic Law</option>
@@ -859,7 +895,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
 
             {(formData.legal_framework_type === 'Domestic Law' || formData.legal_framework_type === 'Both') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-stone-700">
                   Domestic Laws
                 </label>
                 <div className="flex space-x-2">
@@ -868,7 +904,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                     value={newDomesticLaw}
                     onChange={(e) => setNewDomesticLaw(e.target.value)}
                     placeholder="Add a domestic law"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -900,7 +936,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
 
             {(formData.legal_framework_type === 'International Law' || formData.legal_framework_type === 'Both') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-stone-700">
                   International Laws
                 </label>
                 <div className="flex space-x-2">
@@ -909,7 +945,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                     value={newInternationalLaw}
                     onChange={(e) => setNewInternationalLaw(e.target.value)}
                     placeholder="Add an international law"
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -940,7 +976,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Protocols
               </label>
               <div className="flex space-x-2">
@@ -949,7 +985,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                   value={newProtocol}
                   onChange={(e) => setNewProtocol(e.target.value)}
                   placeholder="Add a protocol"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -984,7 +1020,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-stone-700">
                 Case Impact *
               </label>
               <textarea
@@ -993,16 +1029,16 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="Describe the impact of this case"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Case Categories *
               </label>
-              <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-md">
+              <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-stone-200 rounded-md">
                 {[
                   'Access to Safe Abortion',
                   'Maternal Health and Mortality',
@@ -1031,9 +1067,9 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                       type="checkbox"
                       checked={formData.case_categories.includes(category)}
                       onChange={() => handleCategoryToggle(category)}
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                      className="rounded border-stone-300 text-primary focus:ring-primary"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{category}</span>
+                    <span className="ml-2 text-sm text-stone-700">{category}</span>
                   </label>
                 ))}
               </div>
@@ -1045,42 +1081,55 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Upload Case Document *
               </label>
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                  file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'
+                  isDragActive
+                    ? 'border-primary bg-primary/5'
+                    : file
+                      ? 'border-primary bg-primary/5'
+                      : fileError
+                        ? 'border-danger bg-danger-light/40'
+                        : 'border-stone-300 hover:border-primary'
                 }`}
               >
-                <input {...getInputProps()} />
+                <input {...getInputProps()} aria-label="Upload case document (PDF)" />
                 {file ? (
-                  <div className="flex items-center justify-center space-x-3">
-                    <Upload className="h-6 w-6 text-primary" />
-                    <span className="text-gray-900">{file.name}</span>
+                  <div className="flex items-center justify-center gap-3">
+                    <Upload className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
+                    <span className="text-stone-900 text-sm font-medium">{createSafeDisplayName(file.name)}</span>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      className="text-gray-500 hover:text-red-500"
+                      aria-label="Remove selected file"
+                      className="text-stone-500 hover:text-danger"
                     >
                       <X className="h-5 w-5" />
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600">Drop your PDF file here or click to browse</p>
-                    <p className="text-sm text-gray-500 mt-2">Maximum file size: 10MB</p>
-                    <p className="text-sm text-gray-600 mt-4 italic">
+                    <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
+                    <p className="text-stone-600">Drop your PDF file here or click to browse</p>
+                    <p className="text-sm text-stone-500 mt-2">Maximum file size: 10MB</p>
+                    <p className="text-sm text-stone-600 mt-4 italic">
                       This document serves to capture any additional important information relevant to the case that may not have been included in the form fields.
                     </p>
                   </div>
                 )}
               </div>
+              {fileError && (
+                <p role="alert" className="mt-2 flex items-center gap-1.5 text-sm text-danger">
+                  <AlertCircle className="h-4 w-4 flex-none" />
+                  {fileError}
+                </p>
+              )}
             </div>
 
             {!isDirectUpload && (
@@ -1118,27 +1167,36 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       <form onSubmit={handleSubmit} className="mt-6">
         {renderStepContent()}
         
-        <div className="mt-8 flex justify-between">
+        {(() => {
+          const missing = getMissingFields(currentStep);
+          return missing.length > 0 ? (
+            <p role="status" className="mt-4 text-sm text-danger text-right">
+              Before you continue, please fill in: {missing.join(', ')}
+            </p>
+          ) : null;
+        })()}
+
+        <div className="mt-4 flex justify-between">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
           >
             Cancel
           </button>
-          
+
           <div className="flex space-x-3">
             {currentStep > 0 && (
               <button
                 type="button"
                 onClick={prevStep}
-                className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex items-center px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Previous
               </button>
             )}
-            
+
             {currentStep < steps.length - 1 ? (
               <button
                 type="button"

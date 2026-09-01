@@ -138,12 +138,12 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
       case 'Low':
         return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-stone-100 text-stone-800';
     }
   };
   
   const getCategoryColor = (category: string) => {
-    if (!category) return 'bg-gray-100 text-gray-800';
+    if (!category) return 'bg-stone-100 text-stone-800';
 
     if (category.includes('Abortion') || category.includes('Contraceptive') || category.includes('Reproductive')) return 'bg-blue-100 text-blue-800';
     if (category.includes('Maternal') || category.includes('Mortality')) return 'bg-red-100 text-red-800';
@@ -160,7 +160,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
     if (category.includes('Environmental')) return 'bg-emerald-100 text-emerald-800';
     if (category.includes('Religious') || category.includes('Cultural')) return 'bg-stone-100 text-stone-800';
 
-    return 'bg-gray-100 text-gray-800';
+    return 'bg-stone-100 text-stone-800';
   };
 
   if (loading) {
@@ -177,10 +177,10 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
         <div className="flex justify-center mb-4">
           <AlertCircle className="h-12 w-12 text-red-500" />
         </div>
-        <p className="text-gray-900 font-medium mb-2">
+        <p className="text-stone-900 font-medium mb-2">
           {accessDenied ? 'Access Denied' : 'Case not found'}
         </p>
-        <p className="text-gray-500 mb-6">
+        <p className="text-stone-500 mb-6">
           {accessDenied
             ? 'You do not have permission to view this case. It may belong to another organization.'
             : 'The case you are looking for does not exist.'}
@@ -207,7 +207,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
         <div className="flex justify-between items-start">
           <button
             onClick={onBack}
-            className="text-gray-500 hover:text-gray-700 flex items-center mb-4"
+            className="text-stone-500 hover:text-stone-700 flex items-center mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Cases
@@ -227,8 +227,8 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
 
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{caseData.case_filed}</h1>
-            <div className="flex items-center mt-2 text-gray-500">
+            <h1 className="text-2xl font-semibold text-stone-900">{caseData.case_filed}</h1>
+            <div className="flex items-center mt-2 text-stone-500">
               <Calendar className="h-4 w-4 mr-1" />
               <span className="text-sm">
                 {new Date(caseData.created_at).toLocaleDateString()}
@@ -269,27 +269,27 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
           {/* Case Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Information</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Court</label>
+                  <label className="text-sm font-medium text-stone-500">Court</label>
                   <p className="mt-1">{caseData.court}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Nature of Case</label>
+                  <label className="text-sm font-medium text-stone-500">Nature of Case</label>
                   <p className="mt-1">{caseData.nature_of_case}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Case Type</label>
+                  <label className="text-sm font-medium text-stone-500">Case Type</label>
                   <p className="mt-1 capitalize">{caseData.case_type?.replace('-', ' ')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Partner Organization</label>
+                  <label className="text-sm font-medium text-stone-500">Partner Organization</label>
                   <p className="mt-1">{caseData.partner}</p>
                 </div>
                 {caseData.case_categories && caseData.case_categories.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Categories</label>
+                    <label className="text-sm font-medium text-stone-500">Categories</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {caseData.case_categories.map((category: string, idx: number) => (
                         <span 
@@ -307,24 +307,24 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
 
             {/* Case Summary */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Summary</h2>
-              <p className="text-gray-600 whitespace-pre-line">{caseData.case_summary}</p>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Summary</h2>
+              <p className="text-stone-600 whitespace-pre-line">{caseData.case_summary}</p>
             </div>
 
             {/* Action Details */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Action Details</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Action Details</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Action Taken</label>
+                  <label className="text-sm font-medium text-stone-500">Action Taken</label>
                   <p className="mt-1">{caseData.action_taken}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Action Timeframe</label>
+                  <label className="text-sm font-medium text-stone-500">Action Timeframe</label>
                   <p className="mt-1">{caseData.action_timeframe}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Next Steps</label>
+                  <label className="text-sm font-medium text-stone-500">Next Steps</label>
                   <p className="mt-1">{caseData.next_steps}</p>
                 </div>
               </div>
@@ -335,13 +335,13 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
           <div className="space-y-6">
             {/* Documents */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Documents</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Documents</h2>
               {caseData.pdf_url && (
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="bg-stone-50 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900">Main Case Document</span>
+                      <FileText className="h-5 w-5 text-stone-400 mr-2" />
+                      <span className="text-sm text-stone-900">Main Case Document</span>
                     </div>
                     <button
                       onClick={() => setShowDocumentModal(true)}
@@ -358,12 +358,12 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                   {caseData.case_documents.map((doc: any) => (
                     <div
                       key={doc.id}
-                      className="flex items-start p-3 bg-gray-50 rounded-lg"
+                      className="flex items-start p-3 bg-stone-50 rounded-lg"
                     >
-                      <FileText className="h-5 w-5 text-gray-400 mt-1" />
+                      <FileText className="h-5 w-5 text-stone-400 mt-1" />
                       <div className="ml-3">
-                        <h4 className="text-sm font-medium text-gray-900">{doc.title}</h4>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <h4 className="text-sm font-medium text-stone-900">{doc.title}</h4>
+                        <p className="text-xs text-stone-500 mt-1">
                           {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                         <button
@@ -380,30 +380,30 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                   ))}
                 </div>
               ) : !caseData.pdf_url ? (
-                <p className="text-gray-500 text-sm">No documents uploaded</p>
+                <p className="text-stone-500 text-sm">No documents uploaded</p>
               ) : null}
             </div>
 
             {/* Progress Tracking */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Progress</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Progress</h2>
               {caseData.case_stages?.length > 0 ? (
                 <div className="space-y-4">
                   {caseData.case_stages.map((stage: any) => (
                     <div
                       key={stage.id}
-                      className="relative pl-6 pb-4 border-l-2 border-gray-200 last:pb-0"
+                      className="relative pl-6 pb-4 border-l-2 border-stone-200 last:pb-0"
                     >
                       <div className="absolute -left-[9px] top-0">
                         <div className={`h-4 w-4 rounded-full ${
                           stage.status === 'Completed' ? 'bg-green-500' :
                           stage.status === 'In Progress' ? 'bg-blue-500' :
-                          'bg-gray-300'
+                          'bg-stone-300'
                         }`} />
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">{stage.stage_name}</h4>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <h4 className="text-sm font-medium text-stone-900">{stage.stage_name}</h4>
+                        <p className="text-xs text-stone-500 mt-1">
                           {new Date(stage.timestamp).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
@@ -411,14 +411,14 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                           })}
                         </p>
                         {stage.notes && (
-                          <p className="text-sm text-gray-600 mt-2">{stage.notes}</p>
+                          <p className="text-sm text-stone-600 mt-2">{stage.notes}</p>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No progress stages defined</p>
+                <p className="text-stone-500 text-sm">No progress stages defined</p>
               )}
             </div>
           </div>

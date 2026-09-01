@@ -28,7 +28,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onGetStarted }) => {
             Ready to Make an Impact?
           </motion.h2>
           <motion.p 
-            className="text-lg text-gray-600 mb-6"
+            className="text-lg text-stone-600 mb-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

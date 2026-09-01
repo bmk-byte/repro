@@ -402,7 +402,7 @@ const HealthIndicatorIntegration: React.FC = () => {
             <select
               value={selectedIndicator}
               onChange={(e) => setSelectedIndicator(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="maternal_mortality">Maternal Mortality</option>
               <option value="contraceptive_access">Contraceptive Access</option>
@@ -415,7 +415,7 @@ const HealthIndicatorIntegration: React.FC = () => {
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">All Countries</option>
               {countries.map(country => (
@@ -426,7 +426,7 @@ const HealthIndicatorIntegration: React.FC = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -579,7 +579,7 @@ const HealthIndicatorIntegration: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <div className="bg-stone-50 p-6 rounded-lg">
               <Title>Health Indicator Analysis</Title>
               <Text className="mt-2">
                 This dashboard shows the relationship between health indicators and legal cases across different countries.
@@ -590,7 +590,7 @@ const HealthIndicatorIntegration: React.FC = () => {
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm">
                   <Text className="font-medium">Key Insights</Text>
-                  <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                  <ul className="mt-2 space-y-2 text-sm text-stone-600">
                     <li>• Countries with higher maternal mortality rates show increased litigation activity</li>
                     <li>• Improved contraceptive access correlates with fewer legal challenges</li>
                     <li>• Adolescent health indicators can predict future case trends</li>
@@ -600,7 +600,7 @@ const HealthIndicatorIntegration: React.FC = () => {
                 
                 <div className="bg-white p-4 rounded-lg shadow-sm">
                   <Text className="font-medium">Data Sources</Text>
-                  <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                  <ul className="mt-2 space-y-2 text-sm text-stone-600">
                     <li>• World Health Organization (WHO) country statistics</li>
                     <li>• United Nations Population Fund (UNFPA) reports</li>
                     <li>• National health ministries and statistical agencies</li>

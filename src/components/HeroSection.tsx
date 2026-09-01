@@ -35,7 +35,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
   }, [isTypingComplete]);
 
   return (
-    <div id="hero-section" className="relative min-h-screen bg-gradient-to-br from-gray-900 to-black overflow-hidden">
+    <div id="hero-section" className="relative min-h-screen bg-gradient-to-br from-stone-900 to-black overflow-hidden">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-20" 
@@ -91,7 +91,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="mt-6 max-w-3xl mx-auto text-xl text-gray-300 leading-relaxed"
+              className="mt-6 max-w-3xl mx-auto text-xl text-stone-300 leading-relaxed"
             >
               A comprehensive platform for tracking, analyzing, and collaborating on reproductive justice cases across the African continent.
             </motion.p>

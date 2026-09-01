@@ -92,7 +92,7 @@ const CasesTable: React.FC<CasesTableProps> = () => {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-stone-100 text-stone-800';
     }
   };
 
@@ -105,15 +105,15 @@ const CasesTable: React.FC<CasesTableProps> = () => {
           <div className="p-6 border-b">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-semibold text-gray-900">{selectedCase.case_filed}</h2>
-                <p className="text-gray-600 mt-1">{selectedCase.tracking_period}</p>
+                <h2 className="text-2xl font-semibold text-stone-900">{selectedCase.case_filed}</h2>
+                <p className="text-stone-600 mt-1">{selectedCase.tracking_period}</p>
               </div>
               <button
                 onClick={() => {
                   setSelectedCase(null);
                   setShowCaseDetails(false);
                 }}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-stone-500 hover:text-stone-700"
               >
                 ×
               </button>
@@ -124,33 +124,33 @@ const CasesTable: React.FC<CasesTableProps> = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Status</h3>
+                  <h3 className="text-sm font-medium text-stone-500">Status</h3>
                   <p className={`mt-1 inline-flex px-2 py-1 rounded-full text-sm ${getStatusColor(selectedCase.status)}`}>
                     {selectedCase.status}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Country</h3>
-                  <p className="mt-1 text-gray-900">{selectedCase.countries?.name}</p>
+                  <h3 className="text-sm font-medium text-stone-500">Country</h3>
+                  <p className="mt-1 text-stone-900">{selectedCase.countries?.name}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Case Type</h3>
-                  <p className="mt-1 text-gray-900">{selectedCase.case_type}</p>
+                  <h3 className="text-sm font-medium text-stone-500">Case Type</h3>
+                  <p className="mt-1 text-stone-900">{selectedCase.case_type}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Court Level</h3>
-                  <p className="mt-1 text-gray-900">{selectedCase.court_level}</p>
+                  <h3 className="text-sm font-medium text-stone-500">Court Level</h3>
+                  <p className="mt-1 text-stone-900">{selectedCase.court_level}</p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Next Steps</h3>
-                <p className="mt-2 text-gray-900 whitespace-pre-line">{selectedCase.next_steps}</p>
+                <h3 className="text-sm font-medium text-stone-500">Next Steps</h3>
+                <p className="mt-2 text-stone-900 whitespace-pre-line">{selectedCase.next_steps}</p>
               </div>
 
               {selectedCase.themes && selectedCase.themes.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Themes</h3>
+                  <h3 className="text-sm font-medium text-stone-500">Themes</h3>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {selectedCase.themes.map((theme, index) => (
                       <span
@@ -166,11 +166,11 @@ const CasesTable: React.FC<CasesTableProps> = () => {
 
               {selectedCase.pdf_url && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Case Document</h3>
+                  <h3 className="text-sm font-medium text-stone-500">Case Document</h3>
                   <div className="mt-2">
                     <iframe
                       src={selectedCase.pdf_url}
-                      className="w-full h-[400px] rounded-lg border border-gray-200"
+                      className="w-full h-[400px] rounded-lg border border-stone-200"
                       title="Case Document"
                     />
                   </div>
@@ -188,29 +188,29 @@ const CasesTable: React.FC<CasesTableProps> = () => {
       {/* Search Bar */}
       <div className="p-4 border-b">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
           <input
             type="text"
             placeholder="Search cases..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
         </div>
       </div>
 
       {/* Cases List */}
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-stone-200">
         {loading ? (
           <div className="p-8 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : cases.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-stone-500">
             No cases found
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-stone-200">
             {cases.map((caseItem) => (
               <button
                 key={caseItem.id}
@@ -218,13 +218,13 @@ const CasesTable: React.FC<CasesTableProps> = () => {
                   setSelectedCase(caseItem);
                   setShowCaseDetails(true);
                 }}
-                className="w-full text-left p-6 hover:bg-gray-50 transition-colors flex items-center justify-between"
+                className="w-full text-left p-6 hover:bg-stone-50 transition-colors flex items-center justify-between"
               >
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-stone-900">
                     {caseItem.case_filed}
                   </h3>
-                  <div className="flex items-center space-x-6 text-sm text-gray-500">
+                  <div className="flex items-center space-x-6 text-sm text-stone-500">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
                       {formatDate(caseItem.created_at)}
@@ -248,7 +248,7 @@ const CasesTable: React.FC<CasesTableProps> = () => {
                     </span>
                   </div>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
+                <ChevronRight className="h-5 w-5 text-stone-400" />
               </button>
             ))}
           </div>
@@ -261,21 +261,21 @@ const CasesTable: React.FC<CasesTableProps> = () => {
           <button
             onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
             disabled={currentPage === 1}
-            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative inline-flex items-center px-4 py-2 border border-stone-300 text-sm font-medium rounded-md text-stone-700 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
           <button
             onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
             disabled={currentPage === totalPages}
-            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-stone-300 text-sm font-medium rounded-md text-stone-700 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>
         </div>
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-stone-700">
               Showing page <span className="font-medium">{currentPage}</span> of{' '}
               <span className="font-medium">{totalPages}</span>
             </p>
@@ -285,28 +285,28 @@ const CasesTable: React.FC<CasesTableProps> = () => {
               <button
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-stone-300 bg-white text-sm font-medium text-stone-500 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 First
               </button>
               <button
                 onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-2 py-2 border border-stone-300 bg-white text-sm font-medium text-stone-500 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
               <button
                 onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
                 disabled={currentPage === totalPages}
-                className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-2 py-2 border border-stone-300 bg-white text-sm font-medium text-stone-500 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
               <button
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
-                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-stone-300 bg-white text-sm font-medium text-stone-500 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Last
               </button>

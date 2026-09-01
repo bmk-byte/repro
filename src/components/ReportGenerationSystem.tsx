@@ -382,23 +382,23 @@ const ReportGenerationSystem: React.FC = () => {
   return (
     <Card>
       <Title>Report Generation System</Title>
-      <Text className="text-gray-500">Create customized reports with selected metrics and visualizations</Text>
+      <Text className="text-stone-500">Create customized reports with selected metrics and visualizations</Text>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {/* Report Templates */}
         <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all cursor-pointer"
+            className="p-4 border border-stone-200 rounded-lg hover:border-primary hover:shadow-md transition-all cursor-pointer"
             onClick={() => handleTemplateDownload('performance')}
           >
             <Flex>
               <div>
                 <Text className="font-medium">Performance Summary</Text>
-                <Text className="text-gray-500 text-sm">Overall case performance metrics</Text>
+                <Text className="text-stone-500 text-sm">Overall case performance metrics</Text>
               </div>
               <Download className="h-5 w-5 text-primary" />
             </Flex>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-stone-500">
               <div>Total Cases: {reportStats.totalCases}</div>
               <div>Completed: {reportStats.completedCases}</div>
               <div>Success Rate: {reportStats.successRate}%</div>
@@ -406,34 +406,34 @@ const ReportGenerationSystem: React.FC = () => {
           </div>
 
           <div
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all cursor-pointer"
+            className="p-4 border border-stone-200 rounded-lg hover:border-primary hover:shadow-md transition-all cursor-pointer"
             onClick={() => handleTemplateDownload('country')}
           >
             <Flex>
               <div>
                 <Text className="font-medium">Country Analysis</Text>
-                <Text className="text-gray-500 text-sm">Detailed country-by-country breakdown</Text>
+                <Text className="text-stone-500 text-sm">Detailed country-by-country breakdown</Text>
               </div>
               <Download className="h-5 w-5 text-primary" />
             </Flex>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-stone-500">
               <div>Countries with cases: {reportStats.totalCases > 0 ? 'Available' : 'None'}</div>
               <div>Regional breakdown: {reportStats.totalCases > 0 ? 'Available' : 'None'}</div>
             </div>
           </div>
 
           <div
-            className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all cursor-pointer"
+            className="p-4 border border-stone-200 rounded-lg hover:border-primary hover:shadow-md transition-all cursor-pointer"
             onClick={() => handleTemplateDownload('impact')}
           >
             <Flex>
               <div>
                 <Text className="font-medium">Impact Assessment</Text>
-                <Text className="text-gray-500 text-sm">Comprehensive impact evaluation</Text>
+                <Text className="text-stone-500 text-sm">Comprehensive impact evaluation</Text>
               </div>
               <Download className="h-5 w-5 text-primary" />
             </Flex>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-stone-500">
               <div>Avg. Processing Time: {reportStats.avgProcessingTime} days</div>
               <div>Success Metrics: {reportStats.successRate > 0 ? 'Available' : 'None'}</div>
             </div>
@@ -441,7 +441,7 @@ const ReportGenerationSystem: React.FC = () => {
         </div>
 
         {/* Custom Report Builder */}
-        <div className="md:col-span-3 p-6 border border-gray-200 rounded-lg">
+        <div className="md:col-span-3 p-6 border border-stone-200 rounded-lg">
           <Title>Custom Report Builder</Title>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
             {/* Metrics Selection */}
@@ -461,7 +461,7 @@ const ReportGenerationSystem: React.FC = () => {
                       type="checkbox"
                       checked={selectedMetrics.includes(value)}
                       onChange={() => handleMetricToggle(value)}
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                      className="rounded border-stone-300 text-primary focus:ring-primary"
                     />
                     <span className="text-sm">{label}</span>
                   </label>
@@ -486,7 +486,7 @@ const ReportGenerationSystem: React.FC = () => {
                       value={value}
                       checked={selectedFormat === value}
                       onChange={() => setSelectedFormat(value)}
-                      className="border-gray-300 text-primary focus:ring-primary"
+                      className="border-stone-300 text-primary focus:ring-primary"
                     />
                     <span className="text-sm">{label}</span>
                   </label>
@@ -496,21 +496,21 @@ const ReportGenerationSystem: React.FC = () => {
               <Text className="font-medium mt-6 mb-3">Date Range</Text>
               <div className="space-y-2">
                 <div>
-                  <Text className="text-sm text-gray-500">Start Date</Text>
+                  <Text className="text-sm text-stone-500">Start Date</Text>
                   <input
                     type="date"
                     value={dateRange[0]}
                     onChange={(e) => setDateRange([e.target.value, dateRange[1]])}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-primary"
+                    className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-primary"
                   />
                 </div>
                 <div>
-                  <Text className="text-sm text-gray-500">End Date</Text>
+                  <Text className="text-sm text-stone-500">End Date</Text>
                   <input
                     type="date"
                     value={dateRange[1]}
                     onChange={(e) => setDateRange([dateRange[0], e.target.value])}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-primary"
+                    className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-primary"
                   />
                 </div>
               </div>
@@ -521,23 +521,23 @@ const ReportGenerationSystem: React.FC = () => {
               <Text className="font-medium mb-3">Visualization Options</Text>
               <div className="space-y-2">
                 <label className="flex items-center space-x-2">
-                  <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" defaultChecked />
+                  <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" defaultChecked />
                   <span className="text-sm flex items-center">
-                    <BarChartHorizontal className="h-4 w-4 mr-1 text-gray-500" />
+                    <BarChartHorizontal className="h-4 w-4 mr-1 text-stone-500" />
                     Bar Charts
                   </span>
                 </label>
                 <label className="flex items-center space-x-2">
-                  <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" defaultChecked />
+                  <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" defaultChecked />
                   <span className="text-sm flex items-center">
-                    <PieChart className="h-4 w-4 mr-1 text-gray-500" />
+                    <PieChart className="h-4 w-4 mr-1 text-stone-500" />
                     Pie Charts
                   </span>
                 </label>
                 <label className="flex items-center space-x-2">
-                  <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" defaultChecked />
+                  <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" defaultChecked />
                   <span className="text-sm flex items-center">
-                    <FileText className="h-4 w-4 mr-1 text-gray-500" />
+                    <FileText className="h-4 w-4 mr-1 text-stone-500" />
                     Data Tables
                   </span>
                 </label>
@@ -547,11 +547,11 @@ const ReportGenerationSystem: React.FC = () => {
                 <Text className="font-medium mb-3">Delivery Options</Text>
                 <div className="space-y-2">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
+                    <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" />
                     <span className="text-sm">Email Report</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" />
+                    <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" />
                     <span className="text-sm">Schedule Recurring</span>
                   </label>
                 </div>
@@ -578,7 +578,7 @@ const ReportGenerationSystem: React.FC = () => {
                 <button
                   onClick={handleScheduleReport}
                   disabled={loading || selectedMetrics.length === 0}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 flex items-center disabled:opacity-50"
+                  className="px-4 py-2 border border-stone-300 text-stone-700 rounded-md hover:bg-stone-50 flex items-center disabled:opacity-50"
                 >
                   <Calendar className="h-4 w-4 mr-2" />
                   Schedule
@@ -592,36 +592,36 @@ const ReportGenerationSystem: React.FC = () => {
         <div className="md:col-span-3">
           <Title>Scheduled Reports</Title>
           <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-stone-200">
+              <thead className="bg-stone-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Run</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Report Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Frequency</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Next Run</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Format</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-stone-200">
                 <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Monthly Performance Summary</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Monthly</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Monthly Performance Summary</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Monthly</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                     {new Date(new Date().setDate(1)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">PDF</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">PDF</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button className="text-primary hover:text-primary-dark mr-3">Edit</button>
                     <button className="text-red-600 hover:text-red-800">Delete</button>
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Quarterly Impact Report</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Quarterly</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Quarterly Impact Report</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Quarterly</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                     {new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3 + 3, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">PPT</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">PPT</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button className="text-primary hover:text-primary-dark mr-3">Edit</button>
                     <button className="text-red-600 hover:text-red-800">Delete</button>

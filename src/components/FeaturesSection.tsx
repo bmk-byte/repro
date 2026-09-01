@@ -66,7 +66,7 @@ const FeaturesSection = () => {
             Powerful Features
           </motion.h2>
           <motion.p 
-            className="mt-3 text-lg text-gray-500"
+            className="mt-3 text-lg text-stone-500"
             variants={itemVariants}
           >
             Everything you need to manage and analyze reproductive justice cases effectively.
@@ -94,10 +94,10 @@ const FeaturesSection = () => {
                 <div className="inline-flex p-4 bg-primary/10 rounded-xl mb-6 text-primary group-hover:bg-primary/20 transition-colors duration-300">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-stone-900 mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-stone-500">
                   {feature.description}
                 </p>
               </motion.div>

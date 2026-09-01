@@ -97,7 +97,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
       case 'In Progress':
         return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-stone-100 text-stone-600';
     }
   };
 
@@ -227,7 +227,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
             <h2 className="text-xl font-semibold">{stage.stage_name}</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-stone-500 hover:text-stone-700"
             >
               <ChevronDown className="h-6 w-6" />
             </button>
@@ -235,13 +235,13 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Status
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as Stage['status'])}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="Pending">Pending</option>
                 <option value="In Progress">In Progress</option>
@@ -250,32 +250,32 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Notes
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Add notes about this stage..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Documents
               </label>
               <div
                 {...getRootProps()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors"
+                className="border-2 border-dashed border-stone-300 rounded-lg p-6 text-center hover:border-primary transition-colors"
               >
                 <input {...getInputProps()} />
-                <FileUp className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600">
+                <FileUp className="h-8 w-8 text-stone-400 mx-auto mb-2" />
+                <p className="text-stone-600">
                   {uploading ? 'Uploading...' : 'Drop files here or click to upload'}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-stone-500 mt-1">
                   PDF, DOC, DOCX up to 5MB
                 </p>
                 {fileError && (
@@ -293,9 +293,9 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                         href={doc}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center p-2 rounded-lg hover:bg-gray-50"
+                        className="flex items-center p-2 rounded-lg hover:bg-stone-50"
                       >
-                        <FileText className="h-5 w-5 text-gray-400 mr-2" />
+                        <FileText className="h-5 w-5 text-stone-400 mr-2" />
                         <span className="text-sm text-primary hover:underline">
                           {docTypeInfo.label} {index + 1}
                         </span>
@@ -310,7 +310,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-50"
               >
                 Cancel
               </button>
@@ -346,18 +346,18 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
   return (
     <div className="space-y-4">
       {/* Progress summary */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+      <div className="bg-white p-4 rounded-lg border border-stone-200 mb-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-medium text-gray-700">Overall Progress</h3>
-          <span className="text-sm font-medium text-gray-700">{completionPercentage}%</span>
+          <h3 className="text-sm font-medium text-stone-700">Overall Progress</h3>
+          <span className="text-sm font-medium text-stone-700">{completionPercentage}%</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="w-full bg-stone-200 rounded-full h-2.5">
           <div 
             className="bg-primary h-2.5 rounded-full" 
             style={{ width: `${completionPercentage}%` }}
           ></div>
         </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-2">
+        <div className="flex justify-between text-xs text-stone-500 mt-2">
           <span>{completedStages} completed</span>
           <span>{inProgressStages} in progress</span>
           <span>{totalStages - completedStages - inProgressStages} pending</span>
@@ -365,40 +365,40 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
       </div>
 
       {/* Accordion-style stage groups */}
-      <div className="max-h-[300px] overflow-y-auto pr-2 rounded-lg border border-gray-200">
+      <div className="max-h-[300px] overflow-y-auto pr-2 rounded-lg border border-stone-200">
         {stageGroups.length === 0 ? (
-          <div className="p-4 text-center text-gray-500">
+          <div className="p-4 text-center text-stone-500">
             No stages found for this case
           </div>
         ) : (
           stageGroups.map((group) => (
             <div
               key={group.name}
-              className="border-b border-gray-200 last:border-b-0"
+              className="border-b border-stone-200 last:border-b-0"
             >
               <button
                 onClick={() => toggleGroup(group.name)}
-                className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors"
               >
                 <div className="flex items-center">
-                  <span className="font-medium text-gray-900">{group.name}</span>
-                  <span className="ml-2 text-xs text-gray-500">
+                  <span className="font-medium text-stone-900">{group.name}</span>
+                  <span className="ml-2 text-xs text-stone-500">
                     ({group.stages.filter(s => s.status === 'Completed').length}/{group.stages.length})
                   </span>
                 </div>
                 {expandedGroups.includes(group.name) ? (
-                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                  <ChevronDown className="h-5 w-5 text-stone-500" />
                 ) : (
-                  <ChevronRight className="h-5 w-5 text-gray-500" />
+                  <ChevronRight className="h-5 w-5 text-stone-500" />
                 )}
               </button>
 
               {expandedGroups.includes(group.name) && (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-stone-100">
                   {group.stages.map((stage) => (
                     <div
                       key={stage.id}
-                      className="p-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="p-3 hover:bg-stone-50 transition-colors cursor-pointer"
                       onClick={() => handleStageClick(stage)}
                     >
                       <div className="flex items-center justify-between">
@@ -410,13 +410,13 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                           >
                             {stage.status}
                           </span>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-stone-900">
                             {stage.stage_name}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
                           {stage.documents.length > 0 && (
-                            <span className="text-xs text-gray-500 flex items-center">
+                            <span className="text-xs text-stone-500 flex items-center">
                               <FileText className="h-3 w-3 mr-1" />
                               {stage.documents.length}
                             </span>
@@ -426,7 +426,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                               e.stopPropagation();
                               handleStageClick(stage);
                             }}
-                            className="p-1 text-gray-400 hover:text-primary rounded-full hover:bg-gray-100 transition-colors"
+                            className="p-1 text-stone-400 hover:text-primary rounded-full hover:bg-stone-100 transition-colors"
                             aria-label="Edit stage"
                           >
                             <Edit2 className="h-4 w-4" />
@@ -435,12 +435,12 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                       </div>
 
                       {stage.notes && (
-                        <p className="mt-1 text-sm text-gray-600 line-clamp-1 pl-10">
+                        <p className="mt-1 text-sm text-stone-600 line-clamp-1 pl-10">
                           {stage.notes}
                         </p>
                       )}
 
-                      <div className="mt-1 pl-10 flex items-center text-xs text-gray-500">
+                      <div className="mt-1 pl-10 flex items-center text-xs text-stone-500">
                         <Clock className="h-3 w-3 mr-1" />
                         <span>
                           {new Date(stage.timestamp).toLocaleDateString('en-US', {

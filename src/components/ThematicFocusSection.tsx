@@ -59,7 +59,7 @@ const itemVariants = {
 
 const ThematicFocusSection = () => {
   return (
-    <section id="thematic-focus-section" className="bg-gradient-to-br from-gray-50 via-primary-50 to-gray-100 py-24" aria-labelledby="thematic-heading">
+    <section id="thematic-focus-section" className="bg-gradient-to-br from-stone-50 via-primary-50 to-stone-100 py-24" aria-labelledby="thematic-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="text-center"
@@ -76,7 +76,7 @@ const ThematicFocusSection = () => {
             Our Thematic Focus
           </motion.h2>
           <motion.p 
-            className="mt-4 text-lg text-gray-500"
+            className="mt-4 text-lg text-stone-500"
             variants={itemVariants}
           >
             Exploring key legal areas in reproductive justice across Africa
@@ -104,10 +104,10 @@ const ThematicFocusSection = () => {
                 <div className="inline-flex p-4 bg-primary/10 rounded-xl mb-6 text-primary">
                   {area.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 className="text-xl font-semibold text-stone-900 mb-4">
                   {area.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-stone-600 leading-relaxed">
                   {area.description}
                 </p>
               </motion.div>

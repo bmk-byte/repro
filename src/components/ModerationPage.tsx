@@ -8,6 +8,7 @@ import DocumentModal from './DocumentModal';
 import SubmissionDetailsCard from './SubmissionDetailsCard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import RejectionModal from './RejectionModal';
+import { Button, Select, Badge, LoadingState, EmptyState } from './ui';
 
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -93,14 +94,14 @@ const ModerationPage = () => {
                     <AlertCircle className="h-10 w-10 text-primary" />
                   </div>
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-gray-900">New Case Submission</p>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="text-sm font-medium text-stone-900">New Case Submission</p>
+                    <p className="mt-1 text-sm text-stone-500">
                       {submissionTitle} has been submitted for moderation
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="flex border-l border-gray-200">
+              <div className="flex border-l border-stone-200">
                 <button
                   onClick={() => {
                     toast.dismiss(t.id);
@@ -147,14 +148,14 @@ const ModerationPage = () => {
                     <AlertCircle className="h-10 w-10 text-primary" />
                   </div>
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-gray-900">New Judgment Submission</p>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="text-sm font-medium text-stone-900">New Judgment Submission</p>
+                    <p className="mt-1 text-sm text-stone-500">
                       {submissionTitle} has been submitted for moderation
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="flex border-l border-gray-200">
+              <div className="flex border-l border-stone-200">
                 <button
                   onClick={() => {
                     toast.dismiss(t.id);
@@ -595,29 +596,18 @@ const ModerationPage = () => {
 
   if (moderatorLoading) {
     devLog('Moderator status is loading');
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Checking access…" />;
   }
 
   if (!isModerator) {
     devLog('User is not a moderator');
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <Shield className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Access Denied</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            You do not have permission to access this page
-          </p>
-          {moderatorError && (
-            <p className="mt-4 text-sm text-red-500">
-              Error: {moderatorError}
-            </p>
-          )}
-        </div>
+        <EmptyState
+          icon={<Shield className="h-12 w-12" />}
+          title="Access Denied"
+          description={moderatorError ? `Error: ${moderatorError}` : 'You do not have permission to access this page'}
+        />
       </div>
     );
   }
@@ -631,175 +621,161 @@ const ModerationPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <Shield className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold text-gray-900">Content Moderation</h1>
+          <h1 className="text-2xl font-serif font-semibold text-stone-900">Content Moderation</h1>
         </div>
-        
-        <button
+
+        <Button
+          variant="outline"
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          aria-expanded={showFilters}
+          icon={<Filter className="h-4 w-4" />}
         >
-          <Filter className="h-4 w-4" />
-          <span>Filters</span>
+          Filters
           {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
+        </Button>
       </div>
 
       {/* Search and Filters */}
       {showFilters && (
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <div className="bg-white p-4 rounded-lg shadow-card border border-stone-100 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="col-span-1 md:col-span-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by title or content..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                />
-              </div>
+            <div className="col-span-1 md:col-span-3 relative">
+              <label htmlFor="moderation-search" className="sr-only">Search by title or content</label>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
+              <input
+                id="moderation-search"
+                type="text"
+                placeholder="Search by title or content..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-10 pl-10 pr-4 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Date Range</label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">From</label>
+                  <label className="block text-xs text-stone-500 mb-1">From</label>
                   <input
                     type="date"
                     value={filterStartDate}
                     onChange={(e) => setFilterStartDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="w-full h-10 px-3 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">To</label>
+                  <label className="block text-xs text-stone-500 mb-1">To</label>
                   <input
                     type="date"
                     value={filterEndDate}
                     onChange={(e) => setFilterEndDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="w-full h-10 px-3 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Profession</label>
-              <select
-                value={filterProfession}
-                onChange={(e) => setFilterProfession(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              >
-                <option value="">All Professions</option>
-                {professions.map(profession => (
-                  <option key={profession} value={profession}>{profession}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
-              <select
-                value={filterOrganization}
-                onChange={(e) => setFilterOrganization(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              >
-                <option value="">All Organizations</option>
-                {organizations.map(org => (
-                  <option key={org} value={org}>{org}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <select
-                value={filterCountry}
-                onChange={(e) => setFilterCountry(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              >
-                <option value="">All Countries</option>
-                {countries.map(country => (
-                  <option key={country.id} value={country.id}>{country.name}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as 'desc' | 'asc')}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
-              </select>
-            </div>
-            
+
+            <Select
+              label="Profession"
+              value={filterProfession}
+              onChange={(e) => setFilterProfession(e.target.value)}
+            >
+              <option value="">All Professions</option>
+              {professions.map(profession => (
+                <option key={profession} value={profession}>{profession}</option>
+              ))}
+            </Select>
+
+            <Select
+              label="Organization"
+              value={filterOrganization}
+              onChange={(e) => setFilterOrganization(e.target.value)}
+            >
+              <option value="">All Organizations</option>
+              {organizations.map(org => (
+                <option key={org} value={org}>{org}</option>
+              ))}
+            </Select>
+
+            <Select
+              label="Country"
+              value={filterCountry}
+              onChange={(e) => setFilterCountry(e.target.value)}
+            >
+              <option value="">All Countries</option>
+              {countries.map(country => (
+                <option key={country.id} value={country.id}>{country.name}</option>
+              ))}
+            </Select>
+
+            <Select
+              label="Sort Order"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'desc' | 'asc')}
+            >
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </Select>
+
             <div className="flex items-end">
-              <button
-                onClick={clearFilters}
-                className="w-full px-4 py-2 text-sm font-medium text-primary bg-white border border-primary rounded-lg hover:bg-primary/5"
-              >
+              <Button variant="outline" onClick={clearFilters} className="w-full">
                 Clear Filters
-              </button>
+              </Button>
             </div>
           </div>
-          
+
           {/* Filter summary */}
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             {filterStartDate && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <Badge tone="primary">
                 From: {new Date(filterStartDate).toLocaleDateString()}
-                <button onClick={() => setFilterStartDate('')} className="ml-1 text-blue-600 hover:text-blue-800">
+                <button onClick={() => setFilterStartDate('')} aria-label="Clear start date filter" className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
-              </span>
+              </Badge>
             )}
             {filterEndDate && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <Badge tone="primary">
                 To: {new Date(filterEndDate).toLocaleDateString()}
-                <button onClick={() => setFilterEndDate('')} className="ml-1 text-blue-600 hover:text-blue-800">
+                <button onClick={() => setFilterEndDate('')} aria-label="Clear end date filter" className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
-              </span>
+              </Badge>
             )}
             {filterProfession && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              <Badge tone="primary">
                 Profession: {filterProfession}
-                <button onClick={() => setFilterProfession('')} className="ml-1 text-purple-600 hover:text-purple-800">
+                <button onClick={() => setFilterProfession('')} aria-label="Clear profession filter" className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
-              </span>
+              </Badge>
             )}
             {filterOrganization && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <Badge tone="primary">
                 Organization: {filterOrganization}
-                <button onClick={() => setFilterOrganization('')} className="ml-1 text-green-600 hover:text-green-800">
+                <button onClick={() => setFilterOrganization('')} aria-label="Clear organization filter" className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
-              </span>
+              </Badge>
             )}
             {filterCountry && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+              <Badge tone="primary">
                 Country: {countries.find(c => c.id === filterCountry)?.name}
-                <button onClick={() => setFilterCountry('')} className="ml-1 text-yellow-600 hover:text-yellow-800">
+                <button onClick={() => setFilterCountry('')} aria-label="Clear country filter" className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
-              </span>
+              </Badge>
             )}
             {sortOrder !== 'desc' && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <Badge>
                 Oldest First
-                <button onClick={() => setSortOrder('desc')} className="ml-1 text-gray-600 hover:text-gray-800">
+                <button onClick={() => setSortOrder('desc')} aria-label="Reset sort order" className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
-              </span>
+              </Badge>
             )}
           </div>
         </div>
@@ -813,7 +789,7 @@ const ModerationPage = () => {
               className={`py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap ${
                 activeTab === 'submissions'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
               }`}
             >
               Submissions
@@ -823,7 +799,7 @@ const ModerationPage = () => {
               className={`py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap ${
                 activeTab === 'cases'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
               }`}
             >
               Cases
@@ -839,7 +815,7 @@ const ModerationPage = () => {
                 className={`py-2 px-3 text-sm font-medium rounded-md ${
                   activeSubmissionType === 'all'
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
                 }`}
               >
                 All Submissions
@@ -849,7 +825,7 @@ const ModerationPage = () => {
                 className={`py-2 px-3 text-sm font-medium rounded-md ${
                   activeSubmissionType === 'case'
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
                 }`}
               >
                 Case Submissions
@@ -859,7 +835,7 @@ const ModerationPage = () => {
                 className={`py-2 px-3 text-sm font-medium rounded-md ${
                   activeSubmissionType === 'judgment'
                     ? 'bg-primary/10 text-primary'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
                 }`}
               >
                 Judgment Submissions
@@ -870,37 +846,32 @@ const ModerationPage = () => {
 
         <div className="p-4 sm:p-6">
           {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
+            <LoadingState label="Loading pending content…" />
           ) : contentError ? (
-            <div className="text-center py-8">
-              <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-              <p className="text-gray-700 font-medium mb-2">Failed to load content</p>
-              <p className="text-gray-500 text-sm mb-4">{contentError}</p>
-              <button
-                onClick={fetchPendingContent}
-                className="text-primary hover:text-primary-dark text-sm font-medium"
-              >
-                Try again
-              </button>
-            </div>
+            <EmptyState
+              icon={<AlertCircle className="h-12 w-12" />}
+              title="Failed to load content"
+              description={contentError}
+              action={<Button variant="outline" onClick={fetchPendingContent}>Try again</Button>}
+            />
           ) : (
             <>
               {/* Results count */}
-              <div className="mb-4 text-sm text-gray-500">
+              <div className="mb-4 text-sm text-stone-500">
                 {currentItems.length} {currentItems.length === 1 ? 'item' : 'items'} pending review
                 {(filterStartDate || filterEndDate || filterProfession || filterOrganization || filterCountry || searchTerm) && ' (filtered)'}
               </div>
-              
+
               {currentItems.length === 0 ? (
-                <div className="text-center py-8">
-                  <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No pending content to moderate</p>
-                  {(filterStartDate || filterEndDate || filterProfession || filterOrganization || filterCountry || searchTerm) && (
-                    <p className="mt-2 text-sm text-gray-400">Try adjusting your filters</p>
-                  )}
-                </div>
+                <EmptyState
+                  icon={<AlertCircle className="h-12 w-12" />}
+                  title="No pending content to moderate"
+                  description={
+                    (filterStartDate || filterEndDate || filterProfession || filterOrganization || filterCountry || searchTerm)
+                      ? 'Try adjusting your filters'
+                      : undefined
+                  }
+                />
               ) : (
                 <div className="space-y-4">
                   {currentItems.map((item) => (

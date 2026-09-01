@@ -87,15 +87,15 @@ const ModeratorAdminPanel: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900">Moderators</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="text-2xl font-semibold text-stone-900">Moderators</h2>
+        <p className="mt-1 text-sm text-stone-600">
           Grant or revoke moderator access. Changes are recorded in the audit log.
         </p>
       </div>
 
       <form onSubmit={handleGrant} className="bg-white rounded-lg shadow-md p-6 flex gap-3 items-end flex-wrap">
         <div className="flex-1 min-w-[220px]">
-          <label htmlFor="new-moderator-email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="new-moderator-email" className="block text-sm font-medium text-stone-700 mb-1">
             Grant access by email
           </label>
           <input
@@ -104,7 +104,7 @@ const ModeratorAdminPanel: React.FC = () => {
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             placeholder="person@organization.org"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
         </div>
@@ -120,14 +120,14 @@ const ModeratorAdminPanel: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-md">
         <div className="px-6 py-4 border-b">
-          <h3 className="text-sm font-medium text-gray-700">
+          <h3 className="text-sm font-medium text-stone-700">
             Current moderators {!loading && `(${moderators.length})`}
           </h3>
         </div>
         {loading ? (
-          <div className="p-6 text-sm text-gray-500">Loading…</div>
+          <div className="p-6 text-sm text-stone-500">Loading…</div>
         ) : moderators.length === 0 ? (
-          <div className="p-6 text-sm text-gray-500">No moderators found.</div>
+          <div className="p-6 text-sm text-stone-500">No moderators found.</div>
         ) : (
           <ul className="divide-y">
             {moderators.map((mod) => (
@@ -135,8 +135,8 @@ const ModeratorAdminPanel: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{mod.full_name || mod.email}</p>
-                    <p className="text-xs text-gray-500">{mod.email}{mod.organization ? ` · ${mod.organization}` : ''}</p>
+                    <p className="text-sm font-medium text-stone-900">{mod.full_name || mod.email}</p>
+                    <p className="text-xs text-stone-500">{mod.email}{mod.organization ? ` · ${mod.organization}` : ''}</p>
                   </div>
                 </div>
                 <button

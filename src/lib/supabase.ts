@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 // Dev-only logging — never ships informational detail (URLs, query
 // internals) to the production console.
 const devLog = (...args: unknown[]) => {
-  if (import.meta.env.DEV) devLog(...args);
+  if (import.meta.env.DEV) console.log(...args);
 };
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

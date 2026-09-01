@@ -144,12 +144,12 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
       case 'Low':
         return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-stone-100 text-stone-800';
     }
   };
   
   const getCategoryColor = (category: string) => {
-    if (!category) return 'bg-gray-100 text-gray-800';
+    if (!category) return 'bg-stone-100 text-stone-800';
     
     if (category.includes('Abortion')) return 'bg-purple-100 text-purple-800';
     if (category.includes('Rape')) return 'bg-red-100 text-red-800';
@@ -157,7 +157,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
     if (category.includes('SGBV')) return 'bg-orange-100 text-orange-800';
     if (category.includes('Incest')) return 'bg-indigo-100 text-indigo-800';
     
-    return 'bg-gray-100 text-gray-800';
+    return 'bg-stone-100 text-stone-800';
   };
 
   if (loading) {
@@ -174,10 +174,10 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
         <div className="flex justify-center mb-4">
           <AlertCircle className="h-12 w-12 text-red-500" />
         </div>
-        <p className="text-gray-900 font-medium mb-2">
+        <p className="text-stone-900 font-medium mb-2">
           {accessDenied ? 'Access Denied' : 'Case not found'}
         </p>
-        <p className="text-gray-500 mb-6">
+        <p className="text-stone-500 mb-6">
           {accessDenied
             ? 'You do not have permission to view this case. It may belong to another organization.'
             : 'The case you are looking for does not exist.'}
@@ -220,7 +220,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
         <div className="flex justify-between items-start">
           <button
             onClick={onBack}
-            className="text-gray-500 hover:text-gray-700 flex items-center mb-4"
+            className="text-stone-500 hover:text-stone-700 flex items-center mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Cases
@@ -240,14 +240,14 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-semibold text-gray-900">{caseData.case_filed}</h1>
+              <h1 className="text-2xl font-semibold text-stone-900">{caseData.case_filed}</h1>
               {caseData.case_reference && (
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                <span className="px-2 py-1 text-xs font-medium rounded-full bg-stone-100 text-stone-800">
                   Ref: {caseData.case_reference}
                 </span>
               )}
             </div>
-            <div className="flex items-center mt-2 text-gray-500">
+            <div className="flex items-center mt-2 text-stone-500">
               <Calendar className="h-4 w-4 mr-1" />
               <span className="text-sm">
                 {new Date(caseData.created_at).toLocaleDateString()}
@@ -285,14 +285,14 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
           {/* Case Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Information</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Client Name</label>
+                  <label className="text-sm font-medium text-stone-500">Client Name</label>
                   <p className="mt-1">{caseData.client_name || 'Not specified'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Client Contact</label>
+                  <label className="text-sm font-medium text-stone-500">Client Contact</label>
                   <div className="mt-1 space-y-1">
                     {caseData.client_email && (
                       <p className="text-sm">{caseData.client_email}</p>
@@ -303,16 +303,16 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Nature of Case</label>
+                  <label className="text-sm font-medium text-stone-500">Nature of Case</label>
                   <p className="mt-1">{caseData.nature_of_case}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Partner Organization</label>
+                  <label className="text-sm font-medium text-stone-500">Partner Organization</label>
                   <p className="mt-1">{caseData.partner || 'Not specified'}</p>
                 </div>
                 {caseData.case_categories && caseData.case_categories.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Categories</label>
+                    <label className="text-sm font-medium text-stone-500">Categories</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {caseData.case_categories.map((category: string, idx: number) => (
                         <span 
@@ -330,27 +330,27 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
 
             {/* Case Summary */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Summary</h2>
-              <p className="text-gray-600 whitespace-pre-line">{caseData.case_summary}</p>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Summary</h2>
+              <p className="text-stone-600 whitespace-pre-line">{caseData.case_summary}</p>
             </div>
 
             {/* Key Deadlines */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Key Deadlines</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Key Deadlines</h2>
               {caseData.key_deadlines && caseData.key_deadlines.length > 0 ? (
                 <div className="space-y-3">
                   {caseData.key_deadlines.map((deadline: any, index: number) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-stone-50 rounded-lg">
                       <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">{deadline.description}</p>
-                        <p className="text-sm text-gray-500">{new Date(deadline.date).toLocaleDateString()}</p>
+                        <p className="font-medium text-stone-900">{deadline.description}</p>
+                        <p className="text-sm text-stone-500">{new Date(deadline.date).toLocaleDateString()}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No deadlines specified</p>
+                <p className="text-stone-500 text-sm">No deadlines specified</p>
               )}
             </div>
           </div>
@@ -359,13 +359,13 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
           <div className="space-y-6">
             {/* Documents */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Documents</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Documents</h2>
               {caseData.pdf_url && (
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="bg-stone-50 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900">Main Case Document</span>
+                      <FileText className="h-5 w-5 text-stone-400 mr-2" />
+                      <span className="text-sm text-stone-900">Main Case Document</span>
                     </div>
                     <button
                       onClick={() => setShowDocumentModal(true)}
@@ -382,12 +382,12 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                   {caseData.case_documents.map((doc: any) => (
                     <div
                       key={doc.id}
-                      className="flex items-start p-3 bg-gray-50 rounded-lg"
+                      className="flex items-start p-3 bg-stone-50 rounded-lg"
                     >
-                      <FileText className="h-5 w-5 text-gray-400 mt-1" />
+                      <FileText className="h-5 w-5 text-stone-400 mt-1" />
                       <div className="ml-3">
-                        <h4 className="text-sm font-medium text-gray-900">{doc.title}</h4>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <h4 className="text-sm font-medium text-stone-900">{doc.title}</h4>
+                        <p className="text-xs text-stone-500 mt-1">
                           {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                         <button
@@ -404,13 +404,13 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                   ))}
                 </div>
               ) : !caseData.pdf_url ? (
-                <p className="text-gray-500 text-sm">No documents uploaded</p>
+                <p className="text-stone-500 text-sm">No documents uploaded</p>
               ) : null}
             </div>
 
             {/* Progress Tracking */}
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Case Progress</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Progress</h2>
               <CaseProgressTracker
                 caseId={caseData.id}
                 onUpdate={onUpdate || fetchCaseDetails}

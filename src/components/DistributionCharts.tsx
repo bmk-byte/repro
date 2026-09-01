@@ -138,9 +138,9 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
       const percentage = totalCases > 0 ? ((data.value / totalCases) * 100).toFixed(1) : '0';
       
       return (
-        <div className="bg-white p-3 shadow-lg rounded-md border border-gray-200">
-          <p className="font-medium text-gray-900">{data.name}</p>
-          <p className="text-gray-600">{data.value} cases ({percentage}%)</p>
+        <div className="bg-white p-3 shadow-lg rounded-md border border-stone-200">
+          <p className="font-medium text-stone-900">{data.name}</p>
+          <p className="text-stone-600">{data.value} cases ({percentage}%)</p>
         </div>
       );
     }
@@ -184,7 +184,7 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
           <p className="font-semibold">Failed to load distribution data</p>
           <p className="text-sm mt-1">{error}</p>
           {retryCount > 0 && (
-            <p className="text-xs mt-1 text-gray-500">Retry attempt: {retryCount}</p>
+            <p className="text-xs mt-1 text-stone-500">Retry attempt: {retryCount}</p>
           )}
         </div>
         <button 
@@ -209,8 +209,8 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
           className="w-full"
         >
           <Card className="border-l-4 border-primary shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <Title className="text-xl font-bold text-gray-800">Case Types</Title>
-            <div className="mt-2 text-sm text-gray-500">Distribution of cases by type</div>
+            <Title className="text-xl font-bold text-stone-800">Case Types</Title>
+            <div className="mt-2 text-sm text-stone-500">Distribution of cases by type</div>
             {data.caseTypes.length > 0 ? (
               <div className="flex flex-col md:flex-row items-center justify-between mt-4">
                 <div className="w-full h-64 md:h-72 relative">
@@ -247,10 +247,10 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
                   
                   {/* Center total count */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                    <div className="text-3xl font-bold font-inter text-gray-800">
+                    <div className="text-3xl font-bold font-inter text-stone-800">
                       {totalCases}
                     </div>
-                    <div className="text-sm text-gray-500">Total Cases</div>
+                    <div className="text-sm text-stone-500">Total Cases</div>
                   </div>
                 </div>
                 
@@ -261,7 +261,7 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
                       <div 
                         key={`legend-${index}`}
                         className={`flex items-center space-x-2 p-2 rounded-md transition-colors duration-300 ${
-                          activeIndex === index ? 'bg-gray-100' : ''
+                          activeIndex === index ? 'bg-stone-100' : ''
                         }`}
                         onMouseEnter={() => setActiveIndex(index)}
                         onMouseLeave={() => setActiveIndex(null)}
@@ -272,7 +272,7 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
                         />
                         <div className="flex flex-col md:flex-row md:items-center md:space-x-2">
                           <span className="text-sm font-medium">{entry.name}</span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-stone-500">
                             {entry.value} ({totalCases > 0 ? ((entry.value / totalCases) * 100).toFixed(0) : 0}%)
                           </span>
                         </div>
@@ -296,8 +296,8 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
           transition={{ delay: 0.2 }}
         >
           <Card className="border-l-4 border-blue-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <Title className="text-xl font-bold text-gray-800">Status Distribution</Title>
-            <div className="mt-2 text-sm text-gray-500">Cases by current status</div>
+            <Title className="text-xl font-bold text-stone-800">Status Distribution</Title>
+            <div className="mt-2 text-sm text-stone-500">Cases by current status</div>
             {data.statusDistribution.length > 0 ? (
               <div className="h-72 mt-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -347,8 +347,8 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
         transition={{ delay: 0.4 }}
       >
         <Card className="border-l-4 border-green-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <Title className="text-xl font-bold text-gray-800">Top 10 Countries by Case Volume</Title>
-          <div className="mt-2 text-sm text-gray-500">Geographic distribution of cases</div>
+          <Title className="text-xl font-bold text-stone-800">Top 10 Countries by Case Volume</Title>
+          <div className="mt-2 text-sm text-stone-500">Geographic distribution of cases</div>
           {data.countryDistribution.length > 0 ? (
             <div className="h-72 mt-4">
               <ResponsiveContainer width="100%" height="100%">

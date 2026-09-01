@@ -172,12 +172,12 @@ const AfricaMap = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Case Distribution</h2>
+        <h2 className="text-xl font-semibold text-stone-900">Case Distribution</h2>
         <div className="flex space-x-4">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">All Categories</option>
             {availableCategories.map(category => (
@@ -194,7 +194,7 @@ const AfricaMap = () => {
                 new Date()
               ]);
             }}
-            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="1">Last Year</option>
             <option value="2">Last 2 Years</option>
@@ -216,7 +216,7 @@ const AfricaMap = () => {
           </div>
         ) : Object.keys(mapData).length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-gray-500">No data available for the selected filters</div>
+            <div className="text-stone-500">No data available for the selected filters</div>
           </div>
         ) : (
           <ParentSize>
@@ -282,14 +282,14 @@ const AfricaMap = () => {
             }}
           >
             <div className="font-semibold mb-2">{tooltipData.name}</div>
-            <div className="text-gray-600">Total Cases: {tooltipData.total}</div>
+            <div className="text-stone-600">Total Cases: {tooltipData.total}</div>
             {Object.entries(tooltipData.categories).length > 0 ? (
               <div className="mt-1 max-h-32 overflow-y-auto">
-                <div className="text-sm font-medium text-gray-700">Categories:</div>
+                <div className="text-sm font-medium text-stone-700">Categories:</div>
                 {Object.entries(tooltipData.categories)
                   .sort(([, a]: [string, any], [, b]: [string, any]) => b - a)
                   .map(([category, count]: [string, any]) => (
-                    <div key={category} className="text-sm text-gray-500 flex justify-between">
+                    <div key={category} className="text-sm text-stone-500 flex justify-between">
                       <span className="truncate mr-2">{category}:</span>
                       <span>{count}</span>
                     </div>
@@ -307,12 +307,12 @@ const AfricaMap = () => {
 
       <div className="mt-6">
         <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">Case Volume</div>
+          <div className="text-sm text-stone-500">Case Volume</div>
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-[rgb(254,235,226)]"></div>
-            <div className="text-xs text-gray-500">Low</div>
+            <div className="text-xs text-stone-500">Low</div>
             <div className="w-3 h-3 bg-[rgb(122,1,119)]"></div>
-            <div className="text-xs text-gray-500">High</div>
+            <div className="text-xs text-stone-500">High</div>
           </div>
         </div>
       </div>

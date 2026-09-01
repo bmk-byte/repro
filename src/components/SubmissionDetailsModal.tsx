@@ -77,8 +77,8 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
         <div className="p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 break-words">{submission.title}</h2>
-              <p className="text-gray-600 mt-1">
+              <h2 className="text-xl sm:text-2xl font-semibold text-stone-900 break-words">{submission.title}</h2>
+              <p className="text-stone-600 mt-1">
                 {submission.type === 'case' ? 'Case Submission' : 'Judgment Submission'} - 
                 {submission.status === 'pending' ? ' Pending Review' : 
                  submission.status === 'approved' ? ' Approved' : 
@@ -87,7 +87,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-stone-500 hover:text-stone-700"
             >
               <X className="h-5 w-5" />
             </button>
@@ -115,24 +115,24 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Submission Information</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">Submission Information</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Title</label>
+                      <label className="text-sm font-medium text-stone-500">Title</label>
                       <p className="mt-1">{submission.title}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Submission Date</label>
+                      <label className="text-sm font-medium text-stone-500">Submission Date</label>
                       <p className="mt-1">{new Date(submission.submission_date).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Status</label>
+                      <label className="text-sm font-medium text-stone-500">Status</label>
                       <p className="mt-1">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           submission.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                           submission.status === 'approved' ? 'bg-green-100 text-green-800' :
                           submission.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
+                          'bg-stone-100 text-stone-800'
                         }`}>
                           {submission.status}
                         </span>
@@ -140,7 +140,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                     </div>
                     {submission.feedback && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Feedback</label>
+                        <label className="text-sm font-medium text-stone-500">Feedback</label>
                         <p className="mt-1">{submission.feedback}</p>
                       </div>
                     )}
@@ -148,15 +148,15 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Content</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">Content</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Summary</label>
+                      <label className="text-sm font-medium text-stone-500">Summary</label>
                       <p className="mt-1 whitespace-pre-line">{submission.summary}</p>
                     </div>
                     {submission.case_categories && submission.case_categories.length > 0 && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Categories</label>
+                        <label className="text-sm font-medium text-stone-500">Categories</label>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {submission.case_categories.map((category: string, idx: number) => (
                             <span 
@@ -177,22 +177,22 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
               {submission.type === 'case' ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Case Details</h3>
+                    <h3 className="text-lg font-medium text-stone-900 mb-3">Case Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Timeline Status</label>
+                        <label className="text-sm font-medium text-stone-500">Timeline Status</label>
                         <p className="mt-1">{submission.timeline_status}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Judicial Body</label>
+                        <label className="text-sm font-medium text-stone-500">Judicial Body</label>
                         <p className="mt-1">{submission.judicial_body}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Case Outcome</label>
+                        <label className="text-sm font-medium text-stone-500">Case Outcome</label>
                         <p className="mt-1">{submission.case_outcome}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Legal Framework</label>
+                        <label className="text-sm font-medium text-stone-500">Legal Framework</label>
                         <p className="mt-1">{submission.legal_framework_type}</p>
                       </div>
                     </div>
@@ -200,10 +200,10 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
                   {submission.litigants && submission.litigants.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">Parties</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-3">Parties</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="text-sm font-medium text-gray-500">Litigants</label>
+                          <label className="text-sm font-medium text-stone-500">Litigants</label>
                           <ul className="mt-1 list-disc list-inside">
                             {submission.litigants.map((litigant: string, idx: number) => (
                               <li key={idx}>{litigant}</li>
@@ -211,7 +211,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                           </ul>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500">Defending Institutions</label>
+                          <label className="text-sm font-medium text-stone-500">Defending Institutions</label>
                           <ul className="mt-1 list-disc list-inside">
                             {submission.defending_institutions?.map((institution: string, idx: number) => (
                               <li key={idx}>{institution}</li>
@@ -224,7 +224,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
                   {submission.case_impact && (
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">Impact</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-3">Impact</h3>
                       <p className="whitespace-pre-line">{submission.case_impact}</p>
                     </div>
                   )}
@@ -232,34 +232,34 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Judgment Details</h3>
+                    <h3 className="text-lg font-medium text-stone-900 mb-3">Judgment Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Media Neutral Citation</label>
+                        <label className="text-sm font-medium text-stone-500">Media Neutral Citation</label>
                         <p className="mt-1">{submission.media_neutral_citation}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Court</label>
+                        <label className="text-sm font-medium text-stone-500">Court</label>
                         <p className="mt-1">{submission.court_judgment}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Case Number</label>
+                        <label className="text-sm font-medium text-stone-500">Case Number</label>
                         <p className="mt-1">{submission.case_number_judgment}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Judges</label>
+                        <label className="text-sm font-medium text-stone-500">Judges</label>
                         <p className="mt-1">{submission.judges_judgment}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Judgment Date</label>
+                        <label className="text-sm font-medium text-stone-500">Judgment Date</label>
                         <p className="mt-1">{submission.judgment_date_judgment ? new Date(submission.judgment_date_judgment).toLocaleDateString() : 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Language</label>
+                        <label className="text-sm font-medium text-stone-500">Language</label>
                         <p className="mt-1">{submission.language_judgment || 'Not specified'}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500">Type</label>
+                        <label className="text-sm font-medium text-stone-500">Type</label>
                         <p className="mt-1">{submission.type_judgment || 'Not specified'}</p>
                       </div>
                     </div>
@@ -267,7 +267,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
                   {submission.flynote_judgment && (
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">Flynote</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-3">Flynote</h3>
                       <p className="whitespace-pre-line">{submission.flynote_judgment}</p>
                     </div>
                   )}
@@ -277,9 +277,9 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
               {/* Document section */}
               {submission.document_url && (
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Document</h3>
-                  <div className="bg-gray-50 p-6 rounded-lg flex flex-col items-center justify-center">
-                    <p className="mb-4 text-gray-600">Click the button below to download this document to your device</p>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">Document</h3>
+                  <div className="bg-stone-50 p-6 rounded-lg flex flex-col items-center justify-center">
+                    <p className="mb-4 text-stone-600">Click the button below to download this document to your device</p>
                     <button
                       onClick={handleDownloadDocument}
                       className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"

@@ -171,7 +171,7 @@ const ActorsInstitutionsModule: React.FC = () => {
             <p className="font-semibold">Failed to load actors data</p>
             <p className="text-sm mt-1">{error}</p>
             {retryCount > 0 && (
-              <p className="text-xs mt-1 text-gray-500">Retry attempt: {retryCount}</p>
+              <p className="text-xs mt-1 text-stone-500">Retry attempt: {retryCount}</p>
             )}
           </div>
           <button 
@@ -194,7 +194,7 @@ const ActorsInstitutionsModule: React.FC = () => {
         <select
           value={selectedRegion}
           onChange={(e) => setSelectedRegion(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="all">All Regions</option>
           {regions.filter(r => r !== 'all').map(region => (
@@ -292,7 +292,7 @@ const ActorsInstitutionsModule: React.FC = () => {
         <div className="md:col-span-2">
           <Title>Key Actors Analysis</Title>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="p-3 bg-stone-50 rounded-lg">
               <Flex>
                 <Users className="h-5 w-5 text-primary" />
                 <Text className="font-medium">Litigants</Text>
@@ -304,7 +304,7 @@ const ActorsInstitutionsModule: React.FC = () => {
                       <Text className="text-xs truncate">{item.name}</Text>
                       <Text className="font-medium text-xs">{item.value}</Text>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div 
                         className="bg-primary h-2 rounded-full" 
                         style={{ 
@@ -317,7 +317,7 @@ const ActorsInstitutionsModule: React.FC = () => {
               </div>
             </div>
             
-            <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="p-3 bg-stone-50 rounded-lg">
               <Flex>
                 <Building className="h-5 w-5 text-blue-500" />
                 <Text className="font-medium">Institutions</Text>
@@ -329,7 +329,7 @@ const ActorsInstitutionsModule: React.FC = () => {
                       <Text className="text-xs truncate">{item.name}</Text>
                       <Text className="font-medium text-xs">{item.value}</Text>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div 
                         className="bg-blue-500 h-2 rounded-full" 
                         style={{ 
@@ -342,7 +342,7 @@ const ActorsInstitutionsModule: React.FC = () => {
               </div>
             </div>
             
-            <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="p-3 bg-stone-50 rounded-lg">
               <Flex>
                 <Gavel className="h-5 w-5 text-purple-500" />
                 <Text className="font-medium">Courts</Text>
@@ -354,7 +354,7 @@ const ActorsInstitutionsModule: React.FC = () => {
                       <Text className="text-xs truncate">{item.name}</Text>
                       <Text className="font-medium text-xs">{item.value}</Text>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div 
                         className="bg-purple-500 h-2 rounded-full" 
                         style={{ 

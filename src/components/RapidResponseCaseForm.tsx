@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Plus, Calendar, Clock } from 'lucide-react';
+import { X, Plus, Calendar, Clock, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { useFormDraft } from '../hooks/useFormDraft';
+import { createSafeDisplayName } from '../lib/sanitize';
 
 interface RapidResponseCaseFormProps {
   onSuccess: () => void;
@@ -49,6 +50,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
   const [formData, setFormData] = useState(initialFormData);
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
   const isEditing = !!caseData;
 
@@ -186,9 +188,21 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles: File[], rejections: FileRejection[]) => {
+      if (rejections.length > 0) {
+        const reason = rejections[0].errors[0];
+        setFileError(
+          reason?.code === 'file-too-large'
+            ? 'That file is larger than 10MB. Please choose a smaller file.'
+            : reason?.code === 'file-invalid-type'
+              ? 'Only PDF, DOC, and DOCX files are accepted.'
+              : reason?.message || 'That file could not be accepted.'
+        );
+        return;
+      }
       if (acceptedFiles[0]) {
+        setFileError(null);
         setFile(acceptedFiles[0]);
       }
     },
@@ -336,7 +350,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       case 'Low':
         return 'bg-green-100 border-green-300 text-green-800';
       default:
-        return 'bg-gray-100 border-gray-300 text-gray-800';
+        return 'bg-stone-100 border-stone-300 text-stone-800';
     }
   };
 
@@ -345,12 +359,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+          <h3 className="text-lg font-medium text-stone-900">Basic Information</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="case_reference" className="block text-sm font-medium text-gray-700">
-                Case Reference * <span className="text-xs text-gray-500">(Unique Identifier)</span>
+              <label htmlFor="case_reference" className="block text-sm font-medium text-stone-700">
+                Case Reference * <span className="text-xs text-stone-500">(Unique Identifier)</span>
               </label>
               <input
                 type="text"
@@ -359,13 +373,13 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 value={formData.case_reference}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                 placeholder="e.g., RR-2025-001"
               />
             </div>
 
             <div>
-              <label htmlFor="case_filed" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="case_filed" className="block text-sm font-medium text-stone-700">
                 Case Title *
               </label>
               <input
@@ -375,14 +389,14 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 value={formData.case_filed}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="country_id" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="country_id" className="block text-sm font-medium text-stone-700">
                 Country/Jurisdiction *
               </label>
               <select
@@ -391,7 +405,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 value={formData.country_id}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select a country</option>
                 {countries.map(country => (
@@ -401,7 +415,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
             </div>
 
             <div>
-              <label htmlFor="case_category" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="case_category" className="block text-sm font-medium text-stone-700">
                 Case Category *
               </label>
               <select
@@ -410,7 +424,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 value={formData.case_category}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               >
                 <option value="">Select a category</option>
                 {caseCategoryOptions.map(category => (
@@ -421,7 +435,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="case_summary" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="case_summary" className="block text-sm font-medium text-stone-700">
               Case Description *
             </label>
             <textarea
@@ -431,17 +445,17 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               onChange={handleInputChange}
               rows={3}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             />
           </div>
         </div>
 
         {/* Priority and Status */}
         <div className="space-y-6">
-          <h3 className="text-lg font-medium text-gray-900">Priority and Status</h3>
+          <h3 className="text-lg font-medium text-stone-900">Priority and Status</h3>
           
           <div>
-            <label htmlFor="priority_level" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="priority_level" className="block text-sm font-medium text-stone-700">
               Priority Level *
             </label>
             <div className="mt-1 grid grid-cols-4 gap-2">
@@ -451,7 +465,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                   className={`flex items-center justify-center px-4 py-2 border rounded-md cursor-pointer transition-colors ${
                     formData.priority_level === priority 
                       ? getPriorityColor(priority) 
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50'
                   }`}
                 >
                   <input
@@ -469,7 +483,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="rapid_response_stage" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="rapid_response_stage" className="block text-sm font-medium text-stone-700">
               Current Stage *
             </label>
             <select
@@ -478,14 +492,14 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               value={formData.rapid_response_stage}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             >
               <option value="intake">Intake</option>
               <option value="review">Review</option>
               <option value="action">Action</option>
               <option value="resolution">Resolution</option>
             </select>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-stone-500">
               {formData.rapid_response_stage === 'intake' && 'Initial assessment and information gathering'}
               {formData.rapid_response_stage === 'review' && 'Analyzing case details and planning response'}
               {formData.rapid_response_stage === 'action' && 'Implementing response strategies'}
@@ -494,7 +508,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="nature_of_case" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="nature_of_case" className="block text-sm font-medium text-stone-700">
               Nature of Case *
             </label>
             <textarea
@@ -504,17 +518,17 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               onChange={handleInputChange}
               rows={2}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             />
           </div>
         </div>
 
         {/* Client Information */}
         <div className="space-y-6">
-          <h3 className="text-lg font-medium text-gray-900">Client Information</h3>
+          <h3 className="text-lg font-medium text-stone-900">Client Information</h3>
           
           <div>
-            <label htmlFor="client_name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="client_name" className="block text-sm font-medium text-stone-700">
               Client Name
             </label>
             <input
@@ -523,12 +537,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               name="client_name"
               value={formData.client_name}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="client_email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="client_email" className="block text-sm font-medium text-stone-700">
               Client Email
             </label>
             <input
@@ -537,12 +551,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               name="client_email"
               value={formData.client_email}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="client_phone" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="client_phone" className="block text-sm font-medium text-stone-700">
               Client Phone
             </label>
             <input
@@ -551,17 +565,17 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               name="client_phone"
               value={formData.client_phone}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             />
           </div>
         </div>
 
         {/* Partner Organization */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-gray-900">Partner Organization</h3>
+          <h3 className="text-lg font-medium text-stone-900">Partner Organization</h3>
           
           <div>
-            <label htmlFor="partner" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="partner" className="block text-sm font-medium text-stone-700">
               Partner Organization
             </label>
             <input
@@ -571,9 +585,9 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               value={formData.partner}
               onChange={handleInputChange}
               placeholder="e.g., Afya Na Haki, LIRA Programme, KELIN"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
             />
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-stone-500">
               Enter the name of the partner organization involved in this case
             </p>
           </div>
@@ -582,7 +596,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
         {/* Key Deadlines */}
         <div className="space-y-6 md:col-span-2">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium text-gray-900">Key Deadlines</h3>
+            <h3 className="text-lg font-medium text-stone-900">Key Deadlines</h3>
             <button
               type="button"
               onClick={addDeadline}
@@ -594,19 +608,19 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           </div>
           
           {deadlines.length === 0 ? (
-            <p className="text-sm text-gray-500 italic">No deadlines added yet. Click "Add Deadline" to create one.</p>
+            <p className="text-sm text-stone-500 italic">No deadlines added yet. Click "Add Deadline" to create one.</p>
           ) : (
             <div className="space-y-4">
               {deadlines.map((deadline) => (
                 <div key={deadline.id} className="flex items-start space-x-2">
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
                       <input
                         type="date"
                         value={deadline.date}
                         onChange={(e) => updateDeadline(deadline.id, 'date', e.target.value)}
-                        className="pl-10 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                        className="pl-10 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                       />
                     </div>
                     <input
@@ -614,13 +628,13 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                       value={deadline.description}
                       onChange={(e) => updateDeadline(deadline.id, 'description', e.target.value)}
                       placeholder="Deadline description"
-                      className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                      className="block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => removeDeadline(deadline.id)}
-                    className="p-2 text-gray-400 hover:text-red-500"
+                    className="p-2 text-stone-400 hover:text-red-500"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -632,11 +646,11 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
         {/* Action Details */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-gray-900">Action Details</h3>
+          <h3 className="text-lg font-medium text-stone-900">Action Details</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="action_taken" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="action_taken" className="block text-sm font-medium text-stone-700">
                 Action Taken *
               </label>
               <textarea
@@ -646,12 +660,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 onChange={handleInputChange}
                 rows={3}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               />
             </div>
 
             <div>
-              <label htmlFor="next_steps" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="next_steps" className="block text-sm font-medium text-stone-700">
                 Next Steps *
               </label>
               <textarea
@@ -661,17 +675,17 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 onChange={handleInputChange}
                 rows={3}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="action_timeframe" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="action_timeframe" className="block text-sm font-medium text-stone-700">
               Action Timeframe *
             </label>
             <div className="relative mt-1">
-              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
               <input
                 type="text"
                 id="action_timeframe"
@@ -680,7 +694,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 onChange={handleInputChange}
                 required
                 placeholder="e.g., 48 hours, 1 week, 30 days"
-                className="pl-10 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+                className="pl-10 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
               />
             </div>
           </div>
@@ -688,34 +702,47 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
         {/* Document Upload */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-gray-900">Document Upload</h3>
+          <h3 className="text-lg font-medium text-stone-900">Document Upload</h3>
           
-          <div 
-            {...getRootProps()} 
-            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+              isDragActive
+                ? 'border-primary bg-primary/5'
+                : fileError
+                  ? 'border-danger bg-danger-light/40'
+                  : 'border-stone-300 hover:border-primary'
+            }`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} aria-label="Upload case document" />
             {file ? (
-              <div className="flex items-center justify-center">
-                <span className="text-sm text-gray-900">{file.name}</span>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm text-stone-900 font-medium">{createSafeDisplayName(file.name)}</span>
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setFile(null);
                   }}
-                  className="ml-2 text-gray-500 hover:text-red-500"
+                  aria-label="Remove selected file"
+                  className="ml-2 text-stone-500 hover:text-danger"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <div>
-                <p className="text-gray-600">Drop your file here or click to browse</p>
-                <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
+                <p className="text-stone-600">Drop your file here or click to browse</p>
+                <p className="text-xs text-stone-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
               </div>
             )}
           </div>
+          {fileError && (
+            <p role="alert" className="flex items-center gap-1.5 text-sm text-danger">
+              <AlertCircle className="h-4 w-4 flex-none" />
+              {fileError}
+            </p>
+          )}
         </div>
       </div>
 
@@ -723,7 +750,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
         >
           Cancel
         </button>

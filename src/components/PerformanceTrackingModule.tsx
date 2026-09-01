@@ -322,7 +322,7 @@ const PerformanceTrackingModule: React.FC = () => {
         <select
           value={selectedOrg}
           onChange={(e) => setSelectedOrg(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {organizations.map(org => (
             <option key={org} value={org}>
@@ -343,7 +343,7 @@ const PerformanceTrackingModule: React.FC = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-stone-50 rounded-lg">
               <Flex>
                 <Clock className="h-5 w-5 text-primary" />
                 <Text className="font-medium">Avg. Processing Time</Text>
@@ -351,10 +351,10 @@ const PerformanceTrackingModule: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold">
                 {stats.avgProcessingTime} days
               </Text>
-              <Text className="text-gray-500 text-sm">From filing to resolution</Text>
+              <Text className="text-stone-500 text-sm">From filing to resolution</Text>
             </div>
             
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-stone-50 rounded-lg">
               <Flex>
                 <TrendingUp className="h-5 w-5 text-green-500" />
                 <Text className="font-medium">KPI Achievement</Text>
@@ -362,10 +362,10 @@ const PerformanceTrackingModule: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold text-green-600">
                 {stats.kpiAchievement}%
               </Text>
-              <Text className="text-gray-500 text-sm">Average across organizations</Text>
+              <Text className="text-stone-500 text-sm">Average across organizations</Text>
             </div>
             
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-stone-50 rounded-lg">
               <Flex>
                 <Users className="h-5 w-5 text-blue-500" />
                 <Text className="font-medium">Collaboration Score</Text>
@@ -373,10 +373,10 @@ const PerformanceTrackingModule: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold text-blue-600">
                 {stats.collaborationScore}%
               </Text>
-              <Text className="text-gray-500 text-sm">Inter-organization cooperation</Text>
+              <Text className="text-stone-500 text-sm">Inter-organization cooperation</Text>
             </div>
             
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-stone-50 rounded-lg">
               <Flex>
                 <Briefcase className="h-5 w-5 text-amber-500" />
                 <Text className="font-medium">Strategic Cases</Text>
@@ -384,7 +384,7 @@ const PerformanceTrackingModule: React.FC = () => {
               <Text className="mt-2 text-2xl font-bold text-amber-600">
                 {stats.strategicCases}
               </Text>
-              <Text className="text-gray-500 text-sm">High-impact litigation</Text>
+              <Text className="text-stone-500 text-sm">High-impact litigation</Text>
             </div>
           </div>
 

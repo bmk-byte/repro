@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, MapPin, ArrowRight, AlertCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Badge } from './ui';
 
 interface CaseCardProps {
   caseData: {
@@ -16,59 +17,61 @@ interface CaseCardProps {
       name: string;
     };
   };
-  onClick: () => void;
+  onClick: (id: string) => void;
 }
 
-const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+const statusTone = (status: string): 'success' | 'info' | 'warning' | 'neutral' => {
+  switch (status.toLowerCase()) {
+    case 'completed':
+      return 'success';
+    case 'in_progress':
+      return 'info';
+    case 'pending':
+      return 'warning';
+    default:
+      return 'neutral';
+  }
+};
 
+/**
+ * Memoized — this renders inside a list of potentially many cases. `onClick`
+ * takes the case id (not a pre-bound closure) so the parent can pass a
+ * stable callback reference (e.g. the setState setter directly), letting
+ * memo actually skip re-renders for unchanged cards.
+ */
+const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
   const isRapidResponse = caseData.case_type === 'rapid-response';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+      className="bg-white rounded-xl shadow-card hover:shadow-raised transition-shadow duration-200 border border-stone-100"
     >
       <div className="p-6">
-        {/* Status and Date */}
         <div className="flex justify-between items-start mb-4">
           <div className="flex flex-wrap gap-2">
-            {/* Only show rapid response label on cards */}
             {isRapidResponse && (
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 flex items-center">
-                <AlertCircle className="h-3 w-3 mr-1" />
+              <Badge tone="danger" icon={<AlertCircle className="h-3 w-3" />}>
                 Rapid Response
-              </span>
+              </Badge>
             )}
+            <Badge tone={statusTone(caseData.status)}>{caseData.status.replace('_', ' ')}</Badge>
           </div>
-          <div className="flex items-center text-sm text-gray-500">
+          <div className="flex items-center text-sm text-stone-500">
             <Calendar className="h-4 w-4 mr-1" />
             {new Date(caseData.created_at).toLocaleDateString()}
           </div>
         </div>
 
-        {/* Case Title */}
-        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+        <h3 className="text-lg font-semibold text-stone-900 mb-3 line-clamp-2">
           {caseData.case_filed}
         </h3>
 
-        {/* Location and Stage */}
-        <div className="flex items-center text-sm text-gray-500 mb-4">
+        <div className="flex items-center text-sm text-stone-500 mb-4">
           <MapPin className="h-4 w-4 mr-1" />
           {caseData.countries?.name || 'Unknown Location'}
-          
+
           {isRapidResponse && caseData.rapid_response_stage && (
             <>
               <span className="mx-2">•</span>
@@ -78,9 +81,8 @@ const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
           )}
         </div>
 
-        {/* View Details Button */}
         <button
-          onClick={onClick}
+          onClick={() => onClick(caseData.id)}
           className="flex items-center text-primary hover:text-primary-dark transition-colors"
         >
           <span className="text-sm font-medium">View Details</span>
@@ -91,4 +93,4 @@ const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
   );
 };
 
-export default CaseCard;
+export default React.memo(CaseCard);

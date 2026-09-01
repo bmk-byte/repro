@@ -98,15 +98,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   if (!isPdfFile) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4 bg-gray-100">
+      <div className="flex flex-col items-center justify-center h-full p-4 bg-stone-100">
         <div className="bg-white p-6 rounded-lg shadow-md text-center max-w-md">
           <div className="text-amber-600 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Non-PDF Document</h3>
-          <p className="text-gray-600 mb-4">
+          <h3 className="text-lg font-medium text-stone-900 mb-2">Non-PDF Document</h3>
+          <p className="text-stone-600 mb-4">
             This document cannot be previewed in the browser. Please download it to view.
           </p>
           <button
@@ -119,7 +119,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="mt-2 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="mt-2 inline-flex items-center px-4 py-2 border border-stone-300 text-sm font-medium rounded-md text-stone-700 bg-white hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               <X className="h-4 w-4 mr-2" />
               Close
@@ -133,12 +133,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   return (
     <div className="flex flex-col h-full">
       {showControls && (
-        <div className="flex justify-between items-center p-2 bg-gray-100 border-b">
+        <div className="flex justify-between items-center p-2 bg-stone-100 border-b">
           <div className="flex items-center space-x-2">
             <button
               onClick={previousPage}
               disabled={pageNumber <= 1}
-              className="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-stone-200 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Previous page"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -149,7 +149,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
             <button
               onClick={nextPage}
               disabled={numPages === null || pageNumber >= numPages}
-              className="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-stone-200 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Next page"
             >
               <ChevronRight className="h-5 w-5" />
@@ -159,7 +159,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={zoomOut}
-              className="p-1 rounded hover:bg-gray-200"
+              className="p-1 rounded hover:bg-stone-200"
               title="Zoom out"
             >
               <ZoomOut className="h-5 w-5" />
@@ -167,21 +167,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
             <span className="text-sm">{Math.round(scale * 100)}%</span>
             <button
               onClick={zoomIn}
-              className="p-1 rounded hover:bg-gray-200"
+              className="p-1 rounded hover:bg-stone-200"
               title="Zoom in"
             >
               <ZoomIn className="h-5 w-5" />
             </button>
             <button
               onClick={rotate}
-              className="p-1 rounded hover:bg-gray-200"
+              className="p-1 rounded hover:bg-stone-200"
               title="Rotate"
             >
               <RotateCw className="h-5 w-5" />
             </button>
             <button
               onClick={downloadPDF}
-              className="p-1 rounded hover:bg-gray-200"
+              className="p-1 rounded hover:bg-stone-200"
               title="Download"
             >
               <Download className="h-5 w-5" />
@@ -189,7 +189,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
             {onClose && (
               <button
                 onClick={onClose}
-                className="p-1 rounded hover:bg-gray-200"
+                className="p-1 rounded hover:bg-stone-200"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -199,7 +199,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         </div>
       )}
 
-      <div className="flex-1 overflow-auto bg-gray-200 flex justify-center">
+      <div className="flex-1 overflow-auto bg-stone-200 flex justify-center">
         {loading && !error && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

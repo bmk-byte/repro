@@ -1,10 +1,10 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { X, Upload, File } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { Upload, File, X as XIcon, CircleAlert as AlertCircle } from 'lucide-react';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { createSafeDisplayName, sanitizeText } from '../lib/sanitize';
+import { Modal, Input, Textarea, Select, Button } from './ui';
 
 interface UploadLawModalProps {
   isOpen: boolean;
@@ -31,10 +31,15 @@ const COUNTRIES = [
   { id: 'zimbabwe', name: 'Zimbabwe' }
 ];
 
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { t } = useTranslation();
   const [loading, setLoading] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
+  const [fileError, setFileError] = React.useState<string | null>(null);
   const [formData, setFormData] = React.useState({
     title: '',
     description: '',
@@ -43,49 +48,55 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
     type: 'policy' as 'policy' | 'act',
   });
 
-  const onDrop = React.useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error('File size must be less than 10MB');
+  const onDrop = React.useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
+    if (rejections.length > 0) {
+      const reason = rejections[0].errors[0];
+      setFileError(
+        reason?.code === 'file-too-large'
+          ? 'That file is larger than 10MB. Please choose a smaller PDF.'
+          : reason?.code === 'file-invalid-type'
+            ? 'Only PDF files are accepted.'
+            : reason?.message || 'That file could not be accepted.'
+      );
       return;
     }
-    setFile(file);
+    setFileError(null);
+    setFile(acceptedFiles[0]);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ACCEPTED_FILE_TYPES,
     maxSize: MAX_FILE_SIZE,
-    multiple: false
+    multiple: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file) {
+      setFileError('Please choose a PDF file to upload.');
+      return;
+    }
 
     try {
       setLoading(true);
 
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Upload file to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      
-      const { error: uploadError, data } = await supabase.storage
+
+      const { error: uploadError } = await supabase.storage
         .from('laws')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('laws')
         .getPublicUrl(fileName);
 
-      // Create database record
       const { error: dbError } = await supabase
         .from('law_documents')
         .insert({
@@ -101,151 +112,131 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
       onClose();
     } catch (error) {
       console.error('Error uploading document:', error);
-      toast.error('Failed to upload document');
+      toast.error('Failed to upload document. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Upload Legal Document</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* File Upload */}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Upload Legal Document"
+      size="lg"
+      footer={
+        <>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" form="upload-law-form" loading={loading} disabled={!file}>
+            {loading ? 'Uploading…' : 'Upload Document'}
+          </Button>
+        </>
+      }
+    >
+      <form id="upload-law-form" onSubmit={handleSubmit} className="space-y-6">
+        <div>
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'
+              isDragActive
+                ? 'border-primary bg-primary/5'
+                : fileError
+                  ? 'border-danger bg-danger-light/40'
+                  : 'border-stone-300 hover:border-primary'
             }`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} aria-label="Upload PDF file" />
             {file ? (
-              <div className="flex items-center justify-center space-x-3">
-                <File className="h-6 w-6 text-primary" />
-                <span className="text-gray-900">{createSafeDisplayName(file.name)}</span>
+              <div className="flex items-center justify-center gap-3">
+                <File className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
+                <div className="text-left">
+                  <p className="text-stone-900 text-sm font-medium">{createSafeDisplayName(file.name)}</p>
+                  <p className="text-stone-500 text-xs">{formatFileSize(file.size)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFile(null);
+                  }}
+                  aria-label="Remove selected file"
+                  className="ml-2 p-1 rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
               </div>
             ) : (
               <div>
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600">Drop your PDF file here or click to browse</p>
-                <p className="text-sm text-gray-500 mt-2">Maximum file size: 10MB</p>
+                <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
+                <p className="text-stone-600">Drop your PDF file here or click to browse</p>
+                <p className="text-sm text-stone-500 mt-2">PDF only, maximum file size 10MB</p>
               </div>
             )}
           </div>
+          {fileError && (
+            <p role="alert" className="mt-2 flex items-center gap-1.5 text-sm text-danger">
+              <AlertCircle className="h-4 w-4 flex-none" />
+              {fileError}
+            </p>
+          )}
+        </div>
 
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Title
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: sanitizeText(e.target.value) }))}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
+        <div className="grid grid-cols-1 gap-6">
+          <Input
+            label="Title"
+            required
+            value={formData.title}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: sanitizeText(e.target.value) }))}
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Description
-              </label>
-              <textarea
-                rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: sanitizeText(e.target.value) }))}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
+          <Textarea
+            label="Description"
+            rows={3}
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: sanitizeText(e.target.value) }))}
+          />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Country
-                </label>
-                <select
-                  required
-                  value={formData.country_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, country_id: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                >
-                  <option value="">Select a country</option>
-                  {COUNTRIES.map(country => (
-                    <option key={country.id} value={country.id}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Type
-                </label>
-                <select
-                  required
-                  value={formData.type}
-                  onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'policy' | 'act' }))}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                >
-                  <option value="policy">Policy</option>
-                  <option value="act">Act</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Category
-                </label>
-                <select
-                  required
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                >
-                  <option value="">Select a category</option>
-                  <option value="reproductive-health">Reproductive Health</option>
-                  <option value="criminal-law">Criminal Law</option>
-                  <option value="human-rights">Human Rights</option>
-                  <option value="constitutional-law">Constitutional Law</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Select
+              label="Country"
+              required
+              value={formData.country_id}
+              onChange={(e) => setFormData(prev => ({ ...prev, country_id: e.target.value }))}
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !file}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark disabled:opacity-50"
+              <option value="">Select a country</option>
+              {COUNTRIES.map(country => (
+                <option key={country.id} value={country.id}>{country.name}</option>
+              ))}
+            </Select>
+
+            <Select
+              label="Type"
+              required
+              value={formData.type}
+              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'policy' | 'act' }))}
             >
-              {loading ? 'Uploading...' : 'Upload Document'}
-            </button>
+              <option value="policy">Policy</option>
+              <option value="act">Act</option>
+            </Select>
+
+            <Select
+              label="Category"
+              required
+              value={formData.category}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+            >
+              <option value="">Select a category</option>
+              <option value="reproductive-health">Reproductive Health</option>
+              <option value="criminal-law">Criminal Law</option>
+              <option value="human-rights">Human Rights</option>
+              <option value="constitutional-law">Constitutional Law</option>
+            </Select>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

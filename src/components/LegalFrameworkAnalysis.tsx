@@ -205,7 +205,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="all">All Categories</option>
           {categories.map(category => (
@@ -326,7 +326,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <FileText className="h-5 w-5 text-amber-500" />
                 <Text className="font-medium">Domestic Legal Frameworks</Text>
@@ -341,7 +341,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                         {timeData.reduce((sum, item) => sum + item.domestic, 0)}
                       </Text>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div 
                         className="bg-amber-500 h-2 rounded-full" 
                         style={{ 
@@ -356,7 +356,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
               </div>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <Scale className="h-5 w-5 text-blue-500" />
                 <Text className="font-medium">International Instruments</Text>
@@ -371,7 +371,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                         {timeData.reduce((sum, item) => sum + item.international, 0)}
                       </Text>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div 
                         className="bg-blue-500 h-2 rounded-full" 
                         style={{ 
@@ -386,7 +386,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
               </div>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <BookOpen className="h-5 w-5 text-purple-500" />
                 <Text className="font-medium">Combined Approach</Text>
@@ -401,7 +401,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                         {timeData.reduce((sum, item) => sum + item.both, 0)}
                       </Text>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div 
                         className="bg-purple-500 h-2 rounded-full" 
                         style={{ 

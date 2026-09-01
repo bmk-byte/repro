@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Card, Title, Text, Tab, TabList, TabGroup, TabPanel, TabPanels } from '@tremor/react';
 import { Activity, TrendingUp, Users, Files, Map, BarChart2, Gavel } from 'lucide-react';
 import DashboardCard from './DashboardCard';
-import PerformanceMetrics from './PerformanceMetrics';
-import DistributionCharts from './DistributionCharts';
-import PerformanceDashboard from './PerformanceDashboard';
 import { supabase } from '../lib/supabase';
 import { handleQueryError } from '../lib/errorHandling';
 import DataChart from './DataChart';
 import RecentLegalUpdates from './RecentLegalUpdates';
-import HealthIndicatorIntegration from './HealthIndicatorIntegration';
+import { LoadingState } from './ui';
+
+// Each of these pulls in a large shared chunk (@tremor chart components,
+// recharts, d3, date-fns, lodash — ~830KB). Lazy-loading per-tab means that
+// weight only downloads once a user actually clicks into that tab, instead
+// of on every dashboard visit regardless of which tab (if any) they open.
+const PerformanceMetrics = lazy(() => import('./PerformanceMetrics'));
+const DistributionCharts = lazy(() => import('./DistributionCharts'));
+const PerformanceDashboard = lazy(() => import('./PerformanceDashboard'));
+const HealthIndicatorIntegration = lazy(() => import('./HealthIndicatorIntegration'));
 
 interface DashboardLayoutProps {
   stats: {
@@ -79,7 +85,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
   return (
     <div className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative\" role="alert">
+        <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded-md" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
@@ -96,7 +102,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
               value={stats.totalCases.toString()}
               change={changeStats.cases}
               type="cases"
-              imageUrl="https://zvaurxgtttrgyvjzoedc.supabase.co/storage/v1/object/sign/cases/eq9sk5fg.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82YTZhYTA3Ny05MGFlLTQxZmQtOWI3Yy04OGNjNDFhNWNlOWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJjYXNlcy9lcTlzazVmZy5wbmciLCJpYXQiOjE3NTQyNDUyNTcsImV4cCI6ODA2MTQ0NTI1N30.j_IINeHoveJrCzCJYx5EJpaLMMkLgnkmHT7K_VBmWyw"
               onClick={() => setActiveTab('cases')}
             />
             <DashboardCard
@@ -104,7 +109,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
               value={stats.totalJudgments.toString()}
               change={changeStats.judgments}
               type="judgments"
-              imageUrl="https://zvaurxgtttrgyvjzoedc.supabase.co/storage/v1/object/sign/cases/bckcsw99.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82YTZhYTA3Ny05MGFlLTQxZmQtOWI3Yy04OGNjNDFhNWNlOWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJjYXNlcy9iY2tjc3c5OS5wbmciLCJpYXQiOjE3NTQyNDQ3MTYsImV4cCI6ODA2MTQ0NDcxNn0._dIUM8kfHjLBCeRYDX6zmYzKqLVDRkOBHdKtsEFyQT4"
               onClick={() => setActiveTab('judgments')}
             />
           </div>
@@ -141,19 +145,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
                 </TabPanel>
 
                 <TabPanel value="advanced">
-                  <PerformanceDashboard isModerator={isModerator} />
+                  <Suspense fallback={<LoadingState label="Loading performance dashboard…" />}>
+                    <PerformanceDashboard isModerator={isModerator} />
+                  </Suspense>
                 </TabPanel>
 
                 <TabPanel value="metrics">
-                  <PerformanceMetrics dateRange={dateRange} />
+                  <Suspense fallback={<LoadingState label="Loading metrics…" />}>
+                    <PerformanceMetrics dateRange={dateRange} />
+                  </Suspense>
                 </TabPanel>
 
                 <TabPanel value="distribution">
-                  <DistributionCharts />
+                  <Suspense fallback={<LoadingState label="Loading distribution charts…" />}>
+                    <DistributionCharts />
+                  </Suspense>
                 </TabPanel>
 
                 <TabPanel value="health">
-                  <HealthIndicatorIntegration />
+                  <Suspense fallback={<LoadingState label="Loading health indicators…" />}>
+                    <HealthIndicatorIntegration />
+                  </Suspense>
                 </TabPanel>
               </TabPanels>
             </TabGroup>
