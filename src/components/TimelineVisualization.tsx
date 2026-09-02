@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { LoadingState } from './ui';
+import { CHART_COLORS } from '../lib/chartColors';
 
 interface TimelineData {
   name: string;
@@ -229,37 +230,41 @@ const TimelineVisualization: React.FC = () => {
                 <Tooltip />
                 <Legend />
                 
-                <Area 
-                  type="monotone" 
-                  dataKey="filed" 
+                <Area
+                  type="monotone"
+                  dataKey="filed"
                   stackId="1"
-                  name="Filed" 
-                  fill="#FBBF24" 
-                  stroke="#F59E0B" 
+                  name="Filed"
+                  fill={CHART_COLORS.warning}
+                  fillOpacity={0.5}
+                  stroke={CHART_COLORS.warning}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="ongoing" 
+                <Area
+                  type="monotone"
+                  dataKey="ongoing"
                   stackId="1"
-                  name="Ongoing" 
-                  fill="#60A5FA" 
-                  stroke="#3B82F6" 
+                  name="Ongoing"
+                  fill={CHART_COLORS.info}
+                  fillOpacity={0.5}
+                  stroke={CHART_COLORS.info}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="resolved" 
+                <Area
+                  type="monotone"
+                  dataKey="resolved"
                   stackId="1"
-                  name="Resolved" 
-                  fill="#34D399" 
-                  stroke="#10B981" 
+                  name="Resolved"
+                  fill={CHART_COLORS.success}
+                  fillOpacity={0.5}
+                  stroke={CHART_COLORS.success}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="dismissed" 
+                <Area
+                  type="monotone"
+                  dataKey="dismissed"
                   stackId="1"
-                  name="Dismissed" 
-                  fill="#F87171" 
-                  stroke="#EF4444" 
+                  name="Dismissed"
+                  fill={CHART_COLORS.danger}
+                  fillOpacity={0.5}
+                  stroke={CHART_COLORS.danger}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -272,7 +277,7 @@ const TimelineVisualization: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
-                <Calendar className="h-5 w-5 text-amber-500" />
+                <Calendar className="h-5 w-5 text-warning" />
                 <Text className="font-medium">Filed Cases</Text>
               </Flex>
               <Text className="mt-2 text-2xl font-bold">
@@ -283,7 +288,7 @@ const TimelineVisualization: React.FC = () => {
             
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
-                <Clock className="h-5 w-5 text-blue-500" />
+                <Clock className="h-5 w-5 text-info" />
                 <Text className="font-medium">Ongoing Cases</Text>
               </Flex>
               <Text className="mt-2 text-2xl font-bold">
@@ -294,7 +299,7 @@ const TimelineVisualization: React.FC = () => {
             
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-success" />
                 <Text className="font-medium">Resolved Cases</Text>
               </Flex>
               <Text className="mt-2 text-2xl font-bold">
@@ -305,7 +310,7 @@ const TimelineVisualization: React.FC = () => {
             
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
-                <XCircle className="h-5 w-5 text-red-500" />
+                <XCircle className="h-5 w-5 text-danger" />
                 <Text className="font-medium">Dismissed Cases</Text>
               </Flex>
               <Text className="mt-2 text-2xl font-bold">
@@ -325,15 +330,15 @@ const TimelineVisualization: React.FC = () => {
               <div className="text-right">
                 <Text className="font-medium">Case Aging</Text>
                 <div className="flex items-center mt-1 justify-end">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+                  <div className="w-2 h-2 rounded-full bg-success mr-1"></div>
                   <Text className="text-sm">{'<'} 30 days: {caseAging.lessThan30}%</Text>
                 </div>
                 <div className="flex items-center justify-end">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 mr-1"></div>
+                  <div className="w-2 h-2 rounded-full bg-warning mr-1"></div>
                   <Text className="text-sm">30-90 days: {caseAging.between30And90}%</Text>
                 </div>
                 <div className="flex items-center justify-end">
-                  <div className="w-2 h-2 rounded-full bg-red-500 mr-1"></div>
+                  <div className="w-2 h-2 rounded-full bg-danger mr-1"></div>
                   <Text className="text-sm">{'>'} 90 days: {caseAging.moreThan90}%</Text>
                 </div>
               </div>

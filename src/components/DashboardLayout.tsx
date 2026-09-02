@@ -4,7 +4,7 @@ import DashboardCard from './DashboardCard';
 import { supabase } from '../lib/supabase';
 import { handleQueryError } from '../lib/errorHandling';
 import RecentLegalUpdates from './RecentLegalUpdates';
-import { LoadingState, Button } from './ui';
+import { LoadingState, Button, Card } from './ui';
 
 interface DashboardLayoutProps {
   stats: {
@@ -64,6 +64,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
 
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="font-serif text-2xl font-semibold text-stone-900">Dashboard</h2>
+        <p className="mt-1 text-sm text-stone-600">An overview of cases, judgments, and recent activity.</p>
+      </div>
+
       {error && (
         <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded-md" role="alert">
           <span className="block sm:inline">{error}</span>
@@ -91,7 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
             />
           </div>
 
-          <div className="rounded-xl border border-stone-200 bg-white shadow-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-stone-900">Analytics</h3>
               <p className="mt-1 text-sm text-stone-600">Trends, distribution, geography, outcomes, and more.</p>
@@ -99,7 +104,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
             <Button onClick={() => setActiveTab('analytics')} icon={<ArrowRight className="h-4 w-4" />} iconPosition="right">
               View full analytics
             </Button>
-          </div>
+          </Card>
 
           <RecentLegalUpdates />
         </>

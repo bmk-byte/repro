@@ -1,12 +1,14 @@
 import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Building, Gavel, RefreshCw } from 'lucide-react';
+import { Users, Building, Gavel } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS, CHART_CATEGORICAL_PALETTE } from '../lib/chartColors';
+import { chartHeight } from '../lib/chartLayout';
 
-const COLORS = ['#9C1D20', '#2563EB', '#059669', '#D97706', '#7C3AED'];
+const COLORS = CHART_CATEGORICAL_PALETTE;
 
 interface StakeholderData {
   name: string;
@@ -222,22 +224,15 @@ const StakeholderAnalytics: React.FC = () => {
       {loading ? (
         <LoadingState label="Loading stakeholder analytics…" />
       ) : error ? (
-        <div className="flex flex-col justify-center items-center h-64 space-y-4">
-          <div className="text-danger text-center max-w-md">
-            <p className="font-semibold">Failed to load stakeholder data</p>
-            <p className="text-sm mt-1">{error}</p>
-            {retryCount > 0 && (
-              <p className="text-xs mt-1 text-stone-500">Retry attempt: {retryCount}</p>
-            )}
-          </div>
-          <button
-            onClick={handleRetry}
-            disabled={loading}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Retrying...' : 'Retry'}</span>
-          </button>
+        <div className="flex items-center justify-center h-64">
+          <ErrorState
+            description={retryCount > 0 ? `${error} (Retry attempt: ${retryCount})` : error}
+            action={
+              <Button onClick={handleRetry} loading={loading}>
+                Retry
+              </Button>
+            }
+          />
         </div>
       ) : (
         <>
@@ -254,7 +249,7 @@ const StakeholderAnalytics: React.FC = () => {
                   <Bar
                     dataKey="cases"
                     name="Cases"
-                    fill="#9C1D20"
+                    fill={CHART_COLORS.primary}
                     stackId="a"
                   />
                 </BarChart>
@@ -270,7 +265,7 @@ const StakeholderAnalytics: React.FC = () => {
             <div>
               <Title>Institution Engagement</Title>
               {defendingData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={chartHeight(defendingData.length, 300)}>
                   <BarChart
                     layout="vertical"
                     data={defendingData}
@@ -282,7 +277,7 @@ const StakeholderAnalytics: React.FC = () => {
                     <Bar
                       dataKey="cases"
                       name="Cases"
-                      fill="#3B82F6"
+                      fill={CHART_COLORS.info}
                       radius={[0, 4, 4, 0]}
                     />
                   </BarChart>
@@ -305,7 +300,6 @@ const StakeholderAnalytics: React.FC = () => {
                       cy="50%"
                       labelLine={false}
                       outerRadius={80}
-                      fill="#8884d8"
                       dataKey="value"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >

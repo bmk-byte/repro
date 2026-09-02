@@ -3,9 +3,17 @@ import { Card, Title, Text, Flex, ProgressBar } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { CheckCircle, XCircle, AlertTriangle, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS, CHART_CATEGORICAL_PALETTE } from '../lib/chartColors';
+import { chartHeight } from '../lib/chartLayout';
 
-const COLORS = ['#10B981', '#EF4444', '#F59E0B', '#3B82F6', '#8B5CF6'];
+const COLORS = [
+  CHART_COLORS.success,
+  CHART_COLORS.danger,
+  CHART_COLORS.warning,
+  CHART_COLORS.info,
+  CHART_CATEGORICAL_PALETTE[4],
+];
 
 interface OutcomeData {
   name: string;
@@ -229,59 +237,59 @@ const OutcomeMetricsDashboard: React.FC = () => {
         <LoadingState label="Loading outcome metrics…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-red-500">{error}</div>
+          <ErrorState description={error} action={<Button onClick={fetchOutcomeData}>Retry</Button>} />
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+            <div className="bg-success-light p-4 rounded-lg border border-success/20">
               <Flex>
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-success" />
                 <Text className="font-medium">Won</Text>
               </Flex>
-              <Text className="mt-2 text-2xl font-bold text-green-600">
+              <Text className="mt-2 text-2xl font-bold text-success-dark">
                 {stats.won}
               </Text>
-              <Text className="text-green-600 text-sm">
+              <Text className="text-success text-sm">
                 {stats.totalCases > 0 ? Math.round((stats.won / stats.totalCases) * 100) : 0}% of total cases
               </Text>
             </div>
-            
-            <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+
+            <div className="bg-danger-light p-4 rounded-lg border border-danger/20">
               <Flex>
-                <XCircle className="h-5 w-5 text-red-500" />
+                <XCircle className="h-5 w-5 text-danger" />
                 <Text className="font-medium">Lost</Text>
               </Flex>
-              <Text className="mt-2 text-2xl font-bold text-red-600">
+              <Text className="mt-2 text-2xl font-bold text-danger-dark">
                 {stats.lost}
               </Text>
-              <Text className="text-red-600 text-sm">
+              <Text className="text-danger text-sm">
                 {stats.totalCases > 0 ? Math.round((stats.lost / stats.totalCases) * 100) : 0}% of total cases
               </Text>
             </div>
-            
-            <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
+
+            <div className="bg-warning-light p-4 rounded-lg border border-warning/20">
               <Flex>
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <AlertTriangle className="h-5 w-5 text-warning" />
                 <Text className="font-medium">Settled</Text>
               </Flex>
-              <Text className="mt-2 text-2xl font-bold text-amber-600">
+              <Text className="mt-2 text-2xl font-bold text-warning-dark">
                 {stats.settled}
               </Text>
-              <Text className="text-amber-600 text-sm">
+              <Text className="text-warning text-sm">
                 {stats.totalCases > 0 ? Math.round((stats.settled / stats.totalCases) * 100) : 0}% of total cases
               </Text>
             </div>
-            
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+
+            <div className="bg-info-light p-4 rounded-lg border border-info/20">
               <Flex>
-                <Clock className="h-5 w-5 text-blue-500" />
+                <Clock className="h-5 w-5 text-info" />
                 <Text className="font-medium">Ongoing</Text>
               </Flex>
-              <Text className="mt-2 text-2xl font-bold text-blue-600">
+              <Text className="mt-2 text-2xl font-bold text-info-dark">
                 {stats.ongoing}
               </Text>
-              <Text className="text-blue-600 text-sm">
+              <Text className="text-info text-sm">
                 {stats.totalCases > 0 ? Math.round((stats.ongoing / stats.totalCases) * 100) : 0}% of total cases
               </Text>
             </div>
@@ -298,7 +306,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" name="Cases" fill="#9C1D20" />
+                    <Bar dataKey="value" name="Cases" fill={CHART_COLORS.primary} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -319,7 +327,6 @@ const OutcomeMetricsDashboard: React.FC = () => {
                       cy="50%"
                       labelLine={false}
                       outerRadius={80}
-                      fill="#8884d8"
                       dataKey="value"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
@@ -342,19 +349,19 @@ const OutcomeMetricsDashboard: React.FC = () => {
             <Card>
               <Title>Success Rate by Jurisdiction</Title>
               {jurisdictionData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart 
-                    layout="vertical" 
+                <ResponsiveContainer width="100%" height={chartHeight(jurisdictionData.length, 300)}>
+                  <BarChart
+                    layout="vertical"
                     data={jurisdictionData}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" domain={[0, 100]} />
                     <YAxis dataKey="name" type="category" width={150} />
                     <Tooltip formatter={(value) => [`${value}%`, 'Success Rate']} />
-                    <Bar 
-                      dataKey="rate" 
-                      name="Success Rate" 
-                      fill="#10B981" 
+                    <Bar
+                      dataKey="rate"
+                      name="Success Rate"
+                      fill={CHART_COLORS.success}
                       radius={[0, 4, 4, 0]}
                     />
                   </BarChart>
@@ -415,7 +422,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
             <Flex>
               <div>
                 <Text className="font-medium">Overall Success Rate</Text>
-                <Text className="mt-1 text-2xl font-bold text-green-600">{stats.successRate}%</Text>
+                <Text className="mt-1 text-2xl font-bold text-success-dark">{stats.successRate}%</Text>
                 <Text className="text-stone-500 text-sm">Based on resolved cases</Text>
               </div>
               <div className="text-right">

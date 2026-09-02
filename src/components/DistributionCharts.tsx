@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Card, Title, Text } from '@tremor/react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
-import { RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS } from '../lib/chartColors';
+import { chartHeight } from '../lib/chartLayout';
 
-// Custom colors based on #9C1D20 theme with black for Rapid Response
-const CASE_TYPE_COLORS = ["#9C1D20", "#000000"];
-const STATUS_COLORS = ["#F59E0B", "#10B981", "#EF4444", "#3B82F6"];
+// Custom colors based on the app's semantic tokens
+const CASE_TYPE_COLORS = [CHART_COLORS.primary, CHART_COLORS.info];
+const STATUS_COLORS = [CHART_COLORS.warning, CHART_COLORS.success, CHART_COLORS.danger, CHART_COLORS.info];
 
 const DistributionCharts: React.FC = () => {
   const [data, setData] = React.useState<any>({
@@ -156,11 +157,11 @@ const DistributionCharts: React.FC = () => {
 
   // Get color for case type
   const getCaseTypeColor = (entry: any, index: number) => {
-    // Use black for Rapid Response, primary color for Litigation
+    // Use info blue for Rapid Response, primary color for Litigation
     if (entry.name === 'Rapid Response') {
-      return "#000000";
+      return CHART_COLORS.info;
     } else if (entry.name === 'Litigation') {
-      return "#9C1D20";
+      return CHART_COLORS.primary;
     } else {
       return CASE_TYPE_COLORS[index % CASE_TYPE_COLORS.length];
     }
@@ -172,22 +173,15 @@ const DistributionCharts: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-red-500 text-center max-w-md">
-          <p className="font-semibold">Failed to load distribution data</p>
-          <p className="text-sm mt-1">{error}</p>
-          {retryCount > 0 && (
-            <p className="text-xs mt-1 text-stone-500">Retry attempt: {retryCount}</p>
-          )}
-        </div>
-        <button 
-          onClick={handleRetry}
-          disabled={loading}
-          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>{loading ? 'Retrying...' : 'Retry'}</span>
-        </button>
+      <div className="flex items-center justify-center h-64">
+        <ErrorState
+          description={retryCount > 0 ? `${error} (Retry attempt: ${retryCount})` : error}
+          action={
+            <Button onClick={handleRetry} loading={loading}>
+              Retry
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -288,14 +282,14 @@ const DistributionCharts: React.FC = () => {
           animate="visible"
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-l-4 border-blue-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card className="border-l-4 border-info shadow-lg hover:shadow-xl transition-shadow duration-300">
             <Title className="text-xl font-bold text-stone-800">Status Distribution</Title>
             <div className="mt-2 text-sm text-stone-500">Cases by current status</div>
             {data.statusDistribution.length > 0 ? (
-              <div className="h-72 mt-4">
+              <div style={{ height: chartHeight(data.statusDistribution.length, 288) }} className="mt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    layout="vertical" 
+                  <BarChart
+                    layout="vertical"
                     data={data.statusDistribution}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
@@ -339,7 +333,7 @@ const DistributionCharts: React.FC = () => {
         viewport={{ once: true }}
         transition={{ delay: 0.4 }}
       >
-        <Card className="border-l-4 border-green-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <Card className="border-l-4 border-success shadow-lg hover:shadow-xl transition-shadow duration-300">
           <Title className="text-xl font-bold text-stone-800">Top 10 Countries by Case Volume</Title>
           <div className="mt-2 text-sm text-stone-500">Geographic distribution of cases</div>
           {data.countryDistribution.length > 0 ? (
@@ -356,10 +350,10 @@ const DistributionCharts: React.FC = () => {
                     formatter={(value: any) => [`${value} cases`, 'Count']}
                     contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                   />
-                  <Bar 
-                    dataKey="value" 
-                    name="Cases" 
-                    fill="#9C1D20" 
+                  <Bar
+                    dataKey="value"
+                    name="Cases"
+                    fill={CHART_COLORS.primary}
                     radius={[4, 4, 0, 0]}
                     animationDuration={300}
                     animationEasing="ease-in-out"

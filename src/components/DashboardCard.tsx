@@ -1,5 +1,5 @@
 import React from 'react';
-import { Files, TrendingUp, TrendingDown, Gavel } from 'lucide-react';
+import { Files, TrendingUp, TrendingDown, Minus, Gavel } from 'lucide-react';
 
 interface DashboardCardProps {
   title: string;
@@ -22,9 +22,20 @@ const iconByType = {
  * white background. This version has no external dependency.
  */
 const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, change, type, onClick }) => {
-  const isPositive = change.startsWith('+');
+  // A literal 0.0% (the fallback used when the change calculation fails or
+  // there's nothing to compare against) is neither a real gain nor a real
+  // loss — showing it as "positive" would misrepresent a missing/flat value
+  // as good news.
+  const numericChange = parseFloat(change);
+  const trend: 'up' | 'down' | 'flat' = numericChange > 0 ? 'up' : numericChange < 0 ? 'down' : 'flat';
   const Icon = iconByType[type] ?? Files;
-  const TrendIcon = isPositive ? TrendingUp : TrendingDown;
+  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+  const trendClasses =
+    trend === 'up'
+      ? 'bg-success/20 text-success-light'
+      : trend === 'down'
+      ? 'bg-danger/20 text-danger-light'
+      : 'bg-white/10 text-white/70';
 
   return (
     <button
@@ -40,9 +51,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, change, typ
       <div className="flex items-baseline gap-2">
         <p className="text-3xl font-serif font-semibold text-white">{value}</p>
         <span
-          className={`inline-flex items-center gap-1 text-sm font-medium ${
-            isPositive ? 'text-white' : 'text-white/70'
-          }`}
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-medium ${trendClasses}`}
         >
           <TrendIcon className="h-3.5 w-3.5" aria-hidden="true" />
           {change}

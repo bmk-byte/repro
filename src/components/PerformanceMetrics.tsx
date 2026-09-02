@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, Title } from '@tremor/react';
 import { supabase } from '../lib/supabase';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS, CHART_GRID_COLOR, CHART_AXIS_COLOR } from '../lib/chartColors';
 
 interface PerformanceMetricsProps {
   dateRange: [Date, Date];
@@ -100,14 +101,8 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <div className="text-red-500 mb-4">{error}</div>
-        <button 
-          onClick={fetchMetrics}
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-        >
-          Retry
-        </button>
+      <div className="flex items-center justify-center h-64">
+        <ErrorState description={error} action={<Button onClick={fetchMetrics}>Retry</Button>} />
       </div>
     );
   }
@@ -125,80 +120,80 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
               >
                 <defs>
                   <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.2}/>
+                    <stop offset="5%" stopColor={CHART_COLORS.success} stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor={CHART_COLORS.success} stopOpacity={0.2}/>
                   </linearGradient>
                   <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.2}/>
+                    <stop offset="5%" stopColor={CHART_COLORS.info} stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor={CHART_COLORS.info} stopOpacity={0.2}/>
                   </linearGradient>
                   <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.2}/>
+                    <stop offset="5%" stopColor={CHART_COLORS.warning} stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor={CHART_COLORS.warning} stopOpacity={0.2}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fill: '#6B7280', fontSize: 12 }}
-                  tickLine={{ stroke: '#E5E7EB' }}
-                  axisLine={{ stroke: '#E5E7EB' }}
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: CHART_AXIS_COLOR, fontSize: 12 }}
+                  tickLine={{ stroke: CHART_GRID_COLOR }}
+                  axisLine={{ stroke: CHART_GRID_COLOR }}
                 />
-                <YAxis 
-                  tick={{ fill: '#6B7280', fontSize: 12 }}
-                  tickLine={{ stroke: '#E5E7EB' }}
-                  axisLine={{ stroke: '#E5E7EB' }}
+                <YAxis
+                  tick={{ fill: CHART_AXIS_COLOR, fontSize: 12 }}
+                  tickLine={{ stroke: CHART_GRID_COLOR }}
+                  axisLine={{ stroke: CHART_GRID_COLOR }}
                   width={40}
                   tickCount={6}
                   domain={[0, 'auto']}
-                  label={{ 
-                    value: 'Cases', 
-                    angle: -90, 
+                  label={{
+                    value: 'Cases',
+                    angle: -90,
                     position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6B7280', fontSize: 12 }
+                    style: { textAnchor: 'middle', fill: CHART_AXIS_COLOR, fontSize: 12 }
                   }}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    borderRadius: '8px', 
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
-                    border: '1px solid #E5E7EB' 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    border: `1px solid ${CHART_GRID_COLOR}`
                   }}
                   formatter={(value: any) => [`${value} cases`, '']}
                 />
-                <Legend 
-                  verticalAlign="top" 
+                <Legend
+                  verticalAlign="top"
                   height={36}
                   wrapperStyle={{ paddingTop: '10px' }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="completed" 
-                  name="Completed" 
-                  stroke="#10B981" 
-                  fillOpacity={1} 
-                  fill="url(#colorCompleted)" 
+                <Area
+                  type="monotone"
+                  dataKey="completed"
+                  name="Completed"
+                  stroke={CHART_COLORS.success}
+                  fillOpacity={1}
+                  fill="url(#colorCompleted)"
                   activeDot={{ r: 6, strokeWidth: 1 }}
                   strokeWidth={2}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="in_progress" 
-                  name="In Progress" 
-                  stroke="#3B82F6" 
-                  fillOpacity={1} 
-                  fill="url(#colorInProgress)" 
+                <Area
+                  type="monotone"
+                  dataKey="in_progress"
+                  name="In Progress"
+                  stroke={CHART_COLORS.info}
+                  fillOpacity={1}
+                  fill="url(#colorInProgress)"
                   activeDot={{ r: 6, strokeWidth: 1 }}
                   strokeWidth={2}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="pending" 
-                  name="Pending" 
-                  stroke="#F59E0B" 
-                  fillOpacity={1} 
-                  fill="url(#colorPending)" 
+                <Area
+                  type="monotone"
+                  dataKey="pending"
+                  name="Pending"
+                  stroke={CHART_COLORS.warning}
+                  fillOpacity={1}
+                  fill="url(#colorPending)"
                   activeDot={{ r: 6, strokeWidth: 1 }}
                   strokeWidth={2}
                 />

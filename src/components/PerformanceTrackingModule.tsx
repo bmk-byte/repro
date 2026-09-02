@@ -3,7 +3,9 @@ import { Card, Title, Text, Flex, ProgressBar } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Clock, TrendingUp, Users, Briefcase } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS } from '../lib/chartColors';
+import { chartHeight } from '../lib/chartLayout';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -337,7 +339,7 @@ const PerformanceTrackingModule: React.FC = () => {
         <LoadingState label="Loading performance data…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-red-500">{error}</div>
+          <ErrorState description={error} action={<Button onClick={fetchPerformanceData}>Retry</Button>} />
         </div>
       ) : (
         <>
@@ -391,9 +393,9 @@ const PerformanceTrackingModule: React.FC = () => {
             <div>
               <Title>Organization KPI Dashboard</Title>
               {performanceData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart 
-                    layout="vertical" 
+                <ResponsiveContainer width="100%" height={chartHeight(performanceData.length, 300)}>
+                  <BarChart
+                    layout="vertical"
                     data={performanceData}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
@@ -401,10 +403,10 @@ const PerformanceTrackingModule: React.FC = () => {
                     <YAxis dataKey="name" type="category" width={180} />
                     <Tooltip />
                     <Legend />
-                    <Bar 
-                      dataKey="kpi_achievement" 
-                      name="KPI Achievement (%)" 
-                      fill="#10B981" 
+                    <Bar
+                      dataKey="kpi_achievement"
+                      name="KPI Achievement (%)"
+                      fill={CHART_COLORS.success}
                       radius={[0, 4, 4, 0]}
                     />
                   </BarChart>
@@ -426,19 +428,19 @@ const PerformanceTrackingModule: React.FC = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="avg_time" 
-                      name="Avg. Processing Time (days)" 
-                      stroke="#9C1D20" 
-                      activeDot={{ r: 8 }} 
+                    <Line
+                      type="monotone"
+                      dataKey="avg_time"
+                      name="Avg. Processing Time (days)"
+                      stroke={CHART_COLORS.primary}
+                      activeDot={{ r: 8 }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="target" 
-                      name="Target Time (days)" 
-                      stroke="#3B82F6" 
-                      strokeDasharray="5 5" 
+                    <Line
+                      type="monotone"
+                      dataKey="target"
+                      name="Target Time (days)"
+                      stroke={CHART_COLORS.info}
+                      strokeDasharray="5 5"
                     />
                   </LineChart>
                 </ResponsiveContainer>

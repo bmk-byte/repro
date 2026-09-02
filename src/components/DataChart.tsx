@@ -13,10 +13,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { RefreshCw } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS, CHART_GRID_COLOR } from '../lib/chartColors';
 
 interface DataPoint {
   name: string;
@@ -147,22 +147,15 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
 
   if (error) {
     return (
-      <div className="h-[300px] w-full flex flex-col items-center justify-center space-y-4">
-        <div className="text-red-600 text-center max-w-md">
-          <p className="font-semibold">Error loading chart data</p>
-          <p className="text-sm mt-1">{error}</p>
-          {retryCount > 0 && (
-            <p className="text-xs mt-1 text-stone-500">Retry attempt: {retryCount}</p>
-          )}
-        </div>
-        <button 
-          onClick={handleRetry}
-          disabled={loading}
-          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>{loading ? 'Retrying...' : 'Retry'}</span>
-        </button>
+      <div className="h-[300px] w-full flex items-center justify-center">
+        <ErrorState
+          description={retryCount > 0 ? `${error} (Retry attempt: ${retryCount})` : error}
+          action={
+            <Button onClick={handleRetry} loading={loading}>
+              Retry
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -181,20 +174,20 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
       <XAxis
         dataKey="name"
         tick={{ fontSize: 12 }}
-        tickLine={{ stroke: '#E5E7EB' }}
-        axisLine={{ stroke: '#E5E7EB' }}
+        tickLine={{ stroke: CHART_GRID_COLOR }}
+        axisLine={{ stroke: CHART_GRID_COLOR }}
       />
       <YAxis
         tick={{ fontSize: 12 }}
-        tickLine={{ stroke: '#E5E7EB' }}
-        axisLine={{ stroke: '#E5E7EB' }}
+        tickLine={{ stroke: CHART_GRID_COLOR }}
+        axisLine={{ stroke: CHART_GRID_COLOR }}
       />
       <Tooltip
         contentStyle={{
           backgroundColor: 'white',
           borderRadius: '8px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #E5E7EB'
+          border: `1px solid ${CHART_GRID_COLOR}`
         }}
         formatter={(value: any) => [`${value} cases`, '']}
       />
@@ -217,7 +210,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
               type="monotone"
               dataKey="total"
               name="Total Cases"
-              stroke="#3B82F6"
+              stroke={CHART_COLORS.info}
               strokeWidth={2}
               dot={{ r: 3 }}
               activeDot={{ r: 6, strokeWidth: 1 }}
@@ -227,7 +220,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
               type="monotone"
               dataKey="completed"
               name="Completed"
-              stroke="#10B981"
+              stroke={CHART_COLORS.success}
               strokeWidth={2}
               dot={{ r: 3 }}
               activeDot={{ r: 6, strokeWidth: 1 }}
@@ -237,7 +230,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
               type="monotone"
               dataKey="in_progress"
               name="In Progress"
-              stroke="#F59E0B"
+              stroke={CHART_COLORS.warning}
               strokeWidth={2}
               dot={{ r: 3 }}
               activeDot={{ r: 6, strokeWidth: 1 }}
@@ -247,24 +240,24 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
           <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             {commonAxes}
 
-            <Bar dataKey="total" name="Total Cases" fill="#3B82F6" />
-            <Bar dataKey="completed" name="Completed" fill="#10B981" />
-            <Bar dataKey="in_progress" name="In Progress" fill="#F59E0B" />
+            <Bar dataKey="total" name="Total Cases" fill={CHART_COLORS.info} />
+            <Bar dataKey="completed" name="Completed" fill={CHART_COLORS.success} />
+            <Bar dataKey="in_progress" name="In Progress" fill={CHART_COLORS.warning} />
           </BarChart>
         ) : (
           <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
-                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                <stop offset="5%" stopColor={CHART_COLORS.info} stopOpacity={0.2}/>
+                <stop offset="95%" stopColor={CHART_COLORS.info} stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.2}/>
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                <stop offset="5%" stopColor={CHART_COLORS.success} stopOpacity={0.2}/>
+                <stop offset="95%" stopColor={CHART_COLORS.success} stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.2}/>
-                <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+                <stop offset="5%" stopColor={CHART_COLORS.warning} stopOpacity={0.2}/>
+                <stop offset="95%" stopColor={CHART_COLORS.warning} stopOpacity={0}/>
               </linearGradient>
             </defs>
             {commonAxes}
@@ -273,7 +266,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
               type="monotone"
               dataKey="total"
               name="Total Cases"
-              stroke="#3B82F6"
+              stroke={CHART_COLORS.info}
               fillOpacity={1}
               fill="url(#colorTotal)"
               activeDot={{ r: 6, strokeWidth: 1 }}
@@ -284,7 +277,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
               type="monotone"
               dataKey="completed"
               name="Completed"
-              stroke="#10B981"
+              stroke={CHART_COLORS.success}
               fillOpacity={1}
               fill="url(#colorCompleted)"
               activeDot={{ r: 6, strokeWidth: 1 }}
@@ -295,7 +288,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
               type="monotone"
               dataKey="in_progress"
               name="In Progress"
-              stroke="#F59E0B"
+              stroke={CHART_COLORS.warning}
               fillOpacity={1}
               fill="url(#colorInProgress)"
               activeDot={{ r: 6, strokeWidth: 1 }}

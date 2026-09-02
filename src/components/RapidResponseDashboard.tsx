@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Title, Text, Flex, BarChart } from '@tremor/react';
+import { Card, Title, Text, BarChart } from '@tremor/react';
 import { supabase } from '../lib/supabase';
-import { Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CaseStageProgress from './CaseStageProgress';
-import { LoadingState, Badge } from './ui';
+import { LoadingState, Badge, Select, Button, EmptyState, ErrorState } from './ui';
 import type { BadgeProps } from './ui';
+import { chartHeight } from '../lib/chartLayout';
+import DashboardCard from './DashboardCard';
 
 interface RapidResponseDashboardProps {
   onViewAllCases?: () => void;
@@ -495,19 +497,22 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    if (category.includes('Abortion')) return 'bg-purple-100 text-purple-800';
-    if (category.includes('Rape')) return 'bg-red-100 text-red-800';
-    if (category.includes('Defilement')) return 'bg-pink-100 text-pink-800';
-    if (category.includes('SGBV')) return 'bg-orange-100 text-orange-800';
-    if (category.includes('Incest')) return 'bg-indigo-100 text-indigo-800';
-    return 'bg-stone-100 text-stone-800';
+  const getStatusTone = (status: string): NonNullable<BadgeProps['tone']> => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'in_progress': return 'info';
+      case 'on_hold': return 'warning';
+      case 'pending': return 'neutral';
+      default: return 'neutral';
+    }
   };
 
-  // Custom colors for priority levels
-  const priorityColors = ["#EF4444", "#F97316", "#3B82F6", "#10B981"];
-  const categoryColors = ["#8B5CF6", "#EF4444", "#EC4899", "#F97316", "#6366F1"];
-  const partnerColors = ["#9C1D20", "#2563EB", "#059669", "#D97706", "#7C3AED"];
+  // Tremor's `colors` prop only accepts its own named palette (e.g. "red",
+  // "blue") — arbitrary hex codes don't match any known color and silently
+  // fall back to black bars, so these must stay as Tremor color names.
+  const priorityColors = ["red", "orange", "blue", "emerald"];
+  const categoryColors = ["violet", "red", "pink", "orange", "indigo"];
+  const partnerColors = ["rose", "blue", "emerald", "amber", "violet"];
 
   return (
     <div className="space-y-6">
@@ -528,11 +533,11 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             </select>
           </div>
           
-          <button
+          <Button
+            variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
+            icon={<Filter className="h-4 w-4" />}
           >
-            <Filter className="h-4 w-4" />
             <span>Filters</span>
             {hasActiveFilters && (
               <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary rounded-full">
@@ -540,95 +545,77 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
               </span>
             )}
             {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </button>
+          </Button>
         </div>
 
         {showFilters && (
           <div className="mt-4 p-4 bg-stone-50 rounded-lg">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Priority</label>
-                <select
-                  value={filters.priority}
-                  onChange={(e) => handleFilterChange('priority', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">All Priorities</option>
-                  {filterOptions.priorities.map(priority => (
-                    <option key={priority} value={priority}>{priority}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Stage</label>
-                <select
-                  value={filters.stage}
-                  onChange={(e) => handleFilterChange('stage', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">All Stages</option>
-                  {filterOptions.stages.map(stage => (
-                    <option key={stage} value={stage}>{stage.charAt(0).toUpperCase() + stage.slice(1)}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
-                <select
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">All Categories</option>
-                  {filterOptions.categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Partner</label>
-                <select
-                  value={filters.partner}
-                  onChange={(e) => handleFilterChange('partner', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">All Partners</option>
-                  {filterOptions.partners.map(partner => (
-                    <option key={partner} value={partner}>{partner}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Country</label>
-                <select
-                  value={filters.country}
-                  onChange={(e) => handleFilterChange('country', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">All Countries</option>
-                  {filterOptions.countries.map(country => (
-                    <option key={country.id} value={country.id}>{country.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Status</label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">All Statuses</option>
-                  {filterOptions.statuses.map(status => (
-                    <option key={status} value={status}>{status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
-                  ))}
-                </select>
-              </div>
+              <Select
+                label="Priority"
+                value={filters.priority}
+                onChange={(e) => handleFilterChange('priority', e.target.value)}
+              >
+                <option value="all">All Priorities</option>
+                {filterOptions.priorities.map(priority => (
+                  <option key={priority} value={priority}>{priority}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Stage"
+                value={filters.stage}
+                onChange={(e) => handleFilterChange('stage', e.target.value)}
+              >
+                <option value="all">All Stages</option>
+                {filterOptions.stages.map(stage => (
+                  <option key={stage} value={stage}>{stage.charAt(0).toUpperCase() + stage.slice(1)}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Category"
+                value={filters.category}
+                onChange={(e) => handleFilterChange('category', e.target.value)}
+              >
+                <option value="all">All Categories</option>
+                {filterOptions.categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Partner"
+                value={filters.partner}
+                onChange={(e) => handleFilterChange('partner', e.target.value)}
+              >
+                <option value="all">All Partners</option>
+                {filterOptions.partners.map(partner => (
+                  <option key={partner} value={partner}>{partner}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Country"
+                value={filters.country}
+                onChange={(e) => handleFilterChange('country', e.target.value)}
+              >
+                <option value="all">All Countries</option>
+                {filterOptions.countries.map(country => (
+                  <option key={country.id} value={country.id}>{country.name}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Status"
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+              >
+                <option value="all">All Statuses</option>
+                {filterOptions.statuses.map(status => (
+                  <option key={status} value={status}>{status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
+                ))}
+              </Select>
             </div>
             
             {/* Active filters display */}
@@ -659,29 +646,24 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                   );
                 })}
                 
-                <button
-                  onClick={clearAllFilters}
-                  className="text-sm text-primary hover:text-primary-dark"
-                >
+                <Button variant="ghost" size="sm" onClick={clearAllFilters}>
                   Clear all filters
-                </button>
+                </Button>
               </div>
             )}
           </div>
         )}
       </Card>
       {error ? (
-        <Card className="bg-red-50 border border-red-200">
-          <div className="text-red-700 px-4 py-3">
-            <span className="block sm:inline">{error}</span>
-            <button
-              onClick={fetchDashboardData}
-              className="mt-2 inline-flex items-center px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-            >
-              <RefreshCw className="h-4 w-4 mr-1" />
-              Retry
-            </button>
-          </div>
+        <Card className="bg-white">
+          <ErrorState
+            description={error}
+            action={
+              <Button onClick={fetchDashboardData} icon={<RefreshCw className="h-4 w-4" />}>
+                Retry
+              </Button>
+            }
+          />
         </Card>
       ) : loading ? (
         <Card>
@@ -704,58 +686,44 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                   </Text>
                 )}
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={fetchDashboardData}
-                className="flex items-center space-x-2 px-3 py-1 text-sm text-stone-600 hover:text-primary transition-colors"
                 title="Refresh data"
+                icon={<RefreshCw className="h-4 w-4" />}
               >
-                <RefreshCw className="h-4 w-4" />
-                <span>Refresh</span>
-              </button>
+                Refresh
+              </Button>
             </div>
           </Card>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-white">
-              <Flex>
-                <div>
-                  <Text className="text-stone-500">Total Cases</Text>
-                  <Text className="text-2xl font-bold">{stats.totalCases}</Text>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-primary" />
-              </Flex>
-            </Card>
-            
-            <Card className="bg-white">
-              <Flex>
-                <div>
-                  <Text className="text-stone-500">Active Cases</Text>
-                  <Text className="text-2xl font-bold">{stats.activeCases}</Text>
-                </div>
-                <Clock className="h-8 w-8 text-blue-500" />
-              </Flex>
-            </Card>
-            
-            <Card className="bg-white">
-              <Flex>
-                <div>
-                  <Text className="text-stone-500">Completed Cases</Text>
-                  <Text className="text-2xl font-bold">{stats.completedCases}</Text>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
-              </Flex>
-            </Card>
-            
-            <Card className="bg-white">
-              <Flex>
-                <div>
-                  <Text className="text-stone-500">Avg. Resolution Time</Text>
-                  <Text className="text-2xl font-bold">{stats.averageResolutionTime} days</Text>
-                </div>
-                <Calendar className="h-8 w-8 text-amber-500" />
-              </Flex>
-            </Card>
+            <DashboardCard
+              title="Total Cases"
+              value={stats.totalCases}
+              change="+0.0%"
+              type="cases"
+            />
+            <DashboardCard
+              title="Active Cases"
+              value={stats.activeCases}
+              change="+0.0%"
+              type="judgments"
+            />
+            <DashboardCard
+              title="Completed Cases"
+              value={stats.completedCases}
+              change="+0.0%"
+              type="success"
+            />
+            <DashboardCard
+              title="Avg. Resolution Time"
+              value={`${stats.averageResolutionTime} days`}
+              change="+0.0%"
+              type="cases"
+            />
           </div>
 
           {/* Charts */}
@@ -780,62 +748,58 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                   valueFormatter={(value) => `${value} cases`}
                 />
               ) : (
-                <div className="flex justify-center items-center h-60">
-                  <Text>No priority data available</Text>
-                </div>
+                <EmptyState title="No priority data available" />
               )}
             </Card>
 
-            {/* Case Category Distribution */}
+            {/* Partner Organization Engagement */}
             <Card className="bg-white">
-              <Title>Case Category Distribution</Title>
-              {stats.categoryDistribution.length > 0 ? (
+              <Title>Partner Organization Engagement</Title>
+              {stats.partnerDistribution.length > 0 ? (
                 <BarChart
-                  className="mt-6 h-60"
-                  data={stats.categoryDistribution}
+                  className="mt-6"
+                  style={{ height: chartHeight(stats.partnerDistribution.length, 320) }}
+                  data={stats.partnerDistribution}
                   index="name"
                   categories={["value"]}
-                  colors={categoryColors}
+                  colors={partnerColors}
                   layout="vertical"
                   showLegend={false}
                   showAnimation={true}
                   showYAxis={true}
                   showXAxis={true}
                   showGridLines={true}
-                  yAxisWidth={160}
+                  yAxisWidth={220}
                   valueFormatter={(value) => `${value} cases`}
                 />
               ) : (
-                <div className="flex justify-center items-center h-60">
-                  <Text>No category data available</Text>
-                </div>
+                <EmptyState title="No partner organization data available" />
               )}
             </Card>
           </div>
 
-          {/* Partner Organization Engagement */}
+          {/* Case Category Distribution */}
           <Card className="bg-white">
-            <Title>Partner Organization Engagement</Title>
-            {stats.partnerDistribution.length > 0 ? (
+            <Title>Case Category Distribution</Title>
+            {stats.categoryDistribution.length > 0 ? (
               <BarChart
-                className="mt-6 h-80"
-                data={stats.partnerDistribution}
+                className="mt-6"
+                style={{ height: chartHeight(stats.categoryDistribution.length, 240) }}
+                data={stats.categoryDistribution}
                 index="name"
                 categories={["value"]}
-                colors={partnerColors}
+                colors={categoryColors}
                 layout="vertical"
                 showLegend={false}
                 showAnimation={true}
                 showYAxis={true}
                 showXAxis={true}
                 showGridLines={true}
-                yAxisWidth={220}
+                yAxisWidth={160}
                 valueFormatter={(value) => `${value} cases`}
               />
             ) : (
-              <div className="flex justify-center items-center h-60">
-                <Text>No partner organization data available</Text>
-              </div>
+              <EmptyState title="No category data available" />
             )}
           </Card>
 
@@ -855,21 +819,18 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <div className="flex justify-between items-center mb-4">
               <Title>Recent Cases</Title>
               {onViewAllCases && (
-                <button
-                  onClick={onViewAllCases}
-                  className="text-sm text-primary hover:text-primary-dark"
-                >
+                <Button variant="ghost" size="sm" onClick={onViewAllCases}>
                   View All Cases
-                </button>
+                </Button>
               )}
             </div>
             
             <div className="space-y-4">
               {recentCases.length > 0 ? (
                 recentCases.map((caseItem) => (
-                  <div 
-                    key={caseItem.id} 
-                    className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer"
+                  <div
+                    key={caseItem.id}
+                    className="p-4 border border-stone-200 rounded-xl shadow-card hover:bg-stone-50 cursor-pointer"
                     onClick={() => onCaseClick && onCaseClick(caseItem.id)}
                   >
                     <div className="flex justify-between items-start">
@@ -877,7 +838,12 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                         <h3 className="text-sm font-medium text-stone-900">{caseItem.case_filed}</h3>
                         <p className="text-xs text-stone-500 mt-1">{caseItem.countries?.name}</p>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {caseItem.status && (
+                          <Badge tone={getStatusTone(caseItem.status)}>
+                            {caseItem.status.replace('_', ' ')}
+                          </Badge>
+                        )}
                         {caseItem.priority_level && (
                           <Badge tone={getPriorityTone(caseItem.priority_level)}>
                             {caseItem.priority_level}
@@ -889,9 +855,9 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                           </Badge>
                         )}
                         {caseItem.case_categories && caseItem.case_categories.length > 0 && (
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${getCategoryColor(caseItem.case_categories[0])}`}>
+                          <Badge tone="neutral">
                             {caseItem.case_categories[0].split(' ')[0]}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -903,26 +869,23 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                           <span className="font-medium text-stone-700">{caseItem.profiles.full_name}</span>
                         )}
                         {caseItem.profiles?.organization && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600 border border-slate-200">
+                          <Badge tone="neutral">
                             {caseItem.profiles.organization}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-6">
-                  <Text>No recent cases</Text>
-                  {onCreateCase && (
-                    <button
-                      onClick={onCreateCase}
-                      className="mt-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark"
-                    >
-                      Create New Case
-                    </button>
-                  )}
-                </div>
+                <EmptyState
+                  title="No recent cases"
+                  action={
+                    onCreateCase ? (
+                      <Button onClick={onCreateCase}>Create New Case</Button>
+                    ) : undefined
+                  }
+                />
               )}
             </div>
           </Card>

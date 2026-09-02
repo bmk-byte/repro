@@ -19,3 +19,5 @@ export type { TagListInputProps } from './TagListInput';
 export { Spinner, LoadingState } from './Spinner';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+export { ErrorState } from './ErrorState';
+export type { ErrorStateProps } from './ErrorState';

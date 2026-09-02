@@ -4,7 +4,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Activity, TrendingUp, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS } from '../lib/chartColors';
 
 interface HealthData {
   name: string;
@@ -438,67 +439,59 @@ const HealthIndicatorIntegration: React.FC = () => {
           <LoadingState label="Loading health indicator data…" />
         ) : error ? (
           <div className="flex justify-center items-center h-64">
-            <div className="text-red-500 text-center">
-              <p>{error}</p>
-              <button 
-                onClick={fetchHealthData}
-                className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              >
-                Retry
-              </button>
-            </div>
+            <ErrorState description={error} action={<Button onClick={fetchHealthData}>Retry</Button>} />
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+              <div className="bg-danger-light p-4 rounded-lg border border-danger/20">
                 <Flex>
-                  <Heart className="h-5 w-5 text-red-500" />
+                  <Heart className="h-5 w-5 text-danger" />
                   <Text className="font-medium">Maternal Mortality</Text>
                 </Flex>
-                <Text className="mt-2 text-2xl font-bold text-red-600">
+                <Text className="mt-2 text-2xl font-bold text-danger-dark">
                   {indicatorStats.maternal_mortality.value}
                 </Text>
-                <Text className={`text-sm ${indicatorStats.maternal_mortality.change.startsWith('+') ? 'text-red-600' : 'text-green-600'}`}>
+                <Text className={`text-sm ${indicatorStats.maternal_mortality.change.startsWith('+') ? 'text-danger' : 'text-success'}`}>
                   {indicatorStats.maternal_mortality.change} from previous year
                 </Text>
               </div>
-              
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+
+              <div className="bg-info-light p-4 rounded-lg border border-info/20">
                 <Flex>
-                  <Activity className="h-5 w-5 text-blue-500" />
+                  <Activity className="h-5 w-5 text-info" />
                   <Text className="font-medium">Contraceptive Access</Text>
                 </Flex>
-                <Text className="mt-2 text-2xl font-bold text-blue-600">
+                <Text className="mt-2 text-2xl font-bold text-info-dark">
                   {indicatorStats.contraceptive_access.value}%
                 </Text>
-                <Text className={`text-sm ${indicatorStats.contraceptive_access.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                <Text className={`text-sm ${indicatorStats.contraceptive_access.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>
                   {indicatorStats.contraceptive_access.change} from previous year
                 </Text>
               </div>
-              
-              <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+
+              <div className="bg-success-light p-4 rounded-lg border border-success/20">
                 <Flex>
-                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  <TrendingUp className="h-5 w-5 text-success" />
                   <Text className="font-medium">Adolescent Health</Text>
                 </Flex>
-                <Text className="mt-2 text-2xl font-bold text-green-600">
+                <Text className="mt-2 text-2xl font-bold text-success-dark">
                   {indicatorStats.adolescent_health.value}
                 </Text>
-                <Text className={`text-sm ${indicatorStats.adolescent_health.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                <Text className={`text-sm ${indicatorStats.adolescent_health.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>
                   {indicatorStats.adolescent_health.change} from previous year
                 </Text>
               </div>
-              
-              <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
+
+              <div className="bg-stone-100 p-4 rounded-lg border border-stone-200">
                 <Flex>
-                  <Activity className="h-5 w-5 text-purple-500" />
+                  <Activity className="h-5 w-5 text-stone-700" />
                   <Text className="font-medium">SGBV Reporting</Text>
                 </Flex>
-                <Text className="mt-2 text-2xl font-bold text-purple-600">
+                <Text className="mt-2 text-2xl font-bold text-stone-700">
                   {indicatorStats.sgbv_reporting.value}
                 </Text>
-                <Text className={`text-sm ${indicatorStats.sgbv_reporting.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                <Text className={`text-sm ${indicatorStats.sgbv_reporting.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>
                   {indicatorStats.sgbv_reporting.change} from previous year
                 </Text>
               </div>
@@ -517,10 +510,10 @@ const HealthIndicatorIntegration: React.FC = () => {
                       <Legend />
                       <Line 
                         type="monotone" 
-                        dataKey={selectedIndicator} 
-                        name={selectedIndicator.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} 
-                        stroke="#9C1D20" 
-                        activeDot={{ r: 8 }} 
+                        dataKey={selectedIndicator}
+                        name={selectedIndicator.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        stroke={CHART_COLORS.primary}
+                        activeDot={{ r: 8 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -561,10 +554,10 @@ const HealthIndicatorIntegration: React.FC = () => {
                         formatter={(value, name) => [value, name]}
                         labelFormatter={(label) => correlationData[label]?.name || ''}
                       />
-                      <Scatter 
-                        name="Health-Case Correlation" 
-                        data={correlationData} 
-                        fill="#9C1D20" 
+                      <Scatter
+                        name="Health-Case Correlation"
+                        data={correlationData}
+                        fill={CHART_COLORS.primary}
                       />
                     </ScatterChart>
                   </ResponsiveContainer>

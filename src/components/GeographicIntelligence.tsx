@@ -5,7 +5,8 @@ import { MapPin, Map } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { GlobeLive, LiveMarker } from './ui/cobe-globe-live';
 import { getCountryCoordinates } from '../lib/countryCoordinates';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS } from '../lib/chartColors';
 
 interface CountryData {
   name: string;
@@ -158,17 +159,15 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
           <Title>Geographic Intelligence</Title>
         </div>
         <div className="flex justify-center items-center h-64">
-          <div className="text-red-500 text-center">
-            <p className="font-semibold mb-2">Connection Error</p>
-            <p>{connectionError}</p>
-            <button 
-              onClick={retryConnection}
-              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              disabled={loading}
-            >
-              {loading ? 'Retrying...' : 'Retry Connection'}
-            </button>
-          </div>
+          <ErrorState
+            title="Connection Error"
+            description={connectionError}
+            action={
+              <Button onClick={retryConnection} loading={loading}>
+                Retry Connection
+              </Button>
+            }
+          />
         </div>
       </Card>
     );
@@ -195,16 +194,14 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
         <LoadingState label="Loading geographic data…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-red-500 text-center">
-            <p>{error}</p>
-            <button 
-              onClick={retryConnection}
-              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              disabled={loading}
-            >
-              {loading ? 'Retrying...' : 'Retry'}
-            </button>
-          </div>
+          <ErrorState
+            description={error}
+            action={
+              <Button onClick={retryConnection} loading={loading}>
+                Retry
+              </Button>
+            }
+          />
         </div>
       ) : (
         <>
@@ -240,7 +237,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" name="Total Cases" fill="#9C1D20" />
+                    <Bar dataKey="total" name="Total Cases" fill={CHART_COLORS.primary} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -260,7 +257,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
                     <YAxis domain={[0, 100]} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="success" name="Success Rate (%)" fill="#059669" />
+                    <Bar dataKey="success" name="Success Rate (%)" fill={CHART_COLORS.success} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

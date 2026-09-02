@@ -1,9 +1,13 @@
 import React from 'react';
-import { Card, Title, Text, Flex } from '@tremor/react';
+import { Card, Title, Text, Flex, ProgressBar } from '@tremor/react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { FileText, Scale, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { LoadingState } from './ui';
+import { LoadingState, ErrorState, Button } from './ui';
+import { CHART_COLORS, CHART_CATEGORICAL_PALETTE } from '../lib/chartColors';
+import { chartHeight } from '../lib/chartLayout';
+
+const FRAMEWORK_COLORS = [CHART_COLORS.warning, CHART_COLORS.info, CHART_CATEGORICAL_PALETTE[4]];
 
 interface LegalFrameworkData {
   name: string;
@@ -217,7 +221,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
         <LoadingState label="Loading legal framework data…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-red-500">{error}</div>
+          <ErrorState description={error} action={<Button onClick={fetchLegalFrameworkData}>Retry</Button>} />
         </div>
       ) : (
         <>
@@ -231,29 +235,32 @@ const LegalFrameworkAnalysis: React.FC = () => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="domestic" 
+                  <Area
+                    type="monotone"
+                    dataKey="domestic"
                     stackId="1"
-                    name="Domestic Law" 
-                    fill="#FBBF24" 
-                    stroke="#F59E0B" 
+                    name="Domestic Law"
+                    fill={FRAMEWORK_COLORS[0]}
+                    fillOpacity={0.5}
+                    stroke={FRAMEWORK_COLORS[0]}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="international" 
+                  <Area
+                    type="monotone"
+                    dataKey="international"
                     stackId="1"
-                    name="International Law" 
-                    fill="#60A5FA" 
-                    stroke="#3B82F6" 
+                    name="International Law"
+                    fill={FRAMEWORK_COLORS[1]}
+                    fillOpacity={0.5}
+                    stroke={FRAMEWORK_COLORS[1]}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="both" 
+                  <Area
+                    type="monotone"
+                    dataKey="both"
                     stackId="1"
-                    name="Both" 
-                    fill="#A78BFA" 
-                    stroke="#8B5CF6" 
+                    name="Both"
+                    fill={FRAMEWORK_COLORS[2]}
+                    fillOpacity={0.5}
+                    stroke={FRAMEWORK_COLORS[2]}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -268,19 +275,19 @@ const LegalFrameworkAnalysis: React.FC = () => {
             <div>
               <Title>Protocol Citation Frequency</Title>
               {protocolData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart 
-                    layout="vertical" 
+                <ResponsiveContainer width="100%" height={chartHeight(protocolData.length, 300)}>
+                  <BarChart
+                    layout="vertical"
                     data={protocolData}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
                     <YAxis dataKey="name" type="category" width={120} />
                     <Tooltip />
-                    <Bar 
-                      dataKey="value" 
-                      name="Citations" 
-                      fill="#8B5CF6" 
+                    <Bar
+                      dataKey="value"
+                      name="Citations"
+                      fill={CHART_CATEGORICAL_PALETTE[4]}
                       radius={[0, 4, 4, 0]}
                     />
                   </BarChart>
@@ -303,13 +310,12 @@ const LegalFrameworkAnalysis: React.FC = () => {
                       cy="50%"
                       labelLine={false}
                       outerRadius={80}
-                      fill="#8884d8"
                       dataKey="value"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
-                      <Cell fill="#F59E0B" />
-                      <Cell fill="#3B82F6" />
-                      <Cell fill="#8B5CF6" />
+                      <Cell fill={FRAMEWORK_COLORS[0]} />
+                      <Cell fill={FRAMEWORK_COLORS[1]} />
+                      <Cell fill={FRAMEWORK_COLORS[2]} />
                     </Pie>
                     <Tooltip formatter={(value) => [`${value} cases`, 'Count']} />
                   </PieChart>
@@ -322,97 +328,79 @@ const LegalFrameworkAnalysis: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-stone-50 p-4 rounded-lg">
-              <Flex>
-                <FileText className="h-5 w-5 text-amber-500" />
-                <Text className="font-medium">Domestic Legal Frameworks</Text>
-              </Flex>
-              <div className="mt-2 space-y-2">
-                {/* This section now uses real data from the database */}
-                {timeData.length > 0 ? (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <Text>Total Domestic Law Cases</Text>
-                      <Text className="font-medium">
-                        {timeData.reduce((sum, item) => sum + item.domestic, 0)}
-                      </Text>
-                    </div>
-                    <div className="w-full bg-stone-200 rounded-full h-2">
-                      <div 
-                        className="bg-amber-500 h-2 rounded-full" 
-                        style={{ 
-                          width: '100%'
-                        }}
-                      ></div>
-                    </div>
-                  </>
-                ) : (
-                  <Text>No domestic law data available</Text>
-                )}
+          {(() => {
+            const domesticTotal = timeData.reduce((sum, item) => sum + item.domestic, 0);
+            const internationalTotal = timeData.reduce((sum, item) => sum + item.international, 0);
+            const bothTotal = timeData.reduce((sum, item) => sum + item.both, 0);
+            const totalFrameworkCases = domesticTotal + internationalTotal + bothTotal;
+            const domesticPercent = totalFrameworkCases > 0 ? (domesticTotal / totalFrameworkCases) * 100 : 0;
+            const internationalPercent = totalFrameworkCases > 0 ? (internationalTotal / totalFrameworkCases) * 100 : 0;
+            const bothPercent = totalFrameworkCases > 0 ? (bothTotal / totalFrameworkCases) * 100 : 0;
+
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-stone-50 p-4 rounded-lg">
+                  <Flex>
+                    <FileText className="h-5 w-5 text-amber-500" />
+                    <Text className="font-medium">Domestic Legal Frameworks</Text>
+                  </Flex>
+                  <div className="mt-2 space-y-2">
+                    {timeData.length > 0 ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <Text>Total Domestic Law Cases</Text>
+                          <Text className="font-medium">{domesticTotal}</Text>
+                        </div>
+                        <ProgressBar value={domesticPercent} color="amber" />
+                      </>
+                    ) : (
+                      <Text>No domestic law data available</Text>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-stone-50 p-4 rounded-lg">
+                  <Flex>
+                    <Scale className="h-5 w-5 text-blue-500" />
+                    <Text className="font-medium">International Instruments</Text>
+                  </Flex>
+                  <div className="mt-2 space-y-2">
+                    {timeData.length > 0 ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <Text>Total International Law Cases</Text>
+                          <Text className="font-medium">{internationalTotal}</Text>
+                        </div>
+                        <ProgressBar value={internationalPercent} color="blue" />
+                      </>
+                    ) : (
+                      <Text>No international law data available</Text>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-stone-50 p-4 rounded-lg">
+                  <Flex>
+                    <BookOpen className="h-5 w-5 text-purple-500" />
+                    <Text className="font-medium">Combined Approach</Text>
+                  </Flex>
+                  <div className="mt-2 space-y-2">
+                    {timeData.length > 0 ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <Text>Total Combined Approach Cases</Text>
+                          <Text className="font-medium">{bothTotal}</Text>
+                        </div>
+                        <ProgressBar value={bothPercent} color="violet" />
+                      </>
+                    ) : (
+                      <Text>No combined approach data available</Text>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            <div className="bg-stone-50 p-4 rounded-lg">
-              <Flex>
-                <Scale className="h-5 w-5 text-blue-500" />
-                <Text className="font-medium">International Instruments</Text>
-              </Flex>
-              <div className="mt-2 space-y-2">
-                {/* This section now uses real data from the database */}
-                {timeData.length > 0 ? (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <Text>Total International Law Cases</Text>
-                      <Text className="font-medium">
-                        {timeData.reduce((sum, item) => sum + item.international, 0)}
-                      </Text>
-                    </div>
-                    <div className="w-full bg-stone-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-500 h-2 rounded-full" 
-                        style={{ 
-                          width: '100%'
-                        }}
-                      ></div>
-                    </div>
-                  </>
-                ) : (
-                  <Text>No international law data available</Text>
-                )}
-              </div>
-            </div>
-            
-            <div className="bg-stone-50 p-4 rounded-lg">
-              <Flex>
-                <BookOpen className="h-5 w-5 text-purple-500" />
-                <Text className="font-medium">Combined Approach</Text>
-              </Flex>
-              <div className="mt-2 space-y-2">
-                {/* This section now uses real data from the database */}
-                {timeData.length > 0 ? (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <Text>Total Combined Approach Cases</Text>
-                      <Text className="font-medium">
-                        {timeData.reduce((sum, item) => sum + item.both, 0)}
-                      </Text>
-                    </div>
-                    <div className="w-full bg-stone-200 rounded-full h-2">
-                      <div 
-                        className="bg-purple-500 h-2 rounded-full" 
-                        style={{ 
-                          width: '100%'
-                        }}
-                      ></div>
-                    </div>
-                  </>
-                ) : (
-                  <Text>No combined approach data available</Text>
-                )}
-              </div>
-            </div>
-          </div>
+            );
+          })()}
         </>
       )}
     </Card>
