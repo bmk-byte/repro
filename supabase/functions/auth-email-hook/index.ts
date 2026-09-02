@@ -47,7 +47,11 @@ function renderEmail(heading: string, body: string, ctaLabel: string, ctaUrl: st
 
 function buildEmail(payload: HookPayload): { subject: string; html: string } {
   const { email_data } = payload;
-  const verifyUrl = `${email_data.site_url}/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${email_data.redirect_to}`;
+  // /auth/v1/verify only exists on the Supabase project's own API host, not
+  // the app's Site URL — SUPABASE_URL is a reserved env var Supabase injects
+  // into every edge function automatically, no manual setup needed.
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const verifyUrl = `${supabaseUrl}/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${email_data.redirect_to}`;
 
   switch (email_data.email_action_type) {
     case 'signup':
