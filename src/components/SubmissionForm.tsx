@@ -1,9 +1,5 @@
 import React from 'react';
-import { Upload, X } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
-import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { z } from 'zod';
 import SubmitCaseForm from './forms/SubmitCaseForm';
 import SubmitJudgmentForm from './forms/SubmitJudgmentForm';
 

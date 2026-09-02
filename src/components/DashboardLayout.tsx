@@ -1,21 +1,10 @@
-import React, { Suspense, lazy, useState } from 'react';
-import { Card, Title, Text, Tab, TabList, TabGroup, TabPanel, TabPanels } from '@tremor/react';
-import { Activity, TrendingUp, Users, Files, Map, BarChart2, Gavel } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import DashboardCard from './DashboardCard';
 import { supabase } from '../lib/supabase';
 import { handleQueryError } from '../lib/errorHandling';
-import DataChart from './DataChart';
 import RecentLegalUpdates from './RecentLegalUpdates';
-import { LoadingState } from './ui';
-
-// Each of these pulls in a large shared chunk (@tremor chart components,
-// recharts, d3, date-fns, lodash — ~830KB). Lazy-loading per-tab means that
-// weight only downloads once a user actually clicks into that tab, instead
-// of on every dashboard visit regardless of which tab (if any) they open.
-const PerformanceMetrics = lazy(() => import('./PerformanceMetrics'));
-const DistributionCharts = lazy(() => import('./DistributionCharts'));
-const PerformanceDashboard = lazy(() => import('./PerformanceDashboard'));
-const HealthIndicatorIntegration = lazy(() => import('./HealthIndicatorIntegration'));
+import { LoadingState, Button } from './ui';
 
 interface DashboardLayoutProps {
   stats: {
@@ -25,15 +14,9 @@ interface DashboardLayoutProps {
   loading: boolean;
   error: string | null;
   setActiveTab: (tab: string) => void;
-  isModerator?: boolean;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error, setActiveTab, isModerator = false }) => {
-  const [selectedView, setSelectedView] = useState('overview');
-  const [dateRange, setDateRange] = useState<[Date, Date]>([
-    new Date(new Date().setMonth(new Date().getMonth() - 6)),
-    new Date()
-  ]);
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error, setActiveTab }) => {
   const [changeStats, setChangeStats] = useState({
     cases: '+0.0%',
     judgments: '+0.0%'
@@ -45,13 +28,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
 
   const calculateChangeStats = async () => {
     try {
-      // Calculate the previous period (same length as current period)
+      // Compare today's cumulative totals against the cumulative totals as
+      // of one month ago, to show "+N% since last month" on each stat card.
       const currentPeriodStart = new Date(new Date().setMonth(new Date().getMonth() - 1));
-      const previousPeriodStart = new Date(new Date().setMonth(new Date().getMonth() - 2));
-      const previousPeriodEnd = new Date(currentPeriodStart);
-      previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 1);
 
-      // Get previous period stats
       const { count: prevTotalCount } = await supabase
         .from('cases')
         .select('*', { count: 'exact', head: true })
@@ -91,9 +71,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
       )}
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading dashboard…" />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
@@ -113,63 +91,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
             />
           </div>
 
-          <Card>
-            <TabGroup>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <Title>Performance Analytics</Title>
-                <div className="w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
-                  <TabList variant="line" className="flex-nowrap">
-                    <Tab value="overview">Overview</Tab>
-                    <Tab value="advanced">Advanced</Tab>
-                    <Tab value="metrics">Metrics</Tab>
-                    <Tab value="distribution">Distribution</Tab>
-                    <Tab value="health">Health</Tab>
-                  </TabList>
-                </div>
-              </div>
+          <div className="rounded-xl border border-stone-200 bg-white shadow-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-stone-900">Analytics</h3>
+              <p className="mt-1 text-sm text-stone-600">Trends, distribution, geography, outcomes, and more.</p>
+            </div>
+            <Button onClick={() => setActiveTab('analytics')} icon={<ArrowRight className="h-4 w-4" />} iconPosition="right">
+              View full analytics
+            </Button>
+          </div>
 
-              <TabPanels>
-                <TabPanel value="overview">
-                  <div className="space-y-6">
-                    <div>
-                      <Title>Monthly Case Trends</Title>
-                      <div className="h-80">
-                        <DataChart />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <RecentLegalUpdates />
-                    </div>
-                  </div>
-                </TabPanel>
-
-                <TabPanel value="advanced">
-                  <Suspense fallback={<LoadingState label="Loading performance dashboard…" />}>
-                    <PerformanceDashboard isModerator={isModerator} />
-                  </Suspense>
-                </TabPanel>
-
-                <TabPanel value="metrics">
-                  <Suspense fallback={<LoadingState label="Loading metrics…" />}>
-                    <PerformanceMetrics dateRange={dateRange} />
-                  </Suspense>
-                </TabPanel>
-
-                <TabPanel value="distribution">
-                  <Suspense fallback={<LoadingState label="Loading distribution charts…" />}>
-                    <DistributionCharts />
-                  </Suspense>
-                </TabPanel>
-
-                <TabPanel value="health">
-                  <Suspense fallback={<LoadingState label="Loading health indicators…" />}>
-                    <HealthIndicatorIntegration />
-                  </Suspense>
-                </TabPanel>
-              </TabPanels>
-            </TabGroup>
-          </Card>
+          <RecentLegalUpdates />
         </>
       )}
     </div>

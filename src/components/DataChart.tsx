@@ -2,6 +2,10 @@ import React from 'react';
 import {
   AreaChart,
   Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,6 +16,7 @@ import {
 import { RefreshCw } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { LoadingState } from './ui';
 
 interface DataPoint {
   name: string;
@@ -135,7 +140,7 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
   if (loading) {
     return (
       <div className="h-[300px] w-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <LoadingState label="Loading chart data…" />
       </div>
     );
   }
@@ -170,84 +175,134 @@ const DataChart: React.FC<DataChartProps> = ({ type = 'area' }) => {
     );
   }
 
+  const commonAxes = (
+    <>
+      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+      <XAxis
+        dataKey="name"
+        tick={{ fontSize: 12 }}
+        tickLine={{ stroke: '#E5E7EB' }}
+        axisLine={{ stroke: '#E5E7EB' }}
+      />
+      <YAxis
+        tick={{ fontSize: 12 }}
+        tickLine={{ stroke: '#E5E7EB' }}
+        axisLine={{ stroke: '#E5E7EB' }}
+      />
+      <Tooltip
+        contentStyle={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #E5E7EB'
+        }}
+        formatter={(value: any) => [`${value} cases`, '']}
+      />
+      <Legend
+        verticalAlign="top"
+        height={36}
+        wrapperStyle={{ paddingTop: '10px' }}
+      />
+    </>
+  );
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
-              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-            </linearGradient>
-            <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10B981" stopOpacity={0.2}/>
-              <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-            </linearGradient>
-            <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.2}/>
-              <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-          <XAxis 
-            dataKey="name" 
-            tick={{ fontSize: 12 }}
-            tickLine={{ stroke: '#E5E7EB' }}
-            axisLine={{ stroke: '#E5E7EB' }}
-          />
-          <YAxis 
-            tick={{ fontSize: 12 }}
-            tickLine={{ stroke: '#E5E7EB' }}
-            axisLine={{ stroke: '#E5E7EB' }}
-          />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: 'white', 
-              borderRadius: '8px', 
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
-              border: '1px solid #E5E7EB' 
-            }}
-            formatter={(value: any) => [`${value} cases`, '']}
-          />
-          <Legend 
-            verticalAlign="top" 
-            height={36}
-            wrapperStyle={{ paddingTop: '10px' }}
-          />
-          
-          <Area 
-            type="monotone" 
-            dataKey="total" 
-            name="Total Cases" 
-            stroke="#3B82F6" 
-            fillOpacity={1} 
-            fill="url(#colorTotal)" 
-            activeDot={{ r: 6, strokeWidth: 1 }}
-            strokeWidth={2}
-          />
-          
-          <Area 
-            type="monotone" 
-            dataKey="completed" 
-            name="Completed" 
-            stroke="#10B981" 
-            fillOpacity={1} 
-            fill="url(#colorCompleted)" 
-            activeDot={{ r: 6, strokeWidth: 1 }}
-            strokeWidth={2}
-          />
-          
-          <Area 
-            type="monotone" 
-            dataKey="in_progress" 
-            name="In Progress" 
-            stroke="#F59E0B" 
-            fillOpacity={1} 
-            fill="url(#colorInProgress)" 
-            activeDot={{ r: 6, strokeWidth: 1 }}
-            strokeWidth={2}
-          />
-        </AreaChart>
+        {type === 'line' ? (
+          <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            {commonAxes}
+
+            <Line
+              type="monotone"
+              dataKey="total"
+              name="Total Cases"
+              stroke="#3B82F6"
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6, strokeWidth: 1 }}
+            />
+
+            <Line
+              type="monotone"
+              dataKey="completed"
+              name="Completed"
+              stroke="#10B981"
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6, strokeWidth: 1 }}
+            />
+
+            <Line
+              type="monotone"
+              dataKey="in_progress"
+              name="In Progress"
+              stroke="#F59E0B"
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6, strokeWidth: 1 }}
+            />
+          </LineChart>
+        ) : type === 'bar' ? (
+          <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            {commonAxes}
+
+            <Bar dataKey="total" name="Total Cases" fill="#3B82F6" />
+            <Bar dataKey="completed" name="Completed" fill="#10B981" />
+            <Bar dataKey="in_progress" name="In Progress" fill="#F59E0B" />
+          </BarChart>
+        ) : (
+          <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
+                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+              </linearGradient>
+              <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10B981" stopOpacity={0.2}/>
+                <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+              </linearGradient>
+              <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.2}/>
+                <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            {commonAxes}
+
+            <Area
+              type="monotone"
+              dataKey="total"
+              name="Total Cases"
+              stroke="#3B82F6"
+              fillOpacity={1}
+              fill="url(#colorTotal)"
+              activeDot={{ r: 6, strokeWidth: 1 }}
+              strokeWidth={2}
+            />
+
+            <Area
+              type="monotone"
+              dataKey="completed"
+              name="Completed"
+              stroke="#10B981"
+              fillOpacity={1}
+              fill="url(#colorCompleted)"
+              activeDot={{ r: 6, strokeWidth: 1 }}
+              strokeWidth={2}
+            />
+
+            <Area
+              type="monotone"
+              dataKey="in_progress"
+              name="In Progress"
+              stroke="#F59E0B"
+              fillOpacity={1}
+              fill="url(#colorInProgress)"
+              activeDot={{ r: 6, strokeWidth: 1 }}
+              strokeWidth={2}
+            />
+          </AreaChart>
+        )}
       </ResponsiveContainer>
     </div>
   );

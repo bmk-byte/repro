@@ -18,12 +18,10 @@ export default {
           700: '#B91C1C',
           800: '#991B1B',
           900: '#7F1D1D',
-          1000: '#f5f5dc',
         },
-        // Warm-leaning neutral scale (pairs with the maroon primary and the
-        // cream tone already used at primary-1000) — replaces default
-        // Tailwind gray across new/updated UI so surfaces feel intentional
-        // rather than generic.
+        // Warm-leaning neutral scale (pairs with the maroon primary) —
+        // replaces default Tailwind gray across new/updated UI so surfaces
+        // feel intentional rather than generic.
         stone: {
           50: '#FAF9F7',
           100: '#F3F1ED',

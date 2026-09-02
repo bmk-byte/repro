@@ -1,20 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Card, Title, Text, Flex } from '@tremor/react';
+import { Card, Title, Text } from '@tremor/react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
 import { RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { LoadingState } from './ui';
 
 // Custom colors based on #9C1D20 theme with black for Rapid Response
 const CASE_TYPE_COLORS = ["#9C1D20", "#000000"];
 const STATUS_COLORS = ["#F59E0B", "#10B981", "#EF4444", "#3B82F6"];
 
-interface DistributionChartsProps {
-  // Add any props if needed
-}
-
-const DistributionCharts: React.FC<DistributionChartsProps> = () => {
+const DistributionCharts: React.FC = () => {
   const [data, setData] = React.useState<any>({
     caseTypes: [],
     statusDistribution: [],
@@ -170,11 +167,7 @@ const DistributionCharts: React.FC<DistributionChartsProps> = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Loading distribution data…" />;
   }
 
   if (error) {

@@ -3,6 +3,7 @@ import { Card, Title, Text, Flex } from '@tremor/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { LoadingState } from './ui';
 
 interface TimelineData {
   name: string;
@@ -212,9 +213,7 @@ const TimelineVisualization: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading timeline…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-red-500">{error}</div>

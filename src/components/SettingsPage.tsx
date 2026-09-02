@@ -4,6 +4,7 @@ import ProfileSettingsForm from './ProfileSettingsForm';
 import { User, Bell, Lock, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
+import { LoadingState } from './ui';
 
 const SettingsPage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -39,11 +40,7 @@ const SettingsPage: React.FC = () => {
 
   // Show loading if either user data or moderator status is loading
   if (loading || moderatorLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Loading settings…" />;
   }
 
   // Check if user is not a moderator

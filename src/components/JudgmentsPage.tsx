@@ -23,7 +23,7 @@ const JudgmentsPage = () => {
   const [showAdvancedFilters, setShowAdvancedFilters] = React.useState(false);
   const [countries, setCountries] = React.useState<{id: string, name: string}[]>([]);
   const [courts, setCourts] = React.useState<string[]>([]);
-  const [languages, setLanguages] = React.useState<string[]>(['English', 'French', 'Portuguese', 'Swahili']);
+  const [languages, setLanguages] = React.useState<string[]>([]);
   const [years, setYears] = React.useState<number[]>([]);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
@@ -98,6 +98,17 @@ const JudgmentsPage = () => {
       
       const uniqueCourts = Array.from(new Set(courtsData.map(item => item.court))).filter(Boolean).sort();
       setCourts(uniqueCourts);
+
+      // Fetch unique languages
+      const { data: languagesData, error: languagesError } = await supabase
+        .from('judgments')
+        .select('language')
+        .not('language', 'is', null);
+
+      if (languagesError) throw languagesError;
+
+      const uniqueLanguages = Array.from(new Set(languagesData.map(item => item.language))).filter(Boolean).sort();
+      setLanguages(uniqueLanguages);
 
       // Get unique years from judgment_date
       const { data: yearsData, error: yearsError } = await supabase
@@ -213,7 +224,7 @@ const JudgmentsPage = () => {
     const maxVisiblePages = 3; // Reduced for mobile
     
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
     
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);

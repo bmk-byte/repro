@@ -3,6 +3,7 @@ import { Card, Title, Text, Flex, ProgressBar } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { CheckCircle, XCircle, AlertTriangle, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { LoadingState } from './ui';
 
 const COLORS = ['#10B981', '#EF4444', '#F59E0B', '#3B82F6', '#8B5CF6'];
 
@@ -225,9 +226,7 @@ const OutcomeMetricsDashboard: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading outcome metrics…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-red-500">{error}</div>

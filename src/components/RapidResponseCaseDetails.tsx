@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, MapPin, FileText, User, Clock, CircleCheck as CheckCircle, CreditCard as Edit2, TriangleAlert as AlertTriangle, CircleAlert as AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, FileText, CreditCard as Edit2, TriangleAlert as AlertTriangle, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import DocumentModal from './DocumentModal';
 import CaseProgressTracker from './CaseProgressTracker';
+import { LoadingState } from './ui';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -161,11 +162,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Loading case details…" />;
   }
 
   if (accessDenied || !caseData) {
@@ -195,7 +192,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+      <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative">
         <strong className="font-bold">Error: </strong>
         <span className="block sm:inline">{error}</span>
         <button

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon } from 'lucide-react';
+import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { Button, Badge } from './ui';
@@ -96,6 +96,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'analytics', label: 'Analytics', icon: BarChart2 },
     ...(isModerator ? [
       { id: 'upload-case', label: 'Upload Case', icon: Upload },
       { id: 'moderation', label: 'Moderation', icon: Shield },
@@ -109,9 +110,9 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'laws', label: 'Laws', icon: BookOpen },
     { id: 'resources', label: 'Resources', icon: ScrollText },
     ...(isModerator ? [
-      { id: 'moderator-admin', label: 'Moderators', icon: ShieldCheck },
-      { id: 'settings', label: 'Settings', icon: Settings }
-    ] : [])
+      { id: 'moderator-admin', label: 'Moderators', icon: ShieldCheck }
+    ] : []),
+    { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
   const handleSignOut = async () => {
@@ -150,9 +151,12 @@ const Navbar: React.FC<NavbarProps> = ({
 
               {isAuthenticated && isModerator && notificationCount > 0 && (
                 <button
-                  onClick={clearNotifications}
+                  onClick={() => {
+                    clearNotifications();
+                    setActiveTab?.('moderation');
+                  }}
                   className="relative p-2 rounded-md text-stone-600 hover:text-stone-900 hover:bg-stone-100"
-                  aria-label={`Notifications, ${notificationCount} unread`}
+                  aria-label={`Notifications, ${notificationCount} unread — go to moderation queue`}
                 >
                   <Bell className="h-5 w-5" />
                   <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold leading-none text-white bg-primary rounded-full">
@@ -256,6 +260,14 @@ const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
         </nav>
+      )}
+
+      {isMobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 top-16 z-30 bg-stone-900/30"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
       {isMobileMenuOpen && (

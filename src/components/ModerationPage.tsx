@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, CircleCheck as CheckCircle, Circle as XCircle, CircleAlert as AlertCircle, Eye, FileText, Filter, X, Search, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, CircleCheck as CheckCircle, Circle as XCircle, CircleAlert as AlertCircle, Eye, FileText, Filter, X, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../lib/supabase';
 import { sanitizeSearchTerm, sanitizeOrFilterTerm } from '../lib/sanitize';
 import toast from 'react-hot-toast';
@@ -8,7 +8,7 @@ import DocumentModal from './DocumentModal';
 import SubmissionDetailsCard from './SubmissionDetailsCard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import RejectionModal from './RejectionModal';
-import { Button, Select, Badge, LoadingState, EmptyState } from './ui';
+import { Button, Select, Badge, LoadingState, EmptyState, ConfirmDialog } from './ui';
 
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -24,6 +24,7 @@ const ModerationPage = () => {
   const [showDetailsModal, setShowDetailsModal] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>(null);
   const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
+  const [pendingApproveItem, setPendingApproveItem] = React.useState<any>(null);
   
   // Filter states
   const [showFilters, setShowFilters] = React.useState(false);
@@ -910,7 +911,7 @@ const ModerationPage = () => {
                         </div>
                         <div className="flex space-x-2 sm:ml-4 self-end sm:self-start">
                           <button
-                            onClick={() => handleModeration(activeTab, item.id, 'approved', item.originalTable)}
+                            onClick={() => setPendingApproveItem(item)}
                             className="p-2 text-green-600 hover:bg-green-50 rounded-full"
                             title="Approve"
                           >
@@ -971,6 +972,22 @@ const ModerationPage = () => {
           submission={selectedItem}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!pendingApproveItem}
+        onClose={() => setPendingApproveItem(null)}
+        onConfirm={() => {
+          if (pendingApproveItem) {
+            handleModeration(activeTab, pendingApproveItem.id, 'approved', pendingApproveItem.originalTable);
+          }
+          setPendingApproveItem(null);
+        }}
+        title="Approve and publish?"
+        description="This submission will become publicly visible immediately. Make sure you've reviewed the document or details before approving."
+        confirmLabel="Approve"
+        confirmVariant="primary"
+        loading={loading}
+      />
     </div>
   );
 };

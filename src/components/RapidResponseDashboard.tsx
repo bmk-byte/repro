@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CaseStageProgress from './CaseStageProgress';
+import { LoadingState, Badge } from './ui';
+import type { BadgeProps } from './ui';
 
 interface RapidResponseDashboardProps {
   onViewAllCases?: () => void;
@@ -66,59 +68,6 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
     console.log('RapidResponseDashboard: Fetching dashboard data...');
     fetchDashboardData();
   }, [timeRange, filters]);
-
-  // Set up real-time subscriptions
-  useEffect(() => {
-    console.log('Setting up real-time subscriptions for rapid response dashboard');
-    
-    // Subscribe to changes in rapid response cases
-    const casesSubscription = supabase
-      .channel('rapid-response-cases-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'cases',
-          filter: 'case_type=eq.rapid-response'
-        },
-        (payload) => {
-          console.log('Rapid response case changed:', payload);
-          fetchDashboardData();
-          
-          if (payload.eventType === 'INSERT') {
-            toast.success('New rapid response case added');
-          } else if (payload.eventType === 'UPDATE') {
-            toast.success('Rapid response case updated');
-          }
-        }
-      )
-      .subscribe();
-
-    // Subscribe to changes in case stages
-    const stagesSubscription = supabase
-      .channel('case-stages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'case_stages'
-        },
-        (payload) => {
-          console.log('Case stage changed:', payload);
-          fetchDashboardData();
-        }
-      )
-      .subscribe();
-
-    // Clean up subscriptions when component unmounts
-    return () => {
-      console.log('Cleaning up rapid response dashboard subscriptions');
-      supabase.removeChannel(casesSubscription);
-      supabase.removeChannel(stagesSubscription);
-    };
-  }, []);
 
   // Set up real-time subscriptions
   useEffect(() => {
@@ -338,7 +287,6 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         stagesQuery = stagesQuery.in('case_id', casesData.map(c => c.id));
       } else {
         // If no cases match filters, don't fetch stages
-        const stagesData: any[] = [];
         setStats(prev => ({ ...prev, processedStagesForProgress: [] }));
       }
 
@@ -527,23 +475,23 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
   };
 
   const hasActiveFilters = Object.values(filters).some(value => value !== 'all');
-  const getPriorityColor = (priority: string) => {
+  const getPriorityTone = (priority: string): NonNullable<BadgeProps['tone']> => {
     switch (priority) {
-      case 'Urgent': return 'bg-red-100 text-red-800';
-      case 'High': return 'bg-orange-100 text-orange-800';
-      case 'Medium': return 'bg-blue-100 text-blue-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-stone-100 text-stone-800';
+      case 'Urgent': return 'danger';
+      case 'High': return 'warning';
+      case 'Medium': return 'info';
+      case 'Low': return 'success';
+      default: return 'neutral';
     }
   };
 
-  const getStageColor = (stage: string) => {
+  const getStageTone = (stage: string): NonNullable<BadgeProps['tone']> => {
     switch (stage) {
-      case 'intake': return 'bg-purple-100 text-purple-800';
-      case 'review': return 'bg-blue-100 text-blue-800';
-      case 'action': return 'bg-amber-100 text-amber-800';
-      case 'resolution': return 'bg-green-100 text-green-800';
-      default: return 'bg-stone-100 text-stone-800';
+      case 'intake': return 'neutral';
+      case 'review': return 'info';
+      case 'action': return 'warning';
+      case 'resolution': return 'success';
+      default: return 'neutral';
     }
   };
 
@@ -737,9 +685,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         </Card>
       ) : loading ? (
         <Card>
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+          <LoadingState label="Loading rapid response cases…" />
         </Card>
       ) : (
         <>
@@ -933,14 +879,14 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                       </div>
                       <div className="flex space-x-2">
                         {caseItem.priority_level && (
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${getPriorityColor(caseItem.priority_level)}`}>
+                          <Badge tone={getPriorityTone(caseItem.priority_level)}>
                             {caseItem.priority_level}
-                          </span>
+                          </Badge>
                         )}
                         {caseItem.rapid_response_stage && (
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${getStageColor(caseItem.rapid_response_stage)}`}>
+                          <Badge tone={getStageTone(caseItem.rapid_response_stage)}>
                             {caseItem.rapid_response_stage}
-                          </span>
+                          </Badge>
                         )}
                         {caseItem.case_categories && caseItem.case_categories.length > 0 && (
                           <span className={`px-2 py-0.5 text-xs rounded-full ${getCategoryColor(caseItem.case_categories[0])}`}>

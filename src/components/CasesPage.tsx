@@ -36,7 +36,6 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   const [categories, setCategories] = React.useState<string[]>([]);
   const [partners, setPartners] = React.useState<string[]>([]);
   const [userOrganization, setUserOrganization] = React.useState<string | null>(null);
-  const [isAfyanahakiModerator, setIsAfyanahakiModerator] = React.useState(false);
   const [accessScope, setAccessScope] = React.useState<'global' | 'organization'>('global');
   const [fetchError, setFetchError] = React.useState<string | null>(null);
 
@@ -57,7 +56,6 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
           if (profile) {
             setUserOrganization(profile.organization);
             const isAfyanahaki = profile.is_moderator && (profile.email?.endsWith('@afyanahaki.org') || false);
-            setIsAfyanahakiModerator(isAfyanahaki);
 
             // If afyanahaki or not a moderator, user has global access
             // If restricted organization moderator, user has organization-only access
@@ -285,7 +283,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
     const maxVisiblePages = 3; // Reduced for mobile
     
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
     
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);

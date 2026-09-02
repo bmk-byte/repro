@@ -1,7 +1,7 @@
 import React from 'react';
 import { Upload, File, X as XIcon, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
-import { supabase } from '../lib/supabase';
+import { supabase, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { createSafeDisplayName, sanitizeText } from '../lib/sanitize';
 import { Modal, Input, Textarea, Select, Button } from './ui';
@@ -18,19 +18,6 @@ const ACCEPTED_FILE_TYPES = {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-const COUNTRIES = [
-  { id: 'benin', name: 'Benin' },
-  { id: 'ivory-coast', name: 'Ivory Coast/Côte d\'Ivoire' },
-  { id: 'kenya', name: 'Kenya' },
-  { id: 'madagascar', name: 'Madagascar' },
-  { id: 'malawi', name: 'Malawi' },
-  { id: 'nigeria', name: 'Nigeria' },
-  { id: 'senegal', name: 'Senegal' },
-  { id: 'south-africa', name: 'South Africa' },
-  { id: 'uganda', name: 'Uganda' },
-  { id: 'zimbabwe', name: 'Zimbabwe' }
-];
-
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -40,6 +27,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
   const [loading, setLoading] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
   const [fileError, setFileError] = React.useState<string | null>(null);
+  const [countries, setCountries] = React.useState<{ id: string; name: string }[]>([]);
   const [formData, setFormData] = React.useState({
     title: '',
     description: '',
@@ -47,6 +35,25 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
     category: '',
     type: 'policy' as 'policy' | 'act',
   });
+
+  React.useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('countries')
+          .select('id, name')
+          .order('name');
+
+        if (error) throw error;
+        setCountries(data || []);
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+        toast.error(handleSupabaseError(error));
+      }
+    };
+
+    fetchCountries();
+  }, []);
 
   const onDrop = React.useCallback((acceptedFiles: File[], rejections: FileRejection[]) => {
     if (rejections.length > 0) {
@@ -112,7 +119,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
       onClose();
     } catch (error) {
       console.error('Error uploading document:', error);
-      toast.error('Failed to upload document. Please try again.');
+      toast.error(handleSupabaseError(error));
     } finally {
       setLoading(false);
     }
@@ -206,7 +213,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
               onChange={(e) => setFormData(prev => ({ ...prev, country_id: e.target.value }))}
             >
               <option value="">Select a country</option>
-              {COUNTRIES.map(country => (
+              {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}
             </Select>

@@ -5,7 +5,7 @@ import { validateModeratorOrganization } from '../lib/moderatorService';
 import toast from 'react-hot-toast';
 import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff, Check, X } from 'lucide-react';
 import { PARTNER_ORGANIZATIONS, OTHER_ORGANIZATION_VALUE } from '../constants/organizations';
-import { Input, Select, Button } from './ui';
+import { Input, Select, Button, Card } from './ui';
 
 interface AuthProps {
   onSuccess?: () => void;
@@ -339,7 +339,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col">
+    <div className="min-h-screen w-full bg-stone-100 flex flex-col">
       <div className="flex-grow flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex flex-col items-center">
@@ -352,17 +352,24 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                 <span>Back to Home</span>
               </button>
             )}
-            <div className="flex items-center justify-center gap-2">
-              <Scale className="h-10 w-10 text-primary" />
+            <div className="flex items-center justify-center gap-2.5">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <Scale className="h-6 w-6 text-primary" />
+              </span>
               <span className="font-serif text-3xl font-semibold text-primary">ReproPulse</span>
             </div>
-            <h2 className="mt-6 text-center text-3xl font-serif font-semibold text-stone-900">
+            <h2 className="mt-7 text-center text-2xl sm:text-3xl font-serif font-semibold text-stone-900">
               {isForgotPassword ? 'Reset your password' : isSignUp ? 'Create your account' : 'Sign in to your account'}
             </h2>
           </div>
 
-          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="bg-white py-8 px-4 shadow-card rounded-lg sm:px-10 border border-stone-200">
+          <motion.div
+            className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+          >
+            <Card padding="none" className="p-6 sm:p-10">
                 <motion.form
                     className="space-y-6"
                     onSubmit={handleAuth}
@@ -567,44 +574,42 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                           id="remember-me"
                           name="remember-me"
                           type="checkbox"
-                          className="h-4 w-4 text-primary focus:ring-primary border-stone-300 rounded"
+                          className="h-4 w-4 rounded border-stone-300 accent-primary focus:ring-primary"
                           title="Keep me signed in on this device"
                         />
                         <label htmlFor="remember-me" className="ml-2 block text-sm text-stone-700">
                           Remember me
                         </label>
                       </div>
-                      <div className="text-sm text-stone-500">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsForgotPassword(true);
-                            setValidationErrors({ email: '', password: '', organization: '' });
-                            setPassword('');
-                          }}
-                          className="font-medium text-primary hover:text-primary-dark"
-                        >
-                          Forgot your password?
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsForgotPassword(true);
+                          setValidationErrors({ email: '', password: '', organization: '' });
+                          setPassword('');
+                        }}
+                        className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+                      >
+                        Forgot your password?
+                      </button>
                     </div>
                   )}
 
-                  <Button type="submit" loading={loading} className="w-full">
+                  <Button type="submit" loading={loading} size="lg" className="w-full">
                     {loading ? 'Processing...' : isForgotPassword ? 'Send reset instructions' : isSignUp ? 'Sign up' : 'Sign in'}
                   </Button>
                 </motion.form>
 
-              <div className="mt-6">
+              <div className="mt-6 text-center">
                   <button
                     onClick={isForgotPassword ? () => setIsForgotPassword(false) : toggleAuthMode}
-                    className="flex items-center text-sm font-medium text-primary hover:text-primary-dark"
+                    className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
                   >
                     {isForgotPassword ? 'Back to sign in' : isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
                   </button>
                 </div>
-            </div>
-          </div>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </div>

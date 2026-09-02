@@ -23,6 +23,8 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
   const [organization, setOrganization] = useState(user?.user_metadata?.organization || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.user_metadata?.phone_number || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.user_metadata?.avatar_url || '');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const [isModerator, setIsModerator] = useState(false);
   const [email, setEmail] = useState(user?.email || '');
   const [receiveNotifications, setReceiveNotifications] = useState(true);
@@ -99,6 +101,49 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       setReceiveNotifications(!enabled);
     } finally {
       setSavingNotifications(false);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('That image is larger than 5MB. Please choose a smaller one.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl },
+      });
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
+      toast.success('Profile photo updated');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error(handleSupabaseError(error));
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -182,7 +227,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
   return (
     <div className="space-y-6">
       {/* Avatar Display */}
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center gap-2">
         <div className="relative">
           <div className="h-24 w-24 rounded-full bg-stone-200 flex items-center justify-center overflow-hidden">
             {avatarUrl && sanitizeURL(avatarUrl) ? (
@@ -191,7 +236,24 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
               <Camera className="h-8 w-8 text-stone-400" aria-hidden="true" />
             )}
           </div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            aria-label="Change profile photo"
+            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-card hover:bg-primary-dark disabled:opacity-50"
+          >
+            {uploadingAvatar ? <Spinner size="sm" label="" /> : <Camera className="h-4 w-4" aria-hidden="true" />}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="sr-only"
+          />
         </div>
+        <p className="text-xs text-stone-500">Click the camera icon to change your photo</p>
       </div>
 
       {/* Notification Preferences */}

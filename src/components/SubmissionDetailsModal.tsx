@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import CaseDetails from './CaseDetails';
 import JudgmentDetails from './JudgmentDetails';
+import { LoadingState } from './ui';
 
 interface SubmissionDetailsModalProps {
   isOpen: boolean;
@@ -96,9 +97,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex justify-center items-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
+            <LoadingState label="Loading submission details…" />
           ) : error ? (
             <div className="text-center py-8 text-red-500">
               {error}

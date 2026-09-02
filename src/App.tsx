@@ -21,6 +21,7 @@ const LawsRepository = lazy(() => import('./components/LawsRepository'));
 const JudgmentsPage = lazy(() => import('./components/JudgmentsPage'));
 const CasesPage = lazy(() => import('./components/CasesPage'));
 const DashboardLayout = lazy(() => import('./components/DashboardLayout'));
+const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
 const SubmissionForm = lazy(() => import('./components/SubmissionForm'));
 const ModerationPage = lazy(() => import('./components/ModerationPage'));
 const ModeratorAdminPanel = lazy(() => import('./components/ModeratorAdminPanel'));
@@ -161,22 +162,18 @@ function DashboardApp() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      devLog('Auth state changed, new session:', session ? 'exists' : 'null');
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      devLog('Auth state changed, event:', event, 'new session:', session ? 'exists' : 'null');
+      // Always keep the session object fresh (needed so subsequent API calls
+      // use the refreshed access token), but only reset navigation/re-fetch
+      // the profile on an actual sign-in — Supabase fires TOKEN_REFRESHED
+      // automatically whenever the browser tab regains focus/visibility, and
+      // treating that the same as a fresh sign-in used to kick the user back
+      // to the Dashboard tab and reload their profile every time they simply
+      // switched back to this browser tab.
       setSession(session);
-      if (session) {
-        setShowAuthModal(false);
-        setActiveTab('dashboard');
-        fetchUserProfile(session.user.id);
 
-        // ELU Analytics: attach the signed-in user's email to their session so product
-        // analytics can attribute behavior to a real person instead of an anonymous
-        // device. Optional — safe to remove if you don't want to share email with
-        // analytics. See https://elu.dev for docs.
-        if (typeof window !== 'undefined' && window.elu && session.user?.email) {
-          window.elu.identify(session.user.email, { email: session.user.email });
-        }
-      } else {
+      if (event === 'SIGNED_OUT' || !session) {
         setUserProfile(null);
 
         // ELU Analytics: clear the identified user on sign-out so subsequent
@@ -184,6 +181,25 @@ function DashboardApp() {
         if (typeof window !== 'undefined' && window.elu) {
           window.elu.reset();
         }
+        return;
+      }
+
+      if (event !== 'SIGNED_IN') {
+        // TOKEN_REFRESHED, USER_UPDATED, etc. — session is already updated
+        // above; nothing else should change under the user.
+        return;
+      }
+
+      setShowAuthModal(false);
+      setActiveTab('dashboard');
+      fetchUserProfile(session.user.id);
+
+      // ELU Analytics: attach the signed-in user's email to their session so product
+      // analytics can attribute behavior to a real person instead of an anonymous
+      // device. Optional — safe to remove if you don't want to share email with
+      // analytics. See https://elu.dev for docs.
+      if (typeof window !== 'undefined' && window.elu && session.user?.email) {
+        window.elu.identify(session.user.email, { email: session.user.email });
       }
     });
 
@@ -298,9 +314,9 @@ function DashboardApp() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex-1 flex items-center justify-center bg-gray-50"
+          className="flex-1 flex items-center justify-center bg-stone-100"
         >
-          <Auth 
+          <Auth
             onSuccess={() => setShowAuthModal(false)}
             onBack={() => setShowAuthModal(false)} 
             initialMode={authInitialMode}
@@ -338,14 +354,16 @@ function DashboardApp() {
           {(() => {
             switch (activeTab) {
               case 'dashboard':
-                return <DashboardLayout 
-                  stats={dashboardStats} 
-                  loading={loading} 
-                  error={error} 
+                return <DashboardLayout
+                  stats={dashboardStats}
+                  loading={loading}
+                  error={error}
                   setActiveTab={setActiveTab}
-                  isModerator={isModerator}
                 />;
-              
+
+              case 'analytics':
+                return <AnalyticsPage isModerator={isModerator} />;
+
               case 'cases':
                 return <CasesPage userProfile={userProfile} />;
 
@@ -436,7 +454,7 @@ function DashboardApp() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-1000">
+    <div className="flex flex-col h-screen bg-stone-100">
       <Navbar 
         isAuthenticated={!!session} 
         isLandingPage={!session && !showAuthModal}
@@ -449,9 +467,9 @@ function DashboardApp() {
           setShowAuthModal(true);
         }}
       />
-      <div className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6">
+      <div className="flex-1 overflow-x-hidden overflow-y-auto bg-stone-100 p-4 md:p-6">
           {connectionStatus === false ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative" role="alert">
               <div className="flex items-center">
                 <div className="flex-1">
                   <strong className="font-bold">Connection Error: </strong>
@@ -459,7 +477,7 @@ function DashboardApp() {
                 </div>
                 <button
                   onClick={checkConnection}
-                  className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-danger hover:bg-danger-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Retry Connection
@@ -472,7 +490,7 @@ function DashboardApp() {
               )}
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative" role="alert">
               <strong className="font-bold">Error: </strong>
               <span className="block sm:inline">{error}</span>
             </div>

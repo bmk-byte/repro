@@ -1,13 +1,12 @@
 import React from 'react';
 import { ParentSize } from '@visx/responsive';
 import { Mercator } from '@visx/geo';
-import { Group } from '@visx/group';
 import { scaleQuantize } from '@visx/scale';
-import { Tooltip, defaultStyles } from '@visx/tooltip';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import topology from '../data/africa-topo.json';
 import { feature } from 'topojson-client';
+import { LoadingState } from './ui';
 
 interface MapData {
   [key: string]: {
@@ -204,7 +203,7 @@ const AfricaMap = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
@@ -212,7 +211,7 @@ const AfricaMap = () => {
       <div className="h-[600px] relative" onMouseMove={handleMouseMove}>
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <LoadingState label="Loading map data…" />
           </div>
         ) : Object.keys(mapData).length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">

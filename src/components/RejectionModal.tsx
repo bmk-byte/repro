@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { XCircle, Trash2 } from 'lucide-react';
-import { Modal, Button } from './ui';
+import { Modal, Button, Textarea } from './ui';
 
 interface RejectionModalProps {
   isOpen: boolean;
@@ -125,44 +125,29 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
       </div>
 
       <div className="mb-4">
-        <label htmlFor="rejection-feedback" className="block text-sm font-medium text-stone-700 mb-2">
-          Detailed feedback <span className="text-danger" aria-hidden="true">*</span>
-        </label>
-        <textarea
+        <Textarea
+          label="Detailed feedback"
           id="rejection-feedback"
+          required
+          rows={5}
           value={rejectionFeedback}
           onChange={(e) => setRejectionFeedback(e.target.value)}
           placeholder="• Be specific about what's missing or incorrect
 • Suggest concrete steps for improvement
 • Reference specific sections that need attention
 • Maintain a constructive and professional tone"
-          aria-describedby="rejection-feedback-hint"
-          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 min-h-[120px] resize-y transition-colors ${
-            feedbackLength < 10
-              ? 'border-danger focus:border-danger focus:ring-danger'
-              : 'border-stone-300 focus:border-primary focus:ring-primary'
-          }`}
           autoFocus
+          error={feedbackLength < 10 ? `${10 - feedbackLength} more characters needed (minimum 10)` : undefined}
+          helperText={
+            feedbackLength >= 10
+              ? feedbackLength < 20
+                ? 'Good length — consider adding more detail'
+                : 'Excellent — detailed feedback provided'
+              : undefined
+          }
         />
-
-        <div id="rejection-feedback-hint" className="flex justify-between items-center mt-2">
-          <div className={`text-xs ${
-            feedbackLength < 10
-              ? 'text-danger'
-              : feedbackLength < 20
-                ? 'text-warning'
-                : 'text-success'
-          }`}>
-            {feedbackLength < 10
-              ? `${10 - feedbackLength} more characters needed (minimum 10)`
-              : feedbackLength < 20
-                ? 'Good length - consider adding more detail'
-                : 'Excellent - detailed feedback provided'
-            }
-          </div>
-          <div className="text-xs text-stone-500 font-mono tabular-nums">
-            {rejectionFeedback.length} characters
-          </div>
+        <div className="mt-1 text-right text-xs text-stone-500 font-mono tabular-nums">
+          {rejectionFeedback.length} characters
         </div>
       </div>
 

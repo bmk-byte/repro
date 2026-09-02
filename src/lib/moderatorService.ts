@@ -59,7 +59,6 @@ export const isConfiguredModerator = (email: string, organization?: string): boo
     return false;
   }
 
-  const config = parseModeratorConfig();
   const normalizedEmail = email.toLowerCase().trim();
 
   const expectedOrganization = getModeratorOrganization(normalizedEmail);

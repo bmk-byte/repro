@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { HeartPulse, Baby, UserCheck, BookOpen, Scale as Scales, Droplets, ShieldAlert } from 'lucide-react';
+import { HeartPulse, Baby, UserCheck, Scale as Scales, Droplets, ShieldAlert } from 'lucide-react';
 
 const thematicAreas = [
   {

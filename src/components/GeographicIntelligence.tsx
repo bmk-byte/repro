@@ -5,6 +5,7 @@ import { MapPin, Map } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { GlobeLive, LiveMarker } from './ui/cobe-globe-live';
 import { getCountryCoordinates } from '../lib/countryCoordinates';
+import { LoadingState } from './ui';
 
 interface CountryData {
   name: string;
@@ -191,9 +192,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading geographic data…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-red-500 text-center">

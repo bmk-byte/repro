@@ -30,6 +30,7 @@ export function sanitizeText(input: string): string {
 
   return input
     .trim()
+    // eslint-disable-next-line no-control-regex -- intentional: stripping control characters is the point of this function
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters
     .replace(/\s+/g, ' '); // Normalize whitespace
 }

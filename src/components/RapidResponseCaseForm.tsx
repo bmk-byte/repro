@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Plus, Calendar, Clock, CircleAlert as AlertCircle } from 'lucide-react';
+import { X, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { useFormDraft } from '../hooks/useFormDraft';
 import { createSafeDisplayName } from '../lib/sanitize';
+import { Input, Select, Textarea, Button } from './ui';
 
 interface RapidResponseCaseFormProps {
   onSuccess: () => void;
@@ -19,11 +20,35 @@ interface Deadline {
   description: string;
 }
 
+const PRIORITY_LEVELS = ['Urgent', 'High', 'Medium', 'Low'] as const;
+
+// Selected/unselected classes for the priority segmented-button group, using
+// the app's semantic Tailwind tokens (success/warning/danger/info) instead of
+// raw Tailwind colors, so each priority reads consistently with badges and
+// other status UI elsewhere in the app.
+const PRIORITY_BUTTON_CLASSES: Record<string, { selected: string; unselected: string }> = {
+  Urgent: {
+    selected: 'bg-danger border-danger text-white',
+    unselected: 'bg-danger-light border-danger-light text-danger-dark hover:bg-danger-light/70',
+  },
+  High: {
+    selected: 'bg-warning border-warning text-white',
+    unselected: 'bg-warning-light border-warning-light text-warning-dark hover:bg-warning-light/70',
+  },
+  Medium: {
+    selected: 'bg-info border-info text-white',
+    unselected: 'bg-info-light border-info-light text-info-dark hover:bg-info-light/70',
+  },
+  Low: {
+    selected: 'bg-success border-success text-white',
+    unselected: 'bg-success-light border-success-light text-success-dark hover:bg-success-light/70',
+  },
+};
+
 const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
   onSuccess,
   onCancel,
-  caseData,
-  teamMembers
+  caseData
 }) => {
   const [loading, setLoading] = useState(false);
   const [countries, setCountries] = useState<{ id: string; name: string }[]>([]);
@@ -52,7 +77,16 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+  const [deadlineDraftDate, setDeadlineDraftDate] = useState('');
+  const [deadlineDraftDescription, setDeadlineDraftDescription] = useState('');
+  const [editingDeadlineIndex, setEditingDeadlineIndex] = useState<number | null>(null);
   const isEditing = !!caseData;
+
+  // Fields touched (blurred) so far — inline errors only show for a field
+  // once the user has actually interacted with it, matching the validate-on-
+  // blur pattern used in SubmitCaseForm.tsx.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
   const draftKey = isEditing ? `rapid-response-edit-${caseData?.id || 'unknown'}` : 'rapid-response-new';
   const { loadDraft, saveDraft, clearDraft } = useFormDraft(draftKey, { formData: initialFormData, deadlines: [] as Deadline[] });
@@ -130,7 +164,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
   useEffect(() => {
     fetchCountries();
-    
+
     if (caseData) {
       // Initialize form with existing case data
       const initialStage = caseData.rapid_response_stage || 'intake';
@@ -153,14 +187,14 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
         case_reference: caseData.case_reference || '', // Initialize case reference field
         case_category: caseData.case_categories?.[0] || '' // Initialize case category field from array
       });
-      
+
       // Parse key_deadlines from JSON if it exists
       if (caseData.key_deadlines) {
         try {
-          const parsedDeadlines = typeof caseData.key_deadlines === 'string' 
-            ? JSON.parse(caseData.key_deadlines) 
+          const parsedDeadlines = typeof caseData.key_deadlines === 'string'
+            ? JSON.parse(caseData.key_deadlines)
             : caseData.key_deadlines;
-          
+
           setDeadlines(Array.isArray(parsedDeadlines) ? parsedDeadlines.map((d: any, idx: number) => ({
             ...d,
             id: d.id || `deadline-${idx}`
@@ -219,53 +253,85 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    
+
     // Update form data and map rapid_response_stage to status
     setFormData((prev) => {
       const updatedData = { ...prev, [name]: value };
-      
+
       // If rapid_response_stage is being updated, also update status
       if (name === 'rapid_response_stage') {
         updatedData.status = mapStageToStatus(value);
       }
-      
+
       return updatedData;
     });
   };
 
-  const addDeadline = () => {
-    const newDeadline: Deadline = {
-      id: `deadline-${Date.now()}`,
-      date: '',
-      description: ''
-    };
-    setDeadlines([...deadlines, newDeadline]);
+  const handlePriorityChange = (priority: string) => {
+    setFormData(prev => ({ ...prev, priority_level: priority }));
+    markTouched('priority_level');
   };
 
-  const updateDeadline = (id: string, field: keyof Deadline, value: string) => {
-    setDeadlines(deadlines.map(d => 
-      d.id === id ? { ...d, [field]: value } : d
-    ));
+  // Key deadlines — a small bespoke add/edit/remove list rather than the
+  // shared TagListInput, since deadlines need in-place editing (fix a typo'd
+  // date or description without deleting and re-adding), which no other
+  // "add item to a list" field in the app needs.
+  const commitDeadline = () => {
+    const description = deadlineDraftDescription.trim();
+    if (!description) return;
+
+    if (editingDeadlineIndex !== null) {
+      setDeadlines(prev => prev.map((d, i) =>
+        i === editingDeadlineIndex ? { ...d, date: deadlineDraftDate, description } : d
+      ));
+      setEditingDeadlineIndex(null);
+    } else {
+      const newDeadline: Deadline = {
+        id: `deadline-${Date.now()}`,
+        date: deadlineDraftDate,
+        description
+      };
+      setDeadlines(prev => [...prev, newDeadline]);
+    }
+
+    setDeadlineDraftDate('');
+    setDeadlineDraftDescription('');
+    markTouched('key_deadlines');
   };
 
-  const removeDeadline = (id: string) => {
-    setDeadlines(deadlines.filter(d => d.id !== id));
+  const startEditDeadline = (index: number) => {
+    const deadline = deadlines[index];
+    setDeadlineDraftDate(deadline.date);
+    setDeadlineDraftDescription(deadline.description);
+    setEditingDeadlineIndex(index);
+  };
+
+  const cancelEditDeadline = () => {
+    setDeadlineDraftDate('');
+    setDeadlineDraftDescription('');
+    setEditingDeadlineIndex(null);
+  };
+
+  const removeDeadline = (index: number) => {
+    setDeadlines(prev => prev.filter((_, i) => i !== index));
+    if (editingDeadlineIndex === index) cancelEditDeadline();
+    markTouched('key_deadlines');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!formData.case_reference) {
       toast.error('Case reference is required');
       return;
     }
-    
+
     if (!formData.case_category) {
       toast.error('Case category is required');
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -288,7 +354,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       if (file) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from('case-documents')
           .upload(fileName, file);
@@ -338,21 +404,9 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
     }
   };
 
-  // Get priority level color
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'Urgent':
-        return 'bg-red-100 border-red-300 text-red-800';
-      case 'High':
-        return 'bg-orange-100 border-orange-300 text-orange-800';
-      case 'Medium':
-        return 'bg-blue-100 border-blue-300 text-blue-800';
-      case 'Low':
-        return 'bg-green-100 border-green-300 text-green-800';
-      default:
-        return 'bg-stone-100 border-stone-300 text-stone-800';
-    }
-  };
+  // Per-field inline error, shown once the field has been touched (blurred).
+  const fieldError = (field: string, label: string, isEmpty: boolean): string | undefined =>
+    touched[field] && isEmpty ? `${label} is required` : undefined;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -360,350 +414,305 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
         {/* Basic Information */}
         <div className="space-y-6 md:col-span-2">
           <h3 className="text-lg font-medium text-stone-900">Basic Information</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="case_reference" className="block text-sm font-medium text-stone-700">
-                Case Reference * <span className="text-xs text-stone-500">(Unique Identifier)</span>
-              </label>
-              <input
-                type="text"
-                id="case_reference"
-                name="case_reference"
-                value={formData.case_reference}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., RR-2025-001"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="case_filed" className="block text-sm font-medium text-stone-700">
-                Case Title *
-              </label>
-              <input
-                type="text"
-                id="case_filed"
-                name="case_filed"
-                value={formData.case_filed}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="country_id" className="block text-sm font-medium text-stone-700">
-                Country/Jurisdiction *
-              </label>
-              <select
-                id="country_id"
-                name="country_id"
-                value={formData.country_id}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="">Select a country</option>
-                {countries.map(country => (
-                  <option key={country.id} value={country.id}>{country.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="case_category" className="block text-sm font-medium text-stone-700">
-                Case Category *
-              </label>
-              <select
-                id="case_category"
-                name="case_category"
-                value={formData.case_category}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="">Select a category</option>
-                {caseCategoryOptions.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="case_summary" className="block text-sm font-medium text-stone-700">
-              Case Description *
-            </label>
-            <textarea
-              id="case_summary"
-              name="case_summary"
-              value={formData.case_summary}
-              onChange={handleInputChange}
-              rows={3}
+            <Input
+              label="Case Reference"
+              name="case_reference"
               required
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
+              value={formData.case_reference}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('case_reference')}
+              error={fieldError('case_reference', 'Case Reference', !formData.case_reference)}
+              helperText="Unique identifier"
+              placeholder="e.g., RR-2025-001"
+            />
+
+            <Input
+              label="Case Title"
+              name="case_filed"
+              required
+              value={formData.case_filed}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('case_filed')}
+              error={fieldError('case_filed', 'Case Title', !formData.case_filed)}
             />
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Select
+              label="Country/Jurisdiction"
+              name="country_id"
+              required
+              value={formData.country_id}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('country_id')}
+              error={fieldError('country_id', 'Country/Jurisdiction', !formData.country_id)}
+            >
+              <option value="">Select a country</option>
+              {countries.map(country => (
+                <option key={country.id} value={country.id}>{country.name}</option>
+              ))}
+            </Select>
+
+            <Select
+              label="Case Category"
+              name="case_category"
+              required
+              value={formData.case_category}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('case_category')}
+              error={fieldError('case_category', 'Case Category', !formData.case_category)}
+            >
+              <option value="">Select a category</option>
+              {caseCategoryOptions.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </Select>
+          </div>
+
+          <Textarea
+            label="Case Description"
+            name="case_summary"
+            required
+            rows={3}
+            value={formData.case_summary}
+            onChange={handleInputChange}
+            onBlur={() => markTouched('case_summary')}
+            error={fieldError('case_summary', 'Case Description', !formData.case_summary)}
+          />
         </div>
 
         {/* Priority and Status */}
         <div className="space-y-6">
           <h3 className="text-lg font-medium text-stone-900">Priority and Status</h3>
-          
-          <div>
-            <label htmlFor="priority_level" className="block text-sm font-medium text-stone-700">
-              Priority Level *
-            </label>
-            <div className="mt-1 grid grid-cols-4 gap-2">
-              {['Urgent', 'High', 'Medium', 'Low'].map((priority) => (
-                <label
-                  key={priority}
-                  className={`flex items-center justify-center px-4 py-2 border rounded-md cursor-pointer transition-colors ${
-                    formData.priority_level === priority 
-                      ? getPriorityColor(priority) 
-                      : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="priority_level"
-                    value={priority}
-                    checked={formData.priority_level === priority}
-                    onChange={handleInputChange}
-                    className="sr-only"
-                  />
-                  {priority}
-                </label>
-              ))}
+
+          <div className="flex flex-col gap-1.5">
+            {/* Label typography matches Select's rendered label exactly, so
+                this bespoke segmented group reads consistently with the
+                "Current Stage" Select right below it. */}
+            <span className="text-sm font-medium text-stone-700">
+              Priority Level
+              <span className="text-danger ml-0.5" aria-hidden="true">*</span>
+            </span>
+            <div className="grid grid-cols-4 gap-2">
+              {PRIORITY_LEVELS.map((priority) => {
+                const isSelected = formData.priority_level === priority;
+                const classes = PRIORITY_BUTTON_CLASSES[priority];
+                return (
+                  <label
+                    key={priority}
+                    className={`flex items-center justify-center px-4 py-2 border rounded-md cursor-pointer transition-colors ${
+                      isSelected ? classes.selected : classes.unselected
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="priority_level"
+                      value={priority}
+                      checked={isSelected}
+                      onChange={() => handlePriorityChange(priority)}
+                      className="sr-only"
+                    />
+                    {priority}
+                  </label>
+                );
+              })}
             </div>
           </div>
 
-          <div>
-            <label htmlFor="rapid_response_stage" className="block text-sm font-medium text-stone-700">
-              Current Stage *
-            </label>
-            <select
-              id="rapid_response_stage"
-              name="rapid_response_stage"
-              value={formData.rapid_response_stage}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            >
-              <option value="intake">Intake</option>
-              <option value="review">Review</option>
-              <option value="action">Action</option>
-              <option value="resolution">Resolution</option>
-            </select>
-            <p className="mt-1 text-sm text-stone-500">
-              {formData.rapid_response_stage === 'intake' && 'Initial assessment and information gathering'}
-              {formData.rapid_response_stage === 'review' && 'Analyzing case details and planning response'}
-              {formData.rapid_response_stage === 'action' && 'Implementing response strategies'}
-              {formData.rapid_response_stage === 'resolution' && 'Case resolution and follow-up'}
-            </p>
-          </div>
+          <Select
+            label="Current Stage"
+            name="rapid_response_stage"
+            required
+            value={formData.rapid_response_stage}
+            onChange={handleInputChange}
+            onBlur={() => markTouched('rapid_response_stage')}
+            error={fieldError('rapid_response_stage', 'Current Stage', !formData.rapid_response_stage)}
+            helperText={
+              formData.rapid_response_stage === 'intake' ? 'Initial assessment and information gathering' :
+              formData.rapid_response_stage === 'review' ? 'Analyzing case details and planning response' :
+              formData.rapid_response_stage === 'action' ? 'Implementing response strategies' :
+              formData.rapid_response_stage === 'resolution' ? 'Case resolution and follow-up' :
+              undefined
+            }
+          >
+            <option value="intake">Intake</option>
+            <option value="review">Review</option>
+            <option value="action">Action</option>
+            <option value="resolution">Resolution</option>
+          </Select>
 
-          <div>
-            <label htmlFor="nature_of_case" className="block text-sm font-medium text-stone-700">
-              Nature of Case *
-            </label>
-            <textarea
-              id="nature_of_case"
-              name="nature_of_case"
-              value={formData.nature_of_case}
-              onChange={handleInputChange}
-              rows={2}
-              required
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+          <Textarea
+            label="Nature of Case"
+            name="nature_of_case"
+            required
+            rows={2}
+            value={formData.nature_of_case}
+            onChange={handleInputChange}
+            onBlur={() => markTouched('nature_of_case')}
+            error={fieldError('nature_of_case', 'Nature of Case', !formData.nature_of_case)}
+          />
         </div>
 
         {/* Client Information */}
         <div className="space-y-6">
           <h3 className="text-lg font-medium text-stone-900">Client Information</h3>
-          
-          <div>
-            <label htmlFor="client_name" className="block text-sm font-medium text-stone-700">
-              Client Name
-            </label>
-            <input
-              type="text"
-              id="client_name"
-              name="client_name"
-              value={formData.client_name}
-              onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
 
-          <div>
-            <label htmlFor="client_email" className="block text-sm font-medium text-stone-700">
-              Client Email
-            </label>
-            <input
-              type="email"
-              id="client_email"
-              name="client_email"
-              value={formData.client_email}
-              onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+          <Input
+            label="Client Name"
+            name="client_name"
+            value={formData.client_name}
+            onChange={handleInputChange}
+          />
 
-          <div>
-            <label htmlFor="client_phone" className="block text-sm font-medium text-stone-700">
-              Client Phone
-            </label>
-            <input
-              type="tel"
-              id="client_phone"
-              name="client_phone"
-              value={formData.client_phone}
-              onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-          </div>
+          <Input
+            label="Client Email"
+            name="client_email"
+            type="email"
+            value={formData.client_email}
+            onChange={handleInputChange}
+          />
+
+          <Input
+            label="Client Phone"
+            name="client_phone"
+            type="tel"
+            value={formData.client_phone}
+            onChange={handleInputChange}
+          />
         </div>
 
         {/* Partner Organization */}
         <div className="space-y-6 md:col-span-2">
           <h3 className="text-lg font-medium text-stone-900">Partner Organization</h3>
-          
-          <div>
-            <label htmlFor="partner" className="block text-sm font-medium text-stone-700">
-              Partner Organization
-            </label>
-            <input
-              type="text"
-              id="partner"
-              name="partner"
-              value={formData.partner}
-              onChange={handleInputChange}
-              placeholder="e.g., Afya Na Haki, LIRA Programme, KELIN"
-              className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-            />
-            <p className="mt-1 text-sm text-stone-500">
-              Enter the name of the partner organization involved in this case
-            </p>
-          </div>
+
+          <Input
+            label="Partner Organization"
+            name="partner"
+            value={formData.partner}
+            onChange={handleInputChange}
+            placeholder="e.g., Afya Na Haki, LIRA Programme, KELIN"
+            helperText="Enter the name of the partner organization involved in this case"
+          />
         </div>
 
         {/* Key Deadlines */}
-        <div className="space-y-6 md:col-span-2">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium text-stone-900">Key Deadlines</h3>
-            <button
-              type="button"
-              onClick={addDeadline}
-              className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add Deadline
-            </button>
+        <div className="space-y-4 md:col-span-2">
+          <h3 className="text-lg font-medium text-stone-900">Key Deadlines</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-3 items-end">
+            <Input
+              label="Deadline Date"
+              type="date"
+              value={deadlineDraftDate}
+              onChange={(e) => setDeadlineDraftDate(e.target.value)}
+            />
+            <Input
+              label="Deadline Description"
+              value={deadlineDraftDescription}
+              onChange={(e) => setDeadlineDraftDescription(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commitDeadline();
+                }
+              }}
+              placeholder="Describe this deadline"
+            />
           </div>
-          
-          {deadlines.length === 0 ? (
-            <p className="text-sm text-stone-500 italic">No deadlines added yet. Click "Add Deadline" to create one.</p>
-          ) : (
-            <div className="space-y-4">
-              {deadlines.map((deadline) => (
-                <div key={deadline.id} className="flex items-start space-x-2">
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-                      <input
-                        type="date"
-                        value={deadline.date}
-                        onChange={(e) => updateDeadline(deadline.id, 'date', e.target.value)}
-                        className="pl-10 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      value={deadline.description}
-                      onChange={(e) => updateDeadline(deadline.id, 'description', e.target.value)}
-                      placeholder="Deadline description"
-                      className="block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeDeadline(deadline.id)}
-                    className="p-2 text-stone-400 hover:text-red-500"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+
+          <div className="flex gap-2">
+            <Button type="button" onClick={commitDeadline}>
+              {editingDeadlineIndex !== null ? 'Save Changes' : 'Add Deadline'}
+            </Button>
+            {editingDeadlineIndex !== null && (
+              <Button type="button" variant="ghost" onClick={cancelEditDeadline}>
+                Cancel Edit
+              </Button>
+            )}
+          </div>
+
+          {deadlines.length > 0 && (
+            <ul className="divide-y divide-stone-200 rounded-md border border-stone-200">
+              {deadlines.map((deadline, index) => (
+                <li
+                  key={deadline.id}
+                  className={`flex items-center justify-between gap-3 px-3 py-2 text-sm ${
+                    editingDeadlineIndex === index ? 'bg-primary-50' : ''
+                  }`}
+                >
+                  <span className="text-stone-700">
+                    {deadline.date && <span className="font-medium text-stone-900">{deadline.date} — </span>}
+                    {deadline.description}
+                  </span>
+                  <span className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => startEditDeadline(index)}
+                      className="rounded px-2 py-1 text-xs font-medium text-primary hover:bg-primary-50"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeDeadline(index)}
+                      aria-label={`Remove deadline: ${deadline.description}`}
+                      className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-danger"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
 
         {/* Action Details */}
         <div className="space-y-6 md:col-span-2">
           <h3 className="text-lg font-medium text-stone-900">Action Details</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="action_taken" className="block text-sm font-medium text-stone-700">
-                Action Taken *
-              </label>
-              <textarea
-                id="action_taken"
-                name="action_taken"
-                value={formData.action_taken}
-                onChange={handleInputChange}
-                rows={3}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
+            <Textarea
+              label="Action Taken"
+              name="action_taken"
+              required
+              rows={3}
+              value={formData.action_taken}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('action_taken')}
+              error={fieldError('action_taken', 'Action Taken', !formData.action_taken)}
+            />
 
-            <div>
-              <label htmlFor="next_steps" className="block text-sm font-medium text-stone-700">
-                Next Steps *
-              </label>
-              <textarea
-                id="next_steps"
-                name="next_steps"
-                value={formData.next_steps}
-                onChange={handleInputChange}
-                rows={3}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
+            <Textarea
+              label="Next Steps"
+              name="next_steps"
+              required
+              rows={3}
+              value={formData.next_steps}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('next_steps')}
+              error={fieldError('next_steps', 'Next Steps', !formData.next_steps)}
+            />
           </div>
 
-          <div>
-            <label htmlFor="action_timeframe" className="block text-sm font-medium text-stone-700">
-              Action Timeframe *
-            </label>
-            <div className="relative mt-1">
-              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-              <input
-                type="text"
-                id="action_timeframe"
-                name="action_timeframe"
-                value={formData.action_timeframe}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., 48 hours, 1 week, 30 days"
-                className="pl-10 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
-          </div>
+          <Input
+            label="Action Timeframe"
+            name="action_timeframe"
+            required
+            value={formData.action_timeframe}
+            onChange={handleInputChange}
+            onBlur={() => markTouched('action_timeframe')}
+            error={fieldError('action_timeframe', 'Action Timeframe', !formData.action_timeframe)}
+            placeholder="e.g., 48 hours, 1 week, 30 days"
+          />
         </div>
 
         {/* Document Upload */}
         <div className="space-y-6 md:col-span-2">
           <h3 className="text-lg font-medium text-stone-900">Document Upload</h3>
-          
+
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
@@ -747,20 +756,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       </div>
 
       <div className="flex justify-end space-x-3 pt-6">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
-        >
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark disabled:opacity-50"
-        >
+        </Button>
+        <Button type="submit" loading={loading}>
           {loading ? 'Saving...' : isEditing ? 'Update Case' : 'Create Case'}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -44,7 +44,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4 py-12">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg border border-stone-100">
-        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-primary">
+        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <LockKeyhole className="h-6 w-6" />
         </div>
         <h1 className="text-center text-2xl font-semibold text-stone-900">Create a new password</h1>
@@ -66,7 +66,7 @@ export default function ResetPassword() {
             </button>
           </form>
         ) : (
-          <p className="mt-8 rounded-md bg-red-50 p-4 text-sm text-red-700">
+          <p className="mt-8 rounded-md bg-danger-light p-4 text-sm text-danger-dark">
             This reset link is invalid or has expired. Request a new one from the sign-in page.
           </p>
         )}

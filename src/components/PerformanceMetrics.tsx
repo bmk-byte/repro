@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Title } from '@tremor/react';
 import { supabase } from '../lib/supabase';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LoadingState } from './ui';
 
 interface PerformanceMetricsProps {
   dateRange: [Date, Date];
@@ -60,7 +61,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
     // Initialize months in the date range
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
     
     while (currentDate <= endDate) {
       const monthKey = currentDate.toLocaleString('default', { month: 'short', year: '2-digit' });
@@ -94,11 +95,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Loading performance metrics…" />;
   }
 
   if (error) {

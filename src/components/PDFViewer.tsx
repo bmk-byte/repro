@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Download, X } fro
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import { getFreshFileUrl } from '../lib/storage';
+import { LoadingState } from './ui';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -202,7 +203,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       <div className="flex-1 overflow-auto bg-stone-200 flex justify-center">
         {loading && !error && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <LoadingState label="Loading document…" />
           </div>
         )}
 

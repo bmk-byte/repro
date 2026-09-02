@@ -202,7 +202,7 @@ const ReportGenerationSystem: React.FC = () => {
         <h1>${title}</h1>
         <div class="meta">Generated: ${new Date().toLocaleString()}</div>
         ${bodyHTML}
-        <script>window.onload = () => { window.print(); }<\/script>
+        <script>window.onload = () => { window.print(); }</script>
       </body>
       </html>
     `);

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import MultiStepFormProgress from './MultiStepFormProgress';
+import { useFormDraft } from '../../hooks/useFormDraft';
 import { createSafeDisplayName } from '../../lib/sanitize';
+import { Input, Select, Textarea, Button, TagListInput } from '../ui';
 
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -16,8 +18,32 @@ interface SubmitJudgmentFormProps {
   isDirectUpload?: boolean;
 }
 
-const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({ 
-  onSuccess, 
+const CASE_CATEGORIES = [
+  'Access to Safe Abortion',
+  'Maternal Health and Mortality',
+  'Forced Sterilization',
+  'Contraceptive Access and Denial',
+  'Sexual and Gender-Based Violence (SGBV)',
+  'Child Marriage and Early/Forced Marriage',
+  'Menstrual Health and Hygiene Rights',
+  'Sexual and Reproductive Health Education',
+  'Criminalization of Pregnancy Outcomes',
+  'Access to Assisted Reproductive Technologies',
+  'Access to Reproductive Health Services for Incarcerated Women',
+  'Consent and Access for Adolescents and Minors',
+  'Discrimination in Reproductive Healthcare',
+  'Reproductive Rights in Conflict and Humanitarian Settings',
+  'Access to Reproductive Health Services for Marginalized Groups',
+  'Parental Leave and Reproductive Labor Rights',
+  'Violation of Confidentiality and Privacy in Reproductive Healthcare',
+  'Denial of Post-Abortion Care',
+  'Reproductive Health and Environmental Justice',
+  'Religious and Cultural Barriers to Reproductive Healthcare Access',
+  'Other'
+];
+
+const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
+  onSuccess,
   onCancel,
   isDirectUpload = false
 }) => {
@@ -26,12 +52,12 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [countries, setCountries] = useState<{ id: string, name: string }[]>([]);
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     // Basic Information
     title: '',
     summary: '',
     country_id: '',
-    
+
     // Judgment Details
     citation: '',
     media_neutral_citation: '',
@@ -42,12 +68,12 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     language_judgment: 'English',
     type_judgment: 'Final Judgment',
     flynote_judgment: '',
-    
+
     // Timeline and Parties
     timeline_status: '',
     litigants: [] as string[],
     defending_institutions: [] as string[],
-    
+
     // Legal Framework
     judicial_body_type: '',
     judicial_body: '',
@@ -57,19 +83,46 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     domestic_laws: [] as string[],
     international_laws: [] as string[],
     protocols: [] as string[],
-    
+
     // Impact and Categories
     case_impact: '',
     case_categories: [] as string[]
-  });
-  
-  // Form fields for adding array items
-  const [newLitigant, setNewLitigant] = useState('');
-  const [newDefendingInstitution, setNewDefendingInstitution] = useState('');
-  const [newRegionalBody, setNewRegionalBody] = useState('');
-  const [newDomesticLaw, setNewDomesticLaw] = useState('');
-  const [newInternationalLaw, setNewInternationalLaw] = useState('');
-  const [newProtocol, setNewProtocol] = useState('');
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+
+  // Fields touched (blurred) so far — inline errors only show for a field
+  // once the user has actually interacted with it, matching Auth.tsx's
+  // validate-on-blur pattern rather than showing every error up front.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
+
+  const draftKey = isDirectUpload ? 'strategic-judgment-direct' : 'strategic-judgment-submission';
+  const { loadDraft, saveDraft, clearDraft } = useFormDraft(draftKey, { formData: initialFormData, currentStep: 0 });
+  const draftLoaded = useRef(false);
+
+  // Load saved draft on mount (before first render of form data)
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft) {
+      setFormData(draft.formData);
+      setCurrentStep(draft.currentStep ?? 0);
+      toast.success('Restored your previous draft. You can continue where you left off.', {
+        duration: 6000,
+        onClick: () => toast.dismiss(),
+      });
+    }
+    draftLoaded.current = true;
+  }, [loadDraft]);
+
+  // Auto-save form data (debounced)
+  useEffect(() => {
+    if (!draftLoaded.current) return;
+    const timeout = setTimeout(() => {
+      saveDraft({ formData, currentStep });
+    }, 800);
+    return () => clearTimeout(timeout);
+  }, [formData, currentStep, saveDraft]);
 
   // Form steps
   const steps = [
@@ -168,112 +221,84 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return { ...prev, case_categories: [...categories, category] };
       }
     });
+    markTouched('case_categories');
   };
 
-  // Array field handlers
-  const addLitigant = () => {
-    if (newLitigant.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        litigants: [...prev.litigants, newLitigant.trim()]
-      }));
-      setNewLitigant('');
-    }
+  // Array field handlers — each TagListInput owns its own text-input value;
+  // these just append/remove from the form's array state.
+  const addLitigant = (value: string) => {
+    setFormData(prev => ({ ...prev, litigants: [...prev.litigants, value] }));
+    markTouched('litigants');
   };
-
   const removeLitigant = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      litigants: prev.litigants.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, litigants: prev.litigants.filter((_, i) => i !== index) }));
+    markTouched('litigants');
   };
 
-  const addDefendingInstitution = () => {
-    if (newDefendingInstitution.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        defending_institutions: [...prev.defending_institutions, newDefendingInstitution.trim()]
-      }));
-      setNewDefendingInstitution('');
-    }
+  const addDefendingInstitution = (value: string) => {
+    setFormData(prev => ({ ...prev, defending_institutions: [...prev.defending_institutions, value] }));
+    markTouched('defending_institutions');
   };
-
   const removeDefendingInstitution = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      defending_institutions: prev.defending_institutions.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, defending_institutions: prev.defending_institutions.filter((_, i) => i !== index) }));
+    markTouched('defending_institutions');
   };
 
-  const addRegionalBody = () => {
-    if (newRegionalBody.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        regional_bodies: [...prev.regional_bodies, newRegionalBody.trim()]
-      }));
-      setNewRegionalBody('');
-    }
+  const addRegionalBody = (value: string) => {
+    setFormData(prev => ({ ...prev, regional_bodies: [...prev.regional_bodies, value] }));
   };
-
   const removeRegionalBody = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      regional_bodies: prev.regional_bodies.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, regional_bodies: prev.regional_bodies.filter((_, i) => i !== index) }));
   };
 
-  const addDomesticLaw = () => {
-    if (newDomesticLaw.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        domestic_laws: [...prev.domestic_laws, newDomesticLaw.trim()]
-      }));
-      setNewDomesticLaw('');
-    }
+  const addDomesticLaw = (value: string) => {
+    setFormData(prev => ({ ...prev, domestic_laws: [...prev.domestic_laws, value] }));
   };
-
   const removeDomesticLaw = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      domestic_laws: prev.domestic_laws.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, domestic_laws: prev.domestic_laws.filter((_, i) => i !== index) }));
   };
 
-  const addInternationalLaw = () => {
-    if (newInternationalLaw.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        international_laws: [...prev.international_laws, newInternationalLaw.trim()]
-      }));
-      setNewInternationalLaw('');
-    }
+  const addInternationalLaw = (value: string) => {
+    setFormData(prev => ({ ...prev, international_laws: [...prev.international_laws, value] }));
   };
-
   const removeInternationalLaw = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      international_laws: prev.international_laws.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, international_laws: prev.international_laws.filter((_, i) => i !== index) }));
   };
 
-  const addProtocol = () => {
-    if (newProtocol.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        protocols: [...prev.protocols, newProtocol.trim()]
-      }));
-      setNewProtocol('');
-    }
+  const addProtocol = (value: string) => {
+    setFormData(prev => ({ ...prev, protocols: [...prev.protocols, value] }));
   };
-
   const removeProtocol = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      protocols: prev.protocols.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, protocols: prev.protocols.filter((_, i) => i !== index) }));
+  };
+
+  // Field keys per step, in the same order as getMissingFields below — used
+  // to mark every field on the current step "touched" the moment the user
+  // tries to move on but validation blocks them, so inline errors light up
+  // together with the aggregate banner instead of only one field at a time.
+  const STEP_FIELDS: Record<number, string[]> = {
+    0: ['title', 'summary', 'country_id'],
+    1: ['citation', 'court_judgment', 'judgment_date_judgment'],
+    2: ['timeline_status'],
+    3: ['judicial_body_type', 'judicial_body', 'legal_framework_type'],
+    4: ['case_impact', 'case_categories'],
+    5: [],
+  };
+
+  const touchStep = (step: number) => {
+    const fields = STEP_FIELDS[step] || [];
+    setTouched(prev => {
+      const next = { ...prev };
+      fields.forEach(f => { next[f] = true; });
+      return next;
+    });
   };
 
   const nextStep = () => {
+    if (getMissingFields(currentStep).length > 0) {
+      touchStep(currentStep);
+      return;
+    }
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -291,6 +316,11 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     }
   };
 
+  // Returns the human-readable labels of whatever's still missing on the
+  // current step, so the UI can tell the user exactly what to fill in
+  // instead of a generic "please fill in all required fields." This stays
+  // the source of truth for step-gating (Next/Submit disabled state);
+  // per-field inline errors below are a visual layer on top of it.
   const getMissingFields = (step: number): string[] => {
     switch (step) {
       case 0: // Basic Info
@@ -327,6 +357,10 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
   const validateCurrentStep = (): boolean => getMissingFields(currentStep).length === 0;
 
+  // Per-field inline error, shown once the field has been touched (blurred).
+  const fieldError = (field: string, label: string, isEmpty: boolean): string | undefined =>
+    touched[field] && isEmpty ? `${label} is required` : undefined;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -335,7 +369,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       toast.error(`Please fill in: ${missing.join(', ')}`);
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -349,10 +383,10 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       if (file) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-        
+
         // Use different storage bucket based on whether this is a direct upload or submission
         const storageBucket = isDirectUpload ? 'judgments' : 'submission-documents';
-        
+
         const uploadResult = await queryWithRetry(async () => {
           const { error: uploadError } = await supabase.storage
             .from(storageBucket)
@@ -408,6 +442,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         });
 
         toast.success('Judgment uploaded successfully');
+        clearDraft();
         onSuccess?.();
       } else {
         // Submit the judgment for review - use the pending_judgments table
@@ -464,9 +499,10 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
           </div>,
           { duration: 5000 }
         );
-        
+
         // Add a delay before redirecting to allow the user to see the success message
         setTimeout(() => {
+          clearDraft();
           onSuccess?.();
         }, 2000);
       }
@@ -490,574 +526,295 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       case 0:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judgment Title *
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="Enter a descriptive title for the judgment"
-              />
-            </div>
+            <Input
+              label="Judgment Title"
+              name="title"
+              required
+              value={formData.title}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('title')}
+              error={fieldError('title', 'Judgment Title', !formData.title)}
+              placeholder="Enter a descriptive title for the judgment"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judgment Summary *
-              </label>
-              <textarea
-                name="summary"
-                value={formData.summary}
-                onChange={handleInputChange}
-                required
-                rows={4}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="Provide a brief summary of the judgment"
-              />
-            </div>
+            <Textarea
+              label="Judgment Summary"
+              name="summary"
+              required
+              rows={4}
+              value={formData.summary}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('summary')}
+              error={fieldError('summary', 'Judgment Summary', !formData.summary)}
+              placeholder="Provide a brief summary of the judgment"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Country/Jurisdiction *
-              </label>
-              <select
-                name="country_id"
-                value={formData.country_id}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="">Select a country</option>
-                {countries.map(country => (
-                  <option key={country.id} value={country.id}>{country.name}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Country/Jurisdiction"
+              name="country_id"
+              required
+              value={formData.country_id}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('country_id')}
+              error={fieldError('country_id', 'Country/Jurisdiction', !formData.country_id)}
+            >
+              <option value="">Select a country</option>
+              {countries.map(country => (
+                <option key={country.id} value={country.id}>{country.name}</option>
+              ))}
+            </Select>
           </div>
         );
-      
+
       case 1:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Citation *
-              </label>
-              <input
-                type="text"
-                name="citation"
-                value={formData.citation}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., [2023] KEHC 123"
-              />
-            </div>
+            <Input
+              label="Citation"
+              name="citation"
+              required
+              value={formData.citation}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('citation')}
+              error={fieldError('citation', 'Citation', !formData.citation)}
+              placeholder="e.g., [2023] KEHC 123"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Media Neutral Citation
-              </label>
-              <input
-                type="text"
-                name="media_neutral_citation"
-                value={formData.media_neutral_citation}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., [2023] eKLR 123"
-              />
-            </div>
+            <Input
+              label="Media Neutral Citation"
+              name="media_neutral_citation"
+              value={formData.media_neutral_citation}
+              onChange={handleInputChange}
+              placeholder="e.g., [2023] eKLR 123"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Court *
-              </label>
-              <input
-                type="text"
-                name="court_judgment"
-                value={formData.court_judgment}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., High Court of Kenya"
-              />
-            </div>
+            <Input
+              label="Court"
+              name="court_judgment"
+              required
+              value={formData.court_judgment}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('court_judgment')}
+              error={fieldError('court_judgment', 'Court', !formData.court_judgment)}
+              placeholder="e.g., High Court of Kenya"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Case Number
-              </label>
-              <input
-                type="text"
-                name="case_number_judgment"
-                value={formData.case_number_judgment}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., Petition No. 123 of 2023"
-              />
-            </div>
+            <Input
+              label="Case Number"
+              name="case_number_judgment"
+              value={formData.case_number_judgment}
+              onChange={handleInputChange}
+              placeholder="e.g., Petition No. 123 of 2023"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judges
-              </label>
-              <input
-                type="text"
-                name="judges_judgment"
-                value={formData.judges_judgment}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., Justice John Doe, Justice Jane Smith"
-              />
-            </div>
+            <Input
+              label="Judges"
+              name="judges_judgment"
+              value={formData.judges_judgment}
+              onChange={handleInputChange}
+              placeholder="e.g., Justice John Doe, Justice Jane Smith"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judgment Date *
-              </label>
-              <input
-                type="date"
-                name="judgment_date_judgment"
-                value={formData.judgment_date_judgment}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              />
-            </div>
+            <Input
+              label="Judgment Date"
+              name="judgment_date_judgment"
+              type="date"
+              required
+              value={formData.judgment_date_judgment}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('judgment_date_judgment')}
+              error={fieldError('judgment_date_judgment', 'Judgment Date', !formData.judgment_date_judgment)}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Language
-              </label>
-              <select
-                name="language_judgment"
-                value={formData.language_judgment}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="English">English</option>
-                <option value="French">French</option>
-                <option value="Portuguese">Portuguese</option>
-                <option value="Swahili">Swahili</option>
-              </select>
-            </div>
+            <Select
+              label="Language"
+              name="language_judgment"
+              value={formData.language_judgment}
+              onChange={handleInputChange}
+            >
+              <option value="English">English</option>
+              <option value="French">French</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Swahili">Swahili</option>
+            </Select>
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judgment Type
-              </label>
-              <select
-                name="type_judgment"
-                value={formData.type_judgment}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="Final Judgment">Final Judgment</option>
-                <option value="Interim Order">Interim Order</option>
-                <option value="Ruling">Ruling</option>
-                <option value="Consent">Consent Judgment</option>
-                <option value="Default">Default Judgment</option>
-              </select>
-            </div>
+            <Select
+              label="Judgment Type"
+              name="type_judgment"
+              value={formData.type_judgment}
+              onChange={handleInputChange}
+            >
+              <option value="Final Judgment">Final Judgment</option>
+              <option value="Interim Order">Interim Order</option>
+              <option value="Ruling">Ruling</option>
+              <option value="Consent">Consent Judgment</option>
+              <option value="Default">Default Judgment</option>
+            </Select>
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Flynote
-              </label>
-              <textarea
-                name="flynote_judgment"
-                value={formData.flynote_judgment}
-                onChange={handleInputChange}
-                rows={3}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="Enter the flynote or headnote of the judgment"
-              />
-            </div>
+            <Textarea
+              label="Flynote"
+              name="flynote_judgment"
+              rows={3}
+              value={formData.flynote_judgment}
+              onChange={handleInputChange}
+              placeholder="Enter the flynote or headnote of the judgment"
+            />
           </div>
         );
-      
+
       case 2:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Timeline Status *
-              </label>
-              <select
-                name="timeline_status"
-                value={formData.timeline_status}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="">Select status</option>
-                <option value="filed">Filed</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="resolved">Resolved</option>
-                <option value="dismissed">Dismissed</option>
-              </select>
-            </div>
+            <Select
+              label="Timeline Status"
+              name="timeline_status"
+              required
+              value={formData.timeline_status}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('timeline_status')}
+              error={fieldError('timeline_status', 'Timeline Status', !formData.timeline_status)}
+            >
+              <option value="">Select status</option>
+              <option value="filed">Filed</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="resolved">Resolved</option>
+              <option value="dismissed">Dismissed</option>
+            </Select>
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Litigants
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newLitigant}
-                  onChange={(e) => setNewLitigant(e.target.value)}
-                  placeholder="Add a litigant"
-                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                />
-                <button
-                  type="button"
-                  onClick={addLitigant}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {formData.litigants.map((litigant, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                  >
-                    {litigant}
-                    <button
-                      type="button"
-                      onClick={() => removeLitigant(index)}
-                      className="ml-1 text-blue-800 hover:text-blue-900"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
+            <TagListInput
+              label="Litigants"
+              items={formData.litigants}
+              onAdd={addLitigant}
+              onRemove={removeLitigant}
+              placeholder="Add a litigant"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Defending Institutions
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newDefendingInstitution}
-                  onChange={(e) => setNewDefendingInstitution(e.target.value)}
-                  placeholder="Add a defending institution"
-                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                />
-                <button
-                  type="button"
-                  onClick={addDefendingInstitution}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {formData.defending_institutions.map((institution, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                  >
-                    {institution}
-                    <button
-                      type="button"
-                      onClick={() => removeDefendingInstitution(index)}
-                      className="ml-1 text-green-800 hover:text-green-900"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
+            <TagListInput
+              label="Defending Institutions"
+              items={formData.defending_institutions}
+              onAdd={addDefendingInstitution}
+              onRemove={removeDefendingInstitution}
+              placeholder="Add a defending institution"
+            />
           </div>
         );
-      
+
       case 3:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judicial Body Type *
-              </label>
-              <select
-                name="judicial_body_type"
-                value={formData.judicial_body_type}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="">Select type</option>
-                <option value="National Court">National Court</option>
-                <option value="Regional Court">Regional Court</option>
-              </select>
-            </div>
+            <Select
+              label="Judicial Body Type"
+              name="judicial_body_type"
+              required
+              value={formData.judicial_body_type}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('judicial_body_type')}
+              error={fieldError('judicial_body_type', 'Judicial Body Type', !formData.judicial_body_type)}
+            >
+              <option value="">Select type</option>
+              <option value="National Court">National Court</option>
+              <option value="Regional Court">Regional Court</option>
+            </Select>
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Judicial Body *
-              </label>
+            <Input
+              label="Judicial Body"
+              name="judicial_body"
+              required
+              value={formData.judicial_body}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('judicial_body')}
+              error={fieldError('judicial_body', 'Judicial Body', !formData.judicial_body)}
+              placeholder="e.g., Supreme Court of Kenya"
+            />
+
+            <label className="flex items-center space-x-2">
               <input
-                type="text"
-                name="judicial_body"
-                value={formData.judicial_body}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="e.g., Supreme Court of Kenya"
+                type="checkbox"
+                name="regional_appeals"
+                checked={formData.regional_appeals}
+                onChange={handleCheckboxChange}
+                className="rounded border-stone-300 text-primary focus:ring-primary"
               />
-            </div>
-
-            <div>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="regional_appeals"
-                  checked={formData.regional_appeals}
-                  onChange={handleCheckboxChange}
-                  className="rounded border-stone-300 text-primary focus:ring-primary"
-                />
-                <span className="text-sm font-medium text-stone-700">Regional Appeals</span>
-              </label>
-            </div>
+              <span className="text-sm font-medium text-stone-700">Regional Appeals</span>
+            </label>
 
             {formData.regional_appeals && (
-              <div>
-                <label className="block text-sm font-medium text-stone-700">
-                  Regional Bodies
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={newRegionalBody}
-                    onChange={(e) => setNewRegionalBody(e.target.value)}
-                    placeholder="Add a regional body"
-                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                  />
-                  <button
-                    type="button"
-                    onClick={addRegionalBody}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {formData.regional_bodies.map((body, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                    >
-                      {body}
-                      <button
-                        type="button"
-                        onClick={() => removeRegionalBody(index)}
-                        className="ml-1 text-purple-800 hover:text-purple-900"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <TagListInput
+                label="Regional Bodies"
+                items={formData.regional_bodies}
+                onAdd={addRegionalBody}
+                onRemove={removeRegionalBody}
+                placeholder="Add a regional body"
+              />
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Legal Framework Type *
-              </label>
-              <select
-                name="legal_framework_type"
-                value={formData.legal_framework_type}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-              >
-                <option value="">Select type</option>
-                <option value="Domestic Law">Domestic Law</option>
-                <option value="International Law">International Law</option>
-                <option value="Both">Both</option>
-              </select>
-            </div>
+            <Select
+              label="Legal Framework Type"
+              name="legal_framework_type"
+              required
+              value={formData.legal_framework_type}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('legal_framework_type')}
+              error={fieldError('legal_framework_type', 'Legal Framework Type', !formData.legal_framework_type)}
+              helperText="Choosing Domestic, International, or Both determines which law lists appear below."
+            >
+              <option value="">Select type</option>
+              <option value="Domestic Law">Domestic Law</option>
+              <option value="International Law">International Law</option>
+              <option value="Both">Both</option>
+            </Select>
 
             {(formData.legal_framework_type === 'Domestic Law' || formData.legal_framework_type === 'Both') && (
-              <div>
-                <label className="block text-sm font-medium text-stone-700">
-                  Domestic Laws
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={newDomesticLaw}
-                    onChange={(e) => setNewDomesticLaw(e.target.value)}
-                    placeholder="Add a domestic law"
-                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                  />
-                  <button
-                    type="button"
-                    onClick={addDomesticLaw}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {formData.domestic_laws.map((law, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800"
-                    >
-                      {law}
-                      <button
-                        type="button"
-                        onClick={() => removeDomesticLaw(index)}
-                        className="ml-1 text-amber-800 hover:text-amber-900"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <TagListInput
+                label="Domestic Laws"
+                items={formData.domestic_laws}
+                onAdd={addDomesticLaw}
+                onRemove={removeDomesticLaw}
+                placeholder="Add a domestic law"
+              />
             )}
 
             {(formData.legal_framework_type === 'International Law' || formData.legal_framework_type === 'Both') && (
-              <div>
-                <label className="block text-sm font-medium text-stone-700">
-                  International Laws
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={newInternationalLaw}
-                    onChange={(e) => setNewInternationalLaw(e.target.value)}
-                    placeholder="Add an international law"
-                    className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                  />
-                  <button
-                    type="button"
-                    onClick={addInternationalLaw}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {formData.international_laws.map((law, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                    >
-                      {law}
-                      <button
-                        type="button"
-                        onClick={() => removeInternationalLaw(index)}
-                        className="ml-1 text-blue-800 hover:text-blue-900"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <TagListInput
+                label="International Laws"
+                items={formData.international_laws}
+                onAdd={addInternationalLaw}
+                onRemove={removeInternationalLaw}
+                placeholder="Add an international law"
+              />
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Protocols
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newProtocol}
-                  onChange={(e) => setNewProtocol(e.target.value)}
-                  placeholder="Add a protocol"
-                  className="flex-1 rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                />
-                <button
-                  type="button"
-                  onClick={addProtocol}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {formData.protocols.map((protocol, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                  >
-                    {protocol}
-                    <button
-                      type="button"
-                      onClick={() => removeProtocol(index)}
-                      className="ml-1 text-indigo-800 hover:text-indigo-900"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
+            <TagListInput
+              label="Protocols"
+              items={formData.protocols}
+              onAdd={addProtocol}
+              onRemove={removeProtocol}
+              placeholder="Add a protocol"
+            />
           </div>
         );
-      
+
       case 4:
         return (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-stone-700">
-                Case Impact *
-              </label>
-              <textarea
-                name="case_impact"
-                value={formData.case_impact}
-                onChange={handleInputChange}
-                required
-                rows={4}
-                className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-primary"
-                placeholder="Describe the impact of this judgment"
-              />
-            </div>
+            <Textarea
+              label="Case Impact"
+              name="case_impact"
+              required
+              rows={4}
+              value={formData.case_impact}
+              onChange={handleInputChange}
+              onBlur={() => markTouched('case_impact')}
+              error={fieldError('case_impact', 'Case Impact', !formData.case_impact)}
+              placeholder="Describe the impact of this judgment"
+            />
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Case Categories *
+                Case Categories <span className="text-danger ml-0.5" aria-hidden="true">*</span>
               </label>
               <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-stone-200 rounded-md">
-                {[
-                  'Access to Safe Abortion',
-                  'Maternal Health and Mortality',
-                  'Forced Sterilization',
-                  'Contraceptive Access and Denial',
-                  'Sexual and Gender-Based Violence (SGBV)',
-                  'Child Marriage and Early/Forced Marriage',
-                  'Menstrual Health and Hygiene Rights',
-                  'Sexual and Reproductive Health Education',
-                  'Criminalization of Pregnancy Outcomes',
-                  'Access to Assisted Reproductive Technologies',
-                  'Access to Reproductive Health Services for Incarcerated Women',
-                  'Consent and Access for Adolescents and Minors',
-                  'Discrimination in Reproductive Healthcare',
-                  'Reproductive Rights in Conflict and Humanitarian Settings',
-                  'Access to Reproductive Health Services for Marginalized Groups',
-                  'Parental Leave and Reproductive Labor Rights',
-                  'Violation of Confidentiality and Privacy in Reproductive Healthcare',
-                  'Denial of Post-Abortion Care',
-                  'Reproductive Health and Environmental Justice',
-                  'Religious and Cultural Barriers to Reproductive Healthcare Access',
-                  'Other'
-                ].map((category) => (
+                {CASE_CATEGORIES.map((category) => (
                   <label key={category} className="flex items-center">
                     <input
                       type="checkbox"
@@ -1069,16 +826,19 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                   </label>
                 ))}
               </div>
+              {touched.case_categories && formData.case_categories.length === 0 && (
+                <p role="alert" className="mt-1.5 text-sm text-danger">At least one category is required</p>
+              )}
             </div>
           </div>
         );
-      
+
       case 5:
         return (
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Upload Judgment Document *
+                Upload Judgment Document <span className="text-danger ml-0.5" aria-hidden="true">*</span>
               </label>
               <div
                 {...getRootProps()}
@@ -1129,15 +889,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             </div>
 
             {!isDirectUpload && (
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+              <div className="bg-warning-light border-l-4 border-warning p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
+                    <AlertCircle className="h-5 w-5 text-warning" aria-hidden="true" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-yellow-700">
+                    <p className="text-sm text-warning-dark">
                       Your submission will be reviewed by a moderator before being published. You will be notified once the review is complete.
                     </p>
                   </div>
@@ -1146,7 +904,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             )}
           </div>
         );
-      
+
       default:
         return null;
     }
@@ -1154,12 +912,12 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <MultiStepFormProgress 
-        steps={steps} 
-        currentStep={currentStep} 
+      <MultiStepFormProgress
+        steps={steps}
+        currentStep={currentStep}
         onStepClick={goToStep}
       />
-      
+
       <form onSubmit={handleSubmit} className="mt-6">
         {renderStepContent()}
 
@@ -1173,44 +931,31 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         })()}
 
         <div className="mt-4 flex justify-between">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
-          >
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
-          </button>
-          
+          </Button>
+
           <div className="flex space-x-3">
             {currentStep > 0 && (
-              <button
-                type="button"
-                onClick={prevStep}
-                className="flex items-center px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
+              <Button type="button" variant="outline" onClick={prevStep} icon={<ChevronLeft className="h-4 w-4" />}>
                 Previous
-              </button>
+              </Button>
             )}
-            
+
             {currentStep < steps.length - 1 ? (
-              <button
+              <Button
                 type="button"
                 onClick={nextStep}
                 disabled={!validateCurrentStep()}
-                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                icon={<ChevronRight className="h-4 w-4" />}
+                iconPosition="right"
               >
                 Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </button>
+              </Button>
             ) : (
-              <button
-                type="submit"
-                disabled={loading || !validateCurrentStep()}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <Button type="submit" loading={loading} disabled={!validateCurrentStep()}>
                 {loading ? 'Submitting...' : isDirectUpload ? 'Upload Judgment' : 'Submit Judgment'}
-              </button>
+              </Button>
             )}
           </div>
         </div>

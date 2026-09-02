@@ -1,9 +1,10 @@
 import React from 'react';
-import { ArrowLeft, Calendar, Gavel, FileText, User, MapPin, Edit2 } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, MapPin, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import DocumentModal from './DocumentModal';
+import { LoadingState } from './ui';
 
 interface JudgmentDetailsProps {
   judgmentId: string;
@@ -83,11 +84,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Loading judgment details…" />;
   }
 
   if (!judgment) {

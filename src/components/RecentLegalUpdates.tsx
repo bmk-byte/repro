@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, Filter, Calendar, Scale, Gavel } from 'lucide-react';
+import { ChevronRight, Scale, Gavel } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { LoadingState } from './ui';
 
 interface LegalUpdate {
   id: string;
@@ -184,9 +185,7 @@ const RecentLegalUpdates = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading legal updates…" />
       ) : error ? (
         <div className="text-center py-12 text-red-500">
           {error}

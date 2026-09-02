@@ -1,10 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 
 const PREFIX = 'form-draft:';
 
 export function useFormDraft<T>(key: string, initialData: T) {
   const storageKey = `${PREFIX}${key}`;
-  const firstRun = useRef(true);
 
   useEffect(() => {
     try {

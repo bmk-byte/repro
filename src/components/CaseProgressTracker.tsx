@@ -4,6 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { validateFile } from '../lib/errorHandling';
+import { LoadingState } from './ui';
 
 interface Stage {
   id: string;
@@ -199,11 +200,6 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
       }
     };
 
-    // Function to determine if a document is a PDF
-    const isPdfDocument = (url: string) => {
-      return url.toLowerCase().endsWith('.pdf');
-    };
-
     // Function to get document type icon and label
     const getDocumentTypeInfo = (url: string) => {
       const filename = url.split('/').pop() || '';
@@ -329,9 +325,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
 
   if (loading) {
     return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <LoadingState label="Loading case timeline…" />
     );
   }
 

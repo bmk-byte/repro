@@ -1,9 +1,10 @@
 import React from 'react';
-import { ArrowLeft, Calendar, MapPin, FileText, User, Clock, CircleCheck as CheckCircle, CreditCard as Edit2, CircleAlert as AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, FileText, CreditCard as Edit2, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import DocumentModal from './DocumentModal';
+import { LoadingState } from './ui';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -103,8 +104,10 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
       }
 
       // Check authorization
-      if (isModerator && RESTRICTED_ORGANIZATIONS.includes(userOrganization || '')) {
+      if (isModerator && !isAfyanahakiModerator && RESTRICTED_ORGANIZATIONS.includes(userOrganization || '')) {
         // Restricted organization moderators can only see their own cases
+        // (afyanahaki.org moderators are exempt from this, matching
+        // CasesPage.tsx/RapidResponseCasesPage.tsx's access-scope logic)
         if (data.user_id !== currentUserId) {
           setAccessDenied(true);
           return;
@@ -165,9 +168,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <LoadingState label="Loading case details…" />
     );
   }
 

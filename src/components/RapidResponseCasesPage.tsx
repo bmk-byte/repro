@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Clock, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Calendar, Users, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download } from 'lucide-react';
+import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import toast from 'react-hot-toast';
@@ -7,6 +7,8 @@ import RapidResponseCaseForm from './RapidResponseCaseForm';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
 import RapidResponseDashboard from './RapidResponseDashboard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
+import { LoadingState, Badge } from './ui';
+import type { BadgeProps } from './ui';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -45,7 +47,6 @@ const RapidResponseCasesPage: React.FC = () => {
   const [partnerOrganizations, setPartnerOrganizations] = useState<string[]>([]);
   const [countries, setCountries] = useState<{id: string, name: string}[]>([]);
   const [userOrganization, setUserOrganization] = useState<string | null>(null);
-  const [isAfyanahakiModerator, setIsAfyanahakiModerator] = useState(false);
   const [accessScope, setAccessScope] = useState<'global' | 'organization'>('global');
 
   // Use the moderator status hook to check if the user is a moderator
@@ -77,7 +78,6 @@ const RapidResponseCasesPage: React.FC = () => {
         if (profile) {
           setUserOrganization(profile.organization);
           const isAfyanahaki = profile.is_moderator && (profile.email?.endsWith('@afyanahaki.org') || false);
-          setIsAfyanahakiModerator(isAfyanahaki);
 
           // If afyanahaki or not a moderator, user has global access
           // If restricted organization moderator, user has organization-only access
@@ -153,26 +153,30 @@ const RapidResponseCasesPage: React.FC = () => {
     let startDate = '';
 
     switch (timePeriod) {
-      case 'week':
+      case 'week': {
         const weekAgo = new Date(now);
         weekAgo.setDate(now.getDate() - 7);
         startDate = weekAgo.toISOString();
         break;
-      case 'month':
+      }
+      case 'month': {
         const monthAgo = new Date(now);
         monthAgo.setDate(now.getDate() - 30);
         startDate = monthAgo.toISOString();
         break;
-      case 'quarter':
+      }
+      case 'quarter': {
         const quarterAgo = new Date(now);
         quarterAgo.setDate(now.getDate() - 90);
         startDate = quarterAgo.toISOString();
         break;
-      case 'year':
+      }
+      case 'year': {
         const yearAgo = new Date(now);
         yearAgo.setDate(now.getDate() - 365);
         startDate = yearAgo.toISOString();
         break;
+      }
       case 'all':
       default:
         startDate = '';
@@ -335,26 +339,26 @@ const RapidResponseCasesPage: React.FC = () => {
     setSearchTerm('');
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityTone = (priority: string): NonNullable<BadgeProps['tone']> => {
     switch (priority) {
-      case 'Urgent': return 'bg-red-100 text-red-800';
-      case 'High': return 'bg-orange-100 text-orange-800';
-      case 'Medium': return 'bg-blue-100 text-blue-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-stone-100 text-stone-800';
+      case 'Urgent': return 'danger';
+      case 'High': return 'warning';
+      case 'Medium': return 'info';
+      case 'Low': return 'success';
+      default: return 'neutral';
     }
   };
 
-  const getStageColor = (stage: string) => {
+  const getStageTone = (stage: string): NonNullable<BadgeProps['tone']> => {
     switch (stage) {
-      case 'intake': return 'bg-purple-100 text-purple-800';
-      case 'review': return 'bg-blue-100 text-blue-800';
-      case 'action': return 'bg-amber-100 text-amber-800';
-      case 'resolution': return 'bg-green-100 text-green-800';
-      default: return 'bg-stone-100 text-stone-800';
+      case 'intake': return 'neutral';
+      case 'review': return 'info';
+      case 'action': return 'warning';
+      case 'resolution': return 'success';
+      default: return 'neutral';
     }
   };
-  
+
   const getCategoryColor = (category: string) => {
     if (!category) return 'bg-stone-100 text-stone-800';
     
@@ -687,75 +691,75 @@ const RapidResponseCasesPage: React.FC = () => {
               )}
 
               {filters.timePeriod !== 'all' && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                <Badge tone="primary">
                   Time: {filters.timePeriod === 'week' ? 'This Week' : filters.timePeriod === 'month' ? 'This Month' : filters.timePeriod === 'quarter' ? 'This Quarter' : 'This Year'}
-                  <button onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'all' }))} className="ml-1 text-teal-600 hover:text-teal-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'all' }))} aria-label="Clear time period filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
 
               {filters.priority && (
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(filters.priority)}`}>
+                <Badge tone="primary">
                   Priority: {filters.priority}
-                  <button onClick={() => setFilters(prev => ({ ...prev, priority: '' }))} className="ml-1 text-red-600 hover:text-red-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, priority: '' }))} aria-label="Clear priority filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
-              
+
               {filters.status && (
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStageColor(filters.status)}`}>
+                <Badge tone="primary">
                   Status: {filters.status}
-                  <button onClick={() => setFilters(prev => ({ ...prev, status: '' }))} className="ml-1 text-blue-600 hover:text-blue-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, status: '' }))} aria-label="Clear status filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
-              
+
               {filters.partner && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <Badge tone="primary">
                   Partner: {filters.partner}
-                  <button onClick={() => setFilters(prev => ({ ...prev, partner: '' }))} className="ml-1 text-green-600 hover:text-green-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, partner: '' }))} aria-label="Clear partner filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
 
               {filters.country && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
+                <Badge tone="primary">
                   Country: {countries.find(c => c.id === filters.country)?.name || filters.country}
-                  <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} className="ml-1 text-cyan-600 hover:text-cyan-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label="Clear country filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
 
               {filters.category && (
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(filters.category)}`}>
+                <Badge tone="primary">
                   Category: {filters.category}
-                  <button onClick={() => setFilters(prev => ({ ...prev, category: '' }))} className="ml-1 text-purple-600 hover:text-purple-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, category: '' }))} aria-label="Clear category filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
 
               {filters.myCases && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                <Badge tone="primary">
                   My Cases Only
-                  <button onClick={() => setFilters(prev => ({ ...prev, myCases: false }))} className="ml-1 text-indigo-600 hover:text-indigo-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, myCases: false }))} aria-label="Clear my cases filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
 
               {(filters.dateRange.start || filters.dateRange.end) && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <Badge tone="primary">
                   Date Range: {filters.dateRange.start || 'Any'} to {filters.dateRange.end || 'Any'}
-                  <button onClick={() => setFilters(prev => ({ ...prev, dateRange: { start: '', end: '' } }))} className="ml-1 text-amber-600 hover:text-amber-800">
+                  <button onClick={() => setFilters(prev => ({ ...prev, dateRange: { start: '', end: '' } }))} aria-label="Clear date range filter" className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
-                </span>
+                </Badge>
               )}
               
               <button
@@ -771,10 +775,7 @@ const RapidResponseCasesPage: React.FC = () => {
         {/* Cases List */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {loading ? (
-            <div className="p-6 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-stone-500">Loading cases...</p>
-            </div>
+            <LoadingState label="Loading cases…" />
           ) : error ? (
             <div className="p-6 text-center">
               <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
@@ -845,14 +846,14 @@ const RapidResponseCasesPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(caseItem.priority_level)}`}>
+                        <Badge tone={getPriorityTone(caseItem.priority_level)}>
                           {caseItem.priority_level || 'Not set'}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStageColor(caseItem.rapid_response_stage)}`}>
+                        <Badge tone={getStageTone(caseItem.rapid_response_stage)}>
                           {caseItem.rapid_response_stage || 'Not set'}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryColor(caseItem.case_categories?.[0])}`}>
@@ -904,11 +905,7 @@ const RapidResponseCasesPage: React.FC = () => {
 
   // If moderator status is loading, show loading indicator
   if (moderatorLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingState label="Checking access…" />;
   }
 
   // If user is not a moderator, show access denied message

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from 'recharts';
 import { Activity, TrendingUp, Heart } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
+import { supabase, handleSupabaseError } from '../lib/supabase';
+import { LoadingState } from './ui';
 
 interface HealthData {
   name: string;
@@ -132,14 +134,22 @@ const HealthIndicatorIntegration: React.FC = () => {
 
       const processedData = processHealthData(data);
       setHealthData(processedData);
-      
-      const correlationData = generateCorrelationData(data);
-      setCorrelationData(correlationData);
+
+      // Prefer real case-data-driven correlations; fall back to the
+      // indicator-only correlation when there isn't enough case data
+      // (e.g. sparse/no approved cases) for the selected filters.
+      let correlationPoints = await generateCorrelationDataFromReal(data);
+      if (correlationPoints.length === 0) {
+        correlationPoints = generateCorrelationData(data);
+      }
+      setCorrelationData(correlationPoints);
 
       calculateIndicatorStats(data);
     } catch (err) {
       console.error('Error fetching health data:', err);
-      setError('Failed to load health indicator data. Please try again later.');
+      const errorMessage = handleSupabaseError(err);
+      setError(errorMessage);
+      toast.error(`Failed to load health indicator data: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -211,7 +221,8 @@ const HealthIndicatorIntegration: React.FC = () => {
     return correlationPoints;
   };
 
-  // Generate synthetic correlation data for demonstration
+  // Generate correlation data from real case records, joining approved
+  // cases (by country and category) with health indicator values.
   const generateCorrelationDataFromReal = async (data: HealthIndicator[]): Promise<CorrelationData[]> => {
     // First, get case data to correlate with health indicators
     const { data: cases, error } = await supabase
@@ -381,18 +392,6 @@ const HealthIndicatorIntegration: React.FC = () => {
     fetchPreviousYearData();
   };
 
-  const handleSupabaseError = (error: any): string => {
-    if (!error) return 'An unknown error occurred';
-    
-    if (error.message?.includes('Failed to fetch') || 
-        error.message?.includes('NetworkError') ||
-        error.message?.includes('network request failed')) {
-      return 'Unable to connect to the database. Please check your internet connection and try again.';
-    }
-    
-    return error.message || 'An unexpected error occurred. Please try again.';
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -436,9 +435,7 @@ const HealthIndicatorIntegration: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+          <LoadingState label="Loading health indicator data…" />
         ) : error ? (
           <div className="flex justify-center items-center h-64">
             <div className="text-red-500 text-center">
@@ -561,7 +558,7 @@ const HealthIndicatorIntegration: React.FC = () => {
                       />
                       <Tooltip 
                         cursor={{ strokeDasharray: '3 3' }} 
-                        formatter={(value, name, props) => [value, name]}
+                        formatter={(value, name) => [value, name]}
                         labelFormatter={(label) => correlationData[label]?.name || ''}
                       />
                       <Scatter 

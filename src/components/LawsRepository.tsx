@@ -1,12 +1,21 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Search, Download, FileText, Eye, X } from 'lucide-react';
+import { Search, Download, Eye, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import UploadLawModal from './UploadLawModal';
+import { useModeratorStatus } from '../hooks/useModeratorStatus';
+import { LoadingState, Button, EmptyState } from './ui';
+
+interface LawDoc {
+  id: string;
+  title: string;
+  url: string;
+  type: 'act' | 'policy';
+  category: string;
+}
 
 // Pre-defined documents for all countries
-const PREDEFINED_DOCUMENTS = {
+const PREDEFINED_DOCUMENTS: Record<string, LawDoc[] | { acts: LawDoc[]; policies: LawDoc[] }> = {
   'Ivory Coast': [
     {
       id: 'code-of-ethics',
@@ -447,13 +456,13 @@ const PREDEFINED_DOCUMENTS = {
 };
 
 const LawsRepository = () => {
-  const { t } = useTranslation();
-  const [documents, setDocuments] = React.useState<any[]>([]);
+  const [uploadedDocuments, setUploadedDocuments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCountry, setSelectedCountry] = React.useState<string>('');
   const [selectedType, setSelectedType] = React.useState<'policy' | 'act' | ''>('');
   const [showUploadModal, setShowUploadModal] = React.useState(false);
+  const { isModerator } = useModeratorStatus();
 
   React.useEffect(() => {
     fetchDocuments();
@@ -471,7 +480,7 @@ const LawsRepository = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDocuments(data || []);
+      setUploadedDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast.error('Failed to load documents');
@@ -493,10 +502,53 @@ const LawsRepository = () => {
     document.body.removeChild(link);
   };
 
+  // Merge the hardcoded reference documents with whatever moderators have
+  // uploaded via UploadLawModal (previously fetched into state but never
+  // actually rendered — this is what wires that up), grouped by country.
+  const documentsByCountry = React.useMemo(() => {
+    const grouped: Record<string, LawDoc[]> = {};
+
+    for (const [country, docs] of Object.entries(PREDEFINED_DOCUMENTS)) {
+      grouped[country] = Array.isArray(docs) ? docs : [...docs.acts, ...docs.policies];
+    }
+
+    for (const doc of uploadedDocuments) {
+      const country = doc.countries?.name || 'Other';
+      if (!grouped[country]) grouped[country] = [];
+      grouped[country].push({
+        id: doc.id,
+        title: doc.title,
+        url: doc.file_url,
+        type: doc.type,
+        category: doc.category,
+      });
+    }
+
+    return grouped;
+  }, [uploadedDocuments]);
+
+  const visibleCountries = React.useMemo(() => {
+    return Object.entries(documentsByCountry)
+      .filter(([country]) => !selectedCountry || country === selectedCountry)
+      .map(([country, docs]) => {
+        const filteredDocs = docs.filter(doc =>
+          (!selectedType || doc.type === selectedType) &&
+          (!searchTerm || doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+        return { country, filteredDocs };
+      })
+      .filter(({ filteredDocs }) => filteredDocs.length > 0);
+  }, [documentsByCountry, selectedCountry, selectedType, searchTerm]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-stone-900">Legal Documents</h2>
+        {isModerator && (
+          <Button onClick={() => setShowUploadModal(true)} icon={<Plus className="h-4 w-4" />}>
+            Upload Document
+          </Button>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-md">
@@ -519,7 +571,7 @@ const LawsRepository = () => {
               className="px-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
               <option value="">All Countries</option>
-              {Object.keys(PREDEFINED_DOCUMENTS).map(country => (
+              {Object.keys(documentsByCountry).map(country => (
                 <option key={country} value={country}>{country}</option>
               ))}
             </select>
@@ -538,113 +590,52 @@ const LawsRepository = () => {
         {/* Documents Display */}
         <div className="p-4">
           {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : Object.entries(PREDEFINED_DOCUMENTS)
-              .filter(([country]) => !selectedCountry || country === selectedCountry)
-              .map(([country, docs]) => {
-                const documents = Array.isArray(docs) ? docs : [...docs.acts, ...docs.policies];
-                const filteredDocs = documents.filter(doc => 
-                  (!selectedType || doc.type === selectedType) &&
-                  (!searchTerm || doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
-                );
-
-                if (filteredDocs.length === 0) return null;
-
-                return (
-                  <div key={country} className="mb-8">
-                    <h3 className="text-lg font-semibold text-stone-900 mb-4">{country}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredDocs.map(doc => (
-                        <div key={doc.id} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                          <div className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-stone-100 text-stone-800 mb-2">
-                                  {doc.type === 'act' ? 'Act' : 'Policy'}
-                                </span>
-                                <h4 className="text-md font-medium text-stone-900 mb-2">{doc.title}</h4>
-                                <p className="text-sm text-stone-500 mb-4">{doc.category}</p>
-                              </div>
-                            </div>
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleViewDocument(doc.url)}
-                                className="flex items-center space-x-1 text-sm text-primary hover:text-primary-dark"
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span>View</span>
-                              </button>
-                              <button
-                                onClick={() => handleDownload(doc.url, doc.title)}
-                                className="flex items-center space-x-1 text-sm text-stone-600 hover:text-stone-900"
-                              >
-                                <Download className="h-4 w-4" />
-                                <span>Download</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }).filter(Boolean).length === 0 ? (
-            <div className="text-center py-8 text-stone-500">
-              No documents found matching your criteria
-            </div>
+            <LoadingState label="Loading laws…" />
+          ) : visibleCountries.length === 0 ? (
+            <EmptyState
+              icon={<Search className="h-8 w-8" />}
+              title="No documents found"
+              description="Try a different search term, country, or type filter."
+            />
           ) : (
-            Object.entries(PREDEFINED_DOCUMENTS)
-              .filter(([country]) => !selectedCountry || country === selectedCountry)
-              .map(([country, docs]) => {
-                const documents = Array.isArray(docs) ? docs : [...docs.acts, ...docs.policies];
-                const filteredDocs = documents.filter(doc => 
-                  (!selectedType || doc.type === selectedType) &&
-                  (!searchTerm || doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
-                );
-
-                if (filteredDocs.length === 0) return null;
-
-                return (
-                  <div key={country} className="mb-8">
-                    <h3 className="text-lg font-semibold text-stone-900 mb-4">{country}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredDocs.map(doc => (
-                        <div key={doc.id} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                          <div className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-stone-100 text-stone-800 mb-2">
-                                  {doc.type === 'act' ? 'Act' : 'Policy'}
-                                </span>
-                                <h4 className="text-md font-medium text-stone-900 mb-2">{doc.title}</h4>
-                                <p className="text-sm text-stone-500 mb-4">{doc.category}</p>
-                              </div>
-                            </div>
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleViewDocument(doc.url)}
-                                className="flex items-center space-x-1 text-sm text-primary hover:text-primary-dark"
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span>View</span>
-                              </button>
-                              <button
-                                onClick={() => handleDownload(doc.url, doc.title)}
-                                className="flex items-center space-x-1 text-sm text-stone-600 hover:text-stone-900"
-                              >
-                                <Download className="h-4 w-4" />
-                                <span>Download</span>
-                              </button>
-                            </div>
+            visibleCountries.map(({ country, filteredDocs }) => (
+              <div key={country} className="mb-8">
+                <h3 className="text-lg font-semibold text-stone-900 mb-4">{country}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredDocs.map(doc => (
+                    <div key={doc.id} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <div className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-stone-100 text-stone-800 mb-2">
+                              {doc.type === 'act' ? 'Act' : 'Policy'}
+                            </span>
+                            <h4 className="text-md font-medium text-stone-900 mb-2">{doc.title}</h4>
+                            <p className="text-sm text-stone-500 mb-4">{doc.category}</p>
                           </div>
                         </div>
-                      ))}
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleViewDocument(doc.url)}
+                            className="flex items-center space-x-1 text-sm text-primary hover:text-primary-dark"
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span>View</span>
+                          </button>
+                          <button
+                            onClick={() => handleDownload(doc.url, doc.title)}
+                            className="flex items-center space-x-1 text-sm text-stone-600 hover:text-stone-900"
+                          >
+                            <Download className="h-4 w-4" />
+                            <span>Download</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
-              }).filter(Boolean)
+                  ))}
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

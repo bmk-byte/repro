@@ -83,7 +83,7 @@ export const testConnection = async () => {
     
     // Check for invalid refresh token first
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { error: sessionError } = await supabase.auth.getSession();
       if (sessionError && (
         sessionError.message?.includes('Invalid Refresh Token') ||
         sessionError.message?.includes('refresh_token_not_found') ||
@@ -117,7 +117,7 @@ export const testConnection = async () => {
     
     // Test pending_judgments table specifically
     try {
-      const { data: pendingJudgmentsTest, error: pendingJudgmentsError } = await supabase
+      const { error: pendingJudgmentsError } = await supabase
         .from('pending_judgments')
         .select('id')
         .limit(1);
@@ -135,7 +135,7 @@ export const testConnection = async () => {
     
     // Test pending_cases table specifically
     try {
-      const { data: pendingCasesTest, error: pendingCasesError } = await supabase
+      const { error: pendingCasesError } = await supabase
         .from('pending_cases')
         .select('id')
         .limit(1);
@@ -195,7 +195,7 @@ export const queryWithRetry = async (queryFn: () => Promise<any>) => {
         
         // Test the fresh connection
         try {
-          const { data, error: testError } = await freshClient
+          const { error: testError } = await freshClient
             .from('countries')
             .select('id')
             .limit(1);
@@ -275,7 +275,7 @@ export const handleSupabaseError = (error: any): string => {
 export const checkConnectionHealth = async () => {
   try {
     const startTime = Date.now();
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('countries')
       .select('count')
       .limit(1)

@@ -3,6 +3,7 @@ import { Card, Title, Text, Flex, ProgressBar } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Clock, TrendingUp, Users, Briefcase } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { LoadingState } from './ui';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -333,9 +334,7 @@ const PerformanceTrackingModule: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <LoadingState label="Loading performance data…" />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-red-500">{error}</div>
