@@ -23,13 +23,27 @@ interface HookPayload {
   email_data: {
     token_hash: string;
     redirect_to: string;
-    email_action_type: 'signup' | 'recovery' | 'email_change' | 'magiclink' | 'invite' | 'reauthentication';
+    email_action_type:
+      | 'signup'
+      | 'recovery'
+      | 'email_change'
+      | 'magiclink'
+      | 'invite'
+      | 'reauthentication'
+      | 'password_changed_notification';
     site_url: string;
     token_hash_new?: string;
   };
 }
 
-function renderEmail(heading: string, body: string, ctaLabel: string, ctaUrl: string): string {
+interface RenderEmailOptions {
+  heading: string;
+  body: string;
+  /** Omit for a pure notification with nothing to act on (no verification link exists, e.g. "your password was changed"). */
+  cta?: { label: string; url: string };
+}
+
+function renderEmail({ heading, body, cta }: RenderEmailOptions): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
       <div style="background: #9C1D20; padding: 20px 24px; border-radius: 8px 8px 0 0;">
@@ -37,9 +51,16 @@ function renderEmail(heading: string, body: string, ctaLabel: string, ctaUrl: st
       </div>
       <div style="border: 1px solid #E7E3DB; border-top: none; border-radius: 0 0 8px 8px; padding: 24px;">
         <h1 style="margin: 0 0 12px; font-size: 18px; color: #25211A;">${heading}</h1>
-        <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #524A3C;">${body}</p>
-        <a href="${ctaUrl}" style="display: inline-block; background: #9C1D20; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600;">${ctaLabel}</a>
-        <p style="margin: 20px 0 0; font-size: 12px; color: #8A7F6C;">If the button doesn't work, copy and paste this link into your browser:<br />${ctaUrl}</p>
+        <p style="margin: 0 0 ${cta ? '20px' : '0'}; font-size: 14px; line-height: 1.6; color: #524A3C;">${body}</p>
+        ${
+          cta
+            ? `<a href="${cta.url}" style="display: inline-block; background: #9C1D20; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600;">${cta.label}</a>
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #F3F1ED;">
+          <p style="margin: 0; font-size: 12px; color: #8A7F6C;">Having trouble with the button? Paste this link into your browser instead:</p>
+          <p style="margin: 6px 0 0; font-size: 12px; color: #B3A996; word-break: break-all;">${cta.url}</p>
+        </div>`
+            : ''
+        }
       </div>
     </div>
   `;
@@ -58,43 +79,57 @@ function buildEmail(payload: HookPayload): { subject: string; html: string } {
     case 'invite':
       return {
         subject: 'Confirm your ReproPulse account',
-        html: renderEmail(
-          'Confirm your email',
-          "Welcome to ReproPulse. Click below to confirm your email address and activate your account.",
-          'Confirm Email',
-          verifyUrl
-        ),
+        html: renderEmail({
+          heading: 'Confirm your email',
+          body: 'Welcome to ReproPulse. Click below to confirm your email address and activate your account.',
+          cta: { label: 'Confirm Email', url: verifyUrl },
+        }),
       };
     case 'recovery':
     case 'reauthentication':
       return {
         subject: 'Reset your ReproPulse password',
-        html: renderEmail(
-          'Reset your password',
-          "We received a request to reset your ReproPulse password. If you didn't make this request, you can safely ignore this email.",
-          'Reset Password',
-          verifyUrl
-        ),
+        html: renderEmail({
+          heading: 'Reset your password',
+          body: "We received a request to reset your ReproPulse password. If you didn't make this request, you can safely ignore this email.",
+          cta: { label: 'Reset Password', url: verifyUrl },
+        }),
       };
     case 'email_change':
       return {
         subject: 'Confirm your new email address',
-        html: renderEmail(
-          'Confirm your new email',
-          'Click below to confirm this new email address for your ReproPulse account.',
-          'Confirm Email',
-          verifyUrl
-        ),
+        html: renderEmail({
+          heading: 'Confirm your new email',
+          body: 'Click below to confirm this new email address for your ReproPulse account.',
+          cta: { label: 'Confirm Email', url: verifyUrl },
+        }),
       };
     case 'magiclink':
       return {
         subject: 'Your ReproPulse sign-in link',
-        html: renderEmail('Sign in to ReproPulse', 'Click below to sign in.', 'Sign In', verifyUrl),
+        html: renderEmail({
+          heading: 'Sign in to ReproPulse',
+          body: 'Click below to sign in.',
+          cta: { label: 'Sign In', url: verifyUrl },
+        }),
+      };
+    case 'password_changed_notification':
+      // Pure security notice — no token is issued for this type, so there's
+      // nothing to verify and no CTA to show.
+      return {
+        subject: 'Your ReproPulse password was changed',
+        html: renderEmail({
+          heading: 'Password changed',
+          body: "Your ReproPulse account password was just changed. If you made this change, no action is needed. If you didn't, please contact an administrator immediately — your account may be compromised.",
+        }),
       };
     default:
       return {
         subject: 'ReproPulse account notice',
-        html: renderEmail('Account notice', 'Click below to continue.', 'Continue', verifyUrl),
+        html: renderEmail({
+          heading: 'Account notice',
+          body: 'Something changed on your ReproPulse account. If this was you, no action is needed.',
+        }),
       };
   }
 }

@@ -18,10 +18,14 @@ export function renderEmail({ heading, body, ctaLabel, ctaUrl }: RenderEmailOpti
       </div>
       <div style="border: 1px solid #E7E3DB; border-top: none; border-radius: 0 0 8px 8px; padding: 24px;">
         <h1 style="margin: 0 0 12px; font-size: 18px; color: #25211A;">${heading}</h1>
-        <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #524A3C; white-space: pre-line;">${body}</p>
+        <p style="margin: 0 0 ${ctaLabel && ctaUrl ? '20px' : '0'}; font-size: 14px; line-height: 1.6; color: #524A3C; white-space: pre-line;">${body}</p>
         ${
           ctaLabel && ctaUrl
-            ? `<a href="${ctaUrl}" style="display: inline-block; background: #9C1D20; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600;">${ctaLabel}</a>`
+            ? `<a href="${ctaUrl}" style="display: inline-block; background: #9C1D20; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600;">${ctaLabel}</a>
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #F3F1ED;">
+          <p style="margin: 0; font-size: 12px; color: #8A7F6C;">Having trouble with the button? Paste this link into your browser instead:</p>
+          <p style="margin: 6px 0 0; font-size: 12px; color: #B3A996; word-break: break-all;">${ctaUrl}</p>
+        </div>`
             : ''
         }
       </div>
