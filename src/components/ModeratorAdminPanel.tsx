@@ -1,9 +1,11 @@
 import React from 'react';
 import { ShieldCheck, ShieldOff, UserPlus, ScrollText } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { handleQueryError } from '../lib/errorHandling';
 import { sanitizeEmail } from '../lib/sanitize';
+import { sendEmail } from '../lib/email';
+import { renderEmail } from '../lib/emailTemplates';
 import { Card, Button, Input, ConfirmDialog, Badge, LoadingState, EmptyState } from './ui';
 
 interface Moderator {
@@ -182,6 +184,14 @@ const ModeratorAdminPanel: React.FC = () => {
       });
       if (error) throw error;
       toast.success(`Granted moderator access to ${email}.`);
+      sendEmail({
+        to: email,
+        subject: "You've been granted moderator access on ReproPulse",
+        html: renderEmail({
+          heading: 'Moderator Access Granted',
+          body: "You've been granted moderator access on ReproPulse. You can now review, approve, and reject submissions.",
+        }),
+      }).catch((err) => console.error('Failed to send moderator-grant notification email:', err));
       setNewEmail('');
       fetchModerators();
     } catch (error) {
@@ -201,6 +211,14 @@ const ModeratorAdminPanel: React.FC = () => {
       });
       if (error) throw error;
       toast.success(`Removed moderator access for ${moderator.email}.`);
+      sendEmail({
+        to: moderator.email,
+        subject: 'Your moderator access on ReproPulse has been revoked',
+        html: renderEmail({
+          heading: 'Moderator Access Revoked',
+          body: 'Your moderator access on ReproPulse has been revoked. If you believe this is a mistake, please contact an administrator.',
+        }),
+      }).catch((err) => console.error('Failed to send moderator-revoke notification email:', err));
       fetchModerators();
     } catch (error) {
       handleQueryError(error);

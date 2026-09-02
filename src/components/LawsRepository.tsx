@@ -1,10 +1,10 @@
 import React from 'react';
 import { Search, Download, Eye, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import UploadLawModal from './UploadLawModal';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
-import { LoadingState, Button, EmptyState } from './ui';
+import { Button, EmptyState, SkeletonCard } from './ui';
 
 interface LawDoc {
   id: string;
@@ -590,7 +590,11 @@ const LawsRepository = () => {
         {/* Documents Display */}
         <div className="p-4">
           {loading ? (
-            <LoadingState label="Loading laws…" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
           ) : visibleCountries.length === 0 ? (
             <EmptyState
               icon={<Search className="h-8 w-8" />}

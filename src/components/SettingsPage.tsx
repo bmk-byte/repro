@@ -2,17 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import ProfileSettingsForm from './ProfileSettingsForm';
 import { User, Bell, Lock, Shield } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
-import { LoadingState } from './ui';
+import { usePasswordStrength } from '../hooks/usePasswordStrength';
+import { getToastsEnabled, setToastsEnabled } from '../lib/toastPreference';
+import { LoadingState, Input, Button, PasswordStrengthMeter } from './ui';
 
 const SettingsPage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
-  
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [toastsEnabled, setToastsEnabledState] = useState(getToastsEnabled());
+  const { requirements: passwordRequirements, strength: passwordStrength, isValid: passwordIsValid } = usePasswordStrength(newPassword);
+
   // Use the moderator status hook
-  const { isModerator, loading: moderatorLoading, error: moderatorError } = useModeratorStatus();
+  const { isModerator, loading: moderatorLoading } = useModeratorStatus();
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordIsValid) {
+      toast.error('Your new password does not meet all the requirements below.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('The passwords do not match.');
+      return;
+    }
+    setChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+    if (error) {
+      toast.error(error.message || 'Unable to update your password.');
+      return;
+    }
+    toast.success('Password updated.');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const handleToggleToasts = (enabled: boolean) => {
+    setToastsEnabledState(enabled);
+    setToastsEnabled(enabled);
+    if (enabled) toast.success('Pop-up notifications enabled.');
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,26 +76,6 @@ const SettingsPage: React.FC = () => {
   // Show loading if either user data or moderator status is loading
   if (loading || moderatorLoading) {
     return <LoadingState label="Loading settings…" />;
-  }
-
-  // Check if user is not a moderator
-  if (!isModerator) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-12">
-          <Shield className="mx-auto h-12 w-12 text-stone-400" />
-          <h3 className="mt-2 text-sm font-medium text-stone-900">Access Denied</h3>
-          <p className="mt-1 text-sm text-stone-500">
-            You do not have permission to access the settings page. Only moderators can view and modify system settings.
-          </p>
-          {moderatorError && (
-            <p className="mt-4 text-sm text-red-500">
-              Error: {moderatorError}
-            </p>
-          )}
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -137,18 +152,37 @@ const SettingsPage: React.FC = () => {
             {activeTab === 'security' && (
               <div className="p-6">
                 <h2 className="text-lg font-medium text-stone-900 mb-6">Security Settings</h2>
-                <p className="text-stone-500">
-                  Security settings are managed through your profile. You can change your password and enable two-factor authentication there.
-                </p>
-                
-                <div className="mt-6 space-y-4">
+
+                <div className="space-y-4">
                   <div className="bg-stone-50 p-4 rounded-lg">
                     <h3 className="text-md font-medium text-stone-900">Password</h3>
                     <p className="mt-1 text-sm text-stone-500">
                       Your password was last changed on {new Date(user?.updated_at || Date.now()).toLocaleDateString()}.
                     </p>
                   </div>
-                  
+
+                  <form onSubmit={handleChangePassword} className="bg-stone-50 p-4 rounded-lg space-y-4">
+                    <h3 className="text-md font-medium text-stone-900">Change Password</h3>
+                    <Input
+                      type="password"
+                      label="New password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                    />
+                    {newPassword && <PasswordStrengthMeter strength={passwordStrength} requirements={passwordRequirements} />}
+                    <Input
+                      type="password"
+                      label="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                    <Button type="submit" loading={changingPassword}>
+                      Update Password
+                    </Button>
+                  </form>
+
                   <div className="bg-stone-50 p-4 rounded-lg">
                     <h3 className="text-md font-medium text-stone-900">Login History</h3>
                     <p className="mt-1 text-sm text-stone-500">
@@ -166,65 +200,21 @@ const SettingsPage: React.FC = () => {
                   <div className="flex items-start">
                     <div className="flex items-center h-5">
                       <input
-                        id="email-notifications"
-                        name="email-notifications"
+                        id="toast-notifications"
+                        name="toast-notifications"
                         type="checkbox"
-                        defaultChecked
-                        disabled
-                        className="h-4 w-4 text-primary border-stone-300 rounded focus:ring-primary cursor-not-allowed opacity-60"
+                        checked={toastsEnabled}
+                        onChange={(e) => handleToggleToasts(e.target.checked)}
+                        className="h-4 w-4 text-primary border-stone-300 rounded focus:ring-primary"
                       />
                     </div>
                     <div className="ml-3 text-sm">
-                      <label htmlFor="email-notifications" className="font-medium text-stone-700">
-                        Email Notifications
+                      <label htmlFor="toast-notifications" className="font-medium text-stone-700">
+                        Show pop-up notifications on screen
                       </label>
-                      <p className="text-stone-500">Receive email notifications about case updates and system announcements.</p>
+                      <p className="text-stone-500">Toggle the pop-up messages that appear after actions like saving or submitting. This only affects this device/browser.</p>
                     </div>
                   </div>
-                  
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="case-updates"
-                        name="case-updates"
-                        type="checkbox"
-                        defaultChecked
-                        disabled
-                        className="h-4 w-4 text-primary border-stone-300 rounded focus:ring-primary cursor-not-allowed opacity-60"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label htmlFor="case-updates" className="font-medium text-stone-700">
-                        Case Updates
-                      </label>
-                      <p className="text-stone-500">Receive notifications when cases are updated or new documents are added.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="system-announcements"
-                        name="system-announcements"
-                        type="checkbox"
-                        defaultChecked
-                        disabled
-                        className="h-4 w-4 text-primary border-stone-300 rounded focus:ring-primary cursor-not-allowed opacity-60"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label htmlFor="system-announcements" className="font-medium text-stone-700">
-                        System Announcements
-                      </label>
-                      <p className="text-stone-500">Receive notifications about system updates and new features.</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 bg-yellow-50 border border-yellow-100 rounded-md p-4">
-                  <p className="text-sm text-yellow-700">
-                    Notification preferences are currently view-only. Contact an administrator to change these settings.
-                  </p>
                 </div>
               </div>
             )}

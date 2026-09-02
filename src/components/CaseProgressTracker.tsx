@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FileUp, ChevronDown, ChevronRight, Clock, FileText, Edit2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { validateFile } from '../lib/errorHandling';
 import { LoadingState } from './ui';
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Title, Text, BarChart } from '@tremor/react';
 import { supabase } from '../lib/supabase';
 import { RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import CaseStageProgress from './CaseStageProgress';
 import { LoadingState, Badge, Select, Button, EmptyState, ErrorState } from './ui';
 import type { BadgeProps } from './ui';

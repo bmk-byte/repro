@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from 'recharts';
 import { Activity, TrendingUp, Heart } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { LoadingState, ErrorState, Button } from './ui';
 import { CHART_COLORS } from '../lib/chartColors';

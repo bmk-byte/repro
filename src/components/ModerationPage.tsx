@@ -2,13 +2,15 @@ import React from 'react';
 import { Shield, CircleCheck as CheckCircle, Circle as XCircle, CircleAlert as AlertCircle, Eye, FileText, Filter, X, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../lib/supabase';
 import { sanitizeSearchTerm, sanitizeOrFilterTerm } from '../lib/sanitize';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
+import { sendEmail } from '../lib/email';
+import { renderEmail } from '../lib/emailTemplates';
 import SubmissionDetailsModal from './SubmissionDetailsModal';
 import DocumentModal from './DocumentModal';
 import SubmissionDetailsCard from './SubmissionDetailsCard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import RejectionModal from './RejectionModal';
-import { Button, Select, Badge, LoadingState, EmptyState, ConfirmDialog } from './ui';
+import { Button, Select, Badge, LoadingState, EmptyState, ConfirmDialog, SkeletonRow } from './ui';
 
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -565,8 +567,30 @@ const ModerationPage = () => {
       }
 
       toast.success(`Content ${status} successfully`);
+
+      // Email the original submitter their decision — best-effort, never
+      // blocks the moderation action itself if it fails.
+      if (type === 'submissions') {
+        const item = pendingSubmissions.find((i) => String(i.id) === String(id));
+        const submitterEmail = item?.profiles?.email;
+        if (submitterEmail) {
+          const title = item.title || item.case_name || 'Your submission';
+          sendEmail({
+            to: submitterEmail,
+            subject: status === 'approved' ? 'Your submission has been approved' : 'Your submission was not approved',
+            html: renderEmail({
+              heading: status === 'approved' ? 'Submission Approved' : 'Submission Not Approved',
+              body:
+                status === 'approved'
+                  ? `Good news — "${title}" has been reviewed and approved. It's now publicly visible on ReproPulse.`
+                  : `Your submission "${title}" was reviewed and was not approved.${feedback ? `\n\nReviewer feedback: ${feedback}` : ''}`,
+            }),
+          }).catch((err) => console.error('Failed to send moderation decision email:', err));
+        }
+      }
+
       fetchPendingContent();
-      
+
       // Clear feedback and close modal if open
       if (showFeedbackModal) {
         setShowFeedbackModal(false);
@@ -847,7 +871,11 @@ const ModerationPage = () => {
 
         <div className="p-4 sm:p-6">
           {loading ? (
-            <LoadingState label="Loading pending content…" />
+            <div className="divide-y divide-stone-100 rounded-lg border border-stone-200">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))}
+            </div>
           ) : contentError ? (
             <EmptyState
               icon={<AlertCircle className="h-12 w-12" />}

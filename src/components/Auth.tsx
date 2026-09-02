@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { validateModeratorOrganization } from '../lib/moderatorService';
-import toast from 'react-hot-toast';
-import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff, Check, X } from 'lucide-react';
+import { toast } from '../lib/toast';
+import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff } from 'lucide-react';
 import { PARTNER_ORGANIZATIONS, OTHER_ORGANIZATION_VALUE } from '../constants/organizations';
-import { Input, Select, Button, Card } from './ui';
+import { Input, Select, Button, Card, PasswordStrengthMeter } from './ui';
+import { usePasswordStrength } from '../hooks/usePasswordStrength';
 
 interface AuthProps {
   onSuccess?: () => void;
@@ -17,12 +18,6 @@ interface ValidationState {
   email: string;
   password: string;
   organization: string;
-}
-
-interface PasswordRequirement {
-  regex: RegExp;
-  text: string;
-  met: boolean;
 }
 
 const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }) => {
@@ -42,35 +37,8 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   const [validationErrors, setValidationErrors] = useState<ValidationState>({ email: '', password: '', organization: '' });
   const [shakeAnimation, setShakeAnimation] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
-  
-  // Password strength requirements
-  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirement[]>([
-    { regex: /.{8,}/, text: 'At least 8 characters', met: false },
-    { regex: /[A-Z]/, text: 'At least 1 uppercase letter', met: false },
-    { regex: /[a-z]/, text: 'At least 1 lowercase letter', met: false },
-    { regex: /[0-9]/, text: 'At least 1 number', met: false },
-    { regex: /[!@#$%^&*]/, text: 'At least 1 special character (!@#$%^&*)', met: false }
-  ]);
 
-  // Calculate password strength (0-100)
-  const [passwordStrength, setPasswordStrength] = useState(0);
-
-  // Update password strength when password changes
-  useEffect(() => {
-    if (isSignUp) {
-      const updatedRequirements = passwordRequirements.map(req => ({
-        ...req,
-        met: req.regex.test(password)
-      }));
-      
-      setPasswordRequirements(updatedRequirements);
-      
-      // Calculate strength as percentage of requirements met
-      const metCount = updatedRequirements.filter(req => req.met).length;
-      const newStrength = Math.round((metCount / updatedRequirements.length) * 100);
-      setPasswordStrength(newStrength);
-    }
-  }, [password, isSignUp]);
+  const { requirements: passwordRequirements, strength: passwordStrength } = usePasswordStrength(password);
 
   // Email validation function
   const validateEmail = (email: string): boolean => {
@@ -324,20 +292,6 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
     setPasswordTouched(false);
   };
 
-  // Get password strength color
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength < 40) return 'bg-danger';
-    if (passwordStrength < 70) return 'bg-warning';
-    return 'bg-success';
-  };
-
-  // Get password strength text
-  const getPasswordStrengthText = () => {
-    if (passwordStrength < 40) return 'Weak';
-    if (passwordStrength < 70) return 'Medium';
-    return 'Strong';
-  };
-
   return (
     <div className="min-h-screen w-full bg-stone-100 flex flex-col">
       <div className="flex-grow flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -532,37 +486,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
                     {/* Password strength meter (only for signup) */}
                     {isSignUp && passwordTouched && (
-                      <div className="mt-2">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs font-medium text-stone-700">Password strength</span>
-                          <span className="text-xs font-medium">{getPasswordStrengthText()}</span>
-                        </div>
-                        <div className="w-full bg-stone-200 rounded-full h-2.5">
-                          <motion.div
-                            className={`h-2.5 rounded-full ${getPasswordStrengthColor()}`}
-                            style={{ width: `${passwordStrength}%` }}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${passwordStrength}%` }}
-                            transition={{ duration: 0.3 }}
-                          ></motion.div>
-                        </div>
-
-                        {/* Password requirements */}
-                        <div className="mt-3 space-y-2">
-                          {passwordRequirements.map((req, index) => (
-                            <div key={index} className="flex items-center">
-                              {req.met ? (
-                                <Check className="h-4 w-4 text-success mr-2" />
-                              ) : (
-                                <X className="h-4 w-4 text-stone-400 mr-2" />
-                              )}
-                              <span className={`text-xs ${req.met ? 'text-success' : 'text-stone-500'}`}>
-                                {req.text}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <PasswordStrengthMeter strength={passwordStrength} requirements={passwordRequirements} />
                     )}
                     </div>
                   )}

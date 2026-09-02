@@ -40,8 +40,17 @@ interface Profile {
   phone_number: string | null;
 }
 
+// A thin animated bar across the very top of the viewport — a distinct,
+// app-wide "something is loading" signal, separate from the in-panel
+// spinners/skeletons used for individual data fetches.
 const TabFallback = () => (
-  <div className="flex items-center justify-center py-24 text-gray-400 text-sm">Loading…</div>
+  <div className="fixed top-0 left-0 right-0 z-50 h-1 overflow-hidden bg-primary/15" role="status" aria-label="Loading">
+    <motion.div
+      className="h-full w-1/3 rounded-full bg-primary"
+      animate={{ x: ['-100%', '300%'] }}
+      transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+    />
+  </div>
 );
 
 const devLog = (...args: unknown[]) => {
@@ -519,23 +528,29 @@ function DashboardApp() {
           duration: 4000,
           style: {
             background: '#fff',
-            color: '#374151',
+            color: '#524A3C', // stone-700
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            border: '1px solid #e5e7eb',
+            border: '1px solid #E7E3DB', // stone-200
             borderRadius: '0.5rem',
             padding: '16px',
             cursor: 'pointer',
           },
           success: {
             iconTheme: {
-              primary: '#9C1D20',
+              primary: '#9C1D20', // primary
               secondary: '#fff',
+            },
+            style: {
+              borderLeft: '4px solid #15803D', // success
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
+              primary: '#DC2626', // danger
               secondary: '#fff',
+            },
+            style: {
+              borderLeft: '4px solid #DC2626', // danger
             },
           },
         }}

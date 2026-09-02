@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import RapidResponseCaseForm from './RapidResponseCaseForm';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
 import RapidResponseDashboard from './RapidResponseDashboard';
@@ -362,11 +362,11 @@ const RapidResponseCasesPage: React.FC = () => {
   const getCategoryColor = (category: string) => {
     if (!category) return 'bg-stone-100 text-stone-800';
     
-    if (category.includes('Abortion')) return 'bg-purple-100 text-purple-800';
-    if (category.includes('Rape')) return 'bg-red-100 text-red-800';
-    if (category.includes('Defilement')) return 'bg-pink-100 text-pink-800';
-    if (category.includes('SGBV')) return 'bg-orange-100 text-orange-800';
-    if (category.includes('Incest')) return 'bg-indigo-100 text-indigo-800';
+    if (category.includes('Abortion')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('Rape')) return 'bg-danger-light text-danger-dark';
+    if (category.includes('Defilement')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('SGBV')) return 'bg-warning-light text-warning-dark';
+    if (category.includes('Incest')) return 'bg-stone-100 text-stone-800';
     
     return 'bg-stone-100 text-stone-800';
   };
@@ -682,9 +682,9 @@ const RapidResponseCasesPage: React.FC = () => {
           {(filters.priority || filters.status || filters.category || filters.partner || filters.country || filters.myCases || filters.dateRange.start || filters.dateRange.end || filters.timePeriod !== 'all' || searchTerm) && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-light text-info-dark">
                   Search: {searchTerm}
-                  <button onClick={() => setSearchTerm('')} className="ml-1 text-blue-600 hover:text-blue-800">
+                  <button onClick={() => setSearchTerm('')} className="ml-1 text-info hover:text-info-dark">
                     <X className="h-3 w-3" />
                   </button>
                 </span>
@@ -778,8 +778,8 @@ const RapidResponseCasesPage: React.FC = () => {
             <LoadingState label="Loading cases…" />
           ) : error ? (
             <div className="p-6 text-center">
-              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-              <p className="text-red-500">{error}</p>
+              <AlertTriangle className="h-8 w-8 text-danger mx-auto mb-2" />
+              <p className="text-danger">{error}</p>
               <button
                 onClick={fetchCases}
                 className="mt-4 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark"
@@ -881,12 +881,12 @@ const RapidResponseCasesPage: React.FC = () => {
                             <span className="text-sm text-stone-400">Unknown</span>
                           )}
                           {caseItem.profiles?.organization && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600 border border-slate-200 w-fit">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-stone-100 text-stone-600 border border-stone-200 w-fit">
                               {caseItem.profiles.organization}
                             </span>
                           )}
                           {caseItem.user_id === currentUserId && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 w-fit">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-info-light text-info-dark w-fit">
                               Mine
                             </span>
                           )}
@@ -919,7 +919,7 @@ const RapidResponseCasesPage: React.FC = () => {
             You do not have permission to access the Rapid Response system.
           </p>
           {moderatorError && (
-            <p className="mt-4 text-sm text-red-500">
+            <p className="mt-4 text-sm text-danger">
               Error: {moderatorError}
             </p>
           )}
@@ -938,9 +938,9 @@ const RapidResponseCasesPage: React.FC = () => {
             Track and manage time-sensitive legal response cases
           </p>
           {accessScope === 'organization' && userOrganization && (
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-800">
+            <div className="mt-3 p-3 bg-info-light border border-info/30 rounded-md flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-info-dark">
                 You are viewing cases uploaded by <strong>{userOrganization}</strong> only. Cases from other organizations are not visible.
               </p>
             </div>

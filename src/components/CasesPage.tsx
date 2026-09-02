@@ -1,14 +1,14 @@
 import React from 'react';
 import { Search, Filter, ChevronDown, ChevronUp, X, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import CaseCard from './CaseCard';
 import CaseDetails from './CaseDetails';
 import EditCaseModal from './EditCaseModal';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { sanitizeSearchTerm } from '../lib/sanitize';
 import { RESTRICTED_ORGANIZATIONS } from '../constants/organizations';
-import { Button, Select, Badge, LoadingState, EmptyState } from './ui';
+import { Button, Select, Badge, EmptyState, SkeletonCard } from './ui';
 
 interface CasesPageProps {
   userProfile?: any;
@@ -505,7 +505,11 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
       {/* Cases Grid */}
       {loading ? (
-        <LoadingState label="Loading cases…" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : fetchError ? (
         <EmptyState
           icon={<AlertCircle className="h-12 w-12" />}

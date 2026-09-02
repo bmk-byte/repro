@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 
 interface UseModeratorStatusProps {
   isConnected?: boolean;

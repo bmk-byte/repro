@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { Download, FileText, BarChartHorizontal, PieChart, Calendar, RefreshCw } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
 
 const RESTRICTED_ORGANIZATIONS = [

@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, Calendar, MapPin, FileText, CreditCard as Edit2, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import DocumentModal from './DocumentModal';
 import { LoadingState } from './ui';
 
@@ -133,34 +133,34 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'Urgent':
-        return 'bg-red-100 text-red-800';
+        return 'bg-danger-light text-danger-dark';
       case 'High':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-warning-light text-warning-dark';
       case 'Medium':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-info-light text-info-dark';
       case 'Low':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success-light text-success-dark';
       default:
         return 'bg-stone-100 text-stone-800';
     }
   };
-  
+
   const getCategoryColor = (category: string) => {
     if (!category) return 'bg-stone-100 text-stone-800';
 
-    if (category.includes('Abortion') || category.includes('Contraceptive') || category.includes('Reproductive')) return 'bg-blue-100 text-blue-800';
-    if (category.includes('Maternal') || category.includes('Mortality')) return 'bg-red-100 text-red-800';
-    if (category.includes('SGBV') || category.includes('Sexual and Gender')) return 'bg-orange-100 text-orange-800';
-    if (category.includes('Child Marriage') || category.includes('Forced Marriage')) return 'bg-yellow-100 text-yellow-800';
-    if (category.includes('Menstrual') || category.includes('Hygiene')) return 'bg-pink-100 text-pink-800';
-    if (category.includes('Education')) return 'bg-green-100 text-green-800';
-    if (category.includes('Criminalization')) return 'bg-red-100 text-red-800';
-    if (category.includes('Marginalized') || category.includes('Discrimination')) return 'bg-amber-100 text-amber-800';
-    if (category.includes('Sterilization')) return 'bg-rose-100 text-rose-800';
-    if (category.includes('Consent') || category.includes('Adolescent') || category.includes('Minor')) return 'bg-teal-100 text-teal-800';
-    if (category.includes('Confidentiality') || category.includes('Privacy')) return 'bg-cyan-100 text-cyan-800';
-    if (category.includes('Conflict') || category.includes('Humanitarian')) return 'bg-red-100 text-red-800';
-    if (category.includes('Environmental')) return 'bg-emerald-100 text-emerald-800';
+    if (category.includes('Abortion') || category.includes('Contraceptive') || category.includes('Reproductive')) return 'bg-info-light text-info-dark';
+    if (category.includes('Maternal') || category.includes('Mortality')) return 'bg-danger-light text-danger-dark';
+    if (category.includes('SGBV') || category.includes('Sexual and Gender')) return 'bg-warning-light text-warning-dark';
+    if (category.includes('Child Marriage') || category.includes('Forced Marriage')) return 'bg-warning-light text-warning-dark';
+    if (category.includes('Menstrual') || category.includes('Hygiene')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('Education')) return 'bg-success-light text-success-dark';
+    if (category.includes('Criminalization')) return 'bg-danger-light text-danger-dark';
+    if (category.includes('Marginalized') || category.includes('Discrimination')) return 'bg-warning-light text-warning-dark';
+    if (category.includes('Sterilization')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('Consent') || category.includes('Adolescent') || category.includes('Minor')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('Confidentiality') || category.includes('Privacy')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('Conflict') || category.includes('Humanitarian')) return 'bg-danger-light text-danger-dark';
+    if (category.includes('Environmental')) return 'bg-stone-100 text-stone-800';
     if (category.includes('Religious') || category.includes('Cultural')) return 'bg-stone-100 text-stone-800';
 
     return 'bg-stone-100 text-stone-800';
@@ -176,7 +176,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
     return (
       <div className="text-center py-12">
         <div className="flex justify-center mb-4">
-          <AlertCircle className="h-12 w-12 text-red-500" />
+          <AlertCircle className="h-12 w-12 text-danger" />
         </div>
         <p className="text-stone-900 font-medium mb-2">
           {accessDenied ? 'Access Denied' : 'Case not found'}
@@ -241,15 +241,15 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
           </div>
           <div className="flex flex-wrap gap-2">
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              caseData.status === 'completed' ? 'bg-green-100 text-green-800' :
-              caseData.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-              'bg-yellow-100 text-yellow-800'
+              caseData.status === 'completed' ? 'bg-success-light text-success-dark' :
+              caseData.status === 'in_progress' ? 'bg-info-light text-info-dark' :
+              'bg-warning-light text-warning-dark'
             }`}>
               {caseData.status}
             </span>
-            
+
             {caseData.case_type === 'rapid-response' && (
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 flex items-center">
+              <span className="px-3 py-1 rounded-full text-sm font-medium bg-danger-light text-danger-dark flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 Rapid Response
               </span>
@@ -397,8 +397,8 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                     >
                       <div className="absolute -left-[9px] top-0">
                         <div className={`h-4 w-4 rounded-full ${
-                          stage.status === 'Completed' ? 'bg-green-500' :
-                          stage.status === 'In Progress' ? 'bg-blue-500' :
+                          stage.status === 'Completed' ? 'bg-success' :
+                          stage.status === 'In Progress' ? 'bg-info' :
                           'bg-stone-300'
                         }`} />
                       </div>

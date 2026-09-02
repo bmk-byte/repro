@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { LoadingState, ErrorState, Button } from './ui';
 import { CHART_COLORS, CHART_GRID_COLOR } from '../lib/chartColors';
 

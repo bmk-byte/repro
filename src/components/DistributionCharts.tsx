@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, Title, Text } from '@tremor/react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { LoadingState, ErrorState, Button } from './ui';
 import { CHART_COLORS } from '../lib/chartColors';
 import { chartHeight } from '../lib/chartLayout';

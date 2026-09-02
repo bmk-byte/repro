@@ -3,7 +3,7 @@ import { Card, Title, Text, Flex } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Users, Building, Gavel } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { LoadingState, ErrorState, Button } from './ui';
 import { CHART_COLORS, CHART_CATEGORICAL_PALETTE } from '../lib/chartColors';
 import { chartHeight } from '../lib/chartLayout';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { Modal, Textarea, Select, Button } from './ui';
 
 interface UpdateCaseModalProps {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Download, FileText, Search, Filter, ChevronDown, ChevronUp, X, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import UploadResourceModal from './UploadResourceModal';
 import { Button, Select, Badge, LoadingState, EmptyState } from './ui';

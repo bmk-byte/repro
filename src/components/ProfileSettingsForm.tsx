@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Bell, Pencil } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { sanitizeURL, sanitizeText, sanitizePhone } from '../lib/sanitize';
 import { Badge, Spinner, Button, Input } from './ui';
 

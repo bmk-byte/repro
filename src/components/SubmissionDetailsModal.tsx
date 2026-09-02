@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import CaseDetails from './CaseDetails';
 import JudgmentDetails from './JudgmentDetails';
 import { LoadingState } from './ui';

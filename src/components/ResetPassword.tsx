@@ -1,8 +1,10 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LockKeyhole } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
+import { usePasswordStrength } from '../hooks/usePasswordStrength';
+import { PasswordStrengthMeter } from './ui';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const { requirements, strength, isValid } = usePasswordStrength(password);
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
@@ -21,8 +24,8 @@ export default function ResetPassword() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (password.length < 8) {
-      toast.error('Your password must be at least 8 characters.');
+    if (!isValid) {
+      toast.error('Your password does not meet all the requirements below.');
       return;
     }
     if (password !== confirmPassword) {
@@ -57,6 +60,7 @@ export default function ResetPassword() {
               New password
               <input required type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 block w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />
             </label>
+            {password && <PasswordStrengthMeter strength={strength} requirements={requirements} />}
             <label className="block text-sm font-medium text-stone-700">
               Confirm new password
               <input required type="password" minLength={8} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="mt-2 block w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" />

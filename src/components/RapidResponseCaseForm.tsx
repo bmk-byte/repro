@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { useFormDraft } from '../hooks/useFormDraft';
 import { createSafeDisplayName } from '../lib/sanitize';
 import { Input, Select, Textarea, Button } from './ui';
+import { sendEmail } from '../lib/email';
+import { renderEmail } from '../lib/emailTemplates';
 
 interface RapidResponseCaseFormProps {
   onSuccess: () => void;
@@ -390,6 +392,55 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           });
 
         if (insertError) throw insertError;
+
+        // Notify moderators and confirm to the submitter — fire-and-forget so
+        // an email failure never blocks or rolls back the case creation itself.
+        // Reuses the same 'Urgent' priority_level check the form already uses
+        // for the priority segmented-button styling above.
+        const isUrgent = formData.priority_level === 'Urgent';
+        (async () => {
+          try {
+            const { data: moderatorProfiles, error: moderatorsError } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('is_moderator', true);
+            if (moderatorsError) throw moderatorsError;
+
+            const moderatorEmails = (moderatorProfiles || [])
+              .map((m) => m.email)
+              .filter((email): email is string => !!email);
+
+            await Promise.allSettled(
+              moderatorEmails.map((email) =>
+                sendEmail({
+                  to: email,
+                  subject: isUrgent
+                    ? 'Urgent: New Rapid Response Case awaiting review'
+                    : 'New submission awaiting review',
+                  html: renderEmail({
+                    heading: isUrgent
+                      ? 'Urgent: New Rapid Response Case Awaiting Review'
+                      : 'New Submission Awaiting Review',
+                    body: `A new rapid response case, "${formData.case_filed}", has been submitted and needs moderation.`,
+                  }),
+                })
+              )
+            );
+          } catch (err) {
+            console.error('Failed to send moderator notification emails:', err);
+          }
+        })();
+
+        if (user.email) {
+          sendEmail({
+            to: user.email,
+            subject: 'We received your submission',
+            html: renderEmail({
+              heading: 'Submission Received',
+              body: `Thanks for submitting "${formData.case_filed}". Our moderators will review it, and you'll be notified once a decision is made.`,
+            }),
+          }).catch((err) => console.error('Failed to send submitter confirmation email:', err));
+        }
       }
 
       onSuccess();

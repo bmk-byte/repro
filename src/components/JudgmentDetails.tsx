@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, Calendar, FileText, MapPin, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import DocumentModal from './DocumentModal';
 import { LoadingState } from './ui';
 
@@ -52,17 +52,17 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'Final Judgment':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success-light text-success-dark';
       case 'Interim Order':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-warning-light text-warning-dark';
       case 'Ruling':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-info-light text-info-dark';
       case 'Consent Judgment':
       case 'Consent':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-stone-100 text-stone-800';
       case 'Default Judgment':
       case 'Default':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-warning-light text-warning-dark';
       default:
         return 'bg-stone-100 text-stone-800';
     }
@@ -71,13 +71,13 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
   const getTimelineStatusColor = (status: string) => {
     switch (status) {
       case 'filed':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-info-light text-info-dark';
       case 'ongoing':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-warning-light text-warning-dark';
       case 'resolved':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success-light text-success-dark';
       case 'dismissed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-danger-light text-danger-dark';
       default:
         return 'bg-stone-100 text-stone-800';
     }
@@ -192,7 +192,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                       {judgment.case_categories.map((category: string, idx: number) => (
                         <span 
                           key={idx}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-light text-info-dark"
                         >
                           {category}
                         </span>

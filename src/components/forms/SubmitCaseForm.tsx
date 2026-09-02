@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/toast';
 import MultiStepFormProgress from './MultiStepFormProgress';
 import { useFormDraft } from '../../hooks/useFormDraft';
 import { createSafeDisplayName } from '../../lib/sanitize';
 import { Input, Select, Textarea, Button, TagListInput } from '../ui';
+import { sendEmail } from '../../lib/email';
+import { renderEmail } from '../../lib/emailTemplates';
 
 interface SubmitCaseFormProps {
   onSuccess?: () => void;
@@ -470,6 +472,48 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
           </div>,
           { duration: 5000 }
         );
+
+        // Notify moderators and confirm to the submitter — fire-and-forget so
+        // an email failure never blocks or rolls back the submission itself.
+        (async () => {
+          try {
+            const { data: moderatorProfiles, error: moderatorsError } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('is_moderator', true);
+            if (moderatorsError) throw moderatorsError;
+
+            const moderatorEmails = (moderatorProfiles || [])
+              .map((m) => m.email)
+              .filter((email): email is string => !!email);
+
+            await Promise.allSettled(
+              moderatorEmails.map((email) =>
+                sendEmail({
+                  to: email,
+                  subject: 'New submission awaiting review',
+                  html: renderEmail({
+                    heading: 'New Submission Awaiting Review',
+                    body: `A new case, "${formData.title}", has been submitted and needs moderation.`,
+                  }),
+                })
+              )
+            );
+          } catch (err) {
+            console.error('Failed to send moderator notification emails:', err);
+          }
+        })();
+
+        if (user.email) {
+          sendEmail({
+            to: user.email,
+            subject: 'We received your submission',
+            html: renderEmail({
+              heading: 'Submission Received',
+              body: `Thanks for submitting "${formData.title}". Our moderators will review it, and you'll be notified once a decision is made.`,
+            }),
+          }).catch((err) => console.error('Failed to send submitter confirmation email:', err));
+        }
 
         // Add a delay before redirecting to allow the user to see the success message
         setTimeout(() => {

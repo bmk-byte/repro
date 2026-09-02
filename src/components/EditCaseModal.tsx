@@ -1,6 +1,6 @@
 import React from 'react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { Modal, Input, Textarea, Select, Button } from './ui';
 
 interface EditCaseModalProps {

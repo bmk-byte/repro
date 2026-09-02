@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, MapPin, FileText, CreditCard as Edit2, TriangleAlert as AlertTriangle, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import DocumentModal from './DocumentModal';
 import CaseProgressTracker from './CaseProgressTracker';
 import { LoadingState } from './ui';
@@ -137,27 +137,27 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'Urgent':
-        return 'bg-red-100 text-red-800';
+        return 'bg-danger-light text-danger-dark';
       case 'High':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-warning-light text-warning-dark';
       case 'Medium':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-info-light text-info-dark';
       case 'Low':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success-light text-success-dark';
       default:
         return 'bg-stone-100 text-stone-800';
     }
   };
-  
+
   const getCategoryColor = (category: string) => {
     if (!category) return 'bg-stone-100 text-stone-800';
-    
-    if (category.includes('Abortion')) return 'bg-purple-100 text-purple-800';
-    if (category.includes('Rape')) return 'bg-red-100 text-red-800';
-    if (category.includes('Defilement')) return 'bg-pink-100 text-pink-800';
-    if (category.includes('SGBV')) return 'bg-orange-100 text-orange-800';
-    if (category.includes('Incest')) return 'bg-indigo-100 text-indigo-800';
-    
+
+    if (category.includes('Abortion')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('Rape')) return 'bg-danger-light text-danger-dark';
+    if (category.includes('Defilement')) return 'bg-stone-100 text-stone-800';
+    if (category.includes('SGBV')) return 'bg-warning-light text-warning-dark';
+    if (category.includes('Incest')) return 'bg-stone-100 text-stone-800';
+
     return 'bg-stone-100 text-stone-800';
   };
 
@@ -169,7 +169,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
     return (
       <div className="text-center py-12">
         <div className="flex justify-center mb-4">
-          <AlertCircle className="h-12 w-12 text-red-500" />
+          <AlertCircle className="h-12 w-12 text-danger" />
         </div>
         <p className="text-stone-900 font-medium mb-2">
           {accessDenied ? 'Access Denied' : 'Case not found'}
@@ -256,9 +256,9 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
           </div>
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              caseData.status === 'completed' ? 'bg-green-100 text-green-800' :
-              caseData.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-              'bg-yellow-100 text-yellow-800'
+              caseData.status === 'completed' ? 'bg-success-light text-success-dark' :
+              caseData.status === 'in_progress' ? 'bg-info-light text-info-dark' :
+              'bg-warning-light text-warning-dark'
             }`}>
               {caseData.status}
             </span>
@@ -314,7 +314,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                       {caseData.case_categories.map((category: string, idx: number) => (
                         <span 
                           key={idx}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-light text-info-dark"
                         >
                           {category}
                         </span>
@@ -338,7 +338,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                 <div className="space-y-3">
                   {caseData.key_deadlines.map((deadline: any, index: number) => (
                     <div key={index} className="flex items-start space-x-3 p-3 bg-stone-50 rounded-lg">
-                      <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                      <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
                       <div>
                         <p className="font-medium text-stone-900">{deadline.description}</p>
                         <p className="text-sm text-stone-500">{new Date(deadline.date).toLocaleDateString()}</p>

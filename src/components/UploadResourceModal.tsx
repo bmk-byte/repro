@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Upload, File, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/toast';
 import { createSafeDisplayName, sanitizeText } from '../lib/sanitize';
 import { Modal, Input, Textarea, Select, Button, Badge } from './ui';
 
