@@ -73,6 +73,9 @@ function DashboardApp() {
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const [userProfile, setUserProfile] = React.useState<Profile | null>(null);
   const [authInitialMode, setAuthInitialMode] = React.useState<'signIn' | 'signUp'>('signIn');
+  // Tracks whose session we've already set up, so a spurious re-notification
+  // of the SAME user (see below) can be told apart from an actual new sign-in.
+  const signedInUserId = React.useRef<string | null>(null);
 
   devLog('App render - connectionStatus:', connectionStatus);
   const retryBaseDelay = 1000; // Base delay in milliseconds
@@ -156,6 +159,7 @@ function DashboardApp() {
       devLog('Got session:', session ? 'exists' : 'null');
       setSession(session);
       if (session) {
+        signedInUserId.current = session.user.id;
         fetchUserProfile(session.user.id);
       }
     });
@@ -166,14 +170,11 @@ function DashboardApp() {
       devLog('Auth state changed, event:', event, 'new session:', session ? 'exists' : 'null');
       // Always keep the session object fresh (needed so subsequent API calls
       // use the refreshed access token), but only reset navigation/re-fetch
-      // the profile on an actual sign-in — Supabase fires TOKEN_REFRESHED
-      // automatically whenever the browser tab regains focus/visibility, and
-      // treating that the same as a fresh sign-in used to kick the user back
-      // to the Dashboard tab and reload their profile every time they simply
-      // switched back to this browser tab.
+      // the profile on an actual sign-in.
       setSession(session);
 
       if (event === 'SIGNED_OUT' || !session) {
+        signedInUserId.current = null;
         setUserProfile(null);
 
         // ELU Analytics: clear the identified user on sign-out so subsequent
@@ -183,6 +184,19 @@ function DashboardApp() {
         }
         return;
       }
+
+      // The Supabase SDK fires 'SIGNED_IN' — not just 'TOKEN_REFRESHED' — every
+      // time the browser tab regains focus/visibility and the existing session
+      // is still valid (see GoTrueClient's _onVisibilityChanged/_recoverAndRefresh).
+      // That's indistinguishable from a real sign-in by event name alone, so we
+      // instead check whether this is the SAME user we already set up: if so,
+      // it's just the SDK re-confirming an existing session, not a fresh
+      // sign-in, and should not reset navigation or re-fetch the profile.
+      if (event === 'SIGNED_IN' && signedInUserId.current === session.user.id) {
+        return;
+      }
+
+      signedInUserId.current = session.user.id;
 
       if (event !== 'SIGNED_IN') {
         // TOKEN_REFRESHED, USER_UPDATED, etc. — session is already updated
