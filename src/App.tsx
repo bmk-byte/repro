@@ -10,7 +10,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import LandingPage from './components/LandingPage';
 import { supabase, handleSupabaseError, testConnection } from './lib/supabase';
 import Navbar from './components/Navbar';
-import TawkChat from './components/TawkChat';
 import { useModeratorStatus } from './hooks/useModeratorStatus';
 import { can } from './lib/permissions';
 import { schedulePrefetchAllRoutes, prefetchRoute } from './lib/routePrefetch';
@@ -558,7 +557,6 @@ function DashboardApp() {
             renderContent()
           )}
       </div>
-      <TawkChat isAuthenticated={!!session} />
       <Toaster 
         position="top-right"
         toastOptions={{

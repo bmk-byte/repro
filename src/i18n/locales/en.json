@@ -12,6 +12,8 @@
     "french": "French",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "add": "Add",
+    "removeItem": "Remove {{item}}",
     "save": "Save",
     "saving": "Saving…",
     "loading": "Loading…",

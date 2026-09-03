@@ -8,7 +8,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://elu.dev https://embed.tawk.to; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://zvaurxgtttrgyvjzoedc.supabase.co; connect-src 'self' https://zvaurxgtttrgyvjzoedc.supabase.co wss://zvaurxgtttrgyvjzoedc.supabase.co https://elu.dev https://*.tawk.to wss://*.tawk.to https://*.sentry.io https://*.ingest.sentry.io; frame-src https://*.tawk.to; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://elu.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://zvaurxgtttrgyvjzoedc.supabase.co; connect-src 'self' https://zvaurxgtttrgyvjzoedc.supabase.co wss://zvaurxgtttrgyvjzoedc.supabase.co https://elu.dev https://*.sentry.io https://*.ingest.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
         },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },

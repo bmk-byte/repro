@@ -1,4 +1,5 @@
 import React, { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 export interface TagListInputProps {
@@ -32,8 +33,9 @@ export const TagListInput: React.FC<TagListInputProps> = ({
   error,
   helperText,
   disabled,
-  addButtonLabel = 'Add',
+  addButtonLabel,
 }) => {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const autoId = useId();
   const inputId = `${autoId}-input`;
@@ -85,7 +87,7 @@ export const TagListInput: React.FC<TagListInputProps> = ({
           disabled={disabled}
           className="h-10 shrink-0 rounded-md bg-primary px-4 text-sm font-medium text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {addButtonLabel}
+          {addButtonLabel ?? t('common.add')}
         </button>
       </div>
 
@@ -100,7 +102,7 @@ export const TagListInput: React.FC<TagListInputProps> = ({
               <button
                 type="button"
                 onClick={() => onRemove(index)}
-                aria-label={`Remove ${item}`}
+                aria-label={t('common.removeItem', { item })}
                 className="text-primary-dark/70 hover:text-primary-dark"
               >
                 <X className="h-3 w-3" />

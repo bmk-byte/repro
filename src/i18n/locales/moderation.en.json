@@ -5,6 +5,8 @@
     "accessDeniedDefault": "You do not have permission to access this page",
     "accessDeniedError": "Error: {{error}}",
     "heading": "Content Moderation",
+    "tabsAriaLabel": "Tabs",
+    "submissionTypesAriaLabel": "Submission Types",
     "filters": "Filters",
     "searchLabel": "Search by title or content",
     "searchPlaceholder": "Search by title or content...",

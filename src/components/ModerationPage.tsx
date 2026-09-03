@@ -811,7 +811,7 @@ const ModerationPage = () => {
 
       <div className="bg-white rounded-lg shadow-md">
         <div className="border-b overflow-x-auto">
-          <nav className="flex space-x-4 px-6" aria-label="Tabs">
+          <nav className="flex space-x-4 px-6" aria-label={t('moderationPage.tabsAriaLabel')}>
             <button
               onClick={() => setActiveTab('submissions')}
               className={`py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap ${
@@ -837,7 +837,7 @@ const ModerationPage = () => {
 
         {activeTab === 'submissions' && (
           <div className="border-b overflow-x-auto">
-            <nav className="flex space-x-4 px-6 py-2" aria-label="Submission Types">
+            <nav className="flex space-x-4 px-6 py-2" aria-label={t('moderationPage.submissionTypesAriaLabel')}>
               <button
                 onClick={() => setActiveSubmissionType('all')}
                 className={`py-2 px-3 text-sm font-medium rounded-md ${

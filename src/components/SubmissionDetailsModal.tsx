@@ -18,6 +18,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
   onClose,
   submission
 }) => {
+  const { t } = useTranslation('moderation');
   const [loading, setLoading] = React.useState(true);
   const [recordId, setRecordId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -52,7 +53,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
       }
     } catch (error) {
       console.error('Error checking for existing record:', error);
-      setError('Failed to check for existing record');
+      setError(t('submissionDetailsModal.failedToCheckRecord'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
     link.click();
     document.body.removeChild(link);
     
-    toast.success('Document download started');
+    toast.success(t('submissionDetailsModal.documentDownloadStarted'));
   };
 
   if (!isOpen || !submission) return null;
@@ -81,10 +82,10 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
             <div>
               <h2 className="text-xl sm:text-2xl font-semibold text-stone-900 break-words">{submission.title}</h2>
               <p className="text-stone-600 mt-1">
-                {submission.type === 'case' ? 'Case Submission' : 'Judgment Submission'} - 
-                {submission.status === 'pending' ? ' Pending Review' : 
-                 submission.status === 'approved' ? ' Approved' : 
-                 submission.status === 'rejected' ? ' Rejected' : ' Failed'}
+                {submission.type === 'case' ? t('submissionDetailsModal.caseSubmission') : t('submissionDetailsModal.judgmentSubmission')} -{' '}
+                {submission.status === 'pending' ? t('submissionDetailsModal.pendingReview') :
+                 submission.status === 'approved' ? t('submissionDetailsModal.approved') :
+                 submission.status === 'rejected' ? t('submissionDetailsModal.rejected') : t('submissionDetailsModal.failed')}
               </p>
             </div>
             <button
@@ -98,7 +99,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <LoadingState label="Loading submission details…" />
+            <LoadingState label={t('submissionDetailsModal.loadingDetails')} />
           ) : error ? (
             <div className="text-center py-8 text-red-500">
               {error}
@@ -115,18 +116,18 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-medium text-stone-900 mb-3">Submission Information</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.submissionInformation')}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-stone-500">Title</label>
+                      <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.titleLabel')}</label>
                       <p className="mt-1">{submission.title}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-stone-500">Submission Date</label>
+                      <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.submissionDate')}</label>
                       <p className="mt-1">{new Date(submission.submission_date).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-stone-500">Status</label>
+                      <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.status')}</label>
                       <p className="mt-1">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           submission.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -134,13 +135,16 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                           submission.status === 'rejected' ? 'bg-red-100 text-red-800' :
                           'bg-stone-100 text-stone-800'
                         }`}>
-                          {submission.status}
+                          {submission.status === 'pending' ? t('submissionDetailsModal.pendingReview') :
+                           submission.status === 'approved' ? t('submissionDetailsModal.approved') :
+                           submission.status === 'rejected' ? t('submissionDetailsModal.rejected') :
+                           submission.status === 'failed' ? t('submissionDetailsModal.failed') : submission.status}
                         </span>
                       </p>
                     </div>
                     {submission.feedback && (
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Feedback</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.feedback')}</label>
                         <p className="mt-1">{submission.feedback}</p>
                       </div>
                     )}
@@ -148,15 +152,15 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium text-stone-900 mb-3">Content</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.content')}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-stone-500">Summary</label>
+                      <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.summary')}</label>
                       <p className="mt-1 whitespace-pre-line">{submission.summary}</p>
                     </div>
                     {submission.case_categories && submission.case_categories.length > 0 && (
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Categories</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.categories')}</label>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {submission.case_categories.map((category: string, idx: number) => (
                             <span 
@@ -177,22 +181,22 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
               {submission.type === 'case' ? (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-stone-900 mb-3">Case Details</h3>
+                    <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.caseDetails')}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Timeline Status</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.timelineStatus')}</label>
                         <p className="mt-1">{submission.timeline_status}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Judicial Body</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.judicialBody')}</label>
                         <p className="mt-1">{submission.judicial_body}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Case Outcome</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.caseOutcome')}</label>
                         <p className="mt-1">{submission.case_outcome}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Legal Framework</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.legalFramework')}</label>
                         <p className="mt-1">{submission.legal_framework_type}</p>
                       </div>
                     </div>
@@ -200,10 +204,10 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
                   {submission.litigants && submission.litigants.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-medium text-stone-900 mb-3">Parties</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.parties')}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="text-sm font-medium text-stone-500">Litigants</label>
+                          <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.litigants')}</label>
                           <ul className="mt-1 list-disc list-inside">
                             {submission.litigants.map((litigant: string, idx: number) => (
                               <li key={idx}>{litigant}</li>
@@ -211,7 +215,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                           </ul>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-stone-500">Defending Institutions</label>
+                          <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.defendingInstitutions')}</label>
                           <ul className="mt-1 list-disc list-inside">
                             {submission.defending_institutions?.map((institution: string, idx: number) => (
                               <li key={idx}>{institution}</li>
@@ -224,7 +228,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
 
                   {submission.case_impact && (
                     <div>
-                      <h3 className="text-lg font-medium text-stone-900 mb-3">Impact</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.impact')}</h3>
                       <p className="whitespace-pre-line">{submission.case_impact}</p>
                     </div>
                   )}
@@ -232,42 +236,42 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-stone-900 mb-3">Judgment Details</h3>
+                    <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.judgmentDetails')}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Media Neutral Citation</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.mediaNeutralCitation')}</label>
                         <p className="mt-1">{submission.media_neutral_citation}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Court</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.court')}</label>
                         <p className="mt-1">{submission.court_judgment}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Case Number</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.caseNumber')}</label>
                         <p className="mt-1">{submission.case_number_judgment}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Judges</label>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.judges')}</label>
                         <p className="mt-1">{submission.judges_judgment}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Judgment Date</label>
-                        <p className="mt-1">{submission.judgment_date_judgment ? new Date(submission.judgment_date_judgment).toLocaleDateString() : 'Not specified'}</p>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.judgmentDate')}</label>
+                        <p className="mt-1">{submission.judgment_date_judgment ? new Date(submission.judgment_date_judgment).toLocaleDateString() : t('submissionDetailsModal.notSpecified')}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Language</label>
-                        <p className="mt-1">{submission.language_judgment || 'Not specified'}</p>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.language')}</label>
+                        <p className="mt-1">{submission.language_judgment || t('submissionDetailsModal.notSpecified')}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-stone-500">Type</label>
-                        <p className="mt-1">{submission.type_judgment || 'Not specified'}</p>
+                        <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.type')}</label>
+                        <p className="mt-1">{submission.type_judgment || t('submissionDetailsModal.notSpecified')}</p>
                       </div>
                     </div>
                   </div>
 
                   {submission.flynote_judgment && (
                     <div>
-                      <h3 className="text-lg font-medium text-stone-900 mb-3">Flynote</h3>
+                      <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.flynote')}</h3>
                       <p className="whitespace-pre-line">{submission.flynote_judgment}</p>
                     </div>
                   )}
@@ -277,15 +281,15 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
               {/* Document section */}
               {submission.document_url && (
                 <div>
-                  <h3 className="text-lg font-medium text-stone-900 mb-3">Document</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">{t('submissionDetailsModal.document')}</h3>
                   <div className="bg-stone-50 p-6 rounded-lg flex flex-col items-center justify-center">
-                    <p className="mb-4 text-stone-600">Click the button below to download this document to your device</p>
+                    <p className="mb-4 text-stone-600">{t('submissionDetailsModal.downloadPrompt')}</p>
                     <button
                       onClick={handleDownloadDocument}
                       className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
                     >
                       <Download className="h-5 w-5 mr-2" />
-                      Download Document
+                      {t('submissionDetailsModal.downloadDocument')}
                     </button>
                   </div>
                 </div>

@@ -117,5 +117,53 @@
     "notAuthenticated": "User not authenticated",
     "uploadSuccess": "Document uploaded successfully",
     "failedToLoadCountries": "Failed to load countries"
+  },
+  "documentModal": {
+    "defaultTitle": "Document Preview",
+    "viewDocument": "View Document",
+    "downloadOptions": "Download Options",
+    "close": "Close",
+    "instructionsPdf": "Click the button below to download this document to your device or view it in the browser.",
+    "instructionsOther": "This document can only be downloaded. Click the button below to download it to your device.",
+    "downloadDocument": "Download Document",
+    "viewInBrowser": "View in Browser",
+    "refreshLinkFailed": "Could not refresh this document's link — it may be expired. Trying the original link."
+  },
+  "resetPassword": {
+    "title": "Create a new password",
+    "subtitle": "Choose a new password for your ReproPulse account.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "updatingPassword": "Updating password...",
+    "updatePassword": "Update password",
+    "invalidOrExpiredLink": "This reset link is invalid or has expired. Request a new one from the sign-in page.",
+    "passwordDoesNotMeetRequirements": "Your password does not meet all the requirements below.",
+    "passwordsDoNotMatch": "The passwords do not match.",
+    "unableToUpdatePassword": "Unable to update your password.",
+    "passwordUpdatedSignIn": "Password updated. You can now sign in."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "The dashboard encountered an unexpected error. Reloading the page should fix it.",
+    "reload": "Reload dashboard"
+  },
+  "pdfViewer": {
+    "failedToLoad": "Failed to load PDF document. Please try again later or download the file.",
+    "notPdfFile": "This document is not a PDF file. Please download it to view.",
+    "nonPdfTitle": "Non-PDF Document",
+    "nonPdfDescription": "This document cannot be previewed in the browser. Please download it to view.",
+    "downloadDocument": "Download Document",
+    "close": "Close",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "pageOf": "Page {{page}} of {{total}}",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "rotate": "Rotate",
+    "download": "Download",
+    "loadingDocument": "Loading document…",
+    "failedToLoadShort": "Failed to load PDF document",
+    "loadingPage": "Loading page...",
+    "errorLoadingPage": "Error loading page {{page}}"
   }
 }

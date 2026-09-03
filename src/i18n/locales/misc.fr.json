@@ -117,5 +117,53 @@
     "notAuthenticated": "Utilisateur non authentifié",
     "uploadSuccess": "Document téléversé avec succès",
     "failedToLoadCountries": "Échec du chargement de la liste des pays"
+  },
+  "documentModal": {
+    "defaultTitle": "Aperçu du document",
+    "viewDocument": "Voir le document",
+    "downloadOptions": "Options de téléchargement",
+    "close": "Fermer",
+    "instructionsPdf": "Cliquez sur le bouton ci-dessous pour télécharger ce document sur votre appareil ou le consulter dans le navigateur.",
+    "instructionsOther": "Ce document ne peut être que téléchargé. Cliquez sur le bouton ci-dessous pour le télécharger sur votre appareil.",
+    "downloadDocument": "Télécharger le document",
+    "viewInBrowser": "Voir dans le navigateur",
+    "refreshLinkFailed": "Impossible d'actualiser le lien de ce document — il est peut-être expiré. Tentative avec le lien d'origine."
+  },
+  "resetPassword": {
+    "title": "Créez un nouveau mot de passe",
+    "subtitle": "Choisissez un nouveau mot de passe pour votre compte ReproPulse.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmez le nouveau mot de passe",
+    "updatingPassword": "Mise à jour du mot de passe...",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "invalidOrExpiredLink": "Ce lien de réinitialisation est invalide ou a expiré. Demandez-en un nouveau depuis la page de connexion.",
+    "passwordDoesNotMeetRequirements": "Votre mot de passe ne respecte pas toutes les exigences ci-dessous.",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+    "unableToUpdatePassword": "Impossible de mettre à jour votre mot de passe.",
+    "passwordUpdatedSignIn": "Mot de passe mis à jour. Vous pouvez maintenant vous connecter."
+  },
+  "errorBoundary": {
+    "title": "Une erreur s'est produite",
+    "description": "Le tableau de bord a rencontré une erreur inattendue. Recharger la page devrait résoudre le problème.",
+    "reload": "Recharger le tableau de bord"
+  },
+  "pdfViewer": {
+    "failedToLoad": "Échec du chargement du document PDF. Veuillez réessayer plus tard ou télécharger le fichier.",
+    "notPdfFile": "Ce document n'est pas un fichier PDF. Veuillez le télécharger pour le consulter.",
+    "nonPdfTitle": "Document non-PDF",
+    "nonPdfDescription": "Ce document ne peut pas être prévisualisé dans le navigateur. Veuillez le télécharger pour le consulter.",
+    "downloadDocument": "Télécharger le document",
+    "close": "Fermer",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "pageOf": "Page {{page}} sur {{total}}",
+    "zoomOut": "Zoom arrière",
+    "zoomIn": "Zoom avant",
+    "rotate": "Pivoter",
+    "download": "Télécharger",
+    "loadingDocument": "Chargement du document…",
+    "failedToLoadShort": "Échec du chargement du document PDF",
+    "loadingPage": "Chargement de la page...",
+    "errorLoadingPage": "Erreur lors du chargement de la page {{page}}"
   }
 }

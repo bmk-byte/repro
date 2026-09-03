@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText, User, Building, Calendar, MapPin } from 'lucide-react';
 
 interface SubmissionDetailsCardProps {
@@ -10,8 +11,9 @@ interface SubmissionDetailsCardProps {
 const SubmissionDetailsCard: React.FC<SubmissionDetailsCardProps> = ({ 
   submission, 
   showDocument = true,
-  onViewDocument 
+  onViewDocument
 }) => {
+  const { t } = useTranslation('moderation');
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-start">
@@ -21,7 +23,7 @@ const SubmissionDetailsCard: React.FC<SubmissionDetailsCardProps> = ({
               {submission.title || submission.case_filed}
             </h3>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-              {submission.type || 'submission'}
+              {submission.type || t('submissionDetailsCard.submission')}
             </span>
           </div>
           
@@ -30,9 +32,9 @@ const SubmissionDetailsCard: React.FC<SubmissionDetailsCardProps> = ({
             <div className="flex items-start space-x-2 text-sm text-stone-600">
               <User className="h-4 w-4 mt-0.5 text-stone-400" />
               <div>
-                <p className="font-medium">Submitted by:</p>
-                <p>{submission.profiles?.email || submission.users?.email || 'Unknown'}</p>
-                <p>{submission.profiles?.full_name || submission.users?.raw_user_meta_data?.full_name || 'Unknown'}</p>
+                <p className="font-medium">{t('submissionDetailsCard.submittedBy')}</p>
+                <p>{submission.profiles?.email || submission.users?.email || t('submissionDetailsCard.unknown')}</p>
+                <p>{submission.profiles?.full_name || submission.users?.raw_user_meta_data?.full_name || t('submissionDetailsCard.unknown')}</p>
                 {(submission.profiles?.profession || submission.users?.raw_user_meta_data?.profession) && (
                   <p className="text-stone-500">
                     {submission.profiles?.profession || submission.users?.raw_user_meta_data?.profession}
@@ -46,27 +48,27 @@ const SubmissionDetailsCard: React.FC<SubmissionDetailsCardProps> = ({
               <div className="flex items-start space-x-2 text-sm text-stone-600">
                 <Building className="h-4 w-4 mt-0.5 text-stone-400" />
                 <div>
-                  <p className="font-medium">Organization:</p>
+                  <p className="font-medium">{t('submissionDetailsCard.organization')}</p>
                   <p>{submission.profiles?.organization || submission.users?.raw_user_meta_data?.organization}</p>
                 </div>
               </div>
             )}
-            
+
             {/* Date Information */}
             <div className="flex items-start space-x-2 text-sm text-stone-600">
               <Calendar className="h-4 w-4 mt-0.5 text-stone-400" />
               <div>
-                <p className="font-medium">Submission Date:</p>
+                <p className="font-medium">{t('submissionDetailsCard.submissionDate')}</p>
                 <p>{new Date(submission.created_at || submission.submission_date).toLocaleDateString()}</p>
               </div>
             </div>
-            
+
             {/* Country Information */}
             {submission.countries?.name && (
               <div className="flex items-start space-x-2 text-sm text-stone-600">
                 <MapPin className="h-4 w-4 mt-0.5 text-stone-400" />
                 <div>
-                  <p className="font-medium">Country:</p>
+                  <p className="font-medium">{t('submissionDetailsCard.country')}</p>
                   <p>{submission.countries.name}</p>
                 </div>
               </div>
@@ -102,7 +104,7 @@ const SubmissionDetailsCard: React.FC<SubmissionDetailsCardProps> = ({
                 className="inline-flex items-center text-sm text-primary hover:text-primary-dark"
               >
                 <FileText className="h-4 w-4 mr-1" />
-                View Document
+                {t('submissionDetailsCard.viewDocument')}
               </button>
             </div>
           )}

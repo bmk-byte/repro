@@ -616,94 +616,94 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <Input
-              label="Citation"
+              label={t('submitJudgmentForm.step1.citationLabel')}
               name="citation"
               required
               value={formData.citation}
               onChange={handleInputChange}
               onBlur={() => markTouched('citation')}
-              error={fieldError('citation', 'Citation', !formData.citation)}
-              placeholder="e.g., [2023] KEHC 123"
+              error={fieldError('citation', t('submitJudgmentForm.step1.citationLabel'), !formData.citation)}
+              placeholder={t('submitJudgmentForm.step1.citationPlaceholder')}
             />
 
             <Input
-              label="Media Neutral Citation"
+              label={t('submitJudgmentForm.step1.mediaNeutralCitationLabel')}
               name="media_neutral_citation"
               value={formData.media_neutral_citation}
               onChange={handleInputChange}
-              placeholder="e.g., [2023] eKLR 123"
+              placeholder={t('submitJudgmentForm.step1.mediaNeutralCitationPlaceholder')}
             />
 
             <Input
-              label="Court"
+              label={t('submitJudgmentForm.step1.courtLabel')}
               name="court_judgment"
               required
               value={formData.court_judgment}
               onChange={handleInputChange}
               onBlur={() => markTouched('court_judgment')}
-              error={fieldError('court_judgment', 'Court', !formData.court_judgment)}
-              placeholder="e.g., High Court of Kenya"
+              error={fieldError('court_judgment', t('submitJudgmentForm.step1.courtLabel'), !formData.court_judgment)}
+              placeholder={t('submitJudgmentForm.step1.courtPlaceholder')}
             />
 
             <Input
-              label="Case Number"
+              label={t('submitJudgmentForm.step1.caseNumberLabel')}
               name="case_number_judgment"
               value={formData.case_number_judgment}
               onChange={handleInputChange}
-              placeholder="e.g., Petition No. 123 of 2023"
+              placeholder={t('submitJudgmentForm.step1.caseNumberPlaceholder')}
             />
 
             <Input
-              label="Judges"
+              label={t('submitJudgmentForm.step1.judgesLabel')}
               name="judges_judgment"
               value={formData.judges_judgment}
               onChange={handleInputChange}
-              placeholder="e.g., Justice John Doe, Justice Jane Smith"
+              placeholder={t('submitJudgmentForm.step1.judgesPlaceholder')}
             />
 
             <Input
-              label="Judgment Date"
+              label={t('submitJudgmentForm.step1.judgmentDateLabel')}
               name="judgment_date_judgment"
               type="date"
               required
               value={formData.judgment_date_judgment}
               onChange={handleInputChange}
               onBlur={() => markTouched('judgment_date_judgment')}
-              error={fieldError('judgment_date_judgment', 'Judgment Date', !formData.judgment_date_judgment)}
+              error={fieldError('judgment_date_judgment', t('submitJudgmentForm.step1.judgmentDateLabel'), !formData.judgment_date_judgment)}
             />
 
             <Select
-              label="Language"
+              label={t('submitJudgmentForm.step1.languageLabel')}
               name="language_judgment"
               value={formData.language_judgment}
               onChange={handleInputChange}
             >
-              <option value="English">English</option>
-              <option value="French">French</option>
-              <option value="Portuguese">Portuguese</option>
-              <option value="Swahili">Swahili</option>
+              <option value="English">{t('submitJudgmentForm.step1.languageEnglish')}</option>
+              <option value="French">{t('submitJudgmentForm.step1.languageFrench')}</option>
+              <option value="Portuguese">{t('submitJudgmentForm.step1.languagePortuguese')}</option>
+              <option value="Swahili">{t('submitJudgmentForm.step1.languageSwahili')}</option>
             </Select>
 
             <Select
-              label="Judgment Type"
+              label={t('submitJudgmentForm.step1.judgmentTypeLabel')}
               name="type_judgment"
               value={formData.type_judgment}
               onChange={handleInputChange}
             >
-              <option value="Final Judgment">Final Judgment</option>
-              <option value="Interim Order">Interim Order</option>
-              <option value="Ruling">Ruling</option>
-              <option value="Consent">Consent Judgment</option>
-              <option value="Default">Default Judgment</option>
+              <option value="Final Judgment">{t('submitJudgmentForm.step1.typeFinalJudgment')}</option>
+              <option value="Interim Order">{t('submitJudgmentForm.step1.typeInterimOrder')}</option>
+              <option value="Ruling">{t('submitJudgmentForm.step1.typeRuling')}</option>
+              <option value="Consent">{t('submitJudgmentForm.step1.typeConsent')}</option>
+              <option value="Default">{t('submitJudgmentForm.step1.typeDefault')}</option>
             </Select>
 
             <Textarea
-              label="Flynote"
+              label={t('submitJudgmentForm.step1.flynoteLabel')}
               name="flynote_judgment"
               rows={3}
               value={formData.flynote_judgment}
               onChange={handleInputChange}
-              placeholder="Enter the flynote or headnote of the judgment"
+              placeholder={t('submitJudgmentForm.step1.flynotePlaceholder')}
             />
           </div>
         );
@@ -712,35 +712,35 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <Select
-              label="Timeline Status"
+              label={t('submitJudgmentForm.step2.timelineStatusLabel')}
               name="timeline_status"
               required
               value={formData.timeline_status}
               onChange={handleInputChange}
               onBlur={() => markTouched('timeline_status')}
-              error={fieldError('timeline_status', 'Timeline Status', !formData.timeline_status)}
+              error={fieldError('timeline_status', t('submitJudgmentForm.step2.timelineStatusLabel'), !formData.timeline_status)}
             >
-              <option value="">Select status</option>
-              <option value="filed">Filed</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="resolved">Resolved</option>
-              <option value="dismissed">Dismissed</option>
+              <option value="">{t('common.selectStatus')}</option>
+              <option value="filed">{t('common.statusFiled')}</option>
+              <option value="ongoing">{t('common.statusOngoing')}</option>
+              <option value="resolved">{t('common.statusResolved')}</option>
+              <option value="dismissed">{t('common.statusDismissed')}</option>
             </Select>
 
             <TagListInput
-              label="Litigants"
+              label={t('submitJudgmentForm.step2.litigantsLabel')}
               items={formData.litigants}
               onAdd={addLitigant}
               onRemove={removeLitigant}
-              placeholder="Add a litigant"
+              placeholder={t('submitJudgmentForm.step2.litigantsPlaceholder')}
             />
 
             <TagListInput
-              label="Defending Institutions"
+              label={t('submitJudgmentForm.step2.defendingInstitutionsLabel')}
               items={formData.defending_institutions}
               onAdd={addDefendingInstitution}
               onRemove={removeDefendingInstitution}
-              placeholder="Add a defending institution"
+              placeholder={t('submitJudgmentForm.step2.defendingInstitutionsPlaceholder')}
             />
           </div>
         );
@@ -749,28 +749,28 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <Select
-              label="Judicial Body Type"
+              label={t('common.judicialBodyTypeLabel')}
               name="judicial_body_type"
               required
               value={formData.judicial_body_type}
               onChange={handleInputChange}
               onBlur={() => markTouched('judicial_body_type')}
-              error={fieldError('judicial_body_type', 'Judicial Body Type', !formData.judicial_body_type)}
+              error={fieldError('judicial_body_type', t('common.judicialBodyTypeLabel'), !formData.judicial_body_type)}
             >
-              <option value="">Select type</option>
-              <option value="National Court">National Court</option>
-              <option value="Regional Court">Regional Court</option>
+              <option value="">{t('common.selectType')}</option>
+              <option value="National Court">{t('common.nationalCourt')}</option>
+              <option value="Regional Court">{t('common.regionalCourt')}</option>
             </Select>
 
             <Input
-              label="Judicial Body"
+              label={t('common.judicialBodyLabel')}
               name="judicial_body"
               required
               value={formData.judicial_body}
               onChange={handleInputChange}
               onBlur={() => markTouched('judicial_body')}
-              error={fieldError('judicial_body', 'Judicial Body', !formData.judicial_body)}
-              placeholder="e.g., Supreme Court of Kenya"
+              error={fieldError('judicial_body', t('common.judicialBodyLabel'), !formData.judicial_body)}
+              placeholder={t('common.judicialBodyPlaceholder')}
             />
 
             <label className="flex items-center space-x-2">
@@ -781,61 +781,61 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 onChange={handleCheckboxChange}
                 className="rounded border-stone-300 text-primary focus:ring-primary"
               />
-              <span className="text-sm font-medium text-stone-700">Regional Appeals</span>
+              <span className="text-sm font-medium text-stone-700">{t('common.regionalAppeals')}</span>
             </label>
 
             {formData.regional_appeals && (
               <TagListInput
-                label="Regional Bodies"
+                label={t('common.regionalBodiesLabel')}
                 items={formData.regional_bodies}
                 onAdd={addRegionalBody}
                 onRemove={removeRegionalBody}
-                placeholder="Add a regional body"
+                placeholder={t('common.addRegionalBody')}
               />
             )}
 
             <Select
-              label="Legal Framework Type"
+              label={t('common.legalFrameworkTypeLabel')}
               name="legal_framework_type"
               required
               value={formData.legal_framework_type}
               onChange={handleInputChange}
               onBlur={() => markTouched('legal_framework_type')}
-              error={fieldError('legal_framework_type', 'Legal Framework Type', !formData.legal_framework_type)}
-              helperText="Choosing Domestic, International, or Both determines which law lists appear below."
+              error={fieldError('legal_framework_type', t('common.legalFrameworkTypeLabel'), !formData.legal_framework_type)}
+              helperText={t('common.legalFrameworkHelperText')}
             >
-              <option value="">Select type</option>
-              <option value="Domestic Law">Domestic Law</option>
-              <option value="International Law">International Law</option>
-              <option value="Both">Both</option>
+              <option value="">{t('common.selectType')}</option>
+              <option value="Domestic Law">{t('common.domesticLaw')}</option>
+              <option value="International Law">{t('common.internationalLaw')}</option>
+              <option value="Both">{t('common.both')}</option>
             </Select>
 
             {(formData.legal_framework_type === 'Domestic Law' || formData.legal_framework_type === 'Both') && (
               <TagListInput
-                label="Domestic Laws"
+                label={t('common.domesticLawsLabel')}
                 items={formData.domestic_laws}
                 onAdd={addDomesticLaw}
                 onRemove={removeDomesticLaw}
-                placeholder="Add a domestic law"
+                placeholder={t('common.addDomesticLaw')}
               />
             )}
 
             {(formData.legal_framework_type === 'International Law' || formData.legal_framework_type === 'Both') && (
               <TagListInput
-                label="International Laws"
+                label={t('common.internationalLawsLabel')}
                 items={formData.international_laws}
                 onAdd={addInternationalLaw}
                 onRemove={removeInternationalLaw}
-                placeholder="Add an international law"
+                placeholder={t('common.addInternationalLaw')}
               />
             )}
 
             <TagListInput
-              label="Protocols"
+              label={t('common.protocolsLabel')}
               items={formData.protocols}
               onAdd={addProtocol}
               onRemove={removeProtocol}
-              placeholder="Add a protocol"
+              placeholder={t('common.addProtocol')}
             />
           </div>
         );
@@ -844,20 +844,20 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <Textarea
-              label="Case Impact"
+              label={t('common.caseImpactLabel')}
               name="case_impact"
               required
               rows={4}
               value={formData.case_impact}
               onChange={handleInputChange}
               onBlur={() => markTouched('case_impact')}
-              error={fieldError('case_impact', 'Case Impact', !formData.case_impact)}
-              placeholder="Describe the impact of this judgment"
+              error={fieldError('case_impact', t('common.caseImpactLabel'), !formData.case_impact)}
+              placeholder={t('submitJudgmentForm.step4.caseImpactPlaceholder')}
             />
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Case Categories <span className="text-danger ml-0.5" aria-hidden="true">*</span>
+                {t('common.caseCategoriesLabel')} <span className="text-danger ml-0.5" aria-hidden="true">*</span>
               </label>
               <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-stone-200 rounded-md">
                 {CASE_CATEGORIES.map((category) => (
@@ -873,7 +873,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 ))}
               </div>
               {touched.case_categories && formData.case_categories.length === 0 && (
-                <p role="alert" className="mt-1.5 text-sm text-danger">At least one category is required</p>
+                <p role="alert" className="mt-1.5 text-sm text-danger">{t('common.atLeastOneCategoryRequired')}</p>
               )}
             </div>
           </div>
@@ -884,7 +884,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Upload Judgment Document <span className="text-danger ml-0.5" aria-hidden="true">*</span>
+                {t('submitJudgmentForm.step5.uploadLabel')} <span className="text-danger ml-0.5" aria-hidden="true">*</span>
               </label>
               <div
                 {...getRootProps()}
@@ -898,7 +898,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                         : 'border-stone-300 hover:border-primary'
                 }`}
               >
-                <input {...getInputProps()} aria-label="Upload judgment document (PDF)" />
+                <input {...getInputProps()} aria-label={t('submitJudgmentForm.step5.uploadAriaLabel')} />
                 {file ? (
                   <div className="flex items-center justify-center gap-3">
                     <Upload className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
@@ -909,7 +909,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      aria-label="Remove selected file"
+                      aria-label={t('common.removeSelectedFile')}
                       className="text-stone-500 hover:text-danger"
                     >
                       <X className="h-5 w-5" />
@@ -918,10 +918,10 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 ) : (
                   <div>
                     <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
-                    <p className="text-stone-600">Drop your PDF file here or click to browse</p>
-                    <p className="text-sm text-stone-500 mt-2">Maximum file size: 10MB</p>
+                    <p className="text-stone-600">{t('common.dropzonePrompt')}</p>
+                    <p className="text-sm text-stone-500 mt-2">{t('common.maxFileSize')}</p>
                     <p className="text-sm text-stone-600 mt-4 italic">
-                      This document serves to capture any additional important information relevant to the judgment that may not have been included in the form fields.
+                      {t('submitJudgmentForm.step5.documentNote')}
                     </p>
                   </div>
                 )}
@@ -942,7 +942,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-warning-dark">
-                      Your submission will be reviewed by a moderator before being published. You will be notified once the review is complete.
+                      {t('common.moderationNotice')}
                     </p>
                   </div>
                 </div>
@@ -971,20 +971,20 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
           const missing = getMissingFields(currentStep);
           return missing.length > 0 ? (
             <p role="status" className="mt-4 text-sm text-danger text-right">
-              Before you continue, please fill in: {missing.join(', ')}
+              {t('common.beforeContinueFillIn', { fields: missing.join(', ') })}
             </p>
           ) : null;
         })()}
 
         <div className="mt-4 flex justify-between">
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </Button>
 
           <div className="flex space-x-3">
             {currentStep > 0 && (
               <Button type="button" variant="outline" onClick={prevStep} icon={<ChevronLeft className="h-4 w-4" />}>
-                Previous
+                {t('common.previous')}
               </Button>
             )}
 
@@ -996,11 +996,11 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
                 icon={<ChevronRight className="h-4 w-4" />}
                 iconPosition="right"
               >
-                Next
+                {t('common.next')}
               </Button>
             ) : (
               <Button type="submit" loading={loading} disabled={!validateCurrentStep()}>
-                {loading ? 'Submitting...' : isDirectUpload ? 'Upload Judgment' : 'Submit Judgment'}
+                {loading ? t('common.submitting') : isDirectUpload ? t('submitJudgmentForm.submitButton.upload') : t('submitJudgmentForm.submitButton.submit')}
               </Button>
             )}
           </div>

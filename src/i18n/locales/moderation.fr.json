@@ -5,6 +5,8 @@
     "accessDeniedDefault": "Vous n'avez pas la permission d'accéder à cette page",
     "accessDeniedError": "Erreur : {{error}}",
     "heading": "Modération des contenus",
+    "tabsAriaLabel": "Onglets",
+    "submissionTypesAriaLabel": "Types de soumission",
     "filters": "Filtres",
     "searchLabel": "Rechercher par titre ou contenu",
     "searchPlaceholder": "Rechercher par titre ou contenu...",

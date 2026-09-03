@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Download, Eye } from 'lucide-react';
 import { toast } from '../lib/toast';
 import PDFViewer from './PDFViewer';
@@ -15,8 +16,10 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
   isOpen,
   onClose,
   documentUrl,
-  title = 'Document Preview'
+  title
 }) => {
+  const { t } = useTranslation('misc');
+  const displayTitle = title ?? t('documentModal.defaultTitle');
   const [viewMode, setViewMode] = useState<'download' | 'view'>('download');
   const [resolvedUrl, setResolvedUrl] = useState<string>(documentUrl);
 
@@ -27,16 +30,16 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
       .then(setResolvedUrl)
       .catch((err) => {
         console.error('Failed to resolve a fresh document URL, falling back to the original link:', err);
-        toast.error('Could not refresh this document\'s link — it may be expired. Trying the original link.');
+        toast.error(t('documentModal.refreshLinkFailed'));
       });
-  }, [isOpen, documentUrl]);
+  }, [isOpen, documentUrl, t]);
 
   if (!isOpen) return null;
 
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = resolvedUrl;
-    link.download = title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+    link.download = displayTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
     link.target = '_blank';
     document.body.appendChild(link);
     link.click();
@@ -53,13 +56,13 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className={`bg-white rounded-lg ${viewMode === 'view' ? 'w-full max-w-4xl h-[90vh]' : 'w-full max-w-md'} flex flex-col`}>
         <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-medium text-stone-900 truncate max-w-[70%]">{title}</h3>
+          <h3 className="text-lg font-medium text-stone-900 truncate max-w-[70%]">{displayTitle}</h3>
           <div className="flex items-center space-x-2">
             {isPdf && (
               <button
                 onClick={toggleViewMode}
                 className="text-stone-500 hover:text-primary p-2 rounded-full hover:bg-stone-100"
-                title={viewMode === 'download' ? 'View Document' : 'Download Options'}
+                title={viewMode === 'download' ? t('documentModal.viewDocument') : t('documentModal.downloadOptions')}
               >
                 {viewMode === 'download' ? <Eye className="h-5 w-5" /> : <Download className="h-5 w-5" />}
               </button>
@@ -67,7 +70,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
             <button
               onClick={onClose}
               className="text-stone-500 hover:text-stone-700 p-2 rounded-full hover:bg-stone-100"
-              title="Close"
+              title={t('documentModal.close')}
             >
               <X className="h-5 w-5" />
             </button>
@@ -83,27 +86,27 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
             </div>
             
             <p className="text-center text-stone-600 mb-6">
-              {isPdf 
-                ? "Click the button below to download this document to your device or view it in the browser."
-                : "This document can only be downloaded. Click the button below to download it to your device."}
+              {isPdf
+                ? t('documentModal.instructionsPdf')
+                : t('documentModal.instructionsOther')}
             </p>
-            
+
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
               <button
                 onClick={handleDownload}
                 className="flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
               >
                 <Download className="h-5 w-5 mr-2" />
-                Download Document
+                {t('documentModal.downloadDocument')}
               </button>
-              
+
               {isPdf && (
                 <button
                   onClick={toggleViewMode}
                   className="flex items-center justify-center px-4 py-2 border border-stone-300 text-stone-700 rounded-md hover:bg-stone-50 transition-colors"
                 >
                   <Eye className="h-5 w-5 mr-2" />
-                  View in Browser
+                  {t('documentModal.viewInBrowser')}
                 </button>
               )}
             </div>
