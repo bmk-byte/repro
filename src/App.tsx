@@ -11,6 +11,7 @@ import { supabase, handleSupabaseError, testConnection } from './lib/supabase';
 import Navbar from './components/Navbar';
 import TawkChat from './components/TawkChat';
 import { useModeratorStatus } from './hooks/useModeratorStatus';
+import { can } from './lib/permissions';
 
 // Lazy-loaded: these pull in the heaviest dependencies (react-pdf/pdfjs-dist,
 // recharts/@tremor/@visx, framer-motion-heavy pages) and previously shipped
@@ -25,6 +26,7 @@ const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
 const SubmissionForm = lazy(() => import('./components/SubmissionForm'));
 const ModerationPage = lazy(() => import('./components/ModerationPage'));
 const ModeratorAdminPanel = lazy(() => import('./components/ModeratorAdminPanel'));
+const AdminManagementPanel = lazy(() => import('./components/AdminManagementPanel'));
 const ResourcesPage = lazy(() => import('./components/ResourcesPage'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 const RapidResponseCasesPage = lazy(() => import('./components/RapidResponseCasesPage'));
@@ -59,6 +61,10 @@ const devLog = (...args: unknown[]) => {
 
 function DashboardApp() {
   const [session, setSession] = React.useState(null);
+  // Which panel the (unauthenticated) single-viewport landing page is
+  // showing — driven by the top Navbar's landing links, not the URL, since
+  // the landing page itself never navigates/scrolls.
+  const [landingSection, setLandingSection] = React.useState('features');
   // Tab is derived from the URL (not local state) so tabs are deep-linkable
   // and browser back/forward work — e.g. /cases, /judgments, /moderation.
   const navigate = useNavigate();
@@ -90,7 +96,7 @@ function DashboardApp() {
   const retryBaseDelay = 1000; // Base delay in milliseconds
   const retryDelay = retryBaseDelay * Math.pow(2, retryCount); // Exponential backoff
 
-  const { isModerator, loading: moderatorLoading, error: moderatorError } = useModeratorStatus({ isConnected: connectionStatus === true });
+  const { isModerator, isAdmin, loading: moderatorLoading, error: moderatorError } = useModeratorStatus({ isConnected: connectionStatus === true });
   devLog('App render - moderator status:', { isModerator, moderatorLoading, moderatorError });
 
   const checkConnection = React.useCallback(async () => {
@@ -355,11 +361,15 @@ function DashboardApp() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
+          className="h-full flex flex-col"
         >
-          <LandingPage onGetStarted={() => {
-            setAuthInitialMode('signUp');
-            setShowAuthModal(true);
-          }} />
+          <LandingPage
+            activeTab={landingSection}
+            onGetStarted={() => {
+              setAuthInitialMode('signUp');
+              setShowAuthModal(true);
+            }}
+          />
         </motion.div>
       );
     }
@@ -421,7 +431,10 @@ function DashboardApp() {
                 return <ModerationPage />;
 
               case 'moderator-admin':
-                return isModerator ? <ModeratorAdminPanel /> : null;
+                return can({ isModerator, isAdmin }, 'moderator:grant') ? <ModeratorAdminPanel /> : null;
+
+              case 'admin-management':
+                return can({ isModerator, isAdmin }, 'admin:grant') ? <AdminManagementPanel /> : null;
 
               case 'laws':
                 return <LawsRepository />;
@@ -478,19 +491,28 @@ function DashboardApp() {
 
   return (
     <div className="flex flex-col h-screen bg-stone-100">
-      <Navbar 
-        isAuthenticated={!!session} 
+      <Navbar
+        isAuthenticated={!!session}
         isLandingPage={!session && !showAuthModal}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        activeLandingSection={landingSection}
+        onLandingSectionChange={setLandingSection}
         isModerator={isModerator}
+        isAdmin={isAdmin}
         userProfile={userProfile}
         onSignInClick={() => {
           setAuthInitialMode('signIn');
           setShowAuthModal(true);
         }}
       />
-      <div className="flex-1 overflow-x-hidden overflow-y-auto bg-stone-100 p-4 md:p-6">
+      <div
+        className={
+          !session && !showAuthModal
+            ? 'flex-1 min-h-0 overflow-hidden bg-stone-100 flex flex-col'
+            : 'flex-1 overflow-x-hidden overflow-y-auto bg-stone-100 p-4 md:p-6'
+        }
+      >
           {connectionStatus === false ? (
             <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative" role="alert">
               <div className="flex items-center">

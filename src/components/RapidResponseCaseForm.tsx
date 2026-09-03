@@ -4,7 +4,7 @@ import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { useFormDraft } from '../hooks/useFormDraft';
-import { createSafeDisplayName } from '../lib/sanitize';
+import { createSafeDisplayName, safeFileExtension } from '../lib/sanitize';
 import { Input, Select, Textarea, Button } from './ui';
 import { sendEmail } from '../lib/email';
 import { renderEmail } from '../lib/emailTemplates';
@@ -354,7 +354,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       // Upload file if present
       let fileUrl = '';
       if (file) {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = safeFileExtension(file.name);
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage

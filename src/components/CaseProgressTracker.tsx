@@ -4,6 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { validateFile } from '../lib/errorHandling';
+import { safeFileExtension } from '../lib/sanitize';
 import { LoadingState } from './ui';
 
 interface Stage {
@@ -134,7 +135,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
           return;
         }
         
-        const fileExt = file.name.split('.').pop();
+        const fileExt = safeFileExtension(file.name);
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage

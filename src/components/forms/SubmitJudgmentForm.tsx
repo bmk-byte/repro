@@ -5,7 +5,7 @@ import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from
 import { toast } from '../../lib/toast';
 import MultiStepFormProgress from './MultiStepFormProgress';
 import { useFormDraft } from '../../hooks/useFormDraft';
-import { createSafeDisplayName } from '../../lib/sanitize';
+import { createSafeDisplayName, safeFileExtension } from '../../lib/sanitize';
 import { Input, Select, Textarea, Button, TagListInput } from '../ui';
 import { sendEmail } from '../../lib/email';
 import { renderEmail } from '../../lib/emailTemplates';
@@ -383,7 +383,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       // Upload file if present
       let fileUrl = '';
       if (file) {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = safeFileExtension(file.name);
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
 
         // Use different storage bucket based on whether this is a direct upload or submission

@@ -14,6 +14,13 @@
 // account immediately after enabling the hook.
 import { Webhook } from 'npm:standardwebhooks@1.0.0';
 
+// NOTE: this function's error responses deliberately do NOT use the shared
+// `_shared/errorResponse.ts` helper. Supabase's Auth "Send Email" hook
+// contract requires the specific nested `{ error: { http_code, message } }`
+// shape below — GoTrue parses that exact structure to decide how to surface
+// the failure to the signup/reset request. Using the app's own generic
+// `{ error, code, status }` shape here would silently break that contract.
+
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const EMAIL_FROM = Deno.env.get('EMAIL_FROM') ?? 'onboarding@resend.dev';
 const HOOK_SECRET = Deno.env.get('SEND_EMAIL_HOOK_SECRET');

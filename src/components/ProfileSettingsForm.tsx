@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Camera, Bell, Pencil } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
-import { sanitizeURL, sanitizeText, sanitizePhone } from '../lib/sanitize';
+import { sanitizeURL, sanitizeText, sanitizePhone, safeFileExtension } from '../lib/sanitize';
 import { Badge, Spinner, Button, Input } from './ui';
+import { useModeratorStatus } from '../hooks/useModeratorStatus';
 
 interface ProfileSettingsFormProps {
   user: any;
@@ -25,7 +26,11 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
   const [avatarUrl, setAvatarUrl] = useState(user?.user_metadata?.avatar_url || '');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
-  const [isModerator, setIsModerator] = useState(false);
+  // Moderator status is sourced from the shared hook (single source of
+  // truth for the DB-trigger-enforced `is_moderator` check) rather than
+  // this form's own profile fetch, so this component can't drift from how
+  // every other page determines moderator status.
+  const { isModerator, isAdmin } = useModeratorStatus();
   const [email, setEmail] = useState(user?.email || '');
   const [receiveNotifications, setReceiveNotifications] = useState(true);
   const [savingNotifications, setSavingNotifications] = useState(false);
@@ -38,16 +43,15 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
   const [editErrors, setEditErrors] = useState<Partial<Record<keyof EditableFields, string>>>({});
 
   useEffect(() => {
-    const checkModeratorStatus = async () => {
+    const loadProfile = async () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('is_moderator, profession, organization, phone_number, email, receive_notifications')
+          .select('profession, organization, phone_number, email, receive_notifications')
           .eq('id', user.id)
           .single();
 
         if (error) throw error;
-        setIsModerator(data?.is_moderator || false);
         setReceiveNotifications(data?.receive_notifications ?? true);
 
         if (!user?.user_metadata?.profession && data?.profession) {
@@ -66,7 +70,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
           setEmail(data.email);
         }
       } catch (error) {
-        console.error('Error checking moderator status:', error);
+        console.error('Error loading profile:', error);
       } finally {
         setLoading(false);
       }
@@ -74,7 +78,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
     if (user) {
       setLoading(true);
-      checkModeratorStatus();
+      loadProfile();
     }
   }, [user]);
 
@@ -120,7 +124,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
     setUploadingAvatar(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = safeFileExtension(file.name);
       const filePath = `${user.id}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
@@ -424,6 +428,19 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       {/* Account Status */}
       <div className="bg-white rounded-xl shadow-card border border-stone-100 p-6">
         <h3 className="text-lg font-medium text-stone-900 mb-4">Account Status</h3>
+
+        {isAdmin && (
+          <div className="mb-4">
+            <span className="block text-sm font-medium text-stone-700">Admin Status</span>
+            <div className="mt-1">
+              <Badge tone="primary">Full System Admin</Badge>
+              <p className="mt-2 text-sm text-stone-500">
+                You have full system access — every moderator capability, plus unrestricted access
+                across all organizations' data for IT/system-level changes.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div>
           <span className="block text-sm font-medium text-stone-700">Moderator Status</span>

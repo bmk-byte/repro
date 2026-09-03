@@ -39,7 +39,7 @@ const ACTION_TONE: Record<string, 'success' | 'info' | 'danger' | 'neutral'> = {
  * table has no declared foreign key to `profiles`, so who performed each
  * action is resolved with a second query and merged client-side.
  */
-const AuditLogPanel: React.FC = () => {
+export const AuditLogPanel: React.FC = () => {
   const [entries, setEntries] = React.useState<AuditLogEntry[]>([]);
   const [performerNames, setPerformerNames] = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(true);

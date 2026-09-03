@@ -8,7 +8,14 @@ interface UseModeratorStatusProps {
 
 export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
   const { isConnected = true } = props || {};
+  // isModerator means "has moderator-or-higher access" (is_moderator OR
+  // is_admin) — admin is a strict superset of moderator (see
+  // supabase/migrations/20260903080000_add_admin_role.sql), so every
+  // existing `if (!isModerator)` gate across the app admits admins too
+  // without needing to be individually updated. Use isAdmin for anything
+  // that must be admin-exclusive (e.g. the admin management panel).
   const [isModerator, setIsModerator] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any | undefined>(undefined);
@@ -48,18 +55,20 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
 
         if (!isConnected || !user) {
           setIsModerator(false);
+          setIsAdmin(false);
           setLoading(false);
           return;
         }
 
-        // NOTE: moderator status is granted server-side only (a Postgres
-        // trigger on `profiles`, see supabase/migrations/*_lock_is_moderator_column.sql).
-        // This hook is read-only — it never writes `is_moderator` itself,
-        // since any client-side write to that column is now rejected by the
-        // database regardless of what this code claims.
+        // NOTE: moderator/admin status is granted server-side only
+        // (Postgres triggers on `profiles`, see
+        // supabase/migrations/*_lock_is_moderator_column.sql and
+        // *_add_admin_role.sql). This hook is read-only — it never writes
+        // these columns itself, since any client-side write is rejected by
+        // the database regardless of what this code claims.
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('is_moderator')
+          .select('is_moderator, is_admin')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -69,6 +78,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
               profileError.code === 'refresh_token_not_found') {
             await supabase.auth.signOut();
             setIsModerator(false);
+            setIsAdmin(false);
             setError('Session expired. Please sign in again.');
             toast.error('Your session has expired. Please sign in again.');
             return;
@@ -77,8 +87,10 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
           console.error('Error checking moderator status:', profileError);
           setError('Failed to verify your permissions. Please refresh the page.');
           setIsModerator(false);
+          setIsAdmin(false);
         } else {
-          setIsModerator(profile?.is_moderator || false);
+          setIsAdmin(profile?.is_admin || false);
+          setIsModerator((profile?.is_moderator || false) || (profile?.is_admin || false));
         }
       } catch (err) {
         if (err && typeof err === 'object' && 'message' in err) {
@@ -87,6 +99,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
               errorMessage?.includes('refresh_token_not_found')) {
             await supabase.auth.signOut();
             setIsModerator(false);
+            setIsAdmin(false);
             setError('Session expired. Please sign in again.');
             toast.error('Your session has expired. Please sign in again.');
             return;
@@ -96,6 +109,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
         console.error('Error checking moderator status:', err);
         setError('Failed to verify your permissions. Please refresh the page.');
         setIsModerator(false);
+        setIsAdmin(false);
       } finally {
         setLoading(false);
       }
@@ -106,10 +120,11 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
     } else if (user === null) {
       // User has been fetched and there is none
       setIsModerator(false);
+      setIsAdmin(false);
       setLoading(false);
     }
     // user === undefined: still fetching initial user — keep loading: true
   }, [user, isConnected]);
 
-  return { isModerator, loading, error };
+  return { isModerator, isAdmin, loading, error };
 };

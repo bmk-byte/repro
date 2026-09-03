@@ -188,6 +188,20 @@ export function validateFileType(
 }
 
 /**
+ * Extract a safe file extension for building generated storage keys
+ * (`${Date.now()}-${Math.random()}.${ext}`). Client-side dropzone `accept`
+ * filters normally guarantee a known extension, but a forged `File` object
+ * (e.g. via devtools) could carry a `name` containing `/`, `..`, or other
+ * path-breaking characters — this rejects anything that isn't a short
+ * alphanumeric extension rather than trusting `name.split('.').pop()`
+ * directly in a storage path.
+ */
+export function safeFileExtension(filename: string, fallback = 'bin'): string {
+  const ext = (filename.split('.').pop() || '').toLowerCase();
+  return /^[a-z0-9]{1,10}$/.test(ext) ? ext : fallback;
+}
+
+/**
  * Sanitize file size (in bytes)
  */
 export function validateFileSize(file: File, maxSizeInMB: number): boolean {

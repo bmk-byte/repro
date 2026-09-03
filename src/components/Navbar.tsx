@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2 } from 'lucide-react';
+import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Button, Badge } from './ui';
@@ -10,7 +10,13 @@ interface NavbarProps {
   isLandingPage?: boolean;
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
+  /** Which landing-page panel is showing (see LandingTabs.tsx) — distinct from `activeTab`, which drives the authenticated dashboard's URL-based routing. */
+  activeLandingSection?: string;
+  onLandingSectionChange?: (id: string) => void;
+  /** "moderator or admin" — see useModeratorStatus.ts. */
   isModerator?: boolean;
+  /** Full-access admin, distinct from (and a superset of) moderator — see src/lib/permissions.ts. */
+  isAdmin?: boolean;
   userProfile?: any;
   onSignInClick?: () => void;
 }
@@ -21,7 +27,10 @@ const Navbar: React.FC<NavbarProps> = ({
   isLandingPage = false,
   activeTab,
   setActiveTab,
+  activeLandingSection,
+  onLandingSectionChange,
   isModerator = false,
+  isAdmin = false,
   userProfile,
   onSignInClick
 }) => {
@@ -86,12 +95,15 @@ const Navbar: React.FC<NavbarProps> = ({
     toast.success('Notifications cleared');
   };
 
+  // ids match LandingTabs.tsx's TabId. No separate "Home" link — the hero
+  // above these tabs is always visible regardless of which panel is active,
+  // so there's no distinct "home" destination to jump to on a
+  // single-viewport page.
   const landingPageLinks = [
-    { name: 'Home', href: '#hero-section' },
-    { name: 'Features', href: '#features-section' },
-    { name: 'Focus Areas', href: '#thematic-focus-section' },
-    { name: 'Benefits', href: '#benefits-section' },
-    { name: 'Testimonials', href: '#testimonial-section' },
+    { name: 'Features', id: 'features' },
+    { name: 'Focus Areas', id: 'thematic' },
+    { name: 'Benefits', id: 'benefits' },
+    { name: 'Testimonials', id: 'testimonials' },
   ];
 
   const navigationItems = [
@@ -111,6 +123,9 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'resources', label: 'Resources', icon: ScrollText },
     ...(isModerator ? [
       { id: 'moderator-admin', label: 'Moderators', icon: ShieldCheck }
+    ] : []),
+    ...(isAdmin ? [
+      { id: 'admin-management', label: 'Admins', icon: KeyRound }
     ] : []),
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
@@ -137,14 +152,16 @@ const Navbar: React.FC<NavbarProps> = ({
               {isLandingPage && !isAuthenticated && (
                 <div className="hidden md:flex items-center gap-6" role="navigation" aria-label="Page sections">
                   {landingPageLinks.map((link) => (
-                    <a
+                    <button
                       key={link.name}
-                      href={link.href}
-                      className="text-sm font-medium text-stone-600 hover:text-primary transition-colors"
-                      aria-label={`Navigate to ${link.name} section`}
+                      onClick={() => onLandingSectionChange?.(link.id)}
+                      className={`text-sm font-medium transition-colors ${
+                        activeLandingSection === link.id ? 'text-primary' : 'text-stone-600 hover:text-primary'
+                      }`}
+                      aria-current={activeLandingSection === link.id ? 'page' : undefined}
                     >
                       {link.name}
-                    </a>
+                    </button>
                   ))}
                 </div>
               )}
@@ -317,14 +334,20 @@ const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <>
                 {landingPageLinks.map((link) => (
-                  <a
+                  <button
                     key={link.name}
-                    href={link.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-stone-900 hover:bg-stone-50"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      onLandingSectionChange?.(link.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+                      activeLandingSection === link.id
+                        ? 'bg-primary text-white'
+                        : 'text-stone-700 hover:text-stone-900 hover:bg-stone-50'
+                    }`}
                   >
                     {link.name}
-                  </a>
+                  </button>
                 ))}
                 {onSignInClick && (
                   <Button

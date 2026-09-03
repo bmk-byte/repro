@@ -3,7 +3,7 @@ import { Upload, File, X as XIcon, CircleAlert as AlertCircle } from 'lucide-rea
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
-import { createSafeDisplayName, sanitizeText } from '../lib/sanitize';
+import { createSafeDisplayName, sanitizeText, safeFileExtension } from '../lib/sanitize';
 import { Modal, Input, Textarea, Select, Button } from './ui';
 
 interface UploadLawModalProps {
@@ -91,7 +91,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = safeFileExtension(file.name);
       const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage

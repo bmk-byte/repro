@@ -7,6 +7,7 @@ import RapidResponseCaseForm from './RapidResponseCaseForm';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
 import RapidResponseDashboard from './RapidResponseDashboard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
+import { can } from '../lib/permissions';
 import { LoadingState, Badge } from './ui';
 import type { BadgeProps } from './ui';
 
@@ -50,7 +51,7 @@ const RapidResponseCasesPage: React.FC = () => {
   const [accessScope, setAccessScope] = useState<'global' | 'organization'>('global');
 
   // Use the moderator status hook to check if the user is a moderator
-  const { isModerator, loading: moderatorLoading, error: moderatorError } = useModeratorStatus();
+  const { isModerator, isAdmin, loading: moderatorLoading, error: moderatorError } = useModeratorStatus();
 
   useEffect(() => {
     if (isModerator) {
@@ -909,7 +910,7 @@ const RapidResponseCasesPage: React.FC = () => {
   }
 
   // If user is not a moderator, show access denied message
-  if (!isModerator) {
+  if (!can({ isModerator, isAdmin }, 'rapid_response:manage')) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center py-12">

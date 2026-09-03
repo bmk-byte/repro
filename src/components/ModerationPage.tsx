@@ -9,6 +9,7 @@ import SubmissionDetailsModal from './SubmissionDetailsModal';
 import DocumentModal from './DocumentModal';
 import SubmissionDetailsCard from './SubmissionDetailsCard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
+import { can } from '../lib/permissions';
 import RejectionModal from './RejectionModal';
 import { Button, Select, Badge, LoadingState, EmptyState, ConfirmDialog, SkeletonRow } from './ui';
 
@@ -46,7 +47,7 @@ const ModerationPage = () => {
   const [contentError, setContentError] = React.useState<string | null>(null);
 
   // Use the custom hook for moderator status
-  const { isModerator, loading: moderatorLoading, error: moderatorError } = useModeratorStatus();
+  const { isModerator, isAdmin, loading: moderatorLoading, error: moderatorError } = useModeratorStatus();
   
   devLog('ModerationPage render - moderator status:', { isModerator, moderatorLoading, moderatorError });
 
@@ -624,7 +625,7 @@ const ModerationPage = () => {
     return <LoadingState label="Checking access…" />;
   }
 
-  if (!isModerator) {
+  if (!can({ isModerator, isAdmin }, 'case:moderate')) {
     devLog('User is not a moderator');
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">

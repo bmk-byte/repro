@@ -1,5 +1,6 @@
 import { toast } from './toast';
 import { handleSupabaseError } from './supabase';
+import { reportError } from './errorReporting';
 
 /**
  * Handles form submission errors with appropriate user feedback
@@ -47,7 +48,8 @@ export const handleFormError = (error: any, setSubmissionError?: (error: string)
   
   // Log the error for debugging
   console.error('Form submission error:', error);
-  
+  reportError(error, { source: 'handleFormError' });
+
   return errorMessage;
 };
 
@@ -72,7 +74,8 @@ export const handleFileUploadError = (error: any) => {
   
   toast.error(errorMessage);
   console.error('File upload error:', error);
-  
+  reportError(error, { source: 'handleFileUploadError' });
+
   return errorMessage;
 };
 
@@ -128,6 +131,7 @@ export const handleQueryError = (error: any) => {
   
   toast.error(errorMessage);
   console.error('Query error:', error);
-  
+  reportError(error, { source: 'handleQueryError' });
+
   return errorMessage;
 };

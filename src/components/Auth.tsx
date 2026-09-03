@@ -231,11 +231,11 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           throw profileError;
         }
 
-        if (isModerator) {
-          toast.success('Moderator account created successfully!');
-        } else {
-          toast.success('Registration successful! You can now sign in.');
-        }
+        // Moderator status is decided server-side (see the trigger comment
+        // above) and isn't known client-side at this point — this component
+        // has no `isModerator` state, so the message is generic regardless
+        // of what the account ends up granted.
+        toast.success('Registration successful! You can now sign in.');
         setIsSignUp(false);
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
