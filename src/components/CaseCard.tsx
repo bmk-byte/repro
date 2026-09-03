@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar, MapPin, ArrowRight, AlertCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from './ui';
@@ -39,8 +40,19 @@ const statusTone = (status: string): 'success' | 'info' | 'warning' | 'neutral' 
  * stable callback reference (e.g. the setState setter directly), letting
  * memo actually skip re-renders for unchanged cards.
  */
+const STATUS_KEYS: Record<string, string> = {
+  pending: 'common.statusPending',
+  in_progress: 'common.statusInProgress',
+  completed: 'common.statusCompleted',
+  on_hold: 'common.statusOnHold',
+};
+
 const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
+  const { t } = useTranslation();
   const isRapidResponse = caseData.case_type === 'rapid-response';
+  const statusLabel = STATUS_KEYS[caseData.status]
+    ? t(STATUS_KEYS[caseData.status])
+    : caseData.status.replace('_', ' ');
 
   return (
     <motion.div
@@ -53,10 +65,10 @@ const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
           <div className="flex flex-wrap gap-2">
             {isRapidResponse && (
               <Badge tone="danger" icon={<AlertCircle className="h-3 w-3" />}>
-                Rapid Response
+                {t('common.rapidResponseBadgeLabel')}
               </Badge>
             )}
-            <Badge tone={statusTone(caseData.status)}>{caseData.status.replace('_', ' ')}</Badge>
+            <Badge tone={statusTone(caseData.status)}>{statusLabel}</Badge>
           </div>
           <div className="flex items-center text-sm text-stone-500">
             <Calendar className="h-4 w-4 mr-1" />
@@ -70,7 +82,7 @@ const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
 
         <div className="flex items-center text-sm text-stone-500 mb-4">
           <MapPin className="h-4 w-4 mr-1" />
-          {caseData.countries?.name || 'Unknown Location'}
+          {caseData.countries?.name || t('common.unknownLocation')}
 
           {isRapidResponse && caseData.rapid_response_stage && (
             <>
@@ -85,7 +97,7 @@ const CaseCard: React.FC<CaseCardProps> = ({ caseData, onClick }) => {
           onClick={() => onClick(caseData.id)}
           className="flex items-center text-primary hover:text-primary-dark transition-colors"
         >
-          <span className="text-sm font-medium">View Details</span>
+          <span className="text-sm font-medium">{t('common.viewDetails')}</span>
           <ArrowRight className="h-4 w-4 ml-1" />
         </button>
       </div>

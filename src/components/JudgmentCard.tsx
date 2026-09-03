@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar, Gavel, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from './ui';
@@ -37,6 +38,7 @@ const typeTone = (type: string): 'success' | 'warning' | 'info' | 'primary' | 'n
 
 /** Memoized — see CaseCard for why `onClick` takes the id rather than a pre-bound closure. */
 const JudgmentCard: React.FC<JudgmentCardProps> = ({ judgment, onClick }) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -65,7 +67,7 @@ const JudgmentCard: React.FC<JudgmentCardProps> = ({ judgment, onClick }) => {
           onClick={() => onClick(judgment.id)}
           className="flex items-center text-primary hover:text-primary-dark transition-colors"
         >
-          <span className="text-sm font-medium">View Details</span>
+          <span className="text-sm font-medium">{t('common.viewDetails')}</span>
           <ArrowRight className="h-4 w-4 ml-1" />
         </button>
       </div>

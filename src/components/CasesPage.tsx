@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Filter, ChevronDown, ChevronUp, X, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -19,6 +20,7 @@ interface CasesPageProps {
 }
 
 const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
+  const { t } = useTranslation();
   const [cases, setCases] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -74,7 +76,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
         }
       } catch (error) {
         console.error('Error fetching user info:', error);
-        toast.error('Failed to load your profile. Some access controls may not apply correctly.');
+        toast.error(t('cases.failedToLoadProfile'));
       }
     };
 
@@ -112,7 +114,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
           devLog('New case inserted:', payload);
           // Refresh the cases list when a new case is inserted
           fetchCases();
-          toast.success('New case has been added');
+          toast.success(t('cases.newCaseAdded'));
         }
       )
       .on(
@@ -177,7 +179,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
       setPartners(uniquePartners);
     } catch (error) {
       console.error('Error fetching filter options:', error);
-      toast.error('Failed to load filter options');
+      toast.error(t('common.failedToLoadFilterOptions'));
     }
   };
 
@@ -254,8 +256,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
       }
     } catch (error) {
       console.error('Error fetching cases:', error);
-      toast.error('Failed to load cases');
-      setFetchError('Unable to load cases. Please try refreshing the page.');
+      toast.error(t('cases.failedToLoad'));
+      setFetchError(t('cases.unableToLoad'));
     } finally {
       setLoading(false);
     }
@@ -309,19 +311,19 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
     return (
       <div className="flex items-center justify-center mt-8 flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
-          First
+          {t('common.first')}
         </Button>
         <Button size="sm" variant="outline" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-          Previous
+          {t('common.previous')}
         </Button>
 
         {pages}
 
         <Button size="sm" variant="outline" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-          Next
+          {t('common.next')}
         </Button>
         <Button size="sm" variant="outline" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
-          Last
+          {t('common.last')}
         </Button>
       </div>
     );
@@ -342,13 +344,13 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-stone-900">Cases</h1>
-        <p className="mt-2 text-stone-600">Browse and manage litigation cases submitted through the case upload form</p>
+        <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-stone-900">{t('cases.title')}</h1>
+        <p className="mt-2 text-stone-600">{t('cases.subtitle')}</p>
         {accessScope === 'organization' && userOrganization && (
           <div className="mt-3 p-3 bg-info-light border border-info/20 rounded-md flex items-start gap-2">
             <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
             <p className="text-sm text-info-dark">
-              You are viewing cases uploaded by <strong>{userOrganization}</strong> only. Cases from other organizations are not visible.
+              {t('cases.orgScopeNotice', { organization: userOrganization })}
             </p>
           </div>
         )}
@@ -358,12 +360,12 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <label htmlFor="cases-search" className="sr-only">Search cases by title or summary</label>
+            <label htmlFor="cases-search" className="sr-only">{t('cases.searchLabel')}</label>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
             <input
               id="cases-search"
               type="text"
-              placeholder="Search cases by title or summary..."
+              placeholder={t('cases.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-10 pl-10 pr-4 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -375,7 +377,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
             aria-expanded={showAdvancedFilters}
             icon={<Filter className="h-4 w-4" />}
           >
-            Filters
+            {t('common.filters')}
             {showAdvancedFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
@@ -385,53 +387,53 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
           <div className="mt-4 p-4 bg-white rounded-lg shadow-card border border-stone-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <Select
-                label="Status"
+                label={t('common.statusLabel')}
                 value={filters.status}
                 onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
               >
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="on_hold">On Hold</option>
+                <option value="">{t('common.allStatuses')}</option>
+                <option value="pending">{t('common.statusPending')}</option>
+                <option value="in_progress">{t('common.statusInProgress')}</option>
+                <option value="completed">{t('common.statusCompleted')}</option>
+                <option value="on_hold">{t('common.statusOnHold')}</option>
               </Select>
 
               <Select
-                label="Type"
+                label={t('common.typeLabel')}
                 value={filters.type}
                 onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
               >
-                <option value="">Litigation</option>
+                <option value="">{t('cases.litigation')}</option>
               </Select>
 
               <Select
-                label="Country"
+                label={t('common.countryLabel')}
                 value={filters.country}
                 onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
               >
-                <option value="">All Countries</option>
+                <option value="">{t('common.allCountries')}</option>
                 {countries.map(country => (
                   <option key={country.id} value={country.id}>{country.name}</option>
                 ))}
               </Select>
 
               <Select
-                label="Category"
+                label={t('common.categoryLabel')}
                 value={filters.category}
                 onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
               >
-                <option value="">All Categories</option>
+                <option value="">{t('common.allCategories')}</option>
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </Select>
 
               <Select
-                label="Partner"
+                label={t('common.partnerLabel')}
                 value={filters.partner}
                 onChange={(e) => setFilters(prev => ({ ...prev, partner: e.target.value }))}
               >
-                <option value="">All Partners</option>
+                <option value="">{t('common.allPartners')}</option>
                 {partners.map(partner => (
                   <option key={partner} value={partner}>{partner}</option>
                 ))}
@@ -443,8 +445,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 {searchTerm && (
                   <Badge tone="primary">
-                    Search: {searchTerm}
-                    <button onClick={() => setSearchTerm('')} aria-label="Clear search filter" className="ml-1">
+                    {t('common.search', { term: searchTerm })}
+                    <button onClick={() => setSearchTerm('')} aria-label={t('common.clearSearchFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -452,8 +454,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
                 {filters.status && (
                   <Badge tone="primary">
-                    Status: {filters.status}
-                    <button onClick={() => setFilters(prev => ({ ...prev, status: '' }))} aria-label="Clear status filter" className="ml-1">
+                    {t('common.status', { value: filters.status })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, status: '' }))} aria-label={t('common.clearStatusFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -461,8 +463,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
                 {filters.type && (
                   <Badge tone="primary">
-                    Type: {filters.type}
-                    <button onClick={() => setFilters(prev => ({ ...prev, type: '' }))} aria-label="Clear type filter" className="ml-1">
+                    {t('common.type', { value: filters.type })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, type: '' }))} aria-label={t('common.clearTypeFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -470,8 +472,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
                 {filters.country && (
                   <Badge tone="primary">
-                    Country: {countries.find(c => c.id === filters.country)?.name}
-                    <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label="Clear country filter" className="ml-1">
+                    {t('common.country', { value: countries.find(c => c.id === filters.country)?.name })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label={t('common.clearCountryFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -479,8 +481,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
                 {filters.category && (
                   <Badge tone="primary">
-                    Category: {filters.category}
-                    <button onClick={() => setFilters(prev => ({ ...prev, category: '' }))} aria-label="Clear category filter" className="ml-1">
+                    {t('common.category', { value: filters.category })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, category: '' }))} aria-label={t('common.clearCategoryFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -488,8 +490,8 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
                 {filters.partner && (
                   <Badge tone="primary">
-                    Partner: {filters.partner}
-                    <button onClick={() => setFilters(prev => ({ ...prev, partner: '' }))} aria-label="Clear partner filter" className="ml-1">
+                    {t('common.partner', { value: filters.partner })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, partner: '' }))} aria-label={t('common.clearPartnerFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -499,7 +501,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
                   onClick={clearFilters}
                   className="text-sm text-primary hover:text-primary-dark"
                 >
-                  Clear all filters
+                  {t('common.clearAllFilters')}
                 </button>
               </div>
             )}
@@ -517,20 +519,20 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
       ) : fetchError ? (
         <EmptyState
           icon={<AlertCircle className="h-12 w-12" />}
-          title="Failed to load cases"
+          title={t('cases.failedToLoad')}
           description={fetchError}
-          action={<Button variant="outline" onClick={fetchCases}>Try again</Button>}
+          action={<Button variant="outline" onClick={fetchCases}>{t('common.tryAgain')}</Button>}
         />
       ) : cases.length === 0 ? (
         <EmptyState
           title={
             searchTerm || filters.status || filters.type || filters.country || filters.category || filters.partner
-              ? 'No cases found matching your criteria'
-              : 'No cases found'
+              ? t('cases.noCasesMatchCriteria')
+              : t('cases.noCasesFound')
           }
           action={
             (searchTerm || filters.status || filters.type || filters.country || filters.category || filters.partner) && (
-              <Button variant="outline" onClick={clearFilters}>Clear filters</Button>
+              <Button variant="outline" onClick={clearFilters}>{t('common.clearFilters')}</Button>
             )
           }
         />
@@ -551,7 +553,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
           {/* Results count */}
           <div className="text-center mt-4 text-sm text-stone-500">
-            Showing {(currentPage - 1) * 9 + 1} to {Math.min(currentPage * 9, totalCases)} of {totalCases} cases
+            {t('cases.showingResults', { from: (currentPage - 1) * 9 + 1, to: Math.min(currentPage * 9, totalCases), total: totalCases })}
           </div>
         </>
       )}

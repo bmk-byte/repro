@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Calendar, FileText, MapPin, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
@@ -19,6 +20,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
   isModerator = false,
   onEditJudgment
 }) => {
+  const { t } = useTranslation();
   const [judgment, setJudgment] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [showDocumentModal, setShowDocumentModal] = React.useState(false);
@@ -43,7 +45,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
       setJudgment(data);
     } catch (error) {
       console.error('Error fetching judgment details:', error);
-      toast.error('Failed to load judgment details');
+      toast.error(t('judgments.failedToLoadDetails'));
     } finally {
       setLoading(false);
     }
@@ -84,19 +86,19 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
   };
 
   if (loading) {
-    return <LoadingState label="Loading judgment details…" />;
+    return <LoadingState label={t('judgments.loadingDetails')} />;
   }
 
   if (!judgment) {
     return (
       <div className="text-center py-12">
-        <p className="text-stone-500">Judgment not found</p>
+        <p className="text-stone-500">{t('judgments.notFound')}</p>
         <button
           onClick={onBack}
           className="mt-4 text-primary hover:text-primary-dark flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Judgments
+          {t('judgments.backToJudgments')}
         </button>
       </div>
     );
@@ -116,17 +118,17 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
             className="text-stone-500 hover:text-stone-700 flex items-center mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Judgments
+            {t('judgments.backToJudgments')}
           </button>
-          
+
           {isModerator && onEditJudgment && (
             <button
               onClick={() => onEditJudgment(judgment)}
               className="text-primary hover:text-primary-dark flex items-center transition-colors duration-200 px-3 py-2 rounded-md hover:bg-primary/10 active:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
-              aria-label="Edit Judgment"
+              aria-label={t('judgments.editJudgment')}
             >
               <Edit2 className="h-4 w-4 mr-1" />
-              <span className="font-medium">Edit Judgment</span>
+              <span className="font-medium">{t('judgments.editJudgment')}</span>
             </button>
           )}
         </div>
@@ -157,27 +159,27 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
           {/* Basic Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Information</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.caseInformation')}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Court</label>
+                  <label className="text-sm font-medium text-stone-500">{t('judgments.court')}</label>
                   <p className="mt-1">{judgment.court}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Case Number</label>
+                  <label className="text-sm font-medium text-stone-500">{t('judgments.caseNumber')}</label>
                   <p className="mt-1">{judgment.case_number}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Judges</label>
+                  <label className="text-sm font-medium text-stone-500">{t('judgments.judges')}</label>
                   <p className="mt-1">{judgment.judges}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Language</label>
+                  <label className="text-sm font-medium text-stone-500">{t('judgments.language')}</label>
                   <p className="mt-1">{judgment.language}</p>
                 </div>
                 {judgment.timeline_status && (
                   <div>
-                    <label className="text-sm font-medium text-stone-500">Timeline Status</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.timelineStatus')}</label>
                     <p className="mt-1">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTimelineStatusColor(judgment.timeline_status)}`}>
                         {judgment.timeline_status}
@@ -187,7 +189,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                 )}
                 {judgment.case_categories && judgment.case_categories.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-stone-500">Categories</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.categories')}</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {judgment.case_categories.map((category: string, idx: number) => (
                         <span 
@@ -205,17 +207,17 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
 
             {/* Flynote */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Flynote</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.flynote')}</h2>
               <p className="text-stone-600 whitespace-pre-line">{judgment.flynote}</p>
             </div>
 
             {/* Parties Involved */}
             {(judgment.litigants?.length > 0 || judgment.defending_institutions?.length > 0) && (
               <div>
-                <h2 className="text-lg font-medium text-stone-900 mb-3">Parties Involved</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.partiesInvolved')}</h2>
                 {judgment.litigants?.length > 0 && (
                   <div className="mb-4">
-                    <label className="text-sm font-medium text-stone-500">Litigants</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.litigants')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
                       {judgment.litigants.map((litigant: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{litigant}</li>
@@ -225,7 +227,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                 )}
                 {judgment.defending_institutions?.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-stone-500">Defending Institutions</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.defendingInstitutions')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
                       {judgment.defending_institutions.map((institution: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{institution}</li>
@@ -239,27 +241,27 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
             {/* Judicial Body Details */}
             {(judgment.judicial_body_type || judgment.judicial_body || judgment.regional_appeals) && (
               <div>
-                <h2 className="text-lg font-medium text-stone-900 mb-3">Judicial Body Details</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.judicialBodyDetails')}</h2>
                 {judgment.judicial_body_type && (
                   <div className="mb-2">
-                    <label className="text-sm font-medium text-stone-500">Judicial Body Type</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.judicialBodyType')}</label>
                     <p className="mt-1">{judgment.judicial_body_type}</p>
                   </div>
                 )}
                 {judgment.judicial_body && (
                   <div className="mb-2">
-                    <label className="text-sm font-medium text-stone-500">Judicial Body</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.judicialBody')}</label>
                     <p className="mt-1">{judgment.judicial_body}</p>
                   </div>
                 )}
                 {judgment.regional_appeals && (
                   <div className="mb-2">
-                    <label className="text-sm font-medium text-stone-500">Regional Appeals</label>
-                    <p className="mt-1">Yes</p>
-                    
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.regionalAppeals')}</label>
+                    <p className="mt-1">{t('judgments.yes')}</p>
+
                     {judgment.regional_bodies?.length > 0 && (
                       <div className="mt-2">
-                        <label className="text-sm font-medium text-stone-500">Regional Bodies</label>
+                        <label className="text-sm font-medium text-stone-500">{t('judgments.regionalBodies')}</label>
                         <ul className="mt-1 list-disc list-inside space-y-1">
                           {judgment.regional_bodies.map((body: string, idx: number) => (
                             <li key={idx} className="text-stone-700">{body}</li>
@@ -276,22 +278,22 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
           {/* Case Summary and Document */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Summary</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.caseSummary')}</h2>
               <p className="text-stone-600 whitespace-pre-line">{judgment.case_summary}</p>
             </div>
 
             {/* Legal Framework */}
             {judgment.legal_framework_type && (
               <div>
-                <h2 className="text-lg font-medium text-stone-900 mb-3">Legal Framework</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.legalFramework')}</h2>
                 <div className="mb-2">
-                  <label className="text-sm font-medium text-stone-500">Framework Type</label>
+                  <label className="text-sm font-medium text-stone-500">{t('judgments.frameworkType')}</label>
                   <p className="mt-1">{judgment.legal_framework_type}</p>
                 </div>
-                
+
                 {judgment.domestic_laws?.length > 0 && (
                   <div className="mb-2">
-                    <label className="text-sm font-medium text-stone-500">Domestic Laws</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.domesticLaws')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
                       {judgment.domestic_laws.map((law: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{law}</li>
@@ -299,10 +301,10 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                     </ul>
                   </div>
                 )}
-                
+
                 {judgment.international_laws?.length > 0 && (
                   <div className="mb-2">
-                    <label className="text-sm font-medium text-stone-500">International Laws</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.internationalLaws')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
                       {judgment.international_laws.map((law: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{law}</li>
@@ -310,10 +312,10 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                     </ul>
                   </div>
                 )}
-                
+
                 {judgment.protocols?.length > 0 && (
                   <div className="mb-2">
-                    <label className="text-sm font-medium text-stone-500">Protocols</label>
+                    <label className="text-sm font-medium text-stone-500">{t('judgments.protocols')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
                       {judgment.protocols.map((protocol: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{protocol}</li>
@@ -327,31 +329,31 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
             {/* Case Impact */}
             {judgment.case_impact && (
               <div>
-                <h2 className="text-lg font-medium text-stone-900 mb-3">Case Impact</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.caseImpact')}</h2>
                 <p className="text-stone-600 whitespace-pre-line">{judgment.case_impact}</p>
               </div>
             )}
 
             {/* Document */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Judgment Document</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('judgments.judgmentDocument')}</h2>
               {judgment.file_url ? (
                 <div className="bg-stone-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <FileText className="h-5 w-5 text-stone-400" />
-                      <span className="ml-2 text-sm text-stone-900">Full Judgment</span>
+                      <span className="ml-2 text-sm text-stone-900">{t('judgments.fullJudgment')}</span>
                     </div>
                     <button
                       onClick={() => setShowDocumentModal(true)}
                       className="text-sm text-primary hover:text-primary-dark"
                     >
-                      View Document
+                      {t('judgments.viewDocument')}
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-stone-500 text-sm">No document available</p>
+                <p className="text-stone-500 text-sm">{t('judgments.noDocumentAvailable')}</p>
               )}
             </div>
           </div>

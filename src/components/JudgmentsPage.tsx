@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Filter, ChevronDown, ChevronUp, X, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -13,6 +14,7 @@ const devLog = (...args: unknown[]) => {
 };
 
 const JudgmentsPage = () => {
+  const { t } = useTranslation();
   const [judgments, setJudgments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -70,7 +72,7 @@ const JudgmentsPage = () => {
           devLog('New judgment inserted:', payload);
           // Refresh the judgments list when a new judgment is inserted
           fetchJudgments();
-          toast.success('New judgment has been added');
+          toast.success(t('judgments.newJudgmentAdded'));
         }
       )
       .subscribe();
@@ -132,7 +134,7 @@ const JudgmentsPage = () => {
       setYears(uniqueYears);
     } catch (error) {
       console.error('Error fetching filter options:', error);
-      toast.error('Failed to load filter options');
+      toast.error(t('common.failedToLoadFilterOptions'));
     }
   };
 
@@ -200,8 +202,8 @@ const JudgmentsPage = () => {
       }
     } catch (error) {
       console.error('Error fetching judgments:', error);
-      toast.error('Failed to load judgments');
-      setFetchError('Unable to load judgments. Please try refreshing the page.');
+      toast.error(t('judgments.failedToLoad'));
+      setFetchError(t('judgments.unableToLoad'));
     } finally {
       setLoading(false);
     }
@@ -250,19 +252,19 @@ const JudgmentsPage = () => {
     return (
       <div className="flex items-center justify-center mt-8 flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
-          First
+          {t('common.first')}
         </Button>
         <Button size="sm" variant="outline" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-          Previous
+          {t('common.previous')}
         </Button>
 
         {pages}
 
         <Button size="sm" variant="outline" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-          Next
+          {t('common.next')}
         </Button>
         <Button size="sm" variant="outline" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
-          Last
+          {t('common.last')}
         </Button>
       </div>
     );
@@ -282,20 +284,20 @@ const JudgmentsPage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-stone-900">Judgments</h1>
-        <p className="mt-2 text-stone-600">Browse and search legal judgments</p>
+        <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-stone-900">{t('judgments.title')}</h1>
+        <p className="mt-2 text-stone-600">{t('judgments.subtitle')}</p>
       </div>
 
       {/* Search and Filters */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <label htmlFor="judgments-search" className="sr-only">Search judgments by citation, summary, or flynote</label>
+            <label htmlFor="judgments-search" className="sr-only">{t('judgments.searchLabel')}</label>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
             <input
               id="judgments-search"
               type="text"
-              placeholder="Search judgments by citation, summary, or flynote..."
+              placeholder={t('judgments.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-10 pl-10 pr-4 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -307,7 +309,7 @@ const JudgmentsPage = () => {
             aria-expanded={showAdvancedFilters}
             icon={<Filter className="h-4 w-4" />}
           >
-            Filters
+            {t('common.filters')}
             {showAdvancedFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
@@ -317,57 +319,57 @@ const JudgmentsPage = () => {
           <div className="mt-4 p-4 bg-white rounded-lg shadow-card border border-stone-100">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <Select
-                label="Court"
+                label={t('common.courtLabel')}
                 value={filters.court}
                 onChange={(e) => setFilters(prev => ({ ...prev, court: e.target.value }))}
               >
-                <option value="">All Courts</option>
+                <option value="">{t('common.allCourts')}</option>
                 {courts.map(court => (
                   <option key={court} value={court}>{court}</option>
                 ))}
               </Select>
 
               <Select
-                label="Type"
+                label={t('common.typeLabel')}
                 value={filters.type}
                 onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
               >
-                <option value="">All Types</option>
-                <option value="Final Judgment">Final Judgment</option>
-                <option value="Interim Order">Interim Order</option>
-                <option value="Ruling">Ruling</option>
-                <option value="Consent Judgment">Consent Judgment</option>
-                <option value="Default Judgment">Default Judgment</option>
+                <option value="">{t('common.allTypes')}</option>
+                <option value="Final Judgment">{t('judgments.typeFinalJudgment')}</option>
+                <option value="Interim Order">{t('judgments.typeInterimOrder')}</option>
+                <option value="Ruling">{t('judgments.typeRuling')}</option>
+                <option value="Consent Judgment">{t('judgments.typeConsentJudgment')}</option>
+                <option value="Default Judgment">{t('judgments.typeDefaultJudgment')}</option>
               </Select>
 
               <Select
-                label="Country"
+                label={t('common.countryLabel')}
                 value={filters.country}
                 onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
               >
-                <option value="">All Countries</option>
+                <option value="">{t('common.allCountries')}</option>
                 {countries.map(country => (
                   <option key={country.id} value={country.id}>{country.name}</option>
                 ))}
               </Select>
 
               <Select
-                label="Language"
+                label={t('common.languageLabel')}
                 value={filters.language}
                 onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
               >
-                <option value="">All Languages</option>
+                <option value="">{t('common.allLanguages')}</option>
                 {languages.map(language => (
                   <option key={language} value={language}>{language}</option>
                 ))}
               </Select>
 
               <Select
-                label="Year"
+                label={t('common.yearLabel')}
                 value={filters.year}
                 onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}
               >
-                <option value="">All Years</option>
+                <option value="">{t('common.allYears')}</option>
                 {years.map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}
@@ -379,8 +381,8 @@ const JudgmentsPage = () => {
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 {searchTerm && (
                   <Badge tone="primary">
-                    Search: {searchTerm}
-                    <button onClick={() => setSearchTerm('')} aria-label="Clear search filter" className="ml-1">
+                    {t('common.search', { term: searchTerm })}
+                    <button onClick={() => setSearchTerm('')} aria-label={t('common.clearSearchFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -388,8 +390,8 @@ const JudgmentsPage = () => {
 
                 {filters.court && (
                   <Badge tone="primary">
-                    Court: {filters.court}
-                    <button onClick={() => setFilters(prev => ({ ...prev, court: '' }))} aria-label="Clear court filter" className="ml-1">
+                    {t('common.court', { value: filters.court })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, court: '' }))} aria-label={t('common.clearCourtFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -397,8 +399,8 @@ const JudgmentsPage = () => {
 
                 {filters.type && (
                   <Badge tone="primary">
-                    Type: {filters.type}
-                    <button onClick={() => setFilters(prev => ({ ...prev, type: '' }))} aria-label="Clear type filter" className="ml-1">
+                    {t('common.type', { value: filters.type })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, type: '' }))} aria-label={t('common.clearTypeFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -406,8 +408,8 @@ const JudgmentsPage = () => {
 
                 {filters.country && (
                   <Badge tone="primary">
-                    Country: {countries.find(c => c.id === filters.country)?.name}
-                    <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label="Clear country filter" className="ml-1">
+                    {t('common.country', { value: countries.find(c => c.id === filters.country)?.name })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label={t('common.clearCountryFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -415,8 +417,8 @@ const JudgmentsPage = () => {
 
                 {filters.language && (
                   <Badge tone="primary">
-                    Language: {filters.language}
-                    <button onClick={() => setFilters(prev => ({ ...prev, language: '' }))} aria-label="Clear language filter" className="ml-1">
+                    {t('common.language', { value: filters.language })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, language: '' }))} aria-label={t('common.clearLanguageFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -424,8 +426,8 @@ const JudgmentsPage = () => {
 
                 {filters.year && (
                   <Badge tone="primary">
-                    Year: {filters.year}
-                    <button onClick={() => setFilters(prev => ({ ...prev, year: '' }))} aria-label="Clear year filter" className="ml-1">
+                    {t('common.year', { value: filters.year })}
+                    <button onClick={() => setFilters(prev => ({ ...prev, year: '' }))} aria-label={t('common.clearYearFilter')} className="ml-1">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -435,7 +437,7 @@ const JudgmentsPage = () => {
                   onClick={clearFilters}
                   className="text-sm text-primary hover:text-primary-dark"
                 >
-                  Clear all filters
+                  {t('common.clearAllFilters')}
                 </button>
               </div>
             )}
@@ -453,20 +455,20 @@ const JudgmentsPage = () => {
       ) : fetchError ? (
         <EmptyState
           icon={<AlertCircle className="h-12 w-12" />}
-          title="Failed to load judgments"
+          title={t('judgments.failedToLoad')}
           description={fetchError}
-          action={<Button variant="outline" onClick={fetchJudgments}>Try again</Button>}
+          action={<Button variant="outline" onClick={fetchJudgments}>{t('common.tryAgain')}</Button>}
         />
       ) : judgments.length === 0 ? (
         <EmptyState
           title={
             searchTerm || filters.court || filters.type || filters.country || filters.language || filters.year
-              ? 'No judgments found matching your criteria'
-              : 'No judgments found'
+              ? t('judgments.noJudgmentsMatchCriteria')
+              : t('judgments.noJudgmentsFound')
           }
           action={
             (searchTerm || filters.court || filters.type || filters.country || filters.language || filters.year) && (
-              <Button variant="outline" onClick={clearFilters}>Clear filters</Button>
+              <Button variant="outline" onClick={clearFilters}>{t('common.clearFilters')}</Button>
             )
           }
         />
@@ -487,7 +489,7 @@ const JudgmentsPage = () => {
 
           {/* Results count */}
           <div className="text-center mt-4 text-sm text-stone-500">
-            Showing {(currentPage - 1) * 9 + 1} to {Math.min(currentPage * 9, totalJudgments)} of {totalJudgments} judgments
+            {t('judgments.showingResults', { from: (currentPage - 1) * 9 + 1, to: Math.min(currentPage * 9, totalJudgments), total: totalJudgments })}
           </div>
         </>
       )}

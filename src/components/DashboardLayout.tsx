@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
 import DashboardCard from './DashboardCard';
 import { supabase } from '../lib/supabase';
@@ -17,6 +18,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error, setActiveTab }) => {
+  const { t } = useTranslation();
   const [changeStats, setChangeStats] = useState({
     cases: '+0.0%',
     judgments: '+0.0%'
@@ -65,8 +67,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-serif text-2xl font-semibold text-stone-900">Dashboard</h2>
-        <p className="mt-1 text-sm text-stone-600">An overview of cases, judgments, and recent activity.</p>
+        <h2 className="font-serif text-2xl font-semibold text-stone-900">{t('dashboard.title')}</h2>
+        <p className="mt-1 text-sm text-stone-600">{t('dashboard.subtitle')}</p>
       </div>
 
       {error && (
@@ -76,19 +78,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
       )}
 
       {loading ? (
-        <LoadingState label="Loading dashboard…" />
+        <LoadingState label={t('dashboard.loading')} />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             <DashboardCard
-              title="Cases"
+              title={t('dashboard.cases')}
               value={stats.totalCases.toString()}
               change={changeStats.cases}
               type="cases"
               onClick={() => setActiveTab('cases')}
             />
             <DashboardCard
-              title="Judgments"
+              title={t('dashboard.judgments')}
               value={stats.totalJudgments.toString()}
               change={changeStats.judgments}
               type="judgments"
@@ -98,11 +100,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
 
           <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-stone-900">Analytics</h3>
-              <p className="mt-1 text-sm text-stone-600">Trends, distribution, geography, outcomes, and more.</p>
+              <h3 className="text-lg font-semibold text-stone-900">{t('dashboard.analytics')}</h3>
+              <p className="mt-1 text-sm text-stone-600">{t('dashboard.analyticsSubtitle')}</p>
             </div>
             <Button onClick={() => setActiveTab('analytics')} icon={<ArrowRight className="h-4 w-4" />} iconPosition="right">
-              View full analytics
+              {t('dashboard.viewFullAnalytics')}
             </Button>
           </Card>
 

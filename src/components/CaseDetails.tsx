@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Calendar, MapPin, FileText, CreditCard as Edit2, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
@@ -18,6 +19,13 @@ const RESTRICTED_ORGANIZATIONS = [
   'Dumaic Global Health'
 ];
 
+const STATUS_KEYS: Record<string, string> = {
+  pending: 'common.statusPending',
+  in_progress: 'common.statusInProgress',
+  completed: 'common.statusCompleted',
+  on_hold: 'common.statusOnHold',
+};
+
 interface CaseDetailsProps {
   caseId: string;
   onBack: () => void;
@@ -31,6 +39,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
   isModerator = false,
   onEditCase
 }) => {
+  const { t } = useTranslation();
   const [caseData, setCaseData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [showDocumentModal, setShowDocumentModal] = React.useState(false);
@@ -60,7 +69,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
         }
       } catch (error) {
         console.error('Error fetching user info:', error);
-        toast.error('Failed to load your access permissions. Some features may be restricted.');
+        toast.error(t('cases.failedToLoadPermissions'));
       }
       await fetchCaseDetails();
     };
@@ -124,7 +133,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
       setCaseData(data);
     } catch (error) {
       console.error('Error fetching case details:', error);
-      toast.error('Failed to load case details');
+      toast.error(t('cases.failedToLoadDetails'));
     } finally {
       setLoading(false);
     }
@@ -168,7 +177,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
 
   if (loading) {
     return (
-      <LoadingState label="Loading case details…" />
+      <LoadingState label={t('cases.loadingDetails')} />
     );
   }
 
@@ -179,19 +188,19 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
           <AlertCircle className="h-12 w-12 text-danger" />
         </div>
         <p className="text-stone-900 font-medium mb-2">
-          {accessDenied ? 'Access Denied' : 'Case not found'}
+          {accessDenied ? t('cases.accessDenied') : t('cases.notFound')}
         </p>
         <p className="text-stone-500 mb-6">
           {accessDenied
-            ? 'You do not have permission to view this case. It may belong to another organization.'
-            : 'The case you are looking for does not exist.'}
+            ? t('cases.accessDeniedDescription')
+            : t('cases.notFoundDescription')}
         </p>
         <button
           onClick={onBack}
           className="text-primary hover:text-primary-dark flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Cases
+          {t('cases.backToCases')}
         </button>
       </div>
     );
@@ -211,17 +220,17 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
             className="text-stone-500 hover:text-stone-700 flex items-center mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Cases
+            {t('cases.backToCases')}
           </button>
-          
+
           {isModerator && onEditCase && (
             <button
               onClick={() => onEditCase(caseData)}
               className="text-primary hover:text-primary-dark flex items-center transition-colors duration-200 px-3 py-2 rounded-md hover:bg-primary/10 active:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
-              aria-label="Edit Case"
+              aria-label={t('cases.editCase')}
             >
               <Edit2 className="h-4 w-4 mr-1" />
-              <span className="font-medium">Edit Case</span>
+              <span className="font-medium">{t('cases.editCase')}</span>
             </button>
           )}
         </div>
@@ -245,13 +254,13 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
               caseData.status === 'in_progress' ? 'bg-info-light text-info-dark' :
               'bg-warning-light text-warning-dark'
             }`}>
-              {caseData.status}
+              {STATUS_KEYS[caseData.status] ? t(STATUS_KEYS[caseData.status]) : caseData.status}
             </span>
 
             {caseData.case_type === 'rapid-response' && (
               <span className="px-3 py-1 rounded-full text-sm font-medium bg-danger-light text-danger-dark flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
-                Rapid Response
+                {t('common.rapidResponseBadgeLabel')}
               </span>
             )}
             
@@ -270,27 +279,27 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
           {/* Case Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Information</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('cases.caseInformation')}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Court</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.court')}</label>
                   <p className="mt-1">{caseData.court}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Nature of Case</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.natureOfCase')}</label>
                   <p className="mt-1">{caseData.nature_of_case}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Case Type</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.caseType')}</label>
                   <p className="mt-1 capitalize">{caseData.case_type?.replace('-', ' ')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Partner Organization</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.partnerOrganization')}</label>
                   <p className="mt-1">{caseData.partner}</p>
                 </div>
                 {caseData.case_categories && caseData.case_categories.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-stone-500">Categories</label>
+                    <label className="text-sm font-medium text-stone-500">{t('cases.categories')}</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {caseData.case_categories.map((category: string, idx: number) => (
                         <span 
@@ -308,24 +317,24 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
 
             {/* Case Summary */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Summary</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('cases.caseSummary')}</h2>
               <p className="text-stone-600 whitespace-pre-line">{caseData.case_summary}</p>
             </div>
 
             {/* Action Details */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Action Details</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('cases.actionDetails')}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Action Taken</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.actionTaken')}</label>
                   <p className="mt-1">{caseData.action_taken}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Action Timeframe</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.actionTimeframe')}</label>
                   <p className="mt-1">{caseData.action_timeframe}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Next Steps</label>
+                  <label className="text-sm font-medium text-stone-500">{t('cases.nextSteps')}</label>
                   <p className="mt-1">{caseData.next_steps}</p>
                 </div>
               </div>
@@ -336,24 +345,24 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
           <div className="space-y-6">
             {/* Documents */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Documents</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('cases.caseDocuments')}</h2>
               {caseData.pdf_url && (
                 <div className="bg-stone-50 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <FileText className="h-5 w-5 text-stone-400 mr-2" />
-                      <span className="text-sm text-stone-900">Main Case Document</span>
+                      <span className="text-sm text-stone-900">{t('cases.mainCaseDocument')}</span>
                     </div>
                     <button
                       onClick={() => setShowDocumentModal(true)}
                       className="text-sm text-primary hover:text-primary-dark"
                     >
-                      View Document
+                      {t('cases.viewDocument')}
                     </button>
                   </div>
                 </div>
               )}
-              
+
               {caseData.case_documents?.length > 0 ? (
                 <div className="space-y-3">
                   {caseData.case_documents.map((doc: any) => (
@@ -374,20 +383,20 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                           }}
                           className="text-xs text-primary hover:text-primary-dark mt-2 inline-block"
                         >
-                          View Document
+                          {t('cases.viewDocument')}
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : !caseData.pdf_url ? (
-                <p className="text-stone-500 text-sm">No documents uploaded</p>
+                <p className="text-stone-500 text-sm">{t('cases.noDocumentsUploaded')}</p>
               ) : null}
             </div>
 
             {/* Progress Tracking */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Progress</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('cases.caseProgress')}</h2>
               {caseData.case_stages?.length > 0 ? (
                 <div className="space-y-4">
                   {caseData.case_stages.map((stage: any) => (
@@ -419,7 +428,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                   ))}
                 </div>
               ) : (
-                <p className="text-stone-500 text-sm">No progress stages defined</p>
+                <p className="text-stone-500 text-sm">{t('cases.noProgressStages')}</p>
               )}
             </div>
           </div>
