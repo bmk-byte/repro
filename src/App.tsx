@@ -12,6 +12,7 @@ import Navbar from './components/Navbar';
 import TawkChat from './components/TawkChat';
 import { useModeratorStatus } from './hooks/useModeratorStatus';
 import { can } from './lib/permissions';
+import { schedulePrefetchAllRoutes, prefetchRoute } from './lib/routePrefetch';
 
 // Lazy-loaded: these pull in the heaviest dependencies (react-pdf/pdfjs-dist,
 // recharts/@tremor/@visx, framer-motion-heavy pages) and previously shipped
@@ -98,6 +99,15 @@ function DashboardApp() {
 
   const { isModerator, isAdmin, loading: moderatorLoading, error: moderatorError } = useModeratorStatus({ isConnected: connectionStatus === true });
   devLog('App render - moderator status:', { isModerator, moderatorLoading, moderatorError });
+
+  // Warm the lazy-loaded tab chunks in the background once signed in, so
+  // switching tabs doesn't show a visible loading flash — see
+  // src/lib/routePrefetch.ts. Nav-item hover prefetching (Navbar.tsx) covers
+  // the case where a user clicks before this idle-time pass finishes.
+  React.useEffect(() => {
+    if (!session) return;
+    return schedulePrefetchAllRoutes();
+  }, [session]);
 
   const checkConnection = React.useCallback(async () => {
     try {

@@ -37,14 +37,18 @@ const MODERATOR_PERMISSIONS: Permission[] = [
   'case:approve',
   'judgment:moderate',
   'rapid_response:manage',
-  'moderator:grant',
-  'moderator:revoke',
   'law:upload',
   'resource:upload',
 ];
 
+// Granting/revoking moderator status is admin-only, not a moderator
+// capability — moderating content and managing who else can moderate are
+// deliberately separate (see supabase/migrations/
+// 20260903090000_restrict_moderator_management_to_admins.sql).
 const ADMIN_PERMISSIONS: Permission[] = [
   ...MODERATOR_PERMISSIONS,
+  'moderator:grant',
+  'moderator:revoke',
   'admin:grant',
   'admin:revoke',
 ];

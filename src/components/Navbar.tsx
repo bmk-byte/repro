@@ -3,6 +3,7 @@ import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, Shi
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Button, Badge } from './ui';
+import { prefetchRoute } from '../lib/routePrefetch';
 
 interface NavbarProps {
   className?: string;
@@ -121,7 +122,9 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'judgments', label: 'Judgments', icon: Gavel },
     { id: 'laws', label: 'Laws', icon: BookOpen },
     { id: 'resources', label: 'Resources', icon: ScrollText },
-    ...(isModerator ? [
+    // Granting/revoking moderator status is admin-only (see
+    // src/lib/permissions.ts) — a plain moderator no longer sees this tab.
+    ...(isAdmin ? [
       { id: 'moderator-admin', label: 'Moderators', icon: ShieldCheck }
     ] : []),
     ...(isAdmin ? [
@@ -250,6 +253,8 @@ const Navbar: React.FC<NavbarProps> = ({
                   <button
                     key={item.id}
                     onClick={() => setActiveTab?.(item.id)}
+                    onMouseEnter={() => prefetchRoute(item.id)}
+                    onFocus={() => prefetchRoute(item.id)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       isActive
                         ? 'bg-primary text-white'
