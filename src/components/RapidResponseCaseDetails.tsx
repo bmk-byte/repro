@@ -7,6 +7,10 @@ import DocumentModal from './DocumentModal';
 import CaseProgressTracker from './CaseProgressTracker';
 import { LoadingState } from './ui';
 
+const devLog = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
+
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
   'Islamic Women\'s Initiative for Justice Law and Peace',
@@ -69,7 +73,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
 
   const fetchCaseDetails = async () => {
     try {
-      console.log('Fetching case details for ID:', caseId);
+      devLog('Fetching case details for ID:', caseId);
       setLoading(true);
       setError(null);
       setAccessDenied(false);
@@ -123,7 +127,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
         }
       }
 
-      console.log('Case details fetched:', data);
+      devLog('Case details fetched:', data);
       setCaseData(data);
     } catch (error) {
       console.error('Error fetching case details:', error);

@@ -10,6 +10,10 @@ import { sanitizeSearchTerm } from '../lib/sanitize';
 import { RESTRICTED_ORGANIZATIONS } from '../constants/organizations';
 import { Button, Select, Badge, EmptyState, SkeletonCard } from './ui';
 
+const devLog = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
+
 interface CasesPageProps {
   userProfile?: any;
 }
@@ -105,7 +109,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
           filter: 'moderation_status=eq.approved,case_type=eq.litigation'
         },
         (payload) => {
-          console.log('New case inserted:', payload);
+          devLog('New case inserted:', payload);
           // Refresh the cases list when a new case is inserted
           fetchCases();
           toast.success('New case has been added');
@@ -120,7 +124,7 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
           filter: 'moderation_status=eq.approved,case_type=eq.litigation'
         },
         (payload) => {
-          console.log('Case updated:', payload);
+          devLog('Case updated:', payload);
           // Refresh the cases list when a case is updated
           fetchCases();
         }

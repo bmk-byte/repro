@@ -9,6 +9,10 @@ import type { BadgeProps } from './ui';
 import { chartHeight } from '../lib/chartLayout';
 import DashboardCard from './DashboardCard';
 
+const devLog = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
+
 interface RapidResponseDashboardProps {
   onViewAllCases?: () => void;
   onCreateCase?: () => void;
@@ -67,13 +71,13 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log('RapidResponseDashboard: Fetching dashboard data...');
+    devLog('RapidResponseDashboard: Fetching dashboard data...');
     fetchDashboardData();
   }, [timeRange, filters]);
 
   // Set up real-time subscriptions
   useEffect(() => {
-    console.log('Setting up real-time subscriptions for rapid response dashboard');
+    devLog('Setting up real-time subscriptions for rapid response dashboard');
     
     // Subscribe to changes in rapid response cases
     const casesSubscription = supabase
@@ -87,7 +91,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           filter: 'case_type=eq.rapid-response'
         },
         (payload) => {
-          console.log('Rapid response case changed:', payload);
+          devLog('Rapid response case changed:', payload);
           fetchDashboardData();
           
           if (payload.eventType === 'INSERT') {
@@ -110,7 +114,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           table: 'case_stages'
         },
         (payload) => {
-          console.log('Case stage changed:', payload);
+          devLog('Case stage changed:', payload);
           fetchDashboardData();
         }
       )
@@ -118,7 +122,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
     // Clean up subscriptions when component unmounts
     return () => {
-      console.log('Cleaning up rapid response dashboard subscriptions');
+      devLog('Cleaning up rapid response dashboard subscriptions');
       supabase.removeChannel(casesSubscription);
       supabase.removeChannel(stagesSubscription);
     };
@@ -126,7 +130,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
   const fetchFilterOptions = async () => {
     try {
-      console.log('Fetching filter options for rapid response dashboard');
+      devLog('Fetching filter options for rapid response dashboard');
       
       // Fetch countries
       const { data: countriesData, error: countriesError } = await supabase
@@ -183,7 +187,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
   const fetchDashboardData = async () => {
     try {
-      console.log('Fetching dashboard data...');
+      devLog('Fetching dashboard data...');
       setLoading(true);
       setError(null);
 
@@ -206,7 +210,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           break;
       }
 
-      console.log('Date range:', { startDate, endDate });
+      devLog('Date range:', { startDate, endDate });
 
       // Fetch rapid response cases
       let casesQuery = supabase
@@ -258,8 +262,8 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
       const { data: casesData, error: casesError } = await casesQuery;
 
-      console.log('Cases query result:', casesData);
-      console.log('Cases query error:', casesError);
+      devLog('Cases query result:', casesData);
+      devLog('Cases query error:', casesError);
 
       if (casesError) throw casesError;
 
@@ -294,8 +298,8 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
       const { data: stagesData, error: stagesError } = await stagesQuery;
 
-      console.log('Stages query result:', stagesData?.length);
-      console.log('Stages query error:', stagesError);
+      devLog('Stages query result:', stagesData?.length);
+      devLog('Stages query error:', stagesError);
 
       if (stagesError) throw stagesError;
 
@@ -421,7 +425,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         };
       });
 
-      console.log('Processed stages for progress:', processedStagesForProgress);
+      devLog('Processed stages for progress:', processedStagesForProgress);
 
       // Get recent activity (latest 5 cases or stage updates)
       const recentActivity = filteredCases

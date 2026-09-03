@@ -187,6 +187,19 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           return;
         }
 
+        // Fail open: only an explicit `false` blocks — an RPC error (e.g.
+        // offline) shouldn't itself lock the user out of signing up.
+        const { data: signUpAllowed, error: signUpRateLimitError } = await supabase.rpc('check_rate_limit', {
+          p_key: `signup:${email.toLowerCase()}`,
+          p_max_count: 3,
+          p_window_seconds: 3600,
+        });
+        if (!signUpRateLimitError && signUpAllowed === false) {
+          toast.error('Too many sign-up attempts for this email. Please try again in an hour.');
+          setLoading(false);
+          return;
+        }
+
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -238,6 +251,19 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         toast.success('Registration successful! You can now sign in.');
         setIsSignUp(false);
       } else {
+        // Fail open: only an explicit `false` blocks — an RPC error (e.g.
+        // offline) shouldn't itself lock the user out of signing in.
+        const { data: loginAllowed, error: loginRateLimitError } = await supabase.rpc('check_rate_limit', {
+          p_key: `login:${email.toLowerCase()}`,
+          p_max_count: 5,
+          p_window_seconds: 300,
+        });
+        if (!loginRateLimitError && loginAllowed === false) {
+          toast.error('Too many sign-in attempts. Please try again in a few minutes.');
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -492,19 +518,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                   )}
 
                   {!isForgotPassword && !isSignUp && (
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center">
-                        <input
-                          id="remember-me"
-                          name="remember-me"
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-stone-300 accent-primary focus:ring-primary"
-                          title="Keep me signed in on this device"
-                        />
-                        <label htmlFor="remember-me" className="ml-2 block text-sm text-stone-700">
-                          Remember me
-                        </label>
-                      </div>
+                    <div className="flex items-center justify-end gap-4">
                       <button
                         type="button"
                         onClick={() => {

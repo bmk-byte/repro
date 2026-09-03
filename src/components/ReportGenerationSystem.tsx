@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
-import { Download, FileText, BarChartHorizontal, PieChart, Calendar, RefreshCw } from 'lucide-react';
+import { Download, FileText, BarChartHorizontal, PieChart, RefreshCw } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
 
@@ -231,11 +231,6 @@ const ReportGenerationSystem: React.FC = () => {
         downloadFile(csv, `report-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
         toast.success(`Downloaded CSV with ${cases.length} records`);
 
-      } else if (selectedFormat === 'excel') {
-        const csv = buildCSVFromCases(cases, selectedMetrics);
-        downloadFile(csv, `report-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
-        toast.success(`Downloaded Excel-compatible file with ${cases.length} records`);
-
       } else if (selectedFormat === 'pdf') {
         const metricLabels: Record<string, string> = {
           case_volume: 'Case Volume',
@@ -273,12 +268,6 @@ const ReportGenerationSystem: React.FC = () => {
 
         openPrintWindow('Custom Report', statsHTML + tableHTML);
         toast.success('Print dialog opened — choose "Save as PDF"');
-
-      } else if (selectedFormat === 'ppt') {
-        // Generate a tabular CSV as a proxy for PPT content
-        const csv = buildCSVFromCases(cases, selectedMetrics);
-        downloadFile(csv, `report-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
-        toast.success('Downloaded data file — import into PowerPoint as a table');
       }
 
     } catch (err) {
@@ -369,14 +358,6 @@ const ReportGenerationSystem: React.FC = () => {
     setSelectedMetrics(prev =>
       prev.includes(metric) ? prev.filter(m => m !== metric) : [...prev, metric]
     );
-  };
-
-  const handleScheduleReport = () => {
-    if (selectedMetrics.length === 0) {
-      toast.error('Please select at least one metric');
-      return;
-    }
-    toast.success('Report scheduled successfully');
   };
 
   return (
@@ -475,8 +456,6 @@ const ReportGenerationSystem: React.FC = () => {
               <div className="space-y-2">
                 {[
                   ['pdf', 'PDF Report'],
-                  ['excel', 'Excel Spreadsheet'],
-                  ['ppt', 'PowerPoint Presentation'],
                   ['csv', 'CSV Data Export'],
                 ].map(([value, label]) => (
                   <label key={value} className="flex items-center space-x-2">
@@ -543,20 +522,6 @@ const ReportGenerationSystem: React.FC = () => {
                 </label>
               </div>
 
-              <div className="mt-6">
-                <Text className="font-medium mb-3">Delivery Options</Text>
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" />
-                    <span className="text-sm">Email Report</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" />
-                    <span className="text-sm">Schedule Recurring</span>
-                  </label>
-                </div>
-              </div>
-
               <div className="mt-6 flex space-x-3">
                 <button
                   onClick={handleGenerateReport}
@@ -575,60 +540,8 @@ const ReportGenerationSystem: React.FC = () => {
                     </>
                   )}
                 </button>
-                <button
-                  onClick={handleScheduleReport}
-                  disabled={loading || selectedMetrics.length === 0}
-                  className="px-4 py-2 border border-stone-300 text-stone-700 rounded-md hover:bg-stone-50 flex items-center disabled:opacity-50"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Schedule
-                </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Scheduled Reports */}
-        <div className="md:col-span-3">
-          <Title>Scheduled Reports</Title>
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-stone-200">
-              <thead className="bg-stone-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Report Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Frequency</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Next Run</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Format</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-stone-200">
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Monthly Performance Summary</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Monthly</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
-                    {new Date(new Date().setDate(1)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">PDF</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-primary hover:text-primary-dark mr-3">Edit</button>
-                    <button className="text-red-600 hover:text-red-800">Delete</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Quarterly Impact Report</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Quarterly</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
-                    {new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3 + 3, 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">PPT</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-primary hover:text-primary-dark mr-3">Edit</button>
-                    <button className="text-red-600 hover:text-red-800">Delete</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

@@ -23,6 +23,8 @@ const RESTRICTED_ORGANIZATIONS = [
   'Dumaic Global Health'
 ];
 
+const PAGE_SIZE = 50;
+
 const RapidResponseCasesPage: React.FC = () => {
   const [view, setView] = useState<'dashboard' | 'list'>('dashboard');
   const [cases, setCases] = useState<any[]>([]);
@@ -44,6 +46,9 @@ const RapidResponseCasesPage: React.FC = () => {
     dateRange: { start: '', end: '' },
     timePeriod: 'all' // Time-based filter: week, month, quarter, year, all
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCases, setTotalCases] = useState(0);
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
   const [partnerOrganizations, setPartnerOrganizations] = useState<string[]>([]);
   const [countries, setCountries] = useState<{id: string, name: string}[]>([]);
@@ -100,7 +105,11 @@ const RapidResponseCasesPage: React.FC = () => {
     if (isModerator && view === 'list') {
       fetchCases();
     }
-  }, [view, filters, isModerator]);
+  }, [view, filters, isModerator, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, view]);
 
   const fetchTeamMembers = async () => {
     try {
@@ -212,7 +221,7 @@ const RapidResponseCasesPage: React.FC = () => {
           countries (name),
           profiles:user_id (full_name, organization),
           user_id
-        `)
+        `, { count: 'exact' })
         .eq('case_type', 'rapid-response')
         .eq('moderation_status', 'approved');
 
@@ -277,18 +286,25 @@ const RapidResponseCasesPage: React.FC = () => {
         query = query.or(`case_filed.ilike.%${term}%,case_summary.ilike.%${term}%,client_name.ilike.%${term}%`);
       }
 
-      // Order by priority and creation date, and bound the result — this
-      // list has no pagination UI, so without a cap it fetches every
-      // matching case unbounded as the dataset grows.
+      // Order by priority and creation date, and page through results —
+      // mirrors the same count-then-range pagination CasesPage.tsx uses.
+      const from = (currentPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       query = query
         .order('priority_level', { ascending: false })
         .order('created_at', { ascending: false })
-        .range(0, 499);
+        .range(from, to);
 
-      const { data, error } = await query;
+      const { data, count, error } = await query;
 
       if (error) throw error;
       setCases(data || []);
+
+      if (count !== null) {
+        setTotalCases(count);
+        setTotalPages(Math.max(1, Math.ceil(count / PAGE_SIZE)));
+      }
     } catch (err) {
       console.error('Error fetching rapid response cases:', err);
       setError('Failed to load rapid response cases');
@@ -338,6 +354,56 @@ const RapidResponseCasesPage: React.FC = () => {
       timePeriod: 'all'
     });
     setSearchTerm('');
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisiblePages = 3;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+            currentPage === i
+              ? 'bg-primary text-white'
+              : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    const navButtonClass = 'px-3 py-1.5 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed';
+
+    return (
+      <div className="p-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="text-sm text-stone-500">
+          Showing {(currentPage - 1) * PAGE_SIZE + 1} to {Math.min(currentPage * PAGE_SIZE, totalCases)} of {totalCases} cases
+        </div>
+        <div className="flex items-center gap-2 flex-wrap justify-center">
+          <button className={navButtonClass} onClick={() => handlePageChange(1)} disabled={currentPage === 1}>First</button>
+          <button className={navButtonClass} onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+          {pages}
+          <button className={navButtonClass} onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
+          <button className={navButtonClass} onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>Last</button>
+        </div>
+      </div>
+    );
   };
 
   const getPriorityTone = (priority: string): NonNullable<BadgeProps['tone']> => {
@@ -485,7 +551,7 @@ const RapidResponseCasesPage: React.FC = () => {
               </button>
               <button
                 onClick={exportToCSV}
-                title="Export filtered results to Excel"
+                title="Export the current page of results to CSV"
                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <Download className="h-4 w-4" />
@@ -899,6 +965,7 @@ const RapidResponseCasesPage: React.FC = () => {
               </table>
             </div>
           )}
+          {!loading && !error && cases.length > 0 && renderPagination()}
         </div>
       </div>
     );

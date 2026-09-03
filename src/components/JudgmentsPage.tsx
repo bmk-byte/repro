@@ -8,6 +8,10 @@ import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { sanitizeSearchTerm } from '../lib/sanitize';
 import { Button, Select, Badge, EmptyState, SkeletonCard } from './ui';
 
+const devLog = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.log(...args);
+};
+
 const JudgmentsPage = () => {
   const [judgments, setJudgments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -63,7 +67,7 @@ const JudgmentsPage = () => {
           table: 'judgments'
         },
         (payload) => {
-          console.log('New judgment inserted:', payload);
+          devLog('New judgment inserted:', payload);
           // Refresh the judgments list when a new judgment is inserted
           fetchJudgments();
           toast.success('New judgment has been added');
