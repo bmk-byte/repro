@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { Download, FileText, BarChartHorizontal, PieChart, RefreshCw } from 'lucide-react';
 import { toast } from '../lib/toast';
@@ -34,6 +35,7 @@ const downloadFile = (content: string, filename: string, mimeType: string) => {
 };
 
 const ReportGenerationSystem: React.FC = () => {
+  const { t } = useTranslation('misc');
   const [selectedMetrics, setSelectedMetrics] = React.useState<string[]>([]);
   const [selectedFormat, setSelectedFormat] = React.useState<string>('pdf');
   const [dateRange, setDateRange] = React.useState<[string, string]>(['', '']);
@@ -176,7 +178,7 @@ const ReportGenerationSystem: React.FC = () => {
   // Open a printable HTML window (save as PDF via browser print dialog)
   const openPrintWindow = (title: string, bodyHTML: string) => {
     const win = window.open('', '_blank');
-    if (!win) { toast.error('Pop-up blocked. Allow pop-ups to download PDF.'); return; }
+    if (!win) { toast.error(t('reportGenerationSystem.popupBlocked')); return; }
     win.document.write(`
       <!DOCTYPE html>
       <html>
@@ -211,7 +213,7 @@ const ReportGenerationSystem: React.FC = () => {
 
   const handleGenerateReport = async () => {
     if (selectedMetrics.length === 0) {
-      toast.error('Please select at least one metric');
+      toast.error(t('reportGenerationSystem.selectAtLeastOneMetric'));
       return;
     }
 
@@ -220,7 +222,7 @@ const ReportGenerationSystem: React.FC = () => {
       const { data: cases, error } = await buildBaseQuery();
       if (error) throw error;
       if (!cases || cases.length === 0) {
-        toast.error('No data available for the selected criteria');
+        toast.error(t('reportGenerationSystem.noDataAvailable'));
         return;
       }
 
@@ -229,7 +231,7 @@ const ReportGenerationSystem: React.FC = () => {
       if (selectedFormat === 'csv') {
         const csv = buildCSVFromCases(cases, selectedMetrics);
         downloadFile(csv, `report-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
-        toast.success(`Downloaded CSV with ${cases.length} records`);
+        toast.success(t('reportGenerationSystem.downloadedCsv', { count: cases.length }));
 
       } else if (selectedFormat === 'pdf') {
         const metricLabels: Record<string, string> = {
@@ -267,12 +269,12 @@ const ReportGenerationSystem: React.FC = () => {
         `;
 
         openPrintWindow('Custom Report', statsHTML + tableHTML);
-        toast.success('Print dialog opened — choose "Save as PDF"');
+        toast.success(t('reportGenerationSystem.printDialogOpened'));
       }
 
     } catch (err) {
       console.error('Report generation error:', err);
-      toast.error('Failed to generate report. Please try again.');
+      toast.error(t('reportGenerationSystem.failedToGenerateReport'));
     } finally {
       setLoading(false);
     }
@@ -314,7 +316,7 @@ const ReportGenerationSystem: React.FC = () => {
         ];
         const csv = buildSummaryCSV('Performance Summary Report', rows);
         downloadFile(csv, `performance-summary-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
-        toast.success('Performance Summary downloaded');
+        toast.success(t('reportGenerationSystem.performanceSummaryDownloaded'));
 
       } else if (type === 'country') {
         const byCountry: Record<string, number> = {};
@@ -325,7 +327,7 @@ const ReportGenerationSystem: React.FC = () => {
         const rows: [string, unknown][] = Object.entries(byCountry).sort((a, b) => (b[1] as number) - (a[1] as number));
         const csv = buildSummaryCSV('Country Analysis Report', [['Country', 'Case Count'], ...rows]);
         downloadFile(csv, `country-analysis-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
-        toast.success('Country Analysis downloaded');
+        toast.success(t('reportGenerationSystem.countryAnalysisDownloaded'));
 
       } else if (type === 'impact') {
         const byCategory: Record<string, number> = {};
@@ -343,12 +345,12 @@ const ReportGenerationSystem: React.FC = () => {
         ];
         const csv = buildSummaryCSV('Impact Assessment Report', rows);
         downloadFile(csv, `impact-assessment-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
-        toast.success('Impact Assessment downloaded');
+        toast.success(t('reportGenerationSystem.impactAssessmentDownloaded'));
       }
 
     } catch (err) {
       console.error('Template download error:', err);
-      toast.error('Failed to generate report');
+      toast.error(t('reportGenerationSystem.failedToGenerateReportShort'));
     } finally {
       setLoading(false);
     }
@@ -362,8 +364,8 @@ const ReportGenerationSystem: React.FC = () => {
 
   return (
     <Card>
-      <Title>Report Generation System</Title>
-      <Text className="text-stone-500">Create customized reports with selected metrics and visualizations</Text>
+      <Title>{t('reportGenerationSystem.title')}</Title>
+      <Text className="text-stone-500">{t('reportGenerationSystem.subtitle')}</Text>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         {/* Report Templates */}
@@ -374,15 +376,15 @@ const ReportGenerationSystem: React.FC = () => {
           >
             <Flex>
               <div>
-                <Text className="font-medium">Performance Summary</Text>
-                <Text className="text-stone-500 text-sm">Overall case performance metrics</Text>
+                <Text className="font-medium">{t('reportGenerationSystem.performanceSummary')}</Text>
+                <Text className="text-stone-500 text-sm">{t('reportGenerationSystem.performanceSummaryDescription')}</Text>
               </div>
               <Download className="h-5 w-5 text-primary" />
             </Flex>
             <div className="mt-2 text-xs text-stone-500">
-              <div>Total Cases: {reportStats.totalCases}</div>
-              <div>Completed: {reportStats.completedCases}</div>
-              <div>Success Rate: {reportStats.successRate}%</div>
+              <div>{t('reportGenerationSystem.totalCases', { count: reportStats.totalCases })}</div>
+              <div>{t('reportGenerationSystem.completed', { count: reportStats.completedCases })}</div>
+              <div>{t('reportGenerationSystem.successRate', { rate: reportStats.successRate })}</div>
             </div>
           </div>
 
@@ -392,14 +394,14 @@ const ReportGenerationSystem: React.FC = () => {
           >
             <Flex>
               <div>
-                <Text className="font-medium">Country Analysis</Text>
-                <Text className="text-stone-500 text-sm">Detailed country-by-country breakdown</Text>
+                <Text className="font-medium">{t('reportGenerationSystem.countryAnalysis')}</Text>
+                <Text className="text-stone-500 text-sm">{t('reportGenerationSystem.countryAnalysisDescription')}</Text>
               </div>
               <Download className="h-5 w-5 text-primary" />
             </Flex>
             <div className="mt-2 text-xs text-stone-500">
-              <div>Countries with cases: {reportStats.totalCases > 0 ? 'Available' : 'None'}</div>
-              <div>Regional breakdown: {reportStats.totalCases > 0 ? 'Available' : 'None'}</div>
+              <div>{t('reportGenerationSystem.countriesWithCases', { status: reportStats.totalCases > 0 ? t('reportGenerationSystem.available') : t('reportGenerationSystem.none') })}</div>
+              <div>{t('reportGenerationSystem.regionalBreakdown', { status: reportStats.totalCases > 0 ? t('reportGenerationSystem.available') : t('reportGenerationSystem.none') })}</div>
             </div>
           </div>
 
@@ -409,33 +411,33 @@ const ReportGenerationSystem: React.FC = () => {
           >
             <Flex>
               <div>
-                <Text className="font-medium">Impact Assessment</Text>
-                <Text className="text-stone-500 text-sm">Comprehensive impact evaluation</Text>
+                <Text className="font-medium">{t('reportGenerationSystem.impactAssessment')}</Text>
+                <Text className="text-stone-500 text-sm">{t('reportGenerationSystem.impactAssessmentDescription')}</Text>
               </div>
               <Download className="h-5 w-5 text-primary" />
             </Flex>
             <div className="mt-2 text-xs text-stone-500">
-              <div>Avg. Processing Time: {reportStats.avgProcessingTime} days</div>
-              <div>Success Metrics: {reportStats.successRate > 0 ? 'Available' : 'None'}</div>
+              <div>{t('reportGenerationSystem.avgProcessingTime', { days: reportStats.avgProcessingTime })}</div>
+              <div>{t('reportGenerationSystem.successMetrics', { status: reportStats.successRate > 0 ? t('reportGenerationSystem.available') : t('reportGenerationSystem.none') })}</div>
             </div>
           </div>
         </div>
 
         {/* Custom Report Builder */}
         <div className="md:col-span-3 p-6 border border-stone-200 rounded-lg">
-          <Title>Custom Report Builder</Title>
+          <Title>{t('reportGenerationSystem.customReportBuilder')}</Title>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
             {/* Metrics Selection */}
             <div>
-              <Text className="font-medium mb-3">Select Metrics</Text>
+              <Text className="font-medium mb-3">{t('reportGenerationSystem.selectMetrics')}</Text>
               <div className="space-y-2">
                 {[
-                  ['case_volume', 'Case Volume'],
-                  ['success_rates', 'Success Rates'],
-                  ['geographic', 'Geographical Distribution'],
-                  ['timeline', 'Timeline Analysis'],
-                  ['stakeholders', 'Stakeholder Analysis'],
-                  ['legal_framework', 'Legal Framework'],
+                  ['case_volume', t('reportGenerationSystem.metricCaseVolume')],
+                  ['success_rates', t('reportGenerationSystem.metricSuccessRates')],
+                  ['geographic', t('reportGenerationSystem.metricGeographic')],
+                  ['timeline', t('reportGenerationSystem.metricTimeline')],
+                  ['stakeholders', t('reportGenerationSystem.metricStakeholders')],
+                  ['legal_framework', t('reportGenerationSystem.metricLegalFramework')],
                 ].map(([value, label]) => (
                   <label key={value} className="flex items-center space-x-2">
                     <input
@@ -452,11 +454,11 @@ const ReportGenerationSystem: React.FC = () => {
 
             {/* Export Format + Date Range */}
             <div>
-              <Text className="font-medium mb-3">Export Format</Text>
+              <Text className="font-medium mb-3">{t('reportGenerationSystem.exportFormat')}</Text>
               <div className="space-y-2">
                 {[
-                  ['pdf', 'PDF Report'],
-                  ['csv', 'CSV Data Export'],
+                  ['pdf', t('reportGenerationSystem.formatPdfReport')],
+                  ['csv', t('reportGenerationSystem.formatCsvExport')],
                 ].map(([value, label]) => (
                   <label key={value} className="flex items-center space-x-2">
                     <input
@@ -472,10 +474,10 @@ const ReportGenerationSystem: React.FC = () => {
                 ))}
               </div>
 
-              <Text className="font-medium mt-6 mb-3">Date Range</Text>
+              <Text className="font-medium mt-6 mb-3">{t('reportGenerationSystem.dateRange')}</Text>
               <div className="space-y-2">
                 <div>
-                  <Text className="text-sm text-stone-500">Start Date</Text>
+                  <Text className="text-sm text-stone-500">{t('reportGenerationSystem.startDate')}</Text>
                   <input
                     type="date"
                     value={dateRange[0]}
@@ -484,7 +486,7 @@ const ReportGenerationSystem: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Text className="text-sm text-stone-500">End Date</Text>
+                  <Text className="text-sm text-stone-500">{t('reportGenerationSystem.endDate')}</Text>
                   <input
                     type="date"
                     value={dateRange[1]}
@@ -497,27 +499,27 @@ const ReportGenerationSystem: React.FC = () => {
 
             {/* Visualization Options + Actions */}
             <div>
-              <Text className="font-medium mb-3">Visualization Options</Text>
+              <Text className="font-medium mb-3">{t('reportGenerationSystem.visualizationOptions')}</Text>
               <div className="space-y-2">
                 <label className="flex items-center space-x-2">
                   <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" defaultChecked />
                   <span className="text-sm flex items-center">
                     <BarChartHorizontal className="h-4 w-4 mr-1 text-stone-500" />
-                    Bar Charts
+                    {t('reportGenerationSystem.barCharts')}
                   </span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" defaultChecked />
                   <span className="text-sm flex items-center">
                     <PieChart className="h-4 w-4 mr-1 text-stone-500" />
-                    Pie Charts
+                    {t('reportGenerationSystem.pieCharts')}
                   </span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input type="checkbox" className="rounded border-stone-300 text-primary focus:ring-primary" defaultChecked />
                   <span className="text-sm flex items-center">
                     <FileText className="h-4 w-4 mr-1 text-stone-500" />
-                    Data Tables
+                    {t('reportGenerationSystem.dataTables')}
                   </span>
                 </label>
               </div>
@@ -531,12 +533,12 @@ const ReportGenerationSystem: React.FC = () => {
                   {loading ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Generating...
+                      {t('reportGenerationSystem.generating')}
                     </>
                   ) : (
                     <>
                       <Download className="h-4 w-4 mr-2" />
-                      Generate Report
+                      {t('reportGenerationSystem.generateReport')}
                     </>
                   )}
                 </button>
