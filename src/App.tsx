@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
@@ -46,21 +47,25 @@ interface Profile {
 // A thin animated bar across the very top of the viewport — a distinct,
 // app-wide "something is loading" signal, separate from the in-panel
 // spinners/skeletons used for individual data fetches.
-const TabFallback = () => (
-  <div className="fixed top-0 left-0 right-0 z-50 h-1 overflow-hidden bg-primary/15" role="status" aria-label="Loading">
+const TabFallback = () => {
+  const { t } = useTranslation('translation');
+  return (
+  <div className="fixed top-0 left-0 right-0 z-50 h-1 overflow-hidden bg-primary/15" role="status" aria-label={t('common.loading')}>
     <motion.div
       className="h-full w-1/3 rounded-full bg-primary"
       animate={{ x: ['-100%', '300%'] }}
       transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
     />
   </div>
-);
+  );
+};
 
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
 };
 
 function DashboardApp() {
+  const { t } = useTranslation('misc');
   const [session, setSession] = React.useState(null);
   // Which panel the (unauthenticated) single-viewport landing page is
   // showing — driven by the top Navbar's landing links, not the URL, since
@@ -416,7 +421,7 @@ function DashboardApp() {
               case 'submit-case':
                 return (
                   <div className="max-w-3xl mx-auto px-4">
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">Submit Case for Review</h2>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('app.submitCaseForReview')}</h2>
                     <SubmissionForm 
                       type="case"
                       onSuccess={() => setActiveTab('cases')}
@@ -428,7 +433,7 @@ function DashboardApp() {
               case 'submit-judgment':
                 return (
                   <div className="max-w-3xl mx-auto px-4">
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">Submit Judgment for Review</h2>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('app.submitJudgmentForReview')}</h2>
                     <SubmissionForm 
                       type="judgment"
                       onSuccess={() => setActiveTab('judgments')}
@@ -463,20 +468,20 @@ function DashboardApp() {
                   <div className="space-y-6 px-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                       <div>
-                        <h2 className="text-2xl font-semibold text-gray-900">Upload Case</h2>
+                        <h2 className="text-2xl font-semibold text-gray-900">{t('app.uploadCase')}</h2>
                       </div>
                       <button
                         onClick={() => setShowCaseForm(true)}
                         className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                       >
-                        Add New Case
+                        {t('app.addNewCase')}
                       </button>
                     </div>
 
                     {showCaseForm && (
                       <div className="bg-white p-6 rounded-lg shadow-md">
                         <h3 className="text-xl font-semibold mb-6">
-                          Add New Case
+                          {t('app.addNewCase')}
                         </h3>
                         <SubmissionForm
                           type="case"
@@ -527,26 +532,26 @@ function DashboardApp() {
             <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative" role="alert">
               <div className="flex items-center">
                 <div className="flex-1">
-                  <strong className="font-bold">Connection Error: </strong>
-                  <span className="block sm:inline">Unable to connect to the database. Please check your internet connection.</span>
+                  <strong className="font-bold">{t('app.connectionError')} </strong>
+                  <span className="block sm:inline">{t('app.connectionErrorDescription')}</span>
                 </div>
                 <button
                   onClick={checkConnection}
                   className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-danger hover:bg-danger-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Retry Connection
+                  {t('app.retryConnection')}
                 </button>
               </div>
               {retryCount > 0 && retryCount < maxRetries && (
                 <p className="mt-2 text-sm">
-                  Retrying connection... Attempt {retryCount} of {maxRetries}
+                  {t('app.retryingConnection', { count: retryCount, max: maxRetries })}
                 </p>
               )}
             </div>
           ) : error ? (
             <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative" role="alert">
-              <strong className="font-bold">Error: </strong>
+              <strong className="font-bold">{t('app.error')} </strong>
               <span className="block sm:inline">{error}</span>
             </div>
           ) : (

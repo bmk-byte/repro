@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -12,6 +13,7 @@ interface UpdateCaseModalProps {
 }
 
 const UpdateCaseModal: React.FC<UpdateCaseModalProps> = ({ isOpen, onClose, caseData, onUpdate }) => {
+  const { t } = useTranslation('moderation');
   const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState({
     status: caseData.status || '',
@@ -40,7 +42,7 @@ const UpdateCaseModal: React.FC<UpdateCaseModalProps> = ({ isOpen, onClose, case
 
       if (error) throw error;
 
-      toast.success('Case updated successfully');
+      toast.success(t('updateCaseModal.updateSuccess'));
       onUpdate();
       onClose();
     } catch (error: any) {
@@ -63,44 +65,44 @@ const UpdateCaseModal: React.FC<UpdateCaseModalProps> = ({ isOpen, onClose, case
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Update Case Status"
+      title={t('updateCaseModal.title')}
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+            {t('updateCaseModal.cancel')}
           </Button>
           <Button type="submit" form="update-case-form" loading={loading}>
-            {loading ? 'Updating…' : 'Update Case'}
+            {loading ? t('updateCaseModal.updating') : t('updateCaseModal.updateCase')}
           </Button>
         </>
       }
     >
       <form id="update-case-form" onSubmit={handleSubmit} className="space-y-6">
         <Select
-          label="Status"
+          label={t('updateCaseModal.status')}
           name="status"
           value={formData.status}
           onChange={handleChange}
         >
-          <option value="">Select status</option>
-          <option value="pending">Pending</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="on_hold">On Hold</option>
+          <option value="">{t('updateCaseModal.selectStatus')}</option>
+          <option value="pending">{t('updateCaseModal.statusPending')}</option>
+          <option value="in_progress">{t('updateCaseModal.statusInProgress')}</option>
+          <option value="completed">{t('updateCaseModal.statusCompleted')}</option>
+          <option value="on_hold">{t('updateCaseModal.statusOnHold')}</option>
         </Select>
 
         <div>
           <span className="block text-sm font-medium text-stone-700 mb-2">
-            Client Satisfaction Score
+            {t('updateCaseModal.clientSatisfactionScore')}
           </span>
-          <div role="radiogroup" aria-label="Client satisfaction score" className="flex items-center gap-2">
+          <div role="radiogroup" aria-label={t('updateCaseModal.satisfactionAriaLabel')} className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((score) => (
               <button
                 key={score}
                 type="button"
                 role="radio"
                 aria-checked={formData.client_satisfaction === score}
-                aria-label={`${score} out of 5 stars`}
+                aria-label={t('updateCaseModal.starAriaLabel', { score })}
                 onClick={() => handleSatisfactionClick(score)}
                 className={`p-2 rounded-full transition-colors ${
                   formData.client_satisfaction >= score
@@ -115,16 +117,16 @@ const UpdateCaseModal: React.FC<UpdateCaseModalProps> = ({ isOpen, onClose, case
         </div>
 
         <Textarea
-          label="Satisfaction Notes"
+          label={t('updateCaseModal.satisfactionNotes')}
           name="satisfaction_notes"
           rows={2}
           value={formData.satisfaction_notes}
           onChange={handleChange}
-          placeholder="Add any feedback or notes about the client's satisfaction"
+          placeholder={t('updateCaseModal.satisfactionNotesPlaceholder')}
         />
 
         <Textarea
-          label="Next Steps"
+          label={t('updateCaseModal.nextSteps')}
           name="next_steps"
           rows={3}
           value={formData.next_steps}
@@ -132,7 +134,7 @@ const UpdateCaseModal: React.FC<UpdateCaseModalProps> = ({ isOpen, onClose, case
         />
 
         <Textarea
-          label="Additional Comments"
+          label={t('updateCaseModal.additionalComments')}
           name="comments"
           rows={3}
           value={formData.comments}

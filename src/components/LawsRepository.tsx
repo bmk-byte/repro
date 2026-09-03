@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Download, Eye, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -456,6 +457,7 @@ const PREDEFINED_DOCUMENTS: Record<string, LawDoc[] | { acts: LawDoc[]; policies
 };
 
 const LawsRepository = () => {
+  const { t } = useTranslation();
   const [uploadedDocuments, setUploadedDocuments] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -483,7 +485,7 @@ const LawsRepository = () => {
       setUploadedDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      toast.error('Failed to load documents');
+      toast.error(t('laws.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -543,10 +545,10 @@ const LawsRepository = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-stone-900">Legal Documents</h2>
+        <h2 className="text-2xl font-semibold text-stone-900">{t('laws.title')}</h2>
         {isModerator && (
           <Button onClick={() => setShowUploadModal(true)} icon={<Plus className="h-4 w-4" />}>
-            Upload Document
+            {t('laws.uploadDocument')}
           </Button>
         )}
       </div>
@@ -559,7 +561,7 @@ const LawsRepository = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
               <input
                 type="text"
-                placeholder="Search documents..."
+                placeholder={t('laws.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
@@ -570,7 +572,7 @@ const LawsRepository = () => {
               onChange={(e) => setSelectedCountry(e.target.value)}
               className="px-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
-              <option value="">All Countries</option>
+              <option value="">{t('common.allCountries')}</option>
               {Object.keys(documentsByCountry).map(country => (
                 <option key={country} value={country}>{country}</option>
               ))}
@@ -580,9 +582,9 @@ const LawsRepository = () => {
               onChange={(e) => setSelectedType(e.target.value as 'policy' | 'act' | '')}
               className="px-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
-              <option value="">All Types</option>
-              <option value="policy">Policies</option>
-              <option value="act">Acts</option>
+              <option value="">{t('common.allTypes')}</option>
+              <option value="policy">{t('laws.policies')}</option>
+              <option value="act">{t('laws.acts')}</option>
             </select>
           </div>
         </div>
@@ -598,8 +600,8 @@ const LawsRepository = () => {
           ) : visibleCountries.length === 0 ? (
             <EmptyState
               icon={<Search className="h-8 w-8" />}
-              title="No documents found"
-              description="Try a different search term, country, or type filter."
+              title={t('laws.noDocumentsFound')}
+              description={t('laws.noDocumentsDescription')}
             />
           ) : (
             visibleCountries.map(({ country, filteredDocs }) => (
@@ -612,7 +614,7 @@ const LawsRepository = () => {
                         <div className="flex items-start justify-between">
                           <div>
                             <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-stone-100 text-stone-800 mb-2">
-                              {doc.type === 'act' ? 'Act' : 'Policy'}
+                              {doc.type === 'act' ? t('laws.act') : t('laws.policy')}
                             </span>
                             <h4 className="text-md font-medium text-stone-900 mb-2">{doc.title}</h4>
                             <p className="text-sm text-stone-500 mb-4">{doc.category}</p>
@@ -624,14 +626,14 @@ const LawsRepository = () => {
                             className="flex items-center space-x-1 text-sm text-primary hover:text-primary-dark"
                           >
                             <Eye className="h-4 w-4" />
-                            <span>View</span>
+                            <span>{t('laws.view')}</span>
                           </button>
                           <button
                             onClick={() => handleDownload(doc.url, doc.title)}
                             className="flex items-center space-x-1 text-sm text-stone-600 hover:text-stone-900"
                           >
                             <Download className="h-4 w-4" />
-                            <span>Download</span>
+                            <span>{t('laws.download')}</span>
                           </button>
                         </div>
                       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XCircle, Trash2 } from 'lucide-react';
 import { Modal, Button, Textarea } from './ui';
 
@@ -17,18 +18,10 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
   onReject,
   loading = false
 }) => {
+  const { t } = useTranslation('moderation');
   const [rejectionFeedback, setRejectionFeedback] = useState('');
 
-  const quickReasons = [
-    "Missing required information in the submission",
-    "Document quality is poor or unreadable",
-    "Insufficient detail in case summary",
-    "Incorrect formatting or structure",
-    "Missing supporting documentation",
-    "Information appears to be incomplete or inaccurate",
-    "Does not meet submission guidelines",
-    "Duplicate submission already exists"
-  ];
+  const quickReasons = t('rejectionModal.quickReasons', { returnObjects: true }) as string[];
 
   const handleQuickReasonClick = (reason: string) => {
     if (rejectionFeedback.trim()) {
@@ -64,12 +57,12 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Rejection Feedback"
+      title={t('rejectionModal.title')}
       size="lg"
       footer={
         <>
           <Button variant="outline" onClick={handleClose} disabled={loading}>
-            Cancel
+            {t('rejectionModal.cancel')}
           </Button>
           <Button
             variant="danger"
@@ -78,10 +71,10 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
             loading={loading}
           >
             {loading
-              ? 'Processing…'
+              ? t('rejectionModal.processing')
               : feedbackLength < 10
-                ? 'Provide feedback to reject'
-                : 'Reject Submission'
+                ? t('rejectionModal.provideFeedback')
+                : t('rejectionModal.rejectSubmission')
             }
           </Button>
         </>
@@ -91,14 +84,14 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
         <div className="flex-shrink-0 w-8 h-8 bg-danger-light rounded-full flex items-center justify-center">
           <XCircle className="h-5 w-5 text-danger" aria-hidden="true" />
         </div>
-        <p className="text-sm text-stone-500">Help the submitter understand what needs to be improved</p>
+        <p className="text-sm text-stone-500">{t('rejectionModal.helpText')}</p>
       </div>
 
       {/* Quick Reasons Section */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <span className="block text-sm font-medium text-stone-700">
-            Quick Reasons (click to add)
+            {t('rejectionModal.quickReasonsLabel')}
           </span>
           {rejectionFeedback && (
             <button
@@ -106,7 +99,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
               className="flex items-center gap-1 text-xs text-stone-500 hover:text-danger transition-colors"
             >
               <Trash2 className="h-3 w-3" />
-              <span>Clear</span>
+              <span>{t('rejectionModal.clear')}</span>
             </button>
           )}
         </div>
@@ -126,38 +119,34 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
 
       <div className="mb-4">
         <Textarea
-          label="Detailed feedback"
+          label={t('rejectionModal.detailedFeedbackLabel')}
           id="rejection-feedback"
           required
           rows={5}
           value={rejectionFeedback}
           onChange={(e) => setRejectionFeedback(e.target.value)}
-          placeholder="• Be specific about what's missing or incorrect
-• Suggest concrete steps for improvement
-• Reference specific sections that need attention
-• Maintain a constructive and professional tone"
+          placeholder={t('rejectionModal.placeholder')}
           autoFocus
-          error={feedbackLength < 10 ? `${10 - feedbackLength} more characters needed (minimum 10)` : undefined}
+          error={feedbackLength < 10 ? t('rejectionModal.charactersNeeded', { count: 10 - feedbackLength }) : undefined}
           helperText={
             feedbackLength >= 10
               ? feedbackLength < 20
-                ? 'Good length — consider adding more detail'
-                : 'Excellent — detailed feedback provided'
+                ? t('rejectionModal.goodLength')
+                : t('rejectionModal.excellentFeedback')
               : undefined
           }
         />
         <div className="mt-1 text-right text-xs text-stone-500 font-mono tabular-nums">
-          {rejectionFeedback.length} characters
+          {t('rejectionModal.charactersCount', { count: rejectionFeedback.length })}
         </div>
       </div>
 
       <div className="p-3 bg-info-light border border-info/20 rounded-md">
-        <h4 className="text-sm font-medium text-info-dark mb-2">Tips for helpful feedback</h4>
+        <h4 className="text-sm font-medium text-info-dark mb-2">{t('rejectionModal.tipsTitle')}</h4>
         <ul className="text-xs text-info-dark/90 space-y-1">
-          <li>• Be specific about what's missing or incorrect</li>
-          <li>• Suggest concrete steps for improvement</li>
-          <li>• Reference specific sections that need attention</li>
-          <li>• Maintain a constructive and professional tone</li>
+          {(t('rejectionModal.tips', { returnObjects: true }) as string[]).map((tip, idx) => (
+            <li key={idx}>• {tip}</li>
+          ))}
         </ul>
       </div>
     </Modal>

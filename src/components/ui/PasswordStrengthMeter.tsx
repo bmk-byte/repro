@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { PasswordRequirement } from '../../hooks/usePasswordStrength';
@@ -14,18 +15,16 @@ const strengthColor = (strength: number) => {
   return 'bg-success';
 };
 
-const strengthLabel = (strength: number) => {
-  if (strength < 40) return 'Weak';
-  if (strength < 70) return 'Medium';
-  return 'Strong';
-};
-
 /** Shared password-strength meter + requirement checklist, used by signup, password reset, and change-password. */
-export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ strength, requirements }) => (
+export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ strength, requirements }) => {
+  const { t } = useTranslation();
+  const strengthLabel =
+    strength < 40 ? t('auth.passwordStrengthWeak') : strength < 70 ? t('auth.passwordStrengthMedium') : t('auth.passwordStrengthStrong');
+  return (
   <div className="mt-2">
     <div className="flex justify-between items-center mb-1">
-      <span className="text-xs font-medium text-stone-700">Password strength</span>
-      <span className="text-xs font-medium">{strengthLabel(strength)}</span>
+      <span className="text-xs font-medium text-stone-700">{t('auth.passwordStrength')}</span>
+      <span className="text-xs font-medium">{strengthLabel}</span>
     </div>
     <div className="w-full bg-stone-200 rounded-full h-2.5">
       <motion.div
@@ -49,4 +48,5 @@ export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ st
       ))}
     </div>
   </div>
-);
+  );
+};

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 
 interface MultiStepFormProgressProps {
@@ -12,13 +13,20 @@ const MultiStepFormProgress: React.FC<MultiStepFormProgressProps> = ({
   currentStep,
   onStepClick,
 }) => {
+  const { t } = useTranslation('forms');
+
   return (
-    <nav aria-label="Form progress" className="w-full py-4">
+    <nav aria-label={t('multiStepFormProgress.ariaFormProgress')} className="w-full py-4">
       <ol className="flex items-center justify-between">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
           const isClickable = !!onStepClick && index < currentStep;
+          const status = isCompleted
+            ? t('multiStepFormProgress.completedSuffix')
+            : isCurrent
+              ? t('multiStepFormProgress.currentSuffix')
+              : '';
 
           return (
             <li key={step} className="flex items-center flex-1 last:flex-none">
@@ -27,7 +35,7 @@ const MultiStepFormProgress: React.FC<MultiStepFormProgressProps> = ({
                 onClick={() => isClickable && onStepClick(index)}
                 disabled={!isClickable}
                 aria-current={isCurrent ? 'step' : undefined}
-                aria-label={`Step ${index + 1}: ${step}${isCompleted ? ' (completed)' : isCurrent ? ' (current)' : ''}`}
+                aria-label={t('multiStepFormProgress.stepAriaLabel', { number: index + 1, step, status })}
                 className={[
                   'relative flex items-center justify-center w-8 h-8 rounded-full border-2 flex-none transition-colors',
                   isCompleted

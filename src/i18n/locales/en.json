@@ -11,6 +11,7 @@
     "english": "English",
     "french": "French",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "save": "Save",
     "saving": "Saving…",
     "loading": "Loading…",
@@ -65,7 +66,8 @@
     "failedToLoadFilterOptions": "Failed to load filter options",
     "viewDetails": "View Details",
     "unknownLocation": "Unknown Location",
-    "rapidResponseBadgeLabel": "Rapid Response"
+    "rapidResponseBadgeLabel": "Rapid Response",
+    "somethingWentWrong": "Something went wrong"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -178,7 +180,16 @@
     "rateLimitedLogin": "Too many sign-in attempts. Please try again in a few minutes.",
     "invalidCredentials": "The email or password you entered is incorrect",
     "emailRegisteredListed": "This email is registered for \"{{org}}\". Please select that organization from the dropdown, or choose \"Other\" to enter a different one.",
-    "emailRegisteredOther": "This email is registered for \"{{org}}\". Please choose \"Other\" in the dropdown and enter \"{{org}}\" as your organization."
+    "emailRegisteredOther": "This email is registered for \"{{org}}\". Please choose \"Other\" in the dropdown and enter \"{{org}}\" as your organization.",
+    "passwordStrength": "Password strength",
+    "passwordStrengthWeak": "Weak",
+    "passwordStrengthMedium": "Medium",
+    "passwordStrengthStrong": "Strong",
+    "passwordReqLength": "At least 8 characters",
+    "passwordReqUppercase": "At least 1 uppercase letter",
+    "passwordReqLowercase": "At least 1 lowercase letter",
+    "passwordReqNumber": "At least 1 number",
+    "passwordReqSpecial": "At least 1 special character (!@#$%^&*)"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -280,6 +291,46 @@
     "fullJudgment": "Full Judgment",
     "viewDocument": "View Document",
     "noDocumentAvailable": "No document available"
+  },
+  "laws": {
+    "title": "Legal Documents",
+    "uploadDocument": "Upload Document",
+    "searchPlaceholder": "Search documents...",
+    "policies": "Policies",
+    "acts": "Acts",
+    "act": "Act",
+    "policy": "Policy",
+    "noDocumentsFound": "No documents found",
+    "noDocumentsDescription": "Try a different search term, country, or type filter.",
+    "view": "View",
+    "download": "Download",
+    "failedToLoad": "Failed to load documents"
+  },
+  "resources": {
+    "title": "Resources",
+    "subtitle": "Access templates, guides, and research materials for reproductive justice advocacy",
+    "uploadResource": "Upload Resource",
+    "typeAll": "All Resources",
+    "typeTemplate": "Templates",
+    "typeGuide": "Guides",
+    "typeAnalysis": "Analysis",
+    "typeResearch": "Research",
+    "resourceType": "Resource type",
+    "searchLabel": "Search resources by title, description, or tags",
+    "searchPlaceholder": "Search resources by title, description, or tags...",
+    "loading": "Loading resources…",
+    "failedToLoad": "Failed to load resources. Please try again later.",
+    "failedToLoadTitle": "Failed to load resources",
+    "noResourcesFound": "No resources found",
+    "adjustSearchOrFilters": "Try adjusting your search or filters",
+    "noResourcesUploaded": "No resources have been uploaded yet",
+    "uploadFirstResource": "Upload First Resource",
+    "downloadsCount": "{{count}} downloads",
+    "added": "Added {{date}}",
+    "download": "Download",
+    "downloading": "Downloading {{title}}",
+    "failedToDownload": "Failed to download file",
+    "newResourceAdded": "New resource has been added"
   },
   "footer": {
     "copyright": "© 2025 LIRA Programme, Afya na Haki",

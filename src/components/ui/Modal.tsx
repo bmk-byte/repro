@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -25,6 +26,7 @@ const sizeClasses = {
  * ad-hoc modal in this app, so it's a drop-in replacement.
  */
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
@@ -88,7 +90,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
           </h2>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('common.close')}
             className="rounded-md p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
           >
             <X className="h-5 w-5" />

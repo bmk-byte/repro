@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ShieldOff, UserPlus, ScrollText } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
@@ -40,6 +41,7 @@ const ACTION_TONE: Record<string, 'success' | 'info' | 'danger' | 'neutral'> = {
  * action is resolved with a second query and merged client-side.
  */
 export const AuditLogPanel: React.FC = () => {
+  const { t } = useTranslation('moderation');
   const [entries, setEntries] = React.useState<AuditLogEntry[]>([]);
   const [performerNames, setPerformerNames] = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(true);
@@ -88,19 +90,19 @@ export const AuditLogPanel: React.FC = () => {
   return (
     <Card padding="none">
       <div className="px-6 py-4 border-b border-stone-100">
-        <h3 className="text-sm font-medium text-stone-700">Recent activity</h3>
-        <p className="mt-0.5 text-xs text-stone-500">The last 100 moderator/admin actions recorded by the system.</p>
+        <h3 className="text-sm font-medium text-stone-700">{t('moderatorAdminPanel.auditLog.heading')}</h3>
+        <p className="mt-0.5 text-xs text-stone-500">{t('moderatorAdminPanel.auditLog.subheading')}</p>
       </div>
 
       {loading ? (
-        <LoadingState label="Loading audit log…" />
+        <LoadingState label={t('moderatorAdminPanel.auditLog.loading')} />
       ) : error ? (
         <div className="p-6 text-sm text-danger">{error}</div>
       ) : entries.length === 0 ? (
         <EmptyState
           icon={<ScrollText className="h-8 w-8" />}
-          title="No activity recorded yet"
-          description="Moderator and admin actions will appear here as they happen."
+          title={t('moderatorAdminPanel.auditLog.emptyTitle')}
+          description={t('moderatorAdminPanel.auditLog.emptyDescription')}
         />
       ) : (
         <ul className="divide-y divide-stone-100 max-h-[28rem] overflow-y-auto">
@@ -117,8 +119,8 @@ export const AuditLogPanel: React.FC = () => {
               </div>
               <p className="mt-1 text-xs text-stone-500">
                 {entry.performed_by
-                  ? performerNames[entry.performed_by] || 'Unknown user'
-                  : 'System'}
+                  ? performerNames[entry.performed_by] || t('moderatorAdminPanel.auditLog.unknownUser')
+                  : t('moderatorAdminPanel.auditLog.system')}
                 {entry.changes && Object.keys(entry.changes).length > 0 && (
                   <span className="ml-1">
                     · {Object.entries(entry.changes).slice(0, 3).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join(', ')}
@@ -141,6 +143,7 @@ export const AuditLogPanel: React.FC = () => {
  * path is rejected by the database regardless.
  */
 const ModeratorAdminPanel: React.FC = () => {
+  const { t } = useTranslation('moderation');
   const [moderators, setModerators] = React.useState<Moderator[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [newEmail, setNewEmail] = React.useState('');
@@ -169,7 +172,7 @@ const ModeratorAdminPanel: React.FC = () => {
     e.preventDefault();
     const email = sanitizeEmail(newEmail);
     if (!email) {
-      toast.error('Enter a valid email address.');
+      toast.error(t('moderatorAdminPanel.enterValidEmail'));
       return;
     }
     setPendingGrantEmail(email);
@@ -183,7 +186,7 @@ const ModeratorAdminPanel: React.FC = () => {
         should_grant: true,
       });
       if (error) throw error;
-      toast.success(`Granted moderator access to ${email}.`);
+      toast.success(t('moderatorAdminPanel.grantedAccessSuccess', { email }));
       sendEmail({
         to: email,
         subject: "You've been granted moderator access on ReproPulse",
@@ -210,7 +213,7 @@ const ModeratorAdminPanel: React.FC = () => {
         should_grant: false,
       });
       if (error) throw error;
-      toast.success(`Removed moderator access for ${moderator.email}.`);
+      toast.success(t('moderatorAdminPanel.revokedAccessSuccess', { email: moderator.email }));
       sendEmail({
         to: moderator.email,
         subject: 'Your moderator access on ReproPulse has been revoked',
@@ -231,9 +234,9 @@ const ModeratorAdminPanel: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-stone-900">Moderators</h2>
+        <h2 className="text-2xl font-semibold text-stone-900">{t('moderatorAdminPanel.heading')}</h2>
         <p className="mt-1 text-sm text-stone-600">
-          Grant or revoke moderator access. Changes are recorded in the audit log.
+          {t('moderatorAdminPanel.subheading')}
         </p>
       </div>
 
@@ -241,17 +244,17 @@ const ModeratorAdminPanel: React.FC = () => {
         <form onSubmit={handleGrantSubmit} className="flex gap-3 items-end flex-wrap">
           <div className="flex-1 min-w-[220px]">
             <Input
-              label="Grant access by email"
+              label={t('moderatorAdminPanel.grantAccessByEmail')}
               id="new-moderator-email"
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="person@organization.org"
+              placeholder={t('moderatorAdminPanel.emailPlaceholder')}
               required
             />
           </div>
           <Button type="submit" disabled={submitting} icon={<UserPlus className="h-4 w-4" />}>
-            Grant
+            {t('moderatorAdminPanel.grant')}
           </Button>
         </form>
       </Card>
@@ -259,13 +262,13 @@ const ModeratorAdminPanel: React.FC = () => {
       <Card padding="none">
         <div className="px-6 py-4 border-b border-stone-100">
           <h3 className="text-sm font-medium text-stone-700">
-            Current moderators {!loading && `(${moderators.length})`}
+            {t('moderatorAdminPanel.currentModeratorsCount', { count: loading ? 0 : moderators.length })}
           </h3>
         </div>
         {loading ? (
-          <div className="p-6 text-sm text-stone-500">Loading…</div>
+          <div className="p-6 text-sm text-stone-500">{t('moderatorAdminPanel.loading')}</div>
         ) : moderators.length === 0 ? (
-          <div className="p-6 text-sm text-stone-500">No moderators found.</div>
+          <div className="p-6 text-sm text-stone-500">{t('moderatorAdminPanel.noModeratorsFound')}</div>
         ) : (
           <ul className="divide-y divide-stone-100">
             {moderators.map((mod) => (
@@ -284,7 +287,7 @@ const ModeratorAdminPanel: React.FC = () => {
                   icon={<ShieldOff className="h-3.5 w-3.5" />}
                   className="!border-danger/30 !text-danger hover:!bg-danger-light"
                 >
-                  Revoke
+                  {t('moderatorAdminPanel.revoke')}
                 </Button>
               </li>
             ))}
@@ -298,9 +301,9 @@ const ModeratorAdminPanel: React.FC = () => {
         isOpen={!!pendingGrantEmail}
         onClose={() => setPendingGrantEmail(null)}
         onConfirm={() => pendingGrantEmail && doGrant(pendingGrantEmail)}
-        title="Grant moderator access?"
-        description={`${pendingGrantEmail} will be able to approve and publish submissions, and manage other moderators. Double-check the email address before continuing.`}
-        confirmLabel="Grant access"
+        title={t('moderatorAdminPanel.grantConfirmTitle')}
+        description={t('moderatorAdminPanel.grantConfirmDescription', { email: pendingGrantEmail })}
+        confirmLabel={t('moderatorAdminPanel.grantConfirmLabel')}
         loading={submitting}
       />
 
@@ -308,9 +311,9 @@ const ModeratorAdminPanel: React.FC = () => {
         isOpen={!!pendingRevoke}
         onClose={() => setPendingRevoke(null)}
         onConfirm={() => pendingRevoke && doRevoke(pendingRevoke)}
-        title="Revoke moderator access?"
-        description={`${pendingRevoke?.email} will no longer be able to approve, reject, or publish submissions.`}
-        confirmLabel="Revoke access"
+        title={t('moderatorAdminPanel.revokeConfirmTitle')}
+        description={t('moderatorAdminPanel.revokeConfirmDescription', { email: pendingRevoke?.email })}
+        confirmLabel={t('moderatorAdminPanel.revokeConfirmLabel')}
         confirmVariant="danger"
         loading={submitting}
       />

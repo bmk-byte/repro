@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../../lib/supabase';
@@ -49,6 +50,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
   onCancel,
   isDirectUpload = false
 }) => {
+  const { t } = useTranslation('forms');
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -109,7 +111,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     if (draft) {
       setFormData(draft.formData);
       setCurrentStep(draft.currentStep ?? 0);
-      toast.success('Restored your previous draft. You can continue where you left off.', {
+      toast.success(t('submitJudgmentForm.toasts.draftRestored'), {
         duration: 6000,
         onClick: () => toast.dismiss(),
       });
@@ -128,12 +130,12 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
   // Form steps
   const steps = [
-    'Basic Info',
-    'Judgment Details',
-    'Parties',
-    'Legal Framework',
-    'Categories',
-    'Document'
+    t('submitJudgmentForm.steps.basicInfo'),
+    t('submitJudgmentForm.steps.judgmentDetails'),
+    t('submitJudgmentForm.steps.parties'),
+    t('submitJudgmentForm.steps.legalFramework'),
+    t('submitJudgmentForm.steps.categories'),
+    t('submitJudgmentForm.steps.document')
   ];
 
   useEffect(() => {
@@ -149,7 +151,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       const exists = await verifyTableExists('pending_judgments');
       if (!exists) {
         console.error('pending_judgments table does not exist or is not accessible');
-        toast.error('Database configuration issue detected. Please contact support.');
+        toast.error(t('submitJudgmentForm.toasts.dbConfigIssue'));
       } else {
         devLog('pending_judgments table verified successfully');
       }
@@ -183,10 +185,10 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         const reason = rejections[0].errors[0];
         setFileError(
           reason?.code === 'file-too-large'
-            ? 'That file is larger than 10MB. Please choose a smaller PDF.'
+            ? t('common.fileTooLarge')
             : reason?.code === 'file-invalid-type'
-              ? 'Only PDF files are accepted.'
-              : reason?.message || 'That file could not be accepted.'
+              ? t('common.fileInvalidType')
+              : reason?.message || t('common.fileRejectedGeneric')
         );
         return;
       }
@@ -327,31 +329,31 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
     switch (step) {
       case 0: // Basic Info
         return [
-          !formData.title && 'Title',
-          !formData.summary && 'Summary',
-          !formData.country_id && 'Country',
+          !formData.title && t('submitJudgmentForm.fields.title'),
+          !formData.summary && t('submitJudgmentForm.fields.summary'),
+          !formData.country_id && t('submitJudgmentForm.fields.country'),
         ].filter((v): v is string => !!v);
       case 1: // Judgment Details
         return [
-          !formData.citation && 'Citation',
-          !formData.court_judgment && 'Court',
-          !formData.judgment_date_judgment && 'Judgment Date',
+          !formData.citation && t('submitJudgmentForm.fields.citation'),
+          !formData.court_judgment && t('submitJudgmentForm.fields.court'),
+          !formData.judgment_date_judgment && t('submitJudgmentForm.fields.judgmentDate'),
         ].filter((v): v is string => !!v);
       case 2: // Parties
-        return [!formData.timeline_status && 'Timeline Status'].filter((v): v is string => !!v);
+        return [!formData.timeline_status && t('submitJudgmentForm.fields.timelineStatus')].filter((v): v is string => !!v);
       case 3: // Legal Framework
         return [
-          !formData.judicial_body_type && 'Judicial Body Type',
-          !formData.judicial_body && 'Judicial Body',
-          !formData.legal_framework_type && 'Legal Framework Type',
+          !formData.judicial_body_type && t('submitJudgmentForm.fields.judicialBodyType'),
+          !formData.judicial_body && t('submitJudgmentForm.fields.judicialBody'),
+          !formData.legal_framework_type && t('submitJudgmentForm.fields.legalFrameworkType'),
         ].filter((v): v is string => !!v);
       case 4: // Categories
         return [
-          !formData.case_impact && 'Case Impact',
-          formData.case_categories.length === 0 && 'at least one Category',
+          !formData.case_impact && t('submitJudgmentForm.fields.caseImpact'),
+          formData.case_categories.length === 0 && t('common.atLeastOne', { label: t('submitJudgmentForm.fields.category') }),
         ].filter((v): v is string => !!v);
       case 5: // Document
-        return [!file && 'a supporting Document'].filter((v): v is string => !!v);
+        return [!file && t('submitJudgmentForm.fields.document')].filter((v): v is string => !!v);
       default:
         return [];
     }
@@ -361,14 +363,14 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
   // Per-field inline error, shown once the field has been touched (blurred).
   const fieldError = (field: string, label: string, isEmpty: boolean): string | undefined =>
-    touched[field] && isEmpty ? `${label} is required` : undefined;
+    touched[field] && isEmpty ? t('common.fieldRequired', { label }) : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const missing = getMissingFields(currentStep);
     if (missing.length > 0) {
-      toast.error(`Please fill in: ${missing.join(', ')}`);
+      toast.error(t('common.pleaseFillIn', { fields: missing.join(', ') }));
       return;
     }
 
@@ -378,7 +380,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
-      if (!user) throw new Error('No authenticated user found');
+      if (!user) throw new Error(t('common.noAuthenticatedUser'));
 
       // Upload file if present
       let fileUrl = '';
@@ -443,7 +445,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
           if (insertError) throw insertError;
         });
 
-        toast.success('Judgment uploaded successfully');
+        toast.success(t('submitJudgmentForm.toasts.judgmentUploaded'));
         clearDraft();
         onSuccess?.();
       } else {
@@ -452,7 +454,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
           // First verify the table exists
           const tableExists = await verifyTableExists('pending_judgments');
           if (!tableExists) {
-            throw new Error('The pending_judgments table is not accessible. Please contact support.');
+            throw new Error(t('submitJudgmentForm.errors.tableNotAccessible'));
           }
 
           const { error: submissionError } = await supabase
@@ -496,8 +498,8 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         // Show success notification with more details
         toast.success(
           <div>
-            <p className="font-medium">Judgment submitted successfully!</p>
-            <p className="text-sm mt-1">Your judgment has been sent for review. You'll be notified when it's approved.</p>
+            <p className="font-medium">{t('submitJudgmentForm.toasts.judgmentSubmittedTitle')}</p>
+            <p className="text-sm mt-1">{t('submitJudgmentForm.toasts.judgmentSubmittedBody')}</p>
           </div>,
           { duration: 5000 }
         );
@@ -555,7 +557,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       const errorMessage = handleSupabaseError(error);
       toast.error(
         <div>
-          <p className="font-medium">Error submitting judgment:</p>
+          <p className="font-medium">{t('submitJudgmentForm.toasts.submitErrorTitle')}</p>
           <p className="text-sm mt-1">{errorMessage}</p>
         </div>,
         { duration: 5000 }
@@ -571,38 +573,38 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
         return (
           <div className="space-y-6">
             <Input
-              label="Judgment Title"
+              label={t('submitJudgmentForm.step0.titleLabel')}
               name="title"
               required
               value={formData.title}
               onChange={handleInputChange}
               onBlur={() => markTouched('title')}
-              error={fieldError('title', 'Judgment Title', !formData.title)}
-              placeholder="Enter a descriptive title for the judgment"
+              error={fieldError('title', t('submitJudgmentForm.step0.titleLabel'), !formData.title)}
+              placeholder={t('submitJudgmentForm.step0.titlePlaceholder')}
             />
 
             <Textarea
-              label="Judgment Summary"
+              label={t('submitJudgmentForm.step0.summaryLabel')}
               name="summary"
               required
               rows={4}
               value={formData.summary}
               onChange={handleInputChange}
               onBlur={() => markTouched('summary')}
-              error={fieldError('summary', 'Judgment Summary', !formData.summary)}
-              placeholder="Provide a brief summary of the judgment"
+              error={fieldError('summary', t('submitJudgmentForm.step0.summaryLabel'), !formData.summary)}
+              placeholder={t('submitJudgmentForm.step0.summaryPlaceholder')}
             />
 
             <Select
-              label="Country/Jurisdiction"
+              label={t('submitJudgmentForm.step0.countryLabel')}
               name="country_id"
               required
               value={formData.country_id}
               onChange={handleInputChange}
               onBlur={() => markTouched('country_id')}
-              error={fieldError('country_id', 'Country/Jurisdiction', !formData.country_id)}
+              error={fieldError('country_id', t('submitJudgmentForm.step0.countryLabel'), !formData.country_id)}
             >
-              <option value="">Select a country</option>
+              <option value="">{t('common.selectCountry')}</option>
               {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}

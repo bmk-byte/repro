@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Modal, Input, Textarea, Select, Button } from './ui';
@@ -16,6 +17,7 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
   caseData,
   onUpdate
 }) => {
+  const { t } = useTranslation('moderation');
   const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState({
     case_filed: caseData?.case_filed || '',
@@ -53,7 +55,7 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
 
       if (error) throw error;
 
-      toast.success('Case updated successfully');
+      toast.success(t('editCaseModal.updateSuccess'));
       onUpdate();
       onClose();
     } catch (error: any) {
@@ -72,22 +74,22 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Edit Case"
+      title={t('editCaseModal.title')}
       size="lg"
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+            {t('editCaseModal.cancel')}
           </Button>
           <Button type="submit" form="edit-case-form" loading={loading}>
-            {loading ? 'Saving…' : 'Save Changes'}
+            {loading ? t('editCaseModal.saving') : t('editCaseModal.saveChanges')}
           </Button>
         </>
       }
     >
       <form id="edit-case-form" onSubmit={handleSubmit} className="space-y-6">
         <Input
-          label="Case Title"
+          label={t('editCaseModal.caseTitle')}
           name="case_filed"
           value={formData.case_filed}
           onChange={handleChange}
@@ -95,7 +97,7 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
         />
 
         <Textarea
-          label="Case Summary"
+          label={t('editCaseModal.caseSummary')}
           name="case_summary"
           value={formData.case_summary}
           onChange={handleChange}
@@ -103,33 +105,33 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
         />
 
         <Select
-          label="Status"
+          label={t('editCaseModal.status')}
           name="status"
           value={formData.status}
           onChange={handleChange}
         >
-          <option value="pending">Pending</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="on_hold">On Hold</option>
+          <option value="pending">{t('editCaseModal.statusPending')}</option>
+          <option value="in_progress">{t('editCaseModal.statusInProgress')}</option>
+          <option value="completed">{t('editCaseModal.statusCompleted')}</option>
+          <option value="on_hold">{t('editCaseModal.statusOnHold')}</option>
         </Select>
 
         <Input
-          label="Court"
+          label={t('editCaseModal.court')}
           name="court"
           value={formData.court}
           onChange={handleChange}
         />
 
         <Input
-          label="Nature of Case"
+          label={t('editCaseModal.natureOfCase')}
           name="nature_of_case"
           value={formData.nature_of_case}
           onChange={handleChange}
         />
 
         <Textarea
-          label="Action Taken"
+          label={t('editCaseModal.actionTaken')}
           name="action_taken"
           value={formData.action_taken}
           onChange={handleChange}
@@ -137,7 +139,7 @@ const EditCaseModal: React.FC<EditCaseModalProps> = ({
         />
 
         <Textarea
-          label="Next Steps"
+          label={t('editCaseModal.nextSteps')}
           name="next_steps"
           value={formData.next_steps}
           onChange={handleChange}

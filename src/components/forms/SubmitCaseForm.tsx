@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase } from '../../lib/supabase';
@@ -45,6 +46,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
   onCancel,
   isDirectUpload = false
 }) => {
+  const { t } = useTranslation('forms');
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -105,7 +107,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
     if (draft) {
       setFormData(draft.formData);
       setCurrentStep(draft.currentStep ?? 0);
-      toast.success('Restored your previous draft. You can continue where you left off.', {
+      toast.success(t('submitCaseForm.toasts.draftRestored'), {
         duration: 6000,
         onClick: () => toast.dismiss(),
       });
@@ -124,12 +126,12 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
 
   // Form steps
   const steps = [
-    'Basic Info',
-    'Case Details',
-    'Parties',
-    'Legal Framework',
-    'Categories',
-    'Document'
+    t('submitCaseForm.steps.basicInfo'),
+    t('submitCaseForm.steps.caseDetails'),
+    t('submitCaseForm.steps.parties'),
+    t('submitCaseForm.steps.legalFramework'),
+    t('submitCaseForm.steps.categories'),
+    t('submitCaseForm.steps.document')
   ];
 
   useEffect(() => {
@@ -147,7 +149,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       setCountries(data || []);
     } catch (error) {
       console.error('Error fetching countries:', error);
-      toast.error('Failed to load countries');
+      toast.error(t('submitCaseForm.toasts.countriesLoadError'));
     }
   };
 
@@ -157,10 +159,10 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         const reason = rejections[0].errors[0];
         setFileError(
           reason?.code === 'file-too-large'
-            ? 'That file is larger than 10MB. Please choose a smaller PDF.'
+            ? t('common.fileTooLarge')
             : reason?.code === 'file-invalid-type'
-              ? 'Only PDF files are accepted.'
-              : reason?.message || 'That file could not be accepted.'
+              ? t('common.fileInvalidType')
+              : reason?.message || t('common.fileRejectedGeneric')
         );
         return;
       }
@@ -301,40 +303,40 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
     switch (step) {
       case 0: // Basic Info
         return [
-          !formData.title && 'Title',
-          !formData.summary && 'Summary',
-          !formData.country_id && 'Country',
+          !formData.title && t('submitCaseForm.fields.title'),
+          !formData.summary && t('submitCaseForm.fields.summary'),
+          !formData.country_id && t('submitCaseForm.fields.country'),
         ].filter((v): v is string => !!v);
       case 1: // Case Details
         return [
-          !formData.tracking_period && 'Tracking Period',
-          !formData.programme && 'Programme',
-          !formData.partner && 'Partner',
-          !formData.nature_of_case && 'Nature of Case',
-          !formData.action_taken && 'Action Taken',
-          !formData.action_timeframe && 'Action Timeframe',
-          !formData.next_steps && 'Next Steps',
-          !formData.court && 'Court',
+          !formData.tracking_period && t('submitCaseForm.fields.trackingPeriod'),
+          !formData.programme && t('submitCaseForm.fields.programme'),
+          !formData.partner && t('submitCaseForm.fields.partner'),
+          !formData.nature_of_case && t('submitCaseForm.fields.natureOfCase'),
+          !formData.action_taken && t('submitCaseForm.fields.actionTaken'),
+          !formData.action_timeframe && t('submitCaseForm.fields.actionTimeframe'),
+          !formData.next_steps && t('submitCaseForm.fields.nextSteps'),
+          !formData.court && t('submitCaseForm.fields.court'),
         ].filter((v): v is string => !!v);
       case 2: // Parties
         return [
-          !formData.timeline_status && 'Timeline Status',
-          formData.litigants.length === 0 && 'at least one Litigant',
-          formData.defending_institutions.length === 0 && 'at least one Defending Institution',
+          !formData.timeline_status && t('submitCaseForm.fields.timelineStatus'),
+          formData.litigants.length === 0 && t('common.atLeastOne', { label: t('submitCaseForm.fields.litigant') }),
+          formData.defending_institutions.length === 0 && t('common.atLeastOne', { label: t('submitCaseForm.fields.defendingInstitution') }),
         ].filter((v): v is string => !!v);
       case 3: // Legal Framework
         return [
-          !formData.judicial_body_type && 'Judicial Body Type',
-          !formData.judicial_body && 'Judicial Body',
-          !formData.legal_framework_type && 'Legal Framework Type',
+          !formData.judicial_body_type && t('submitCaseForm.fields.judicialBodyType'),
+          !formData.judicial_body && t('submitCaseForm.fields.judicialBody'),
+          !formData.legal_framework_type && t('submitCaseForm.fields.legalFrameworkType'),
         ].filter((v): v is string => !!v);
       case 4: // Categories
         return [
-          !formData.case_impact && 'Case Impact',
-          formData.case_categories.length === 0 && 'at least one Category',
+          !formData.case_impact && t('submitCaseForm.fields.caseImpact'),
+          formData.case_categories.length === 0 && t('common.atLeastOne', { label: t('submitCaseForm.fields.category') }),
         ].filter((v): v is string => !!v);
       case 5: // Document
-        return [!file && 'a supporting Document'].filter((v): v is string => !!v);
+        return [!file && t('submitCaseForm.fields.document')].filter((v): v is string => !!v);
       default:
         return [];
     }
@@ -344,14 +346,14 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
 
   // Per-field inline error, shown once the field has been touched (blurred).
   const fieldError = (field: string, label: string, isEmpty: boolean): string | undefined =>
-    touched[field] && isEmpty ? `${label} is required` : undefined;
+    touched[field] && isEmpty ? t('common.fieldRequired', { label }) : undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const missing = getMissingFields(currentStep);
     if (missing.length > 0) {
-      toast.error(`Please fill in: ${missing.join(', ')}`);
+      toast.error(t('common.pleaseFillIn', { fields: missing.join(', ') }));
       return;
     }
 
@@ -361,7 +363,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
-      if (!user) throw new Error('No authenticated user found');
+      if (!user) throw new Error(t('common.noAuthenticatedUser'));
 
       // Upload file if present
       let fileUrl = '';
@@ -423,7 +425,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
           });
 
         if (insertError) throw insertError;
-        toast.success('Case uploaded successfully');
+        toast.success(t('submitCaseForm.toasts.caseUploaded'));
         clearDraft();
         onSuccess?.();
       } else {
@@ -467,8 +469,8 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         // Show success notification with more details
         toast.success(
           <div>
-            <p className="font-medium">Case submitted successfully!</p>
-            <p className="text-sm mt-1">Your case has been sent for review. You'll be notified when it's approved.</p>
+            <p className="font-medium">{t('submitCaseForm.toasts.caseSubmittedTitle')}</p>
+            <p className="text-sm mt-1">{t('submitCaseForm.toasts.caseSubmittedBody')}</p>
           </div>,
           { duration: 5000 }
         );
@@ -525,8 +527,8 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       console.error('Error submitting case:', error);
       toast.error(
         <div>
-          <p className="font-medium">Error submitting case:</p>
-          <p className="text-sm mt-1">{error.message || 'Failed to submit case'}</p>
+          <p className="font-medium">{t('submitCaseForm.toasts.submitErrorTitle')}</p>
+          <p className="text-sm mt-1">{error.message || t('submitCaseForm.toasts.failedToSubmitFallback')}</p>
         </div>,
         { duration: 5000 }
       );
@@ -541,38 +543,38 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <Input
-              label="Case Title"
+              label={t('submitCaseForm.step0.caseTitleLabel')}
               name="title"
               required
               value={formData.title}
               onChange={handleInputChange}
               onBlur={() => markTouched('title')}
-              error={fieldError('title', 'Case Title', !formData.title)}
-              placeholder="Enter a descriptive title for the case"
+              error={fieldError('title', t('submitCaseForm.step0.caseTitleLabel'), !formData.title)}
+              placeholder={t('submitCaseForm.step0.caseTitlePlaceholder')}
             />
 
             <Textarea
-              label="Case Summary"
+              label={t('submitCaseForm.step0.caseSummaryLabel')}
               name="summary"
               required
               rows={4}
               value={formData.summary}
               onChange={handleInputChange}
               onBlur={() => markTouched('summary')}
-              error={fieldError('summary', 'Case Summary', !formData.summary)}
-              placeholder="Provide a brief summary of the case"
+              error={fieldError('summary', t('submitCaseForm.step0.caseSummaryLabel'), !formData.summary)}
+              placeholder={t('submitCaseForm.step0.caseSummaryPlaceholder')}
             />
 
             <Select
-              label="Country/Jurisdiction"
+              label={t('submitCaseForm.step0.countryLabel')}
               name="country_id"
               required
               value={formData.country_id}
               onChange={handleInputChange}
               onBlur={() => markTouched('country_id')}
-              error={fieldError('country_id', 'Country/Jurisdiction', !formData.country_id)}
+              error={fieldError('country_id', t('submitCaseForm.step0.countryLabel'), !formData.country_id)}
             >
-              <option value="">Select a country</option>
+              <option value="">{t('common.selectCountry')}</option>
               {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}
@@ -584,94 +586,94 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <Input
-              label="Tracking Period"
+              label={t('submitCaseForm.step1.trackingPeriodLabel')}
               name="tracking_period"
               required
               value={formData.tracking_period}
               onChange={handleInputChange}
               onBlur={() => markTouched('tracking_period')}
-              error={fieldError('tracking_period', 'Tracking Period', !formData.tracking_period)}
-              placeholder="e.g., Q1 2025"
+              error={fieldError('tracking_period', t('submitCaseForm.step1.trackingPeriodLabel'), !formData.tracking_period)}
+              placeholder={t('submitCaseForm.step1.trackingPeriodPlaceholder')}
             />
 
             <Input
-              label="Programme"
+              label={t('submitCaseForm.step1.programmeLabel')}
               name="programme"
               required
               value={formData.programme}
               onChange={handleInputChange}
               onBlur={() => markTouched('programme')}
-              error={fieldError('programme', 'Programme', !formData.programme)}
-              placeholder="e.g., LIRA Programme"
+              error={fieldError('programme', t('submitCaseForm.step1.programmeLabel'), !formData.programme)}
+              placeholder={t('submitCaseForm.step1.programmePlaceholder')}
             />
 
             <Input
-              label="Partner Organization"
+              label={t('submitCaseForm.step1.partnerLabel')}
               name="partner"
               required
               value={formData.partner}
               onChange={handleInputChange}
               onBlur={() => markTouched('partner')}
-              error={fieldError('partner', 'Partner Organization', !formData.partner)}
-              placeholder="e.g., Afya Na Haki"
+              error={fieldError('partner', t('submitCaseForm.step1.partnerLabel'), !formData.partner)}
+              placeholder={t('submitCaseForm.step1.partnerPlaceholder')}
             />
 
             <Input
-              label="Court"
+              label={t('submitCaseForm.step1.courtLabel')}
               name="court"
               required
               value={formData.court}
               onChange={handleInputChange}
               onBlur={() => markTouched('court')}
-              error={fieldError('court', 'Court', !formData.court)}
-              placeholder="e.g., High Court of Kenya"
+              error={fieldError('court', t('submitCaseForm.step1.courtLabel'), !formData.court)}
+              placeholder={t('submitCaseForm.step1.courtPlaceholder')}
             />
 
             <Textarea
-              label="Nature of Case"
+              label={t('submitCaseForm.step1.natureOfCaseLabel')}
               name="nature_of_case"
               required
               rows={3}
               value={formData.nature_of_case}
               onChange={handleInputChange}
               onBlur={() => markTouched('nature_of_case')}
-              error={fieldError('nature_of_case', 'Nature of Case', !formData.nature_of_case)}
-              placeholder="Describe the nature of the case"
+              error={fieldError('nature_of_case', t('submitCaseForm.step1.natureOfCaseLabel'), !formData.nature_of_case)}
+              placeholder={t('submitCaseForm.step1.natureOfCasePlaceholder')}
             />
 
             <Textarea
-              label="Action Taken"
+              label={t('submitCaseForm.step1.actionTakenLabel')}
               name="action_taken"
               required
               rows={3}
               value={formData.action_taken}
               onChange={handleInputChange}
               onBlur={() => markTouched('action_taken')}
-              error={fieldError('action_taken', 'Action Taken', !formData.action_taken)}
-              placeholder="Describe the actions taken"
+              error={fieldError('action_taken', t('submitCaseForm.step1.actionTakenLabel'), !formData.action_taken)}
+              placeholder={t('submitCaseForm.step1.actionTakenPlaceholder')}
             />
 
             <Input
-              label="Action Timeframe"
+              label={t('submitCaseForm.step1.actionTimeframeLabel')}
               name="action_timeframe"
               required
               value={formData.action_timeframe}
               onChange={handleInputChange}
               onBlur={() => markTouched('action_timeframe')}
-              error={fieldError('action_timeframe', 'Action Timeframe', !formData.action_timeframe)}
-              placeholder="e.g., 3 months"
+              error={fieldError('action_timeframe', t('submitCaseForm.step1.actionTimeframeLabel'), !formData.action_timeframe)}
+              placeholder={t('submitCaseForm.step1.actionTimeframePlaceholder')}
             />
 
             <Textarea
-              label="Next Steps"
+              label={t('submitCaseForm.step1.nextStepsLabel')}
               name="next_steps"
               required
               rows={3}
               value={formData.next_steps}
               onChange={handleInputChange}
               onBlur={() => markTouched('next_steps')}
-              error={fieldError('next_steps', 'Next Steps', !formData.next_steps)}
-              placeholder="Describe the next steps"
+              error={fieldError('next_steps', t('submitCaseForm.step1.nextStepsLabel'), !formData.next_steps)}
+              placeholder={t('submitCaseForm.step1.nextStepsPlaceholder')}
             />
           </div>
         );
@@ -680,50 +682,50 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <Select
-              label="Timeline Status"
+              label={t('submitCaseForm.step2.timelineStatusLabel')}
               name="timeline_status"
               required
               value={formData.timeline_status}
               onChange={handleInputChange}
               onBlur={() => markTouched('timeline_status')}
-              error={fieldError('timeline_status', 'Timeline Status', !formData.timeline_status)}
+              error={fieldError('timeline_status', t('submitCaseForm.step2.timelineStatusLabel'), !formData.timeline_status)}
             >
-              <option value="">Select status</option>
-              <option value="filed">Filed</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="resolved">Resolved</option>
-              <option value="dismissed">Dismissed</option>
+              <option value="">{t('common.selectStatus')}</option>
+              <option value="filed">{t('common.statusFiled')}</option>
+              <option value="ongoing">{t('common.statusOngoing')}</option>
+              <option value="resolved">{t('common.statusResolved')}</option>
+              <option value="dismissed">{t('common.statusDismissed')}</option>
             </Select>
 
             <TagListInput
-              label="Litigants"
+              label={t('submitCaseForm.step2.litigantsLabel')}
               required
               items={formData.litigants}
               onAdd={addLitigant}
               onRemove={removeLitigant}
-              placeholder="Add a litigant"
-              error={touched.litigants && formData.litigants.length === 0 ? 'At least one litigant is required' : undefined}
+              placeholder={t('submitCaseForm.step2.litigantsPlaceholder')}
+              error={touched.litigants && formData.litigants.length === 0 ? t('submitCaseForm.step2.litigantsRequiredError') : undefined}
             />
             {/* Mark touched once the user has interacted with the litigants list at all */}
             <input type="hidden" onFocus={() => markTouched('litigants')} />
 
             <TagListInput
-              label="Defending Institutions"
+              label={t('submitCaseForm.step2.defendingInstitutionsLabel')}
               required
               items={formData.defending_institutions}
               onAdd={addDefendingInstitution}
               onRemove={removeDefendingInstitution}
-              placeholder="Add a defending institution"
-              error={touched.defending_institutions && formData.defending_institutions.length === 0 ? 'At least one defending institution is required' : undefined}
+              placeholder={t('submitCaseForm.step2.defendingInstitutionsPlaceholder')}
+              error={touched.defending_institutions && formData.defending_institutions.length === 0 ? t('submitCaseForm.step2.defendingInstitutionsRequiredError') : undefined}
             />
 
             <Textarea
-              label="Case Outcome"
+              label={t('submitCaseForm.step2.caseOutcomeLabel')}
               name="case_outcome"
               rows={3}
               value={formData.case_outcome}
               onChange={handleInputChange}
-              placeholder="Describe the outcome of the case (if resolved)"
+              placeholder={t('submitCaseForm.step2.caseOutcomePlaceholder')}
             />
           </div>
         );
@@ -732,28 +734,28 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <Select
-              label="Judicial Body Type"
+              label={t('common.judicialBodyTypeLabel')}
               name="judicial_body_type"
               required
               value={formData.judicial_body_type}
               onChange={handleInputChange}
               onBlur={() => markTouched('judicial_body_type')}
-              error={fieldError('judicial_body_type', 'Judicial Body Type', !formData.judicial_body_type)}
+              error={fieldError('judicial_body_type', t('common.judicialBodyTypeLabel'), !formData.judicial_body_type)}
             >
-              <option value="">Select type</option>
-              <option value="National Court">National Court</option>
-              <option value="Regional Court">Regional Court</option>
+              <option value="">{t('common.selectType')}</option>
+              <option value="National Court">{t('common.nationalCourt')}</option>
+              <option value="Regional Court">{t('common.regionalCourt')}</option>
             </Select>
 
             <Input
-              label="Judicial Body"
+              label={t('common.judicialBodyLabel')}
               name="judicial_body"
               required
               value={formData.judicial_body}
               onChange={handleInputChange}
               onBlur={() => markTouched('judicial_body')}
-              error={fieldError('judicial_body', 'Judicial Body', !formData.judicial_body)}
-              placeholder="e.g., Supreme Court of Kenya"
+              error={fieldError('judicial_body', t('common.judicialBodyLabel'), !formData.judicial_body)}
+              placeholder={t('common.judicialBodyPlaceholder')}
             />
 
             <label className="flex items-center space-x-2">
@@ -764,61 +766,61 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onChange={handleCheckboxChange}
                 className="rounded border-stone-300 text-primary focus:ring-primary"
               />
-              <span className="text-sm font-medium text-stone-700">Regional Appeals</span>
+              <span className="text-sm font-medium text-stone-700">{t('common.regionalAppeals')}</span>
             </label>
 
             {formData.regional_appeals && (
               <TagListInput
-                label="Regional Bodies"
+                label={t('common.regionalBodiesLabel')}
                 items={formData.regional_bodies}
                 onAdd={addRegionalBody}
                 onRemove={removeRegionalBody}
-                placeholder="Add a regional body"
+                placeholder={t('common.addRegionalBody')}
               />
             )}
 
             <Select
-              label="Legal Framework Type"
+              label={t('common.legalFrameworkTypeLabel')}
               name="legal_framework_type"
               required
               value={formData.legal_framework_type}
               onChange={handleInputChange}
               onBlur={() => markTouched('legal_framework_type')}
-              error={fieldError('legal_framework_type', 'Legal Framework Type', !formData.legal_framework_type)}
-              helperText="Choosing Domestic, International, or Both determines which law lists appear below."
+              error={fieldError('legal_framework_type', t('common.legalFrameworkTypeLabel'), !formData.legal_framework_type)}
+              helperText={t('common.legalFrameworkHelperText')}
             >
-              <option value="">Select type</option>
-              <option value="Domestic Law">Domestic Law</option>
-              <option value="International Law">International Law</option>
-              <option value="Both">Both</option>
+              <option value="">{t('common.selectType')}</option>
+              <option value="Domestic Law">{t('common.domesticLaw')}</option>
+              <option value="International Law">{t('common.internationalLaw')}</option>
+              <option value="Both">{t('common.both')}</option>
             </Select>
 
             {(formData.legal_framework_type === 'Domestic Law' || formData.legal_framework_type === 'Both') && (
               <TagListInput
-                label="Domestic Laws"
+                label={t('common.domesticLawsLabel')}
                 items={formData.domestic_laws}
                 onAdd={addDomesticLaw}
                 onRemove={removeDomesticLaw}
-                placeholder="Add a domestic law"
+                placeholder={t('common.addDomesticLaw')}
               />
             )}
 
             {(formData.legal_framework_type === 'International Law' || formData.legal_framework_type === 'Both') && (
               <TagListInput
-                label="International Laws"
+                label={t('common.internationalLawsLabel')}
                 items={formData.international_laws}
                 onAdd={addInternationalLaw}
                 onRemove={removeInternationalLaw}
-                placeholder="Add an international law"
+                placeholder={t('common.addInternationalLaw')}
               />
             )}
 
             <TagListInput
-              label="Protocols"
+              label={t('common.protocolsLabel')}
               items={formData.protocols}
               onAdd={addProtocol}
               onRemove={removeProtocol}
-              placeholder="Add a protocol"
+              placeholder={t('common.addProtocol')}
             />
           </div>
         );
@@ -827,20 +829,20 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return (
           <div className="space-y-6">
             <Textarea
-              label="Case Impact"
+              label={t('common.caseImpactLabel')}
               name="case_impact"
               required
               rows={4}
               value={formData.case_impact}
               onChange={handleInputChange}
               onBlur={() => markTouched('case_impact')}
-              error={fieldError('case_impact', 'Case Impact', !formData.case_impact)}
-              placeholder="Describe the impact of this case"
+              error={fieldError('case_impact', t('common.caseImpactLabel'), !formData.case_impact)}
+              placeholder={t('submitCaseForm.step4.caseImpactPlaceholder')}
             />
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Case Categories <span className="text-danger ml-0.5" aria-hidden="true">*</span>
+                {t('common.caseCategoriesLabel')} <span className="text-danger ml-0.5" aria-hidden="true">*</span>
               </label>
               <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-stone-200 rounded-md">
                 {CASE_CATEGORIES.map((category) => (
@@ -856,7 +858,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 ))}
               </div>
               {touched.case_categories && formData.case_categories.length === 0 && (
-                <p role="alert" className="mt-1.5 text-sm text-danger">At least one category is required</p>
+                <p role="alert" className="mt-1.5 text-sm text-danger">{t('common.atLeastOneCategoryRequired')}</p>
               )}
             </div>
           </div>
@@ -867,7 +869,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Upload Case Document <span className="text-danger ml-0.5" aria-hidden="true">*</span>
+                {t('submitCaseForm.step5.uploadLabel')} <span className="text-danger ml-0.5" aria-hidden="true">*</span>
               </label>
               <div
                 {...getRootProps()}
@@ -881,7 +883,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                         : 'border-stone-300 hover:border-primary'
                 }`}
               >
-                <input {...getInputProps()} aria-label="Upload case document (PDF)" />
+                <input {...getInputProps()} aria-label={t('submitCaseForm.step5.uploadAriaLabel')} />
                 {file ? (
                   <div className="flex items-center justify-center gap-3">
                     <Upload className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
@@ -892,7 +894,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      aria-label="Remove selected file"
+                      aria-label={t('common.removeSelectedFile')}
                       className="text-stone-500 hover:text-danger"
                     >
                       <X className="h-5 w-5" />
@@ -901,10 +903,10 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 ) : (
                   <div>
                     <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
-                    <p className="text-stone-600">Drop your PDF file here or click to browse</p>
-                    <p className="text-sm text-stone-500 mt-2">Maximum file size: 10MB</p>
+                    <p className="text-stone-600">{t('common.dropzonePrompt')}</p>
+                    <p className="text-sm text-stone-500 mt-2">{t('common.maxFileSize')}</p>
                     <p className="text-sm text-stone-600 mt-4 italic">
-                      This document serves to capture any additional important information relevant to the case that may not have been included in the form fields.
+                      {t('submitCaseForm.step5.documentNote')}
                     </p>
                   </div>
                 )}
@@ -925,7 +927,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-warning-dark">
-                      Your submission will be reviewed by a moderator before being published. You will be notified once the review is complete.
+                      {t('common.moderationNotice')}
                     </p>
                   </div>
                 </div>
@@ -954,20 +956,20 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
           const missing = getMissingFields(currentStep);
           return missing.length > 0 ? (
             <p role="status" className="mt-4 text-sm text-danger text-right">
-              Before you continue, please fill in: {missing.join(', ')}
+              {t('common.beforeContinueFillIn', { fields: missing.join(', ') })}
             </p>
           ) : null;
         })()}
 
         <div className="mt-4 flex justify-between">
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </Button>
 
           <div className="flex space-x-3">
             {currentStep > 0 && (
               <Button type="button" variant="outline" onClick={prevStep} icon={<ChevronLeft className="h-4 w-4" />}>
-                Previous
+                {t('common.previous')}
               </Button>
             )}
 
@@ -979,11 +981,11 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 icon={<ChevronRight className="h-4 w-4" />}
                 iconPosition="right"
               >
-                Next
+                {t('common.next')}
               </Button>
             ) : (
               <Button type="submit" loading={loading} disabled={!validateCurrentStep()}>
-                {loading ? 'Submitting...' : isDirectUpload ? 'Upload Case' : 'Submit Case'}
+                {loading ? t('common.submitting') : isDirectUpload ? t('submitCaseForm.submitButton.upload') : t('submitCaseForm.submitButton.submit')}
               </Button>
             )}
           </div>

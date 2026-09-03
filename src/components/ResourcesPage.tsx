@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download, FileText, Search, Filter, ChevronDown, ChevronUp, X, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -22,15 +23,21 @@ interface Resource {
   user_id: string;
 }
 
-const RESOURCE_TYPES = [
-  { id: 'all', name: 'All Resources' },
-  { id: 'template', name: 'Templates' },
-  { id: 'guide', name: 'Guides' },
-  { id: 'analysis', name: 'Analysis' },
-  { id: 'research', name: 'Research' },
-];
+const RESOURCE_TYPE_IDS = ['all', 'template', 'guide', 'analysis', 'research'] as const;
+const RESOURCE_TYPE_NAME_KEYS: Record<string, string> = {
+  all: 'resources.typeAll',
+  template: 'resources.typeTemplate',
+  guide: 'resources.typeGuide',
+  analysis: 'resources.typeAnalysis',
+  research: 'resources.typeResearch',
+};
 
 const ResourcesPage: React.FC = () => {
+  const { t } = useTranslation();
+  const resourceTypes = useMemo(
+    () => RESOURCE_TYPE_IDS.map((id) => ({ id, name: t(RESOURCE_TYPE_NAME_KEYS[id]) })),
+    [t]
+  );
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +63,7 @@ const ResourcesPage: React.FC = () => {
       setResources(data || []);
     } catch (err) {
       console.error('Error fetching resources:', err);
-      setError('Failed to load resources. Please try again later.');
+      setError(t('resources.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +82,7 @@ const ResourcesPage: React.FC = () => {
         (payload) => {
           devLog('New resource added:', payload);
           fetchResources();
-          toast.success('New resource has been added');
+          toast.success(t('resources.newResourceAdded'));
         }
       )
       .on(
@@ -111,11 +118,11 @@ const ResourcesPage: React.FC = () => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success(`Downloading ${resource.title}`);
+      toast.success(t('resources.downloading', { title: resource.title }));
       fetchResources();
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Failed to download file');
+      toast.error(t('resources.failedToDownload'));
     }
   };
 
@@ -138,27 +145,27 @@ const ResourcesPage: React.FC = () => {
     const groups: Record<string, Resource[]> = {};
     filteredResources.forEach((resource) => {
       const typeName =
-        RESOURCE_TYPES.find((t) => t.id === resource.resource_type)?.name ||
+        resourceTypes.find((rt) => rt.id === resource.resource_type)?.name ||
         resource.resource_type.charAt(0).toUpperCase() + resource.resource_type.slice(1);
       (groups[typeName] ||= []).push(resource);
     });
     return groups;
-  }, [filteredResources]);
+  }, [filteredResources, resourceTypes]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-serif font-semibold text-stone-900">Resources</h1>
+          <h1 className="text-2xl font-serif font-semibold text-stone-900">{t('resources.title')}</h1>
           <p className="mt-1 text-sm text-stone-500">
-            Access templates, guides, and research materials for reproductive justice advocacy
+            {t('resources.subtitle')}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {isModerator && (
             <Button onClick={() => setShowUploadModal(true)} icon={<Plus className="h-4 w-4" />}>
-              Upload Resource
+              {t('resources.uploadResource')}
             </Button>
           )}
 
@@ -168,7 +175,7 @@ const ResourcesPage: React.FC = () => {
             aria-expanded={showFilters}
             icon={<Filter className="h-4 w-4" />}
           >
-            Filters
+            {t('common.filters')}
             {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
@@ -179,20 +186,20 @@ const ResourcesPage: React.FC = () => {
         <div className="bg-white p-4 rounded-lg shadow-card border border-stone-100 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2 relative">
-              <label htmlFor="resources-search" className="sr-only">Search resources by title, description, or tags</label>
+              <label htmlFor="resources-search" className="sr-only">{t('resources.searchLabel')}</label>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
               <input
                 id="resources-search"
                 type="text"
-                placeholder="Search resources by title, description, or tags..."
+                placeholder={t('resources.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
             </div>
 
-            <Select label="Resource type" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-              {RESOURCE_TYPES.map((type) => (
+            <Select label={t('resources.resourceType')} value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+              {resourceTypes.map((type) => (
                 <option key={type.id} value={type.id}>{type.name}</option>
               ))}
             </Select>
@@ -202,16 +209,16 @@ const ResourcesPage: React.FC = () => {
             <div className="flex flex-wrap items-center gap-2 mt-4">
               {searchTerm && (
                 <Badge tone="primary">
-                  Search: {searchTerm}
-                  <button onClick={() => setSearchTerm('')} aria-label="Clear search filter" className="ml-1">
+                  {t('common.search', { term: searchTerm })}
+                  <button onClick={() => setSearchTerm('')} aria-label={t('common.clearSearchFilter')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               )}
               {selectedType !== 'all' && (
                 <Badge tone="primary">
-                  Type: {RESOURCE_TYPES.find((t) => t.id === selectedType)?.name}
-                  <button onClick={() => setSelectedType('all')} aria-label="Clear type filter" className="ml-1">
+                  {t('common.type', { value: resourceTypes.find((rt) => rt.id === selectedType)?.name })}
+                  <button onClick={() => setSelectedType('all')} aria-label={t('common.clearTypeFilter')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -223,7 +230,7 @@ const ResourcesPage: React.FC = () => {
                 }}
                 className="text-sm text-primary hover:text-primary-dark"
               >
-                Clear all filters
+                {t('common.clearAllFilters')}
               </button>
             </div>
           )}
@@ -232,27 +239,27 @@ const ResourcesPage: React.FC = () => {
 
       {/* Resources List */}
       {loading ? (
-        <LoadingState label="Loading resources…" />
+        <LoadingState label={t('resources.loading')} />
       ) : error ? (
         <EmptyState
           icon={<FileText className="h-12 w-12" />}
-          title="Failed to load resources"
+          title={t('resources.failedToLoadTitle')}
           description={error}
-          action={<Button variant="outline" onClick={fetchResources}>Retry</Button>}
+          action={<Button variant="outline" onClick={fetchResources}>{t('common.retry')}</Button>}
         />
       ) : Object.keys(groupedResources).length === 0 ? (
         <EmptyState
           icon={<FileText className="h-12 w-12" />}
-          title="No resources found"
+          title={t('resources.noResourcesFound')}
           description={
             searchTerm || selectedType !== 'all'
-              ? 'Try adjusting your search or filters'
-              : 'No resources have been uploaded yet'
+              ? t('resources.adjustSearchOrFilters')
+              : t('resources.noResourcesUploaded')
           }
           action={
             isModerator && (
               <Button onClick={() => setShowUploadModal(true)} icon={<Plus className="h-4 w-4" />}>
-                Upload First Resource
+                {t('resources.uploadFirstResource')}
               </Button>
             )
           }
@@ -281,21 +288,21 @@ const ResourcesPage: React.FC = () => {
 
                           <div className="flex items-center justify-between text-xs text-stone-500 mb-4">
                             <span className="capitalize">{resource.resource_type}</span>
-                            <span>{resource.downloads} downloads</span>
+                            <span>{t('resources.downloadsCount', { count: resource.downloads })}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-stone-500">
-                          Added {new Date(resource.created_at).toLocaleDateString()}
+                          {t('resources.added', { date: new Date(resource.created_at).toLocaleDateString() })}
                         </span>
                         <button
                           onClick={() => handleDownload(resource)}
                           className="flex items-center gap-2 text-sm text-primary hover:text-primary-dark"
                         >
                           <Download className="h-4 w-4" />
-                          <span>Download</span>
+                          <span>{t('resources.download')}</span>
                         </button>
                       </div>
                     </div>

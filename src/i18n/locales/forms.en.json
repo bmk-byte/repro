@@ -1,0 +1,241 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next",
+    "submitting": "Submitting...",
+    "selectCountry": "Select a country",
+    "selectStatus": "Select status",
+    "selectType": "Select type",
+    "statusFiled": "Filed",
+    "statusOngoing": "Ongoing",
+    "statusResolved": "Resolved",
+    "statusDismissed": "Dismissed",
+    "fieldRequired": "{{label}} is required",
+    "pleaseFillIn": "Please fill in: {{fields}}",
+    "beforeContinueFillIn": "Before you continue, please fill in: {{fields}}",
+    "atLeastOne": "at least one {{label}}",
+    "fileTooLarge": "That file is larger than 10MB. Please choose a smaller PDF.",
+    "fileInvalidType": "Only PDF files are accepted.",
+    "fileRejectedGeneric": "That file could not be accepted.",
+    "noAuthenticatedUser": "No authenticated user found",
+    "removeSelectedFile": "Remove selected file",
+    "maxFileSize": "Maximum file size: 10MB",
+    "dropzonePrompt": "Drop your PDF file here or click to browse",
+    "regionalAppeals": "Regional Appeals",
+    "regionalBodiesLabel": "Regional Bodies",
+    "addRegionalBody": "Add a regional body",
+    "legalFrameworkTypeLabel": "Legal Framework Type",
+    "legalFrameworkHelperText": "Choosing Domestic, International, or Both determines which law lists appear below.",
+    "domesticLaw": "Domestic Law",
+    "internationalLaw": "International Law",
+    "both": "Both",
+    "domesticLawsLabel": "Domestic Laws",
+    "addDomesticLaw": "Add a domestic law",
+    "internationalLawsLabel": "International Laws",
+    "addInternationalLaw": "Add an international law",
+    "protocolsLabel": "Protocols",
+    "addProtocol": "Add a protocol",
+    "judicialBodyTypeLabel": "Judicial Body Type",
+    "judicialBodyLabel": "Judicial Body",
+    "judicialBodyPlaceholder": "e.g., Supreme Court of Kenya",
+    "nationalCourt": "National Court",
+    "regionalCourt": "Regional Court",
+    "caseImpactLabel": "Case Impact",
+    "caseCategoriesLabel": "Case Categories",
+    "atLeastOneCategoryRequired": "At least one category is required",
+    "moderationNotice": "Your submission will be reviewed by a moderator before being published. You will be notified once the review is complete."
+  },
+  "submitCaseForm": {
+    "toasts": {
+      "draftRestored": "Restored your previous draft. You can continue where you left off.",
+      "countriesLoadError": "Failed to load countries",
+      "caseUploaded": "Case uploaded successfully",
+      "caseSubmittedTitle": "Case submitted successfully!",
+      "caseSubmittedBody": "Your case has been sent for review. You'll be notified when it's approved.",
+      "submitErrorTitle": "Error submitting case:",
+      "failedToSubmitFallback": "Failed to submit case"
+    },
+    "steps": {
+      "basicInfo": "Basic Info",
+      "caseDetails": "Case Details",
+      "parties": "Parties",
+      "legalFramework": "Legal Framework",
+      "categories": "Categories",
+      "document": "Document"
+    },
+    "fields": {
+      "title": "Title",
+      "summary": "Summary",
+      "country": "Country",
+      "trackingPeriod": "Tracking Period",
+      "programme": "Programme",
+      "partner": "Partner",
+      "natureOfCase": "Nature of Case",
+      "actionTaken": "Action Taken",
+      "actionTimeframe": "Action Timeframe",
+      "nextSteps": "Next Steps",
+      "court": "Court",
+      "timelineStatus": "Timeline Status",
+      "litigant": "Litigant",
+      "defendingInstitution": "Defending Institution",
+      "judicialBodyType": "Judicial Body Type",
+      "judicialBody": "Judicial Body",
+      "legalFrameworkType": "Legal Framework Type",
+      "caseImpact": "Case Impact",
+      "category": "Category",
+      "document": "a supporting Document"
+    },
+    "step0": {
+      "caseTitleLabel": "Case Title",
+      "caseTitlePlaceholder": "Enter a descriptive title for the case",
+      "caseSummaryLabel": "Case Summary",
+      "caseSummaryPlaceholder": "Provide a brief summary of the case",
+      "countryLabel": "Country/Jurisdiction"
+    },
+    "step1": {
+      "trackingPeriodLabel": "Tracking Period",
+      "trackingPeriodPlaceholder": "e.g., Q1 2025",
+      "programmeLabel": "Programme",
+      "programmePlaceholder": "e.g., LIRA Programme",
+      "partnerLabel": "Partner Organization",
+      "partnerPlaceholder": "e.g., Afya Na Haki",
+      "courtLabel": "Court",
+      "courtPlaceholder": "e.g., High Court of Kenya",
+      "natureOfCaseLabel": "Nature of Case",
+      "natureOfCasePlaceholder": "Describe the nature of the case",
+      "actionTakenLabel": "Action Taken",
+      "actionTakenPlaceholder": "Describe the actions taken",
+      "actionTimeframeLabel": "Action Timeframe",
+      "actionTimeframePlaceholder": "e.g., 3 months",
+      "nextStepsLabel": "Next Steps",
+      "nextStepsPlaceholder": "Describe the next steps"
+    },
+    "step2": {
+      "timelineStatusLabel": "Timeline Status",
+      "litigantsLabel": "Litigants",
+      "litigantsPlaceholder": "Add a litigant",
+      "litigantsRequiredError": "At least one litigant is required",
+      "defendingInstitutionsLabel": "Defending Institutions",
+      "defendingInstitutionsPlaceholder": "Add a defending institution",
+      "defendingInstitutionsRequiredError": "At least one defending institution is required",
+      "caseOutcomeLabel": "Case Outcome",
+      "caseOutcomePlaceholder": "Describe the outcome of the case (if resolved)"
+    },
+    "step4": {
+      "caseImpactPlaceholder": "Describe the impact of this case"
+    },
+    "step5": {
+      "uploadLabel": "Upload Case Document",
+      "uploadAriaLabel": "Upload case document (PDF)",
+      "documentNote": "This document serves to capture any additional important information relevant to the case that may not have been included in the form fields."
+    },
+    "submitButton": {
+      "upload": "Upload Case",
+      "submit": "Submit Case"
+    }
+  },
+  "submitJudgmentForm": {
+    "toasts": {
+      "draftRestored": "Restored your previous draft. You can continue where you left off.",
+      "countriesLoadError": "Failed to load countries",
+      "dbConfigIssue": "Database configuration issue detected. Please contact support.",
+      "judgmentUploaded": "Judgment uploaded successfully",
+      "judgmentSubmittedTitle": "Judgment submitted successfully!",
+      "judgmentSubmittedBody": "Your judgment has been sent for review. You'll be notified when it's approved.",
+      "submitErrorTitle": "Error submitting judgment:"
+    },
+    "errors": {
+      "tableNotAccessible": "The pending_judgments table is not accessible. Please contact support."
+    },
+    "steps": {
+      "basicInfo": "Basic Info",
+      "judgmentDetails": "Judgment Details",
+      "parties": "Parties",
+      "legalFramework": "Legal Framework",
+      "categories": "Categories",
+      "document": "Document"
+    },
+    "fields": {
+      "title": "Title",
+      "summary": "Summary",
+      "country": "Country",
+      "citation": "Citation",
+      "court": "Court",
+      "judgmentDate": "Judgment Date",
+      "timelineStatus": "Timeline Status",
+      "judicialBodyType": "Judicial Body Type",
+      "judicialBody": "Judicial Body",
+      "legalFrameworkType": "Legal Framework Type",
+      "caseImpact": "Case Impact",
+      "category": "Category",
+      "document": "a supporting Document"
+    },
+    "step0": {
+      "titleLabel": "Judgment Title",
+      "titlePlaceholder": "Enter a descriptive title for the judgment",
+      "summaryLabel": "Judgment Summary",
+      "summaryPlaceholder": "Provide a brief summary of the judgment",
+      "countryLabel": "Country/Jurisdiction"
+    },
+    "step1": {
+      "citationLabel": "Citation",
+      "citationPlaceholder": "e.g., [2023] KEHC 123",
+      "mediaNeutralCitationLabel": "Media Neutral Citation",
+      "mediaNeutralCitationPlaceholder": "e.g., [2023] eKLR 123",
+      "courtLabel": "Court",
+      "courtPlaceholder": "e.g., High Court of Kenya",
+      "caseNumberLabel": "Case Number",
+      "caseNumberPlaceholder": "e.g., Petition No. 123 of 2023",
+      "judgesLabel": "Judges",
+      "judgesPlaceholder": "e.g., Justice John Doe, Justice Jane Smith",
+      "judgmentDateLabel": "Judgment Date",
+      "languageLabel": "Language",
+      "languageEnglish": "English",
+      "languageFrench": "French",
+      "languagePortuguese": "Portuguese",
+      "languageSwahili": "Swahili",
+      "judgmentTypeLabel": "Judgment Type",
+      "typeFinalJudgment": "Final Judgment",
+      "typeInterimOrder": "Interim Order",
+      "typeRuling": "Ruling",
+      "typeConsent": "Consent Judgment",
+      "typeDefault": "Default Judgment",
+      "flynoteLabel": "Flynote",
+      "flynotePlaceholder": "Enter the flynote or headnote of the judgment"
+    },
+    "step2": {
+      "timelineStatusLabel": "Timeline Status",
+      "litigantsLabel": "Litigants",
+      "litigantsPlaceholder": "Add a litigant",
+      "defendingInstitutionsLabel": "Defending Institutions",
+      "defendingInstitutionsPlaceholder": "Add a defending institution"
+    },
+    "step4": {
+      "caseImpactPlaceholder": "Describe the impact of this judgment"
+    },
+    "step5": {
+      "uploadLabel": "Upload Judgment Document",
+      "uploadAriaLabel": "Upload judgment document (PDF)",
+      "documentNote": "This document serves to capture any additional important information relevant to the judgment that may not have been included in the form fields."
+    },
+    "submitButton": {
+      "upload": "Upload Judgment",
+      "submit": "Submit Judgment"
+    }
+  },
+  "multiStepFormProgress": {
+    "ariaFormProgress": "Form progress",
+    "stepAriaLabel": "Step {{number}}: {{step}}{{status}}",
+    "completedSuffix": " (completed)",
+    "currentSuffix": " (current)"
+  },
+  "submissionForm": {
+    "messages": {
+      "caseUploaded": "Case uploaded successfully",
+      "caseSubmitted": "Case submitted successfully",
+      "judgmentUploaded": "Judgment uploaded successfully",
+      "judgmentSubmitted": "Judgment submitted successfully"
+    }
+  }
+}

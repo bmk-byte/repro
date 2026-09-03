@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyRound, ShieldOff, UserPlus } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
@@ -27,6 +28,7 @@ interface Admin {
  * here also grants every moderator capability without a separate step.
  */
 const AdminManagementPanel: React.FC = () => {
+  const { t } = useTranslation('moderation');
   const [admins, setAdmins] = React.useState<Admin[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [newEmail, setNewEmail] = React.useState('');
@@ -55,7 +57,7 @@ const AdminManagementPanel: React.FC = () => {
     e.preventDefault();
     const email = sanitizeEmail(newEmail);
     if (!email) {
-      toast.error('Enter a valid email address.');
+      toast.error(t('adminManagementPanel.enterValidEmail'));
       return;
     }
     setPendingGrantEmail(email);
@@ -69,7 +71,7 @@ const AdminManagementPanel: React.FC = () => {
         should_grant: true,
       });
       if (error) throw error;
-      toast.success(`Granted admin access to ${email}.`);
+      toast.success(t('adminManagementPanel.grantedAccessSuccess', { email }));
       sendEmail({
         to: email,
         subject: "You've been granted admin access on ReproPulse",
@@ -96,7 +98,7 @@ const AdminManagementPanel: React.FC = () => {
         should_grant: false,
       });
       if (error) throw error;
-      toast.success(`Removed admin access for ${admin.email}.`);
+      toast.success(t('adminManagementPanel.revokedAccessSuccess', { email: admin.email }));
       sendEmail({
         to: admin.email,
         subject: 'Your admin access on ReproPulse has been revoked',
@@ -117,11 +119,9 @@ const AdminManagementPanel: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-stone-900">Admins</h2>
+        <h2 className="text-2xl font-semibold text-stone-900">{t('adminManagementPanel.heading')}</h2>
         <p className="mt-1 text-sm text-stone-600">
-          Full system access — every moderator capability plus unrestricted access across all
-          organizations, for the IT team's system-level changes. Grant/revoke changes are recorded
-          in the audit log below.
+          {t('adminManagementPanel.subheading')}
         </p>
       </div>
 
@@ -129,17 +129,17 @@ const AdminManagementPanel: React.FC = () => {
         <form onSubmit={handleGrantSubmit} className="flex gap-3 items-end flex-wrap">
           <div className="flex-1 min-w-[220px]">
             <Input
-              label="Grant access by email"
+              label={t('adminManagementPanel.grantAccessByEmail')}
               id="new-admin-email"
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="person@organization.org"
+              placeholder={t('adminManagementPanel.emailPlaceholder')}
               required
             />
           </div>
           <Button type="submit" disabled={submitting} icon={<UserPlus className="h-4 w-4" />}>
-            Grant
+            {t('adminManagementPanel.grant')}
           </Button>
         </form>
       </Card>
@@ -147,13 +147,13 @@ const AdminManagementPanel: React.FC = () => {
       <Card padding="none">
         <div className="px-6 py-4 border-b border-stone-100">
           <h3 className="text-sm font-medium text-stone-700">
-            Current admins {!loading && `(${admins.length})`}
+            {t('adminManagementPanel.currentAdminsCount', { count: loading ? 0 : admins.length })}
           </h3>
         </div>
         {loading ? (
-          <div className="p-6 text-sm text-stone-500">Loading…</div>
+          <div className="p-6 text-sm text-stone-500">{t('adminManagementPanel.loading')}</div>
         ) : admins.length === 0 ? (
-          <div className="p-6 text-sm text-stone-500">No admins found.</div>
+          <div className="p-6 text-sm text-stone-500">{t('adminManagementPanel.noAdminsFound')}</div>
         ) : (
           <ul className="divide-y divide-stone-100">
             {admins.map((admin) => (
@@ -172,7 +172,7 @@ const AdminManagementPanel: React.FC = () => {
                   icon={<ShieldOff className="h-3.5 w-3.5" />}
                   className="!border-danger/30 !text-danger hover:!bg-danger-light"
                 >
-                  Revoke
+                  {t('adminManagementPanel.revoke')}
                 </Button>
               </li>
             ))}
@@ -186,9 +186,9 @@ const AdminManagementPanel: React.FC = () => {
         isOpen={!!pendingGrantEmail}
         onClose={() => setPendingGrantEmail(null)}
         onConfirm={() => pendingGrantEmail && doGrant(pendingGrantEmail)}
-        title="Grant full admin access?"
-        description={`${pendingGrantEmail} will get unrestricted access to every organization's data and every moderator capability. Double-check the email address before continuing.`}
-        confirmLabel="Grant access"
+        title={t('adminManagementPanel.grantConfirmTitle')}
+        description={t('adminManagementPanel.grantConfirmDescription', { email: pendingGrantEmail })}
+        confirmLabel={t('adminManagementPanel.grantConfirmLabel')}
         loading={submitting}
       />
 
@@ -196,9 +196,9 @@ const AdminManagementPanel: React.FC = () => {
         isOpen={!!pendingRevoke}
         onClose={() => setPendingRevoke(null)}
         onConfirm={() => pendingRevoke && doRevoke(pendingRevoke)}
-        title="Revoke admin access?"
-        description={`${pendingRevoke?.email} will lose full system access. If they're separately marked as a moderator, that access is unaffected.`}
-        confirmLabel="Revoke access"
+        title={t('adminManagementPanel.revokeConfirmTitle')}
+        description={t('adminManagementPanel.revokeConfirmDescription', { email: pendingRevoke?.email })}
+        confirmLabel={t('adminManagementPanel.revokeConfirmLabel')}
         confirmVariant="danger"
         loading={submitting}
       />

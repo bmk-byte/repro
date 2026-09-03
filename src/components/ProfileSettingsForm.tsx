@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Camera, Bell, Pencil } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -18,6 +19,7 @@ interface EditableFields {
 }
 
 const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
+  const { t } = useTranslation('misc');
   const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [profession, setProfession] = useState(user?.user_metadata?.profession || '');
@@ -96,12 +98,12 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
       toast.success(
         enabled
-          ? 'Notifications enabled successfully'
-          : 'Notifications disabled successfully'
+          ? t('profileSettingsForm.notificationsEnabled')
+          : t('profileSettingsForm.notificationsDisabled')
       );
     } catch (error) {
       console.error('Error updating notification preferences:', error);
-      toast.error('Failed to update notification preferences');
+      toast.error(t('profileSettingsForm.failedToUpdateNotifications'));
       setReceiveNotifications(!enabled);
     } finally {
       setSavingNotifications(false);
@@ -114,11 +116,11 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Please choose an image file.');
+      toast.error(t('profileSettingsForm.chooseImageFile'));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('That image is larger than 5MB. Please choose a smaller one.');
+      toast.error(t('profileSettingsForm.imageTooLarge'));
       return;
     }
 
@@ -142,7 +144,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       if (updateError) throw updateError;
 
       setAvatarUrl(publicUrl);
-      toast.success('Profile photo updated');
+      toast.success(t('profileSettingsForm.photoUpdated'));
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast.error(handleSupabaseError(error));
@@ -180,10 +182,10 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
   const validateEditFields = (): boolean => {
     const errors: Partial<Record<keyof EditableFields, string>> = {};
     if (!editFields.full_name.trim()) {
-      errors.full_name = 'Full name is required.';
+      errors.full_name = t('profileSettingsForm.fullNameRequired');
     }
     if (editFields.phone_number && !/^[+()\d\s-]{6,}$/.test(editFields.phone_number)) {
-      errors.phone_number = 'Enter a valid phone number.';
+      errors.phone_number = t('profileSettingsForm.validPhoneRequired');
     }
     setEditErrors(errors);
     return Object.keys(errors).length === 0;
@@ -219,7 +221,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       setOrganization(updates.organization);
       setPhoneNumber(updates.phone_number);
       setIsEditingProfile(false);
-      toast.success('Profile updated successfully');
+      toast.success(t('profileSettingsForm.profileUpdated'));
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error(handleSupabaseError(error));
@@ -244,7 +246,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
             type="button"
             onClick={() => avatarInputRef.current?.click()}
             disabled={uploadingAvatar}
-            aria-label="Change profile photo"
+            aria-label={t('profileSettingsForm.changePhoto')}
             className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-card hover:bg-primary-dark disabled:opacity-50"
           >
             {uploadingAvatar ? <Spinner size="sm" label="" /> : <Camera className="h-4 w-4" aria-hidden="true" />}
@@ -257,14 +259,14 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
             className="sr-only"
           />
         </div>
-        <p className="text-xs text-stone-500">Click the camera icon to change your photo</p>
+        <p className="text-xs text-stone-500">{t('profileSettingsForm.clickToChangePhoto')}</p>
       </div>
 
       {/* Notification Preferences */}
       <div className="bg-white rounded-xl shadow-card border border-stone-100 p-6">
         <h3 className="text-lg font-medium text-stone-900 mb-4 flex items-center">
           <Bell className="h-5 w-5 mr-2 text-primary" aria-hidden="true" />
-          Notification Preferences
+          {t('profileSettingsForm.notificationPreferences')}
         </h3>
 
         <div className="space-y-4">
@@ -272,16 +274,16 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <label htmlFor="rapid-response-notifications" className="text-sm font-medium text-stone-700">
-                  Rapid Response Alerts
+                  {t('profileSettingsForm.rapidResponseAlerts')}
                 </label>
-                {isModerator && <Badge tone="primary">Moderator</Badge>}
+                {isModerator && <Badge tone="primary">{t('profileSettingsForm.moderator')}</Badge>}
               </div>
               <p className="mt-1 text-sm text-stone-500">
-                Receive notifications for urgent rapid response cases and approaching deadlines
+                {t('profileSettingsForm.rapidResponseAlertsDescription')}
               </p>
               {isModerator && (
                 <p className="mt-1 text-xs text-info">
-                  As a moderator, you'll receive alerts for all urgent cases and deadline reminders
+                  {t('profileSettingsForm.moderatorAlertsNote')}
                 </p>
               )}
             </div>
@@ -313,19 +315,19 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
               <div className="space-y-3">
                 <div className="flex items-center text-sm text-stone-600">
                   <div className="w-2 h-2 bg-danger rounded-full mr-2" aria-hidden="true"></div>
-                  <span>Urgent priority cases (immediate alerts)</span>
+                  <span>{t('profileSettingsForm.urgentCases')}</span>
                 </div>
                 <div className="flex items-center text-sm text-stone-600">
                   <div className="w-2 h-2 bg-warning rounded-full mr-2" aria-hidden="true"></div>
-                  <span>High priority cases (daily digest)</span>
+                  <span>{t('profileSettingsForm.highPriorityCases')}</span>
                 </div>
                 <div className="flex items-center text-sm text-stone-600">
                   <div className="w-2 h-2 bg-warning/60 rounded-full mr-2" aria-hidden="true"></div>
-                  <span>Deadline reminders (24-72 hours before)</span>
+                  <span>{t('profileSettingsForm.deadlineReminders')}</span>
                 </div>
                 <div className="flex items-center text-sm text-stone-600">
                   <div className="w-2 h-2 bg-info rounded-full mr-2" aria-hidden="true"></div>
-                  <span>Case status updates</span>
+                  <span>{t('profileSettingsForm.caseStatusUpdates')}</span>
                 </div>
               </div>
             </div>
@@ -338,9 +340,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-info-dark">
-                  <strong>How it works:</strong> When enabled, you'll receive real-time notifications in the application
-                  for urgent rapid response cases and approaching deadlines. Notifications appear in the bell icon
-                  in the top navigation bar.
+                  <strong>{t('profileSettingsForm.howItWorks')}</strong> {t('profileSettingsForm.howItWorksDescription')}
                 </p>
               </div>
             </div>
@@ -351,10 +351,10 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       {/* Profile Information */}
       <div className="bg-white rounded-xl shadow-card border border-stone-100 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-stone-900">Personal Information</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('profileSettingsForm.personalInformation')}</h3>
           {!isEditingProfile && (
             <Button variant="ghost" size="sm" onClick={startEditingProfile} icon={<Pencil className="h-3.5 w-3.5" />}>
-              Edit
+              {t('profileSettingsForm.edit')}
             </Button>
           )}
         </div>
@@ -362,7 +362,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
         {isEditingProfile ? (
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <Input
-              label="Full Name"
+              label={t('profileSettingsForm.fullName')}
               required
               value={editFields.full_name}
               onChange={handleEditFieldChange('full_name')}
@@ -370,25 +370,25 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
               autoFocus
             />
             <div>
-              <span className="block text-sm font-medium text-stone-700 mb-1.5">Email Address</span>
+              <span className="block text-sm font-medium text-stone-700 mb-1.5">{t('profileSettingsForm.emailAddress')}</span>
               <div className="p-2 bg-stone-50 rounded-md border border-stone-200 text-stone-500 text-sm">
-                {email || 'Not provided'}
+                {email || t('profileSettingsForm.notProvided')}
               </div>
-              <p className="mt-1 text-xs text-stone-500">Contact support to change the email on your account.</p>
+              <p className="mt-1 text-xs text-stone-500">{t('profileSettingsForm.changeEmailNote')}</p>
             </div>
             <Input
-              label="Profession"
+              label={t('profileSettingsForm.profession')}
               value={editFields.profession}
               onChange={handleEditFieldChange('profession')}
-              placeholder="e.g. Lawyer, Researcher, Advocate"
+              placeholder={t('profileSettingsForm.professionPlaceholder')}
             />
             <Input
-              label="Organization"
+              label={t('profileSettingsForm.organization')}
               value={editFields.organization}
               onChange={handleEditFieldChange('organization')}
             />
             <Input
-              label="Phone Number"
+              label={t('profileSettingsForm.phoneNumber')}
               type="tel"
               value={editFields.phone_number}
               onChange={handleEditFieldChange('phone_number')}
@@ -398,26 +398,26 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={cancelEditingProfile} disabled={savingProfile}>
-                Cancel
+                {t('profileSettingsForm.cancel')}
               </Button>
               <Button type="submit" loading={savingProfile}>
-                {savingProfile ? 'Saving…' : 'Save Changes'}
+                {savingProfile ? t('profileSettingsForm.saving') : t('profileSettingsForm.saveChanges')}
               </Button>
             </div>
           </form>
         ) : (
           <div className="space-y-4">
             {[
-              { label: 'Full Name', value: fullName },
-              { label: 'Email Address', value: email },
-              { label: 'Profession', value: profession },
-              { label: 'Organization', value: organization },
-              { label: 'Phone Number', value: phoneNumber },
+              { label: t('profileSettingsForm.fullName'), value: fullName },
+              { label: t('profileSettingsForm.emailAddress'), value: email },
+              { label: t('profileSettingsForm.profession'), value: profession },
+              { label: t('profileSettingsForm.organization'), value: organization },
+              { label: t('profileSettingsForm.phoneNumber'), value: phoneNumber },
             ].map(({ label, value }) => (
               <div key={label}>
                 <span className="block text-sm font-medium text-stone-700">{label}</span>
                 <div className="mt-1 p-2 bg-stone-50 rounded-md border border-stone-200 text-stone-900">
-                  {value || <span className="text-stone-400">Not provided</span>}
+                  {value || <span className="text-stone-400">{t('profileSettingsForm.notProvided')}</span>}
                 </div>
               </div>
             ))}
@@ -427,33 +427,31 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
       {/* Account Status */}
       <div className="bg-white rounded-xl shadow-card border border-stone-100 p-6">
-        <h3 className="text-lg font-medium text-stone-900 mb-4">Account Status</h3>
+        <h3 className="text-lg font-medium text-stone-900 mb-4">{t('profileSettingsForm.accountStatus')}</h3>
 
         {isAdmin && (
           <div className="mb-4">
-            <span className="block text-sm font-medium text-stone-700">Admin Status</span>
+            <span className="block text-sm font-medium text-stone-700">{t('profileSettingsForm.adminStatus')}</span>
             <div className="mt-1">
-              <Badge tone="primary">Full System Admin</Badge>
+              <Badge tone="primary">{t('profileSettingsForm.fullSystemAdmin')}</Badge>
               <p className="mt-2 text-sm text-stone-500">
-                You have full system access — every moderator capability, plus unrestricted access
-                across all organizations' data for IT/system-level changes.
+                {t('profileSettingsForm.adminStatusDescription')}
               </p>
             </div>
           </div>
         )}
 
         <div>
-          <span className="block text-sm font-medium text-stone-700">Moderator Status</span>
+          <span className="block text-sm font-medium text-stone-700">{t('profileSettingsForm.moderatorStatus')}</span>
           <div className="mt-1">
             {isModerator ? (
-              <Badge tone="success" icon={<Bell className="h-3.5 w-3.5" />}>Moderator Access Enabled</Badge>
+              <Badge tone="success" icon={<Bell className="h-3.5 w-3.5" />}>{t('profileSettingsForm.moderatorAccessEnabled')}</Badge>
             ) : (
-              <Badge>Standard User</Badge>
+              <Badge>{t('profileSettingsForm.standardUser')}</Badge>
             )}
             {isModerator && (
               <p className="mt-2 text-sm text-stone-500">
-                As a moderator, you have access to rapid response coordination features and will receive
-                priority notifications for urgent cases.
+                {t('profileSettingsForm.moderatorStatusDescription')}
               </p>
             )}
           </div>
@@ -462,14 +460,14 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
       {loading && (
         <div className="flex justify-center">
-          <Spinner label="Loading profile…" />
+          <Spinner label={t('profileSettingsForm.loadingProfile')} />
         </div>
       )}
 
       {savingNotifications && (
         <div className="fixed bottom-4 right-4 bg-white border border-stone-200 rounded-lg shadow-raised p-4 flex items-center gap-2">
           <Spinner size="sm" label="" />
-          <span className="text-sm text-stone-700">Saving notification preferences…</span>
+          <span className="text-sm text-stone-700">{t('profileSettingsForm.savingNotificationPreferences')}</span>
         </div>
       )}
     </div>

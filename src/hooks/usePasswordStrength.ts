@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface PasswordRequirement {
   regex: RegExp;
@@ -6,23 +7,25 @@ export interface PasswordRequirement {
   met: boolean;
 }
 
-const REQUIREMENTS: Array<{ regex: RegExp; text: string }> = [
-  { regex: /.{8,}/, text: 'At least 8 characters' },
-  { regex: /[A-Z]/, text: 'At least 1 uppercase letter' },
-  { regex: /[a-z]/, text: 'At least 1 lowercase letter' },
-  { regex: /[0-9]/, text: 'At least 1 number' },
-  { regex: /[!@#$%^&*]/, text: 'At least 1 special character (!@#$%^&*)' },
+const REQUIREMENTS: Array<{ regex: RegExp; textKey: string }> = [
+  { regex: /.{8,}/, textKey: 'auth.passwordReqLength' },
+  { regex: /[A-Z]/, textKey: 'auth.passwordReqUppercase' },
+  { regex: /[a-z]/, textKey: 'auth.passwordReqLowercase' },
+  { regex: /[0-9]/, textKey: 'auth.passwordReqNumber' },
+  { regex: /[!@#$%^&*]/, textKey: 'auth.passwordReqSpecial' },
 ];
 
 /** Shared password-complexity rules, used by signup, the forgot-password reset page, and in-app change-password. */
 export function usePasswordStrength(password: string) {
+  const { t } = useTranslation();
   return useMemo(() => {
     const requirements: PasswordRequirement[] = REQUIREMENTS.map((req) => ({
-      ...req,
+      regex: req.regex,
+      text: t(req.textKey),
       met: req.regex.test(password),
     }));
     const metCount = requirements.filter((req) => req.met).length;
     const strength = Math.round((metCount / requirements.length) * 100);
     return { requirements, strength, isValid: metCount === requirements.length };
-  }, [password]);
+  }, [password, t]);
 }

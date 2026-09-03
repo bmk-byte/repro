@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Upload, File, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, handleSupabaseError } from '../lib/supabase';
@@ -32,6 +33,7 @@ const formatFileSize = (bytes: number) => {
 };
 
 const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useTranslation('misc');
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -48,10 +50,10 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
       const reason = rejections[0].errors[0];
       setFileError(
         reason?.code === 'file-too-large'
-          ? 'That file is larger than 10MB. Please choose a smaller file.'
+          ? t('uploadResourceModal.fileTooLarge')
           : reason?.code === 'file-invalid-type'
-            ? 'That file type isn’t supported. See the accepted formats below.'
-            : reason?.message || 'That file could not be accepted.'
+            ? t('uploadResourceModal.fileInvalidType')
+            : reason?.message || t('uploadResourceModal.fileRejectedGeneric')
       );
       return;
     }
@@ -94,7 +96,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setFileError('Please select a file to upload.');
+      setFileError(t('uploadResourceModal.pleaseSelectFile'));
       return;
     }
 
@@ -102,7 +104,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
       setLoading(true);
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error(t('uploadResourceModal.notAuthenticated'));
 
       const fileExt = safeFileExtension(file.name);
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -131,7 +133,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
 
       if (dbError) throw dbError;
 
-      toast.success('Resource uploaded successfully');
+      toast.success(t('uploadResourceModal.uploadSuccess'));
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -146,15 +148,15 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Upload Resource"
+      title={t('uploadResourceModal.title')}
       size="lg"
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+            {t('uploadResourceModal.cancel')}
           </Button>
           <Button type="submit" form="upload-resource-form" loading={loading} disabled={!file}>
-            {loading ? 'Uploading…' : 'Upload Resource'}
+            {loading ? t('uploadResourceModal.uploading') : t('uploadResourceModal.uploadResource')}
           </Button>
         </>
       }
@@ -171,7 +173,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
                   : 'border-stone-300 hover:border-primary'
             }`}
           >
-            <input {...getInputProps()} aria-label="Upload resource file" />
+            <input {...getInputProps()} aria-label={t('uploadResourceModal.uploadAriaLabel')} />
             {file ? (
               <div className="flex items-center justify-center gap-3">
                 <File className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
@@ -185,7 +187,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
                     e.stopPropagation();
                     setFile(null);
                   }}
-                  aria-label="Remove selected file"
+                  aria-label={t('uploadResourceModal.removeSelectedFile')}
                   className="ml-2 p-1 rounded-full text-stone-400 hover:bg-stone-100 hover:text-danger"
                 >
                   <X className="h-4 w-4" />
@@ -194,11 +196,11 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
             ) : (
               <div>
                 <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
-                <p className="text-stone-600">Drop your file here or click to browse</p>
+                <p className="text-stone-600">{t('uploadResourceModal.dropzonePrompt')}</p>
                 <p className="text-sm text-stone-500 mt-2">
-                  Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, CSV
+                  {t('uploadResourceModal.supportedFormats')}
                 </p>
-                <p className="text-sm text-stone-500">Maximum file size: 10MB</p>
+                <p className="text-sm text-stone-500">{t('uploadResourceModal.maxFileSize')}</p>
               </div>
             )}
           </div>
@@ -212,40 +214,40 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
 
         <div className="grid grid-cols-1 gap-6">
           <Input
-            label="Title"
+            label={t('uploadResourceModal.titleLabel')}
             name="title"
             required
             value={formData.title}
             onChange={handleInputChange}
-            placeholder="Enter a descriptive title for the resource"
+            placeholder={t('uploadResourceModal.titlePlaceholder')}
           />
 
           <Textarea
-            label="Description"
+            label={t('uploadResourceModal.descriptionLabel')}
             name="description"
             required
             rows={3}
             value={formData.description}
             onChange={handleInputChange}
-            placeholder="Provide a detailed description of the resource"
+            placeholder={t('uploadResourceModal.descriptionPlaceholder')}
           />
 
           <Select
-            label="Resource Type"
+            label={t('uploadResourceModal.resourceTypeLabel')}
             name="resource_type"
             required
             value={formData.resource_type}
             onChange={handleInputChange}
           >
-            <option value="template">Template</option>
-            <option value="guide">Guide</option>
-            <option value="analysis">Analysis</option>
-            <option value="research">Research</option>
+            <option value="template">{t('uploadResourceModal.typeTemplate')}</option>
+            <option value="guide">{t('uploadResourceModal.typeGuide')}</option>
+            <option value="analysis">{t('uploadResourceModal.typeAnalysis')}</option>
+            <option value="research">{t('uploadResourceModal.typeResearch')}</option>
           </Select>
 
           <div>
             <label htmlFor="new-tag" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Tags
+              {t('uploadResourceModal.tagsLabel')}
             </label>
             <div className="flex gap-2">
               <input
@@ -259,11 +261,11 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
                     addTag();
                   }
                 }}
-                placeholder="Add a tag"
+                placeholder={t('uploadResourceModal.tagPlaceholder')}
                 className="flex-1 h-10 rounded-md border border-stone-300 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
               <Button type="button" variant="secondary" onClick={addTag}>
-                Add
+                {t('uploadResourceModal.add')}
               </Button>
             </div>
             {formData.tags.length > 0 && (
@@ -274,7 +276,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      aria-label={`Remove tag ${tag}`}
+                      aria-label={t('uploadResourceModal.removeTag', { tag })}
                       className="ml-1"
                     >
                       <X className="h-3 w-3" />
@@ -284,7 +286,7 @@ const UploadResourceModal: React.FC<UploadResourceModalProps> = ({ isOpen, onClo
               </div>
             )}
             <p className="text-sm text-stone-500 mt-1">
-              Tags help users find resources more easily. Press Enter or click Add to add a tag.
+              {t('uploadResourceModal.tagsHelp')}
             </p>
           </div>
         </div>

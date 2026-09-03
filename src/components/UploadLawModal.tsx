@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Upload, File, X as XIcon, CircleAlert as AlertCircle } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, handleSupabaseError } from '../lib/supabase';
@@ -24,6 +25,7 @@ const formatFileSize = (bytes: number) => {
 };
 
 const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useTranslation('misc');
   const [loading, setLoading] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
   const [fileError, setFileError] = React.useState<string | null>(null);
@@ -48,7 +50,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
         setCountries(data || []);
       } catch (error) {
         console.error('Error fetching countries:', error);
-        toast.error(handleSupabaseError(error));
+        toast.error(t('uploadLawModal.failedToLoadCountries'));
       }
     };
 
@@ -60,10 +62,10 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
       const reason = rejections[0].errors[0];
       setFileError(
         reason?.code === 'file-too-large'
-          ? 'That file is larger than 10MB. Please choose a smaller PDF.'
+          ? t('uploadLawModal.fileTooLarge')
           : reason?.code === 'file-invalid-type'
-            ? 'Only PDF files are accepted.'
-            : reason?.message || 'That file could not be accepted.'
+            ? t('uploadLawModal.fileInvalidType')
+            : reason?.message || t('uploadLawModal.fileRejectedGeneric')
       );
       return;
     }
@@ -81,7 +83,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setFileError('Please choose a PDF file to upload.');
+      setFileError(t('uploadLawModal.pleaseChooseFile'));
       return;
     }
 
@@ -89,7 +91,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
       setLoading(true);
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error(t('uploadLawModal.notAuthenticated'));
 
       const fileExt = safeFileExtension(file.name);
       const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
@@ -114,7 +116,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
 
       if (dbError) throw dbError;
 
-      toast.success('Document uploaded successfully');
+      toast.success(t('uploadLawModal.uploadSuccess'));
       onSuccess();
       onClose();
     } catch (error) {
@@ -129,15 +131,15 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Upload Legal Document"
+      title={t('uploadLawModal.title')}
       size="lg"
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+            {t('uploadLawModal.cancel')}
           </Button>
           <Button type="submit" form="upload-law-form" loading={loading} disabled={!file}>
-            {loading ? 'Uploading…' : 'Upload Document'}
+            {loading ? t('uploadLawModal.uploading') : t('uploadLawModal.uploadDocument')}
           </Button>
         </>
       }
@@ -154,7 +156,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
                   : 'border-stone-300 hover:border-primary'
             }`}
           >
-            <input {...getInputProps()} aria-label="Upload PDF file" />
+            <input {...getInputProps()} aria-label={t('uploadLawModal.uploadAriaLabel')} />
             {file ? (
               <div className="flex items-center justify-center gap-3">
                 <File className="h-6 w-6 text-primary flex-none" aria-hidden="true" />
@@ -168,7 +170,7 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
                     e.stopPropagation();
                     setFile(null);
                   }}
-                  aria-label="Remove selected file"
+                  aria-label={t('uploadLawModal.removeSelectedFile')}
                   className="ml-2 p-1 rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-600"
                 >
                   <XIcon className="h-4 w-4" />
@@ -177,8 +179,8 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
             ) : (
               <div>
                 <Upload className="h-8 w-8 text-stone-400 mx-auto mb-2" aria-hidden="true" />
-                <p className="text-stone-600">Drop your PDF file here or click to browse</p>
-                <p className="text-sm text-stone-500 mt-2">PDF only, maximum file size 10MB</p>
+                <p className="text-stone-600">{t('uploadLawModal.dropzonePrompt')}</p>
+                <p className="text-sm text-stone-500 mt-2">{t('uploadLawModal.pdfOnlyNote')}</p>
               </div>
             )}
           </div>
@@ -192,14 +194,14 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
 
         <div className="grid grid-cols-1 gap-6">
           <Input
-            label="Title"
+            label={t('uploadLawModal.titleLabel')}
             required
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: sanitizeText(e.target.value) }))}
           />
 
           <Textarea
-            label="Description"
+            label={t('uploadLawModal.descriptionLabel')}
             rows={3}
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: sanitizeText(e.target.value) }))}
@@ -207,38 +209,38 @@ const UploadLawModal: React.FC<UploadLawModalProps> = ({ isOpen, onClose, onSucc
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Select
-              label="Country"
+              label={t('uploadLawModal.countryLabel')}
               required
               value={formData.country_id}
               onChange={(e) => setFormData(prev => ({ ...prev, country_id: e.target.value }))}
             >
-              <option value="">Select a country</option>
+              <option value="">{t('uploadLawModal.selectCountry')}</option>
               {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}
             </Select>
 
             <Select
-              label="Type"
+              label={t('uploadLawModal.typeLabel')}
               required
               value={formData.type}
               onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'policy' | 'act' }))}
             >
-              <option value="policy">Policy</option>
-              <option value="act">Act</option>
+              <option value="policy">{t('uploadLawModal.typePolicy')}</option>
+              <option value="act">{t('uploadLawModal.typeAct')}</option>
             </Select>
 
             <Select
-              label="Category"
+              label={t('uploadLawModal.categoryLabel')}
               required
               value={formData.category}
               onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
             >
-              <option value="">Select a category</option>
-              <option value="reproductive-health">Reproductive Health</option>
-              <option value="criminal-law">Criminal Law</option>
-              <option value="human-rights">Human Rights</option>
-              <option value="constitutional-law">Constitutional Law</option>
+              <option value="">{t('uploadLawModal.selectCategory')}</option>
+              <option value="reproductive-health">{t('uploadLawModal.categoryReproductiveHealth')}</option>
+              <option value="criminal-law">{t('uploadLawModal.categoryCriminalLaw')}</option>
+              <option value="human-rights">{t('uploadLawModal.categoryHumanRights')}</option>
+              <option value="constitutional-law">{t('uploadLawModal.categoryConstitutionalLaw')}</option>
             </Select>
           </div>
         </div>

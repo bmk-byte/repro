@@ -11,6 +11,7 @@
     "english": "Anglais",
     "french": "Français",
     "cancel": "Annuler",
+    "confirm": "Confirmer",
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "loading": "Chargement…",
@@ -65,7 +66,8 @@
     "failedToLoadFilterOptions": "Échec du chargement des options de filtrage",
     "viewDetails": "Voir les détails",
     "unknownLocation": "Lieu inconnu",
-    "rapidResponseBadgeLabel": "Réponse rapide"
+    "rapidResponseBadgeLabel": "Réponse rapide",
+    "somethingWentWrong": "Une erreur s'est produite"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -178,7 +180,16 @@
     "rateLimitedLogin": "Trop de tentatives de connexion. Veuillez réessayer dans quelques minutes.",
     "invalidCredentials": "L'e-mail ou le mot de passe saisi est incorrect",
     "emailRegisteredListed": "Cet e-mail est enregistré pour « {{org}} ». Veuillez sélectionner cette organisation dans la liste, ou choisir « Autre » pour en saisir une différente.",
-    "emailRegisteredOther": "Cet e-mail est enregistré pour « {{org}} ». Veuillez choisir « Autre » dans la liste et saisir « {{org}} » comme organisation."
+    "emailRegisteredOther": "Cet e-mail est enregistré pour « {{org}} ». Veuillez choisir « Autre » dans la liste et saisir « {{org}} » comme organisation.",
+    "passwordStrength": "Robustesse du mot de passe",
+    "passwordStrengthWeak": "Faible",
+    "passwordStrengthMedium": "Moyenne",
+    "passwordStrengthStrong": "Forte",
+    "passwordReqLength": "Au moins 8 caractères",
+    "passwordReqUppercase": "Au moins 1 majuscule",
+    "passwordReqLowercase": "Au moins 1 minuscule",
+    "passwordReqNumber": "Au moins 1 chiffre",
+    "passwordReqSpecial": "Au moins 1 caractère spécial (!@#$%^&*)"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -280,6 +291,46 @@
     "fullJudgment": "Décision complète",
     "viewDocument": "Voir le document",
     "noDocumentAvailable": "Aucun document disponible"
+  },
+  "laws": {
+    "title": "Documents juridiques",
+    "uploadDocument": "Téléverser un document",
+    "searchPlaceholder": "Rechercher des documents...",
+    "policies": "Politiques",
+    "acts": "Lois",
+    "act": "Loi",
+    "policy": "Politique",
+    "noDocumentsFound": "Aucun document trouvé",
+    "noDocumentsDescription": "Essayez un autre terme de recherche, pays ou type de filtre.",
+    "view": "Voir",
+    "download": "Télécharger",
+    "failedToLoad": "Échec du chargement des documents"
+  },
+  "resources": {
+    "title": "Ressources",
+    "subtitle": "Accédez à des modèles, guides et documents de recherche pour le plaidoyer en justice reproductive",
+    "uploadResource": "Téléverser une ressource",
+    "typeAll": "Toutes les ressources",
+    "typeTemplate": "Modèles",
+    "typeGuide": "Guides",
+    "typeAnalysis": "Analyses",
+    "typeResearch": "Recherches",
+    "resourceType": "Type de ressource",
+    "searchLabel": "Rechercher des ressources par titre, description ou étiquettes",
+    "searchPlaceholder": "Rechercher des ressources par titre, description ou étiquettes...",
+    "loading": "Chargement des ressources…",
+    "failedToLoad": "Échec du chargement des ressources. Veuillez réessayer plus tard.",
+    "failedToLoadTitle": "Échec du chargement des ressources",
+    "noResourcesFound": "Aucune ressource trouvée",
+    "adjustSearchOrFilters": "Essayez d'ajuster votre recherche ou vos filtres",
+    "noResourcesUploaded": "Aucune ressource n'a encore été téléversée",
+    "uploadFirstResource": "Téléverser la première ressource",
+    "downloadsCount": "{{count}} téléchargements",
+    "added": "Ajouté le {{date}}",
+    "download": "Télécharger",
+    "downloading": "Téléchargement de {{title}}",
+    "failedToDownload": "Échec du téléchargement du fichier",
+    "newResourceAdded": "Une nouvelle ressource a été ajoutée"
   },
   "footer": {
     "copyright": "© 2025 Programme LIRA, Afya na Haki",

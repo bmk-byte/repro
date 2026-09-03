@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Shield, CircleCheck as CheckCircle, Circle as XCircle, CircleAlert as AlertCircle, Eye, FileText, Filter, X, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../lib/supabase';
 import { sanitizeSearchTerm, sanitizeOrFilterTerm } from '../lib/sanitize';
@@ -18,6 +19,7 @@ const devLog = (...args: unknown[]) => {
 };
 
 const ModerationPage = () => {
+  const { t } = useTranslation('moderation');
   const [loading, setLoading] = React.useState(true);
   const [pendingCases, setPendingCases] = React.useState<any[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = React.useState<any[]>([]);
@@ -85,11 +87,11 @@ const ModerationPage = () => {
           devLog('New pending case:', payload);
           fetchPendingContent();
           
-          const submissionTitle = payload.new.title || 'New case submission';
-          toast.custom((t) => (
+          const submissionTitle = payload.new.title || t('moderationPage.defaultCaseSubmissionTitle');
+          toast.custom((tt) => (
             <div
               className={`${
-                t.visible ? 'animate-enter' : 'animate-leave'
+                tt.visible ? 'animate-enter' : 'animate-leave'
               } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
             >
               <div className="flex-1 w-0 p-4">
@@ -98,9 +100,9 @@ const ModerationPage = () => {
                     <AlertCircle className="h-10 w-10 text-primary" />
                   </div>
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-stone-900">New Case Submission</p>
+                    <p className="text-sm font-medium text-stone-900">{t('moderationPage.newCaseSubmissionTitle')}</p>
                     <p className="mt-1 text-sm text-stone-500">
-                      {submissionTitle} has been submitted for moderation
+                      {t('moderationPage.submissionForModerationBody', { title: submissionTitle })}
                     </p>
                   </div>
                 </div>
@@ -108,12 +110,12 @@ const ModerationPage = () => {
               <div className="flex border-l border-stone-200">
                 <button
                   onClick={() => {
-                    toast.dismiss(t.id);
+                    toast.dismiss(tt.id);
                     setActiveTab('submissions');
                   }}
                   className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-primary hover:text-primary-dark focus:outline-none"
                 >
-                  View
+                  {t('moderationPage.view')}
                 </button>
               </div>
             </div>
@@ -139,11 +141,11 @@ const ModerationPage = () => {
           devLog('New pending judgment:', payload);
           fetchPendingContent();
           
-          const submissionTitle = payload.new.title || 'New judgment submission';
-          toast.custom((t) => (
+          const submissionTitle = payload.new.title || t('moderationPage.defaultJudgmentSubmissionTitle');
+          toast.custom((tt) => (
             <div
               className={`${
-                t.visible ? 'animate-enter' : 'animate-leave'
+                tt.visible ? 'animate-enter' : 'animate-leave'
               } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
             >
               <div className="flex-1 w-0 p-4">
@@ -152,9 +154,9 @@ const ModerationPage = () => {
                     <AlertCircle className="h-10 w-10 text-primary" />
                   </div>
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-stone-900">New Judgment Submission</p>
+                    <p className="text-sm font-medium text-stone-900">{t('moderationPage.newJudgmentSubmissionTitle')}</p>
                     <p className="mt-1 text-sm text-stone-500">
-                      {submissionTitle} has been submitted for moderation
+                      {t('moderationPage.submissionForModerationBody', { title: submissionTitle })}
                     </p>
                   </div>
                 </div>
@@ -162,12 +164,12 @@ const ModerationPage = () => {
               <div className="flex border-l border-stone-200">
                 <button
                   onClick={() => {
-                    toast.dismiss(t.id);
+                    toast.dismiss(tt.id);
                     setActiveTab('submissions');
                   }}
                   className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-primary hover:text-primary-dark focus:outline-none"
                 >
-                  View
+                  {t('moderationPage.view')}
                 </button>
               </div>
             </div>
@@ -345,7 +347,7 @@ const ModerationPage = () => {
           const pendingCasesExists = await verifyTableExists('pending_cases');
           if (!pendingCasesExists) {
             console.error('pending_cases table does not exist or is not accessible');
-            toast.error('Database configuration issue: pending_cases table not found');
+            toast.error(t('moderationPage.pendingCasesTableMissing'));
           } else {
             const casesResult = await queryWithRetry(async () => {
               let casesQuery = supabase
@@ -411,7 +413,7 @@ const ModerationPage = () => {
           const pendingJudgmentsExists = await verifyTableExists('pending_judgments');
           if (!pendingJudgmentsExists) {
             console.error('pending_judgments table does not exist or is not accessible');
-            toast.error('Database configuration issue: pending_judgments table not found');
+            toast.error(t('moderationPage.pendingJudgmentsTableMissing'));
           } else {
             const judgmentsResult = await queryWithRetry(async () => {
               let judgmentsQuery = supabase
@@ -567,7 +569,7 @@ const ModerationPage = () => {
         }
       }
 
-      toast.success(`Content ${status} successfully`);
+      toast.success(status === 'approved' ? t('moderationPage.contentApprovedSuccess') : t('moderationPage.contentRejectedSuccess'));
 
       // Email the original submitter their decision — best-effort, never
       // blocks the moderation action itself if it fails.
@@ -622,7 +624,7 @@ const ModerationPage = () => {
 
   if (moderatorLoading) {
     devLog('Moderator status is loading');
-    return <LoadingState label="Checking access…" />;
+    return <LoadingState label={t('moderationPage.checkingAccess')} />;
   }
 
   if (!can({ isModerator, isAdmin }, 'case:moderate')) {
@@ -631,8 +633,8 @@ const ModerationPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <EmptyState
           icon={<Shield className="h-12 w-12" />}
-          title="Access Denied"
-          description={moderatorError ? `Error: ${moderatorError}` : 'You do not have permission to access this page'}
+          title={t('moderationPage.accessDenied')}
+          description={moderatorError ? t('moderationPage.accessDeniedError', { error: moderatorError }) : t('moderationPage.accessDeniedDefault')}
         />
       </div>
     );
@@ -649,7 +651,7 @@ const ModerationPage = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">
           <Shield className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-serif font-semibold text-stone-900">Content Moderation</h1>
+          <h1 className="text-2xl font-serif font-semibold text-stone-900">{t('moderationPage.heading')}</h1>
         </div>
 
         <Button
@@ -658,7 +660,7 @@ const ModerationPage = () => {
           aria-expanded={showFilters}
           icon={<Filter className="h-4 w-4" />}
         >
-          Filters
+          {t('moderationPage.filters')}
           {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </div>
@@ -668,12 +670,12 @@ const ModerationPage = () => {
         <div className="bg-white p-4 rounded-lg shadow-card border border-stone-100 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="col-span-1 md:col-span-3 relative">
-              <label htmlFor="moderation-search" className="sr-only">Search by title or content</label>
+              <label htmlFor="moderation-search" className="sr-only">{t('moderationPage.searchLabel')}</label>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
               <input
                 id="moderation-search"
                 type="text"
-                placeholder="Search by title or content..."
+                placeholder={t('moderationPage.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 rounded-md border border-stone-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -681,10 +683,10 @@ const ModerationPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Date Range</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">{t('moderationPage.dateRange')}</label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">From</label>
+                  <label className="block text-xs text-stone-500 mb-1">{t('moderationPage.from')}</label>
                   <input
                     type="date"
                     value={filterStartDate}
@@ -693,7 +695,7 @@ const ModerationPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">To</label>
+                  <label className="block text-xs text-stone-500 mb-1">{t('moderationPage.to')}</label>
                   <input
                     type="date"
                     value={filterEndDate}
@@ -705,50 +707,50 @@ const ModerationPage = () => {
             </div>
 
             <Select
-              label="Profession"
+              label={t('moderationPage.profession')}
               value={filterProfession}
               onChange={(e) => setFilterProfession(e.target.value)}
             >
-              <option value="">All Professions</option>
+              <option value="">{t('moderationPage.allProfessions')}</option>
               {professions.map(profession => (
                 <option key={profession} value={profession}>{profession}</option>
               ))}
             </Select>
 
             <Select
-              label="Organization"
+              label={t('moderationPage.organization')}
               value={filterOrganization}
               onChange={(e) => setFilterOrganization(e.target.value)}
             >
-              <option value="">All Organizations</option>
+              <option value="">{t('moderationPage.allOrganizations')}</option>
               {organizations.map(org => (
                 <option key={org} value={org}>{org}</option>
               ))}
             </Select>
 
             <Select
-              label="Country"
+              label={t('moderationPage.country')}
               value={filterCountry}
               onChange={(e) => setFilterCountry(e.target.value)}
             >
-              <option value="">All Countries</option>
+              <option value="">{t('moderationPage.allCountries')}</option>
               {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}
             </Select>
 
             <Select
-              label="Sort Order"
+              label={t('moderationPage.sortOrder')}
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as 'desc' | 'asc')}
             >
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
+              <option value="desc">{t('moderationPage.newestFirst')}</option>
+              <option value="asc">{t('moderationPage.oldestFirst')}</option>
             </Select>
 
             <div className="flex items-end">
               <Button variant="outline" onClick={clearFilters} className="w-full">
-                Clear Filters
+                {t('moderationPage.clearFilters')}
               </Button>
             </div>
           </div>
@@ -757,48 +759,48 @@ const ModerationPage = () => {
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {filterStartDate && (
               <Badge tone="primary">
-                From: {new Date(filterStartDate).toLocaleDateString()}
-                <button onClick={() => setFilterStartDate('')} aria-label="Clear start date filter" className="ml-1">
+                {t('moderationPage.badgeFrom', { date: new Date(filterStartDate).toLocaleDateString() })}
+                <button onClick={() => setFilterStartDate('')} aria-label={t('moderationPage.clearStartDateFilter')} className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
             {filterEndDate && (
               <Badge tone="primary">
-                To: {new Date(filterEndDate).toLocaleDateString()}
-                <button onClick={() => setFilterEndDate('')} aria-label="Clear end date filter" className="ml-1">
+                {t('moderationPage.badgeTo', { date: new Date(filterEndDate).toLocaleDateString() })}
+                <button onClick={() => setFilterEndDate('')} aria-label={t('moderationPage.clearEndDateFilter')} className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
             {filterProfession && (
               <Badge tone="primary">
-                Profession: {filterProfession}
-                <button onClick={() => setFilterProfession('')} aria-label="Clear profession filter" className="ml-1">
+                {t('moderationPage.badgeProfession', { value: filterProfession })}
+                <button onClick={() => setFilterProfession('')} aria-label={t('moderationPage.clearProfessionFilter')} className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
             {filterOrganization && (
               <Badge tone="primary">
-                Organization: {filterOrganization}
-                <button onClick={() => setFilterOrganization('')} aria-label="Clear organization filter" className="ml-1">
+                {t('moderationPage.badgeOrganization', { value: filterOrganization })}
+                <button onClick={() => setFilterOrganization('')} aria-label={t('moderationPage.clearOrganizationFilter')} className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
             {filterCountry && (
               <Badge tone="primary">
-                Country: {countries.find(c => c.id === filterCountry)?.name}
-                <button onClick={() => setFilterCountry('')} aria-label="Clear country filter" className="ml-1">
+                {t('moderationPage.badgeCountry', { value: countries.find(c => c.id === filterCountry)?.name })}
+                <button onClick={() => setFilterCountry('')} aria-label={t('moderationPage.clearCountryFilter')} className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
             {sortOrder !== 'desc' && (
               <Badge>
-                Oldest First
-                <button onClick={() => setSortOrder('desc')} aria-label="Reset sort order" className="ml-1">
+                {t('moderationPage.oldestFirst')}
+                <button onClick={() => setSortOrder('desc')} aria-label={t('moderationPage.resetSortOrder')} className="ml-1">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
@@ -818,7 +820,7 @@ const ModerationPage = () => {
                   : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
               }`}
             >
-              Submissions
+              {t('moderationPage.tabSubmissions')}
             </button>
             <button
               onClick={() => setActiveTab('cases')}
@@ -828,7 +830,7 @@ const ModerationPage = () => {
                   : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
               }`}
             >
-              Cases
+              {t('moderationPage.tabCases')}
             </button>
           </nav>
         </div>
@@ -844,7 +846,7 @@ const ModerationPage = () => {
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
                 }`}
               >
-                All Submissions
+                {t('moderationPage.tabAllSubmissions')}
               </button>
               <button
                 onClick={() => setActiveSubmissionType('case')}
@@ -854,7 +856,7 @@ const ModerationPage = () => {
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
                 }`}
               >
-                Case Submissions
+                {t('moderationPage.tabCaseSubmissions')}
               </button>
               <button
                 onClick={() => setActiveSubmissionType('judgment')}
@@ -864,7 +866,7 @@ const ModerationPage = () => {
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
                 }`}
               >
-                Judgment Submissions
+                {t('moderationPage.tabJudgmentSubmissions')}
               </button>
             </nav>
           </div>
@@ -880,25 +882,25 @@ const ModerationPage = () => {
           ) : contentError ? (
             <EmptyState
               icon={<AlertCircle className="h-12 w-12" />}
-              title="Failed to load content"
+              title={t('moderationPage.failedToLoadContent')}
               description={contentError}
-              action={<Button variant="outline" onClick={fetchPendingContent}>Try again</Button>}
+              action={<Button variant="outline" onClick={fetchPendingContent}>{t('moderationPage.tryAgain')}</Button>}
             />
           ) : (
             <>
               {/* Results count */}
               <div className="mb-4 text-sm text-stone-500">
-                {currentItems.length} {currentItems.length === 1 ? 'item' : 'items'} pending review
-                {(filterStartDate || filterEndDate || filterProfession || filterOrganization || filterCountry || searchTerm) && ' (filtered)'}
+                {t('moderationPage.itemsPendingReview', { count: currentItems.length })}
+                {(filterStartDate || filterEndDate || filterProfession || filterOrganization || filterCountry || searchTerm) && t('moderationPage.filteredSuffix')}
               </div>
 
               {currentItems.length === 0 ? (
                 <EmptyState
                   icon={<AlertCircle className="h-12 w-12" />}
-                  title="No pending content to moderate"
+                  title={t('moderationPage.noPendingContent')}
                   description={
                     (filterStartDate || filterEndDate || filterProfession || filterOrganization || filterCountry || searchTerm)
-                      ? 'Try adjusting your filters'
+                      ? t('moderationPage.tryAdjustingFilters')
                       : undefined
                   }
                 />
@@ -923,7 +925,7 @@ const ModerationPage = () => {
                                 className="inline-flex items-center text-sm text-primary hover:text-primary-dark"
                               >
                                 <Eye className="h-4 w-4 mr-1" />
-                                View Document
+                                {t('moderationPage.viewDocument')}
                               </button>
                             )}
                             <button
@@ -934,7 +936,7 @@ const ModerationPage = () => {
                               className="inline-flex items-center text-sm text-primary hover:text-primary-dark"
                             >
                               <FileText className="h-4 w-4 mr-1" />
-                              View Full Details
+                              {t('moderationPage.viewFullDetails')}
                             </button>
                           </div>
                         </div>
@@ -942,7 +944,7 @@ const ModerationPage = () => {
                           <button
                             onClick={() => setPendingApproveItem(item)}
                             className="p-2 text-green-600 hover:bg-green-50 rounded-full"
-                            title="Approve"
+                            title={t('moderationPage.approve')}
                           >
                             <CheckCircle className="h-5 w-5" />
                           </button>
@@ -956,7 +958,7 @@ const ModerationPage = () => {
                               }
                             }}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-full"
-                            title="Reject"
+                            title={t('moderationPage.reject')}
                           >
                             <XCircle className="h-5 w-5" />
                           </button>
@@ -976,7 +978,7 @@ const ModerationPage = () => {
           isOpen={showDocumentModal}
           onClose={() => setShowDocumentModal(false)}
           documentUrl={selectedItem.file_url || selectedItem.pdf_url || selectedItem.document_url}
-          title={selectedItem.title || selectedItem.case_filed || "Document Preview"}
+          title={selectedItem.title || selectedItem.case_filed || t('moderationPage.documentPreview')}
         />
       )}
       
@@ -1011,9 +1013,9 @@ const ModerationPage = () => {
           }
           setPendingApproveItem(null);
         }}
-        title="Approve and publish?"
-        description="This submission will become publicly visible immediately. Make sure you've reviewed the document or details before approving."
-        confirmLabel="Approve"
+        title={t('moderationPage.approveConfirmTitle')}
+        description={t('moderationPage.approveConfirmDescription')}
+        confirmLabel={t('moderationPage.approve')}
         confirmVariant="primary"
         loading={loading}
       />

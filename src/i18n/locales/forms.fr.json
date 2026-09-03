@@ -1,0 +1,241 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "submitting": "Envoi en cours…",
+    "selectCountry": "Sélectionner un pays",
+    "selectStatus": "Sélectionner un statut",
+    "selectType": "Sélectionner un type",
+    "statusFiled": "Déposé",
+    "statusOngoing": "En cours",
+    "statusResolved": "Résolu",
+    "statusDismissed": "Rejeté",
+    "fieldRequired": "{{label}} est obligatoire",
+    "pleaseFillIn": "Veuillez renseigner : {{fields}}",
+    "beforeContinueFillIn": "Avant de continuer, veuillez renseigner : {{fields}}",
+    "atLeastOne": "au moins un(e) {{label}}",
+    "fileTooLarge": "Ce fichier dépasse 10 Mo. Veuillez choisir un PDF plus léger.",
+    "fileInvalidType": "Seuls les fichiers PDF sont acceptés.",
+    "fileRejectedGeneric": "Ce fichier n'a pas pu être accepté.",
+    "noAuthenticatedUser": "Aucun utilisateur authentifié n'a été trouvé",
+    "removeSelectedFile": "Supprimer le fichier sélectionné",
+    "maxFileSize": "Taille maximale du fichier : 10 Mo",
+    "dropzonePrompt": "Déposez votre fichier PDF ici ou cliquez pour le sélectionner",
+    "regionalAppeals": "Recours régionaux",
+    "regionalBodiesLabel": "Organes régionaux",
+    "addRegionalBody": "Ajouter un organe régional",
+    "legalFrameworkTypeLabel": "Type de cadre juridique",
+    "legalFrameworkHelperText": "Le choix entre Droit national, Droit international ou Les deux détermine les listes de textes de loi qui s'affichent ci-dessous.",
+    "domesticLaw": "Droit national",
+    "internationalLaw": "Droit international",
+    "both": "Les deux",
+    "domesticLawsLabel": "Textes de droit national",
+    "addDomesticLaw": "Ajouter un texte de droit national",
+    "internationalLawsLabel": "Textes de droit international",
+    "addInternationalLaw": "Ajouter un texte de droit international",
+    "protocolsLabel": "Protocoles",
+    "addProtocol": "Ajouter un protocole",
+    "judicialBodyTypeLabel": "Type d'instance judiciaire",
+    "judicialBodyLabel": "Instance judiciaire",
+    "judicialBodyPlaceholder": "ex. : Cour suprême du Kenya",
+    "nationalCourt": "Juridiction nationale",
+    "regionalCourt": "Juridiction régionale",
+    "caseImpactLabel": "Impact de l'affaire",
+    "caseCategoriesLabel": "Catégories de l'affaire",
+    "atLeastOneCategoryRequired": "Au moins une catégorie est obligatoire",
+    "moderationNotice": "Votre soumission sera examinée par un modérateur avant sa publication. Vous serez averti(e) une fois l'examen terminé."
+  },
+  "submitCaseForm": {
+    "toasts": {
+      "draftRestored": "Votre brouillon précédent a été restauré. Vous pouvez reprendre là où vous vous étiez arrêté(e).",
+      "countriesLoadError": "Échec du chargement de la liste des pays",
+      "caseUploaded": "Affaire téléversée avec succès",
+      "caseSubmittedTitle": "Affaire soumise avec succès !",
+      "caseSubmittedBody": "Votre affaire a été envoyée pour examen. Vous serez averti(e) dès son approbation.",
+      "submitErrorTitle": "Erreur lors de la soumission de l'affaire :",
+      "failedToSubmitFallback": "Échec de la soumission de l'affaire"
+    },
+    "steps": {
+      "basicInfo": "Informations de base",
+      "caseDetails": "Détails de l'affaire",
+      "parties": "Parties",
+      "legalFramework": "Cadre juridique",
+      "categories": "Catégories",
+      "document": "Document"
+    },
+    "fields": {
+      "title": "Titre",
+      "summary": "Résumé",
+      "country": "Pays",
+      "trackingPeriod": "Période de suivi",
+      "programme": "Programme",
+      "partner": "Partenaire",
+      "natureOfCase": "Nature de l'affaire",
+      "actionTaken": "Action menée",
+      "actionTimeframe": "Délai de l'action",
+      "nextSteps": "Prochaines étapes",
+      "court": "Tribunal",
+      "timelineStatus": "Statut du calendrier",
+      "litigant": "plaignant",
+      "defendingInstitution": "institution défenderesse",
+      "judicialBodyType": "Type d'instance judiciaire",
+      "judicialBody": "Instance judiciaire",
+      "legalFrameworkType": "Type de cadre juridique",
+      "caseImpact": "Impact de l'affaire",
+      "category": "catégorie",
+      "document": "un document justificatif"
+    },
+    "step0": {
+      "caseTitleLabel": "Titre de l'affaire",
+      "caseTitlePlaceholder": "Saisissez un titre descriptif pour l'affaire",
+      "caseSummaryLabel": "Résumé de l'affaire",
+      "caseSummaryPlaceholder": "Fournissez un bref résumé de l'affaire",
+      "countryLabel": "Pays/Juridiction"
+    },
+    "step1": {
+      "trackingPeriodLabel": "Période de suivi",
+      "trackingPeriodPlaceholder": "ex. : T1 2025",
+      "programmeLabel": "Programme",
+      "programmePlaceholder": "ex. : Programme LIRA",
+      "partnerLabel": "Organisation partenaire",
+      "partnerPlaceholder": "ex. : Afya Na Haki",
+      "courtLabel": "Tribunal",
+      "courtPlaceholder": "ex. : Haute Cour du Kenya",
+      "natureOfCaseLabel": "Nature de l'affaire",
+      "natureOfCasePlaceholder": "Décrivez la nature de l'affaire",
+      "actionTakenLabel": "Action menée",
+      "actionTakenPlaceholder": "Décrivez les actions menées",
+      "actionTimeframeLabel": "Délai de l'action",
+      "actionTimeframePlaceholder": "ex. : 3 mois",
+      "nextStepsLabel": "Prochaines étapes",
+      "nextStepsPlaceholder": "Décrivez les prochaines étapes"
+    },
+    "step2": {
+      "timelineStatusLabel": "Statut du calendrier",
+      "litigantsLabel": "Plaignants",
+      "litigantsPlaceholder": "Ajouter un plaignant",
+      "litigantsRequiredError": "Au moins un plaignant est obligatoire",
+      "defendingInstitutionsLabel": "Institutions défenderesses",
+      "defendingInstitutionsPlaceholder": "Ajouter une institution défenderesse",
+      "defendingInstitutionsRequiredError": "Au moins une institution défenderesse est obligatoire",
+      "caseOutcomeLabel": "Issue de l'affaire",
+      "caseOutcomePlaceholder": "Décrivez l'issue de l'affaire (si résolue)"
+    },
+    "step4": {
+      "caseImpactPlaceholder": "Décrivez l'impact de cette affaire"
+    },
+    "step5": {
+      "uploadLabel": "Téléverser le document de l'affaire",
+      "uploadAriaLabel": "Téléverser le document de l'affaire (PDF)",
+      "documentNote": "Ce document permet de saisir toute information supplémentaire pertinente pour l'affaire qui n'aurait pas été incluse dans les champs du formulaire."
+    },
+    "submitButton": {
+      "upload": "Téléverser l'affaire",
+      "submit": "Soumettre l'affaire"
+    }
+  },
+  "submitJudgmentForm": {
+    "toasts": {
+      "draftRestored": "Votre brouillon précédent a été restauré. Vous pouvez reprendre là où vous vous étiez arrêté(e).",
+      "countriesLoadError": "Échec du chargement de la liste des pays",
+      "dbConfigIssue": "Un problème de configuration de la base de données a été détecté. Veuillez contacter le support.",
+      "judgmentUploaded": "Jugement téléversé avec succès",
+      "judgmentSubmittedTitle": "Jugement soumis avec succès !",
+      "judgmentSubmittedBody": "Votre jugement a été envoyé pour examen. Vous serez averti(e) dès son approbation.",
+      "submitErrorTitle": "Erreur lors de la soumission du jugement :"
+    },
+    "errors": {
+      "tableNotAccessible": "La table pending_judgments n'est pas accessible. Veuillez contacter le support."
+    },
+    "steps": {
+      "basicInfo": "Informations de base",
+      "judgmentDetails": "Détails du jugement",
+      "parties": "Parties",
+      "legalFramework": "Cadre juridique",
+      "categories": "Catégories",
+      "document": "Document"
+    },
+    "fields": {
+      "title": "Titre",
+      "summary": "Résumé",
+      "country": "Pays",
+      "citation": "Référence",
+      "court": "Tribunal",
+      "judgmentDate": "Date du jugement",
+      "timelineStatus": "Statut du calendrier",
+      "judicialBodyType": "Type d'instance judiciaire",
+      "judicialBody": "Instance judiciaire",
+      "legalFrameworkType": "Type de cadre juridique",
+      "caseImpact": "Impact de l'affaire",
+      "category": "catégorie",
+      "document": "un document justificatif"
+    },
+    "step0": {
+      "titleLabel": "Titre du jugement",
+      "titlePlaceholder": "Saisissez un titre descriptif pour le jugement",
+      "summaryLabel": "Résumé du jugement",
+      "summaryPlaceholder": "Fournissez un bref résumé du jugement",
+      "countryLabel": "Pays/Juridiction"
+    },
+    "step1": {
+      "citationLabel": "Référence",
+      "citationPlaceholder": "ex. : [2023] KEHC 123",
+      "mediaNeutralCitationLabel": "Référence neutre (media neutral citation)",
+      "mediaNeutralCitationPlaceholder": "ex. : [2023] eKLR 123",
+      "courtLabel": "Tribunal",
+      "courtPlaceholder": "ex. : Haute Cour du Kenya",
+      "caseNumberLabel": "Numéro d'affaire",
+      "caseNumberPlaceholder": "ex. : Requête n° 123 de 2023",
+      "judgesLabel": "Juges",
+      "judgesPlaceholder": "ex. : Juge John Doe, Juge Jane Smith",
+      "judgmentDateLabel": "Date du jugement",
+      "languageLabel": "Langue",
+      "languageEnglish": "Anglais",
+      "languageFrench": "Français",
+      "languagePortuguese": "Portugais",
+      "languageSwahili": "Swahili",
+      "judgmentTypeLabel": "Type de jugement",
+      "typeFinalJudgment": "Jugement définitif",
+      "typeInterimOrder": "Ordonnance provisoire",
+      "typeRuling": "Décision",
+      "typeConsent": "Jugement par consentement",
+      "typeDefault": "Jugement par défaut",
+      "flynoteLabel": "Sommaire (flynote)",
+      "flynotePlaceholder": "Saisissez le sommaire ou la note de tête du jugement"
+    },
+    "step2": {
+      "timelineStatusLabel": "Statut du calendrier",
+      "litigantsLabel": "Plaignants",
+      "litigantsPlaceholder": "Ajouter un plaignant",
+      "defendingInstitutionsLabel": "Institutions défenderesses",
+      "defendingInstitutionsPlaceholder": "Ajouter une institution défenderesse"
+    },
+    "step4": {
+      "caseImpactPlaceholder": "Décrivez l'impact de ce jugement"
+    },
+    "step5": {
+      "uploadLabel": "Téléverser le document du jugement",
+      "uploadAriaLabel": "Téléverser le document du jugement (PDF)",
+      "documentNote": "Ce document permet de saisir toute information supplémentaire pertinente pour le jugement qui n'aurait pas été incluse dans les champs du formulaire."
+    },
+    "submitButton": {
+      "upload": "Téléverser le jugement",
+      "submit": "Soumettre le jugement"
+    }
+  },
+  "multiStepFormProgress": {
+    "ariaFormProgress": "Progression du formulaire",
+    "stepAriaLabel": "Étape {{number}} : {{step}}{{status}}",
+    "completedSuffix": " (terminée)",
+    "currentSuffix": " (en cours)"
+  },
+  "submissionForm": {
+    "messages": {
+      "caseUploaded": "Affaire téléversée avec succès",
+      "caseSubmitted": "Affaire soumise avec succès",
+      "judgmentUploaded": "Jugement téléversé avec succès",
+      "judgmentSubmitted": "Jugement soumis avec succès"
+    }
+  }
+}
