@@ -24,3 +24,5 @@ export type { ErrorStateProps } from './ErrorState';
 export { PasswordStrengthMeter } from './PasswordStrengthMeter';
 export type { PasswordStrengthMeterProps } from './PasswordStrengthMeter';
 export { Skeleton, SkeletonRow, SkeletonCard } from './Skeleton';
+export { LanguageSwitcher } from './LanguageSwitcher';
+export type { LanguageSwitcherProps } from './LanguageSwitcher';

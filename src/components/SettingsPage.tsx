@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import ProfileSettingsForm from './ProfileSettingsForm';
 import { User, Bell, Lock, Shield } from 'lucide-react';
@@ -6,9 +7,10 @@ import { toast } from '../lib/toast';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { usePasswordStrength } from '../hooks/usePasswordStrength';
 import { getToastsEnabled, setToastsEnabled } from '../lib/toastPreference';
-import { LoadingState, Input, Button, PasswordStrengthMeter } from './ui';
+import { LoadingState, Input, Button, PasswordStrengthMeter, LanguageSwitcher } from './ui';
 
 const SettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
@@ -24,21 +26,21 @@ const SettingsPage: React.FC = () => {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!passwordIsValid) {
-      toast.error('Your new password does not meet all the requirements below.');
+      toast.error(t('settings.passwordDoesNotMeetRequirements'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('The passwords do not match.');
+      toast.error(t('settings.passwordsDoNotMatch'));
       return;
     }
     setChangingPassword(true);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setChangingPassword(false);
     if (error) {
-      toast.error(error.message || 'Unable to update your password.');
+      toast.error(error.message || t('settings.unableToUpdatePassword'));
       return;
     }
-    toast.success('Password updated.');
+    toast.success(t('settings.passwordUpdated'));
     setNewPassword('');
     setConfirmPassword('');
   };
@@ -46,7 +48,7 @@ const SettingsPage: React.FC = () => {
   const handleToggleToasts = (enabled: boolean) => {
     setToastsEnabledState(enabled);
     setToastsEnabled(enabled);
-    if (enabled) toast.success('Pop-up notifications enabled.');
+    if (enabled) toast.success(t('settings.popupNotificationsEnabled'));
   };
 
   useEffect(() => {
@@ -64,18 +66,18 @@ const SettingsPage: React.FC = () => {
         
       } catch (error) {
         console.error('Error fetching user data:', error);
-        toast.error('Failed to load user data');
+        toast.error(t('settings.failedToLoadUserData'));
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, []);
 
   // Show loading if either user data or moderator status is loading
   if (loading || moderatorLoading) {
-    return <LoadingState label="Loading settings…" />;
+    return <LoadingState label={t('settings.loadingSettings')} />;
   }
 
   return (
@@ -85,8 +87,8 @@ const SettingsPage: React.FC = () => {
         <div className="w-full md:w-64 shrink-0">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6 border-b">
-              <h2 className="text-lg font-medium text-stone-900">Settings</h2>
-              <p className="mt-1 text-sm text-stone-500">View your account settings</p>
+              <h2 className="text-lg font-medium text-stone-900">{t('settings.title')}</h2>
+              <p className="mt-1 text-sm text-stone-500">{t('settings.subtitle')}</p>
             </div>
             <nav className="p-4 space-y-1">
               <button
@@ -98,7 +100,7 @@ const SettingsPage: React.FC = () => {
                 }`}
               >
                 <User className="mr-3 h-5 w-5" />
-                Profile
+                {t('settings.profile')}
               </button>
               <button
                 onClick={() => setActiveTab('security')}
@@ -109,7 +111,7 @@ const SettingsPage: React.FC = () => {
                 }`}
               >
                 <Lock className="mr-3 h-5 w-5" />
-                Security
+                {t('settings.security')}
               </button>
               <button
                 onClick={() => setActiveTab('notifications')}
@@ -120,7 +122,7 @@ const SettingsPage: React.FC = () => {
                 }`}
               >
                 <Bell className="mr-3 h-5 w-5" />
-                Notifications
+                {t('settings.notifications')}
               </button>
               {isModerator && (
                 <button
@@ -132,7 +134,7 @@ const SettingsPage: React.FC = () => {
                   }`}
                 >
                   <Shield className="mr-3 h-5 w-5" />
-                  Moderation
+                  {t('settings.moderation')}
                 </button>
               )}
             </nav>
@@ -144,28 +146,28 @@ const SettingsPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md">
             {activeTab === 'profile' && (
               <div className="p-6">
-                <h2 className="text-lg font-medium text-stone-900 mb-6">Profile Information</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-6">{t('settings.profileInformation')}</h2>
                 <ProfileSettingsForm user={user} />
               </div>
             )}
 
             {activeTab === 'security' && (
               <div className="p-6">
-                <h2 className="text-lg font-medium text-stone-900 mb-6">Security Settings</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-6">{t('settings.securitySettings')}</h2>
 
                 <div className="space-y-4">
                   <div className="bg-stone-50 p-4 rounded-lg">
-                    <h3 className="text-md font-medium text-stone-900">Password</h3>
+                    <h3 className="text-md font-medium text-stone-900">{t('settings.password')}</h3>
                     <p className="mt-1 text-sm text-stone-500">
-                      Your password was last changed on {new Date(user?.updated_at || Date.now()).toLocaleDateString()}.
+                      {t('settings.passwordLastChanged', { date: new Date(user?.updated_at || Date.now()).toLocaleDateString() })}
                     </p>
                   </div>
 
                   <form onSubmit={handleChangePassword} className="bg-stone-50 p-4 rounded-lg space-y-4">
-                    <h3 className="text-md font-medium text-stone-900">Change Password</h3>
+                    <h3 className="text-md font-medium text-stone-900">{t('settings.changePassword')}</h3>
                     <Input
                       type="password"
-                      label="New password"
+                      label={t('settings.newPassword')}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
@@ -173,20 +175,20 @@ const SettingsPage: React.FC = () => {
                     {newPassword && <PasswordStrengthMeter strength={passwordStrength} requirements={passwordRequirements} />}
                     <Input
                       type="password"
-                      label="Confirm new password"
+                      label={t('settings.confirmNewPassword')}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
                     <Button type="submit" loading={changingPassword}>
-                      Update Password
+                      {t('settings.updatePassword')}
                     </Button>
                   </form>
 
                   <div className="bg-stone-50 p-4 rounded-lg">
-                    <h3 className="text-md font-medium text-stone-900">Login History</h3>
+                    <h3 className="text-md font-medium text-stone-900">{t('settings.loginHistory')}</h3>
                     <p className="mt-1 text-sm text-stone-500">
-                      Last login: {new Date(user?.last_sign_in_at || Date.now()).toLocaleString()}
+                      {t('settings.lastLogin', { date: new Date(user?.last_sign_in_at || Date.now()).toLocaleString() })}
                     </p>
                   </div>
                 </div>
@@ -195,7 +197,7 @@ const SettingsPage: React.FC = () => {
 
             {activeTab === 'notifications' && (
               <div className="p-6">
-                <h2 className="text-lg font-medium text-stone-900 mb-6">Notification Preferences</h2>
+                <h2 className="text-lg font-medium text-stone-900 mb-6">{t('settings.notificationPreferences')}</h2>
                 <div className="space-y-4">
                   <div className="flex items-start">
                     <div className="flex items-center h-5">
@@ -210,10 +212,16 @@ const SettingsPage: React.FC = () => {
                     </div>
                     <div className="ml-3 text-sm">
                       <label htmlFor="toast-notifications" className="font-medium text-stone-700">
-                        Show pop-up notifications on screen
+                        {t('settings.showPopupNotifications')}
                       </label>
-                      <p className="text-stone-500">Toggle the pop-up messages that appear after actions like saving or submitting. This only affects this device/browser.</p>
+                      <p className="text-stone-500">{t('settings.showPopupNotificationsHelp')}</p>
                     </div>
+                  </div>
+
+                  <div className="border-t border-stone-100 pt-4">
+                    <span className="text-sm font-medium text-stone-700">{t('settings.language')}</span>
+                    <p className="text-sm text-stone-500 mb-3">{t('settings.languageHelp')}</p>
+                    <LanguageSwitcher />
                   </div>
                 </div>
               </div>

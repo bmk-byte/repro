@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Database, TrendingUp, BarChart3, Search,
@@ -10,86 +11,92 @@ import {
 // place these panels are selected from now (see LandingPage.tsx's comment).
 export type TabId = 'features' | 'thematic' | 'benefits' | 'testimonials';
 
-const features = [
-  { icon: <Database className="h-5 w-5" />, title: 'Searchable Case Database', description: 'Access a comprehensive database of reproductive justice cases across Africa.' },
-  { icon: <TrendingUp className="h-5 w-5" />, title: 'AI-Powered Analysis', description: 'Leverage advanced AI to identify legal trends and patterns.' },
-  { icon: <BarChart3 className="h-5 w-5" />, title: 'Interactive Visualizations', description: 'Explore data through dynamic charts and visual representations.' },
-  { icon: <Search className="h-5 w-5" />, title: 'Advanced Search', description: 'Find relevant cases and documents with powerful search capabilities.' },
+const FEATURE_ICONS = [
+  <Database className="h-5 w-5" />, <TrendingUp className="h-5 w-5" />,
+  <BarChart3 className="h-5 w-5" />, <Search className="h-5 w-5" />,
 ];
 
-const thematicAreas = [
-  { icon: <HeartPulse className="h-6 w-6" />, title: 'Access to Safe Abortion', description: 'Legal frameworks, barriers, and advancements in ensuring access to safe abortion services across Africa.' },
-  { icon: <Baby className="h-6 w-6" />, title: 'Maternal Health and Mortality', description: 'Cases addressing maternal healthcare access, quality of care, and accountability for preventable maternal deaths.' },
-  { icon: <ShieldAlert className="h-6 w-6" />, title: 'Sexual and Gender-Based Violence', description: 'Legal responses to SGBV, including rape, domestic violence, and their impact on reproductive health and rights.' },
-  { icon: <UserCheck className="h-6 w-6" />, title: 'Consent and Adolescent Rights', description: 'Legal issues surrounding consent for reproductive healthcare, particularly for adolescents and vulnerable populations.' },
-  { icon: <Scales className="h-6 w-6" />, title: 'Discrimination in Healthcare', description: 'Cases challenging discriminatory practices in reproductive healthcare delivery based on gender, disability, or socioeconomic status.' },
-  { icon: <Droplets className="h-6 w-6" />, title: 'Menstrual Health and Hygiene', description: 'Legal advocacy for menstrual equity, including access to products, facilities, and education.' },
+const THEMATIC_ICONS = [
+  <HeartPulse className="h-6 w-6" />, <Baby className="h-6 w-6" />,
+  <ShieldAlert className="h-6 w-6" />, <UserCheck className="h-6 w-6" />,
+  <Scales className="h-6 w-6" />, <Droplets className="h-6 w-6" />,
 ];
 
-const benefits = [
-  { icon: <Scale className="h-5 w-5" />, title: 'Legal Professionals', description: 'Access comprehensive case management tools and legal resources to effectively handle reproductive justice cases.' },
-  { icon: <Users className="h-5 w-5" />, title: 'Policymakers', description: 'Make informed decisions with data-driven insights and trend analysis across multiple jurisdictions.' },
-  { icon: <Lightbulb className="h-5 w-5" />, title: 'Activists', description: 'Stay informed about legal developments and collaborate with stakeholders to drive meaningful change.' },
+const BENEFIT_ICONS = [
+  <Scale className="h-5 w-5" />, <Users className="h-5 w-5" />, <Lightbulb className="h-5 w-5" />,
 ];
 
-const testimonials = [
-  { quote: 'ReproPulse has revolutionized how we manage and track reproductive justice cases across our network.', author: 'Dr. Jessica Oreoluwa Oga', role: 'Head of Regionalism, Afya Na Haki' },
-  { quote: 'The data insights provided by ReproPulse have been invaluable in shaping our advocacy strategy.', author: 'Mr. Ibrahim Nsereko', role: 'Head of Advocacy Capacity Enhancement, Afya Na Haki' },
-  { quote: 'A game-changer for reproductive rights activism in Africa. The collaborative features are exceptional.', author: 'Koomson Nana', role: 'Reproductive Rights Activist' },
-];
+interface TitleDescriptionItem { title: string; description: string }
+interface TestimonialItem { quote: string; author: string; role: string }
 
 const panelTransition = { duration: 0.25 };
 
-const FeaturesPanel = () => (
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    {features.map((f, i) => (
-      <div key={i} className="enhanced-card p-4 sm:p-5">
-        <div className="inline-flex p-2.5 bg-primary/10 rounded-lg mb-3 text-primary">{f.icon}</div>
-        <h3 className="text-sm sm:text-base font-semibold text-stone-900 mb-1.5">{f.title}</h3>
-        <p className="text-xs sm:text-sm text-stone-500">{f.description}</p>
-      </div>
-    ))}
-  </div>
-);
-
-const ThematicPanel = () => (
-  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-    {thematicAreas.map((a, i) => (
-      <div key={i} className="enhanced-card p-4 sm:p-5">
-        <div className="inline-flex p-2.5 bg-primary/10 rounded-lg mb-3 text-primary">{a.icon}</div>
-        <h3 className="text-sm sm:text-base font-semibold text-stone-900 mb-1.5">{a.title}</h3>
-        <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">{a.description}</p>
-      </div>
-    ))}
-  </div>
-);
-
-const BenefitsPanel = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    {benefits.map((b, i) => (
-      <div key={i} className="enhanced-card p-4 sm:p-5">
-        <div className="inline-flex p-2.5 bg-primary/10 rounded-lg mb-3 text-primary">{b.icon}</div>
-        <h3 className="text-sm sm:text-base font-semibold text-stone-900 mb-1.5">{b.title}</h3>
-        <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">{b.description}</p>
-      </div>
-    ))}
-  </div>
-);
-
-const TestimonialsPanel = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    {testimonials.map((t, i) => (
-      <div key={i} className="enhanced-card p-4 sm:p-5">
-        <div className="inline-flex p-2 bg-primary/10 rounded-lg mb-3">
-          <Quote className="h-5 w-5 text-primary" />
+const FeaturesPanel = () => {
+  const { t } = useTranslation();
+  const items = t('landing.featureItems', { returnObjects: true }) as TitleDescriptionItem[];
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {items.map((f, i) => (
+        <div key={i} className="enhanced-card p-4 sm:p-5">
+          <div className="inline-flex p-2.5 bg-primary/10 rounded-lg mb-3 text-primary">{FEATURE_ICONS[i]}</div>
+          <h3 className="text-sm sm:text-base font-semibold text-stone-900 mb-1.5">{f.title}</h3>
+          <p className="text-xs sm:text-sm text-stone-500">{f.description}</p>
         </div>
-        <p className="text-xs sm:text-sm text-stone-600 italic mb-3 leading-relaxed">"{t.quote}"</p>
-        <p className="font-semibold text-stone-900 text-sm">{t.author}</p>
-        <p className="text-xs text-stone-500">{t.role}</p>
-      </div>
-    ))}
-  </div>
-);
+      ))}
+    </div>
+  );
+};
+
+const ThematicPanel = () => {
+  const { t } = useTranslation();
+  const items = t('landing.thematicItems', { returnObjects: true }) as TitleDescriptionItem[];
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      {items.map((a, i) => (
+        <div key={i} className="enhanced-card p-4 sm:p-5">
+          <div className="inline-flex p-2.5 bg-primary/10 rounded-lg mb-3 text-primary">{THEMATIC_ICONS[i]}</div>
+          <h3 className="text-sm sm:text-base font-semibold text-stone-900 mb-1.5">{a.title}</h3>
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">{a.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const BenefitsPanel = () => {
+  const { t } = useTranslation();
+  const items = t('landing.benefitItems', { returnObjects: true }) as TitleDescriptionItem[];
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {items.map((b, i) => (
+        <div key={i} className="enhanced-card p-4 sm:p-5">
+          <div className="inline-flex p-2.5 bg-primary/10 rounded-lg mb-3 text-primary">{BENEFIT_ICONS[i]}</div>
+          <h3 className="text-sm sm:text-base font-semibold text-stone-900 mb-1.5">{b.title}</h3>
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">{b.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TestimonialsPanel = () => {
+  const { t } = useTranslation();
+  const items = t('landing.testimonialItems', { returnObjects: true }) as TestimonialItem[];
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {items.map((item, i) => (
+        <div key={i} className="enhanced-card p-4 sm:p-5">
+          <div className="inline-flex p-2 bg-primary/10 rounded-lg mb-3">
+            <Quote className="h-5 w-5 text-primary" />
+          </div>
+          <p className="text-xs sm:text-sm text-stone-600 italic mb-3 leading-relaxed">"{item.quote}"</p>
+          <p className="font-semibold text-stone-900 text-sm">{item.author}</p>
+          <p className="text-xs text-stone-500">{item.role}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const PANELS: Record<TabId, React.FC> = {
   features: FeaturesPanel,
@@ -98,11 +105,11 @@ const PANELS: Record<TabId, React.FC> = {
   testimonials: TestimonialsPanel,
 };
 
-const HEADINGS: Record<TabId, { title: string; subtitle: string }> = {
-  features: { title: 'Powerful Features', subtitle: 'Everything you need to manage and analyze reproductive justice cases effectively.' },
-  thematic: { title: 'Our Thematic Focus', subtitle: 'Exploring key legal areas in reproductive justice across Africa.' },
-  benefits: { title: 'Benefits', subtitle: 'Empowering different stakeholders in the pursuit of reproductive justice.' },
-  testimonials: { title: 'What Users Say', subtitle: 'Hear from our community of legal professionals, policymakers, and activists.' },
+const HEADING_KEYS: Record<TabId, string> = {
+  features: 'landing.featuresHeading',
+  thematic: 'landing.thematicHeading',
+  benefits: 'landing.benefitsHeading',
+  testimonials: 'landing.testimonialsHeading',
 };
 
 interface LandingTabsProps {
@@ -115,9 +122,10 @@ interface LandingTabsProps {
 // viewports that can't fit every card still work, without the page growing
 // past one screen.
 const LandingTabs: React.FC<LandingTabsProps> = ({ activeTab }) => {
+  const { t } = useTranslation();
   const tabId: TabId = activeTab in PANELS ? (activeTab as TabId) : 'features';
   const ActivePanel = PANELS[tabId];
-  const heading = HEADINGS[tabId];
+  const heading = t(HEADING_KEYS[tabId], { returnObjects: true }) as { title: string; subtitle: string };
 
   return (
     // Translucent + blurred rather than opaque white, so the page-wide

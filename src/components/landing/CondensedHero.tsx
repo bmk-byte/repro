@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Scale } from 'lucide-react';
 
@@ -12,10 +13,18 @@ interface CondensedHeroProps {
 // Originkit "hero-24" background across the whole page (hero + tabs +
 // footer), so this stays transparent and lets that show through.
 const CondensedHero: React.FC<CondensedHeroProps> = ({ onGetStarted }) => {
+  const { t } = useTranslation();
+  const fullText = t('landing.heroTypedText');
   const [typedText, setTypedText] = useState('');
-  const fullText = 'Reproductive Justice';
   const [isTypingComplete, setIsTypingComplete] = useState(false);
   const [showCursor, setShowCursor] = useState(true);
+
+  // Restart the typing animation whenever the target text changes (e.g. the
+  // language switches mid-animation).
+  useEffect(() => {
+    setTypedText('');
+    setIsTypingComplete(false);
+  }, [fullText]);
 
   useEffect(() => {
     if (typedText.length < fullText.length) {
@@ -48,20 +57,20 @@ const CondensedHero: React.FC<CondensedHeroProps> = ({ onGetStarted }) => {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full">
             <Scale className="h-4 w-4 text-white" />
-            <span className="text-xs font-medium text-white">LIRA Programme</span>
+            <span className="text-xs font-medium text-white">{t('landing.heroBadge')}</span>
           </div>
 
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-snug">
-            Advancing{' '}
+            {t('landing.heroTitlePrefix')}{' '}
             <span className="text-primary">
               {typedText}
               <span className={`${showCursor ? 'opacity-100' : 'opacity-0'} transition-opacity duration-100`}>|</span>
             </span>{' '}
-            Across Africa
+            {t('landing.heroTitleSuffix')}
           </h1>
 
           <p className="max-w-2xl text-sm sm:text-base text-stone-300 leading-relaxed">
-            A comprehensive platform for tracking, analyzing, and collaborating on reproductive justice cases across the African continent.
+            {t('landing.heroSubtitle')}
           </p>
 
           <motion.button
@@ -70,7 +79,7 @@ const CondensedHero: React.FC<CondensedHeroProps> = ({ onGetStarted }) => {
             onClick={onGetStarted}
             className="mt-1 inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark transition-colors duration-300 shadow-lg hover:shadow-xl"
           >
-            Get Started
+            {t('landing.getStarted')}
           </motion.button>
         </motion.div>
       </div>

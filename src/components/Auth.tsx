@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { validateModeratorOrganization } from '../lib/moderatorService';
@@ -21,6 +22,7 @@ interface ValidationState {
 }
 
 const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,10 +51,10 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   // Validate email field
   const handleEmailValidation = () => {
     if (!email) {
-      setValidationErrors(prev => ({ ...prev, email: 'Please enter your email address' }));
+      setValidationErrors(prev => ({ ...prev, email: t('auth.pleaseEnterEmail') }));
       return false;
     } else if (!validateEmail(email)) {
-      setValidationErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+      setValidationErrors(prev => ({ ...prev, email: t('auth.pleaseEnterValidEmail') }));
       return false;
     } else {
       setValidationErrors(prev => ({ ...prev, email: '' }));
@@ -63,10 +65,10 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   // Validate password field
   const handlePasswordValidation = () => {
     if (!password) {
-      setValidationErrors(prev => ({ ...prev, password: 'Please enter your password' }));
+      setValidationErrors(prev => ({ ...prev, password: t('auth.pleaseEnterPassword') }));
       return false;
     } else if (isSignUp && passwordStrength < 100) {
-      setValidationErrors(prev => ({ ...prev, password: 'Password does not meet all requirements' }));
+      setValidationErrors(prev => ({ ...prev, password: t('auth.passwordRequirementsNotMet') }));
       return false;
     } else {
       setValidationErrors(prev => ({ ...prev, password: '' }));
@@ -106,12 +108,12 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
-        toast.success('Reset instructions sent. Check your email.');
+        toast.success(t('auth.resetInstructionsSent'));
       } catch (error: any) {
         console.error('Password reset error:', error);
         if (error?.status >= 500) {
           toast.error(
-            'The password reset service is temporarily unavailable. Please try again later, or contact your administrator to reset your password manually.',
+            t('auth.resetServiceUnavailable'),
             { duration: 8000 }
           );
         } else {
@@ -127,7 +129,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
     // Validate organization is required during signup
     if (isSignUp && !selectedOrganization) {
-      toast.error('Please select your organization');
+      toast.error(t('auth.pleaseSelectOrganization'));
       setShakeAnimation(true);
       setTimeout(() => setShakeAnimation(false), 500);
       return;
@@ -135,7 +137,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
     // Validate custom organization if "Other" is selected
     if (isSignUp && selectedOrganization === OTHER_ORGANIZATION_VALUE && !customOrganization.trim()) {
-      toast.error('Please enter your organization name');
+      toast.error(t('auth.pleaseEnterOrganizationName'));
       setShakeAnimation(true);
       setTimeout(() => setShakeAnimation(false), 500);
       return;
@@ -160,8 +162,8 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
             (org) => org.toLowerCase() === expectedOrg.toLowerCase()
           );
           const actionableMessage = isListed
-            ? `This email is registered for "${expectedOrg}". Please select that organization from the dropdown, or choose "Other" to enter a different one.`
-            : `This email is registered for "${expectedOrg}". Please choose "Other" in the dropdown and enter "${expectedOrg}" as your organization.`;
+            ? t('auth.emailRegisteredListed', { org: expectedOrg })
+            : t('auth.emailRegisteredOther', { org: expectedOrg });
 
           toast.error(actionableMessage);
           setValidationErrors(prev => ({
@@ -195,7 +197,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           p_window_seconds: 3600,
         });
         if (!signUpRateLimitError && signUpAllowed === false) {
-          toast.error('Too many sign-up attempts for this email. Please try again in an hour.');
+          toast.error(t('auth.rateLimitedSignup'));
           setLoading(false);
           return;
         }
@@ -219,7 +221,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         }
 
         if (!authData.user) {
-          toast.error('Registration failed. Please try again.');
+          toast.error(t('auth.registrationFailed'));
           setLoading(false);
           return;
         }
@@ -248,7 +250,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         // above) and isn't known client-side at this point — this component
         // has no `isModerator` state, so the message is generic regardless
         // of what the account ends up granted.
-        toast.success('Registration successful! You can now sign in.');
+        toast.success(t('auth.registrationSuccess'));
         setIsSignUp(false);
       } else {
         // Fail open: only an explicit `false` blocks — an RPC error (e.g.
@@ -259,7 +261,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           p_window_seconds: 300,
         });
         if (!loginRateLimitError && loginAllowed === false) {
-          toast.error('Too many sign-in attempts. Please try again in a few minutes.');
+          toast.error(t('auth.rateLimitedLogin'));
           setLoading(false);
           return;
         }
@@ -272,7 +274,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         if (error) {
           // Directly show toast for invalid credentials without throwing
           if (error.message === 'Invalid login credentials') {
-            setValidationErrors(prev => ({ ...prev, password: 'The email or password you entered is incorrect' }));
+            setValidationErrors(prev => ({ ...prev, password: t('auth.invalidCredentials') }));
             // Trigger shake animation
             setShakeAnimation(true);
             setTimeout(() => setShakeAnimation(false), 500);
@@ -284,10 +286,10 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         }
         
         if (data.user) {
-          toast.success('Welcome back!');
+          toast.success(t('auth.welcomeBack'));
           if (onSuccess) onSuccess();
         } else {
-          toast.error('Sign in failed. Please try again.');
+          toast.error(t('auth.signInFailed'));
         }
       }
     } catch (error: any) {
@@ -329,7 +331,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                 className="self-start mb-4 flex items-center text-sm text-stone-600 hover:text-primary transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                <span>Back to Home</span>
+                <span>{t('auth.backToHome')}</span>
               </button>
             )}
             <div className="flex items-center justify-center gap-2.5">
@@ -339,7 +341,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
               <span className="font-serif text-3xl font-semibold text-primary">ReproPulse</span>
             </div>
             <h2 className="mt-7 text-center text-2xl sm:text-3xl font-serif font-semibold text-stone-900">
-              {isForgotPassword ? 'Reset your password' : isSignUp ? 'Create your account' : 'Sign in to your account'}
+              {isForgotPassword ? t('auth.forgotPasswordTitle') : isSignUp ? t('auth.signUpTitle') : t('auth.signInTitle')}
             </h2>
           </div>
 
@@ -358,17 +360,17 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                   >
                     {!isForgotPassword && isSignUp && (
                       <Input
-                        label="Full Name"
+                        label={t('auth.fullName')}
                         id="fullName"
                         name="fullName"
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Enter your full name"
+                        placeholder={t('auth.fullNamePlaceholder')}
                         rightElement={
                           <HelpCircle
                             className="h-5 w-5 text-stone-400 hover:text-stone-500 cursor-help"
-                            title="Enter your full name as it appears on official documents."
+                            title={t('auth.fullNameHelp')}
                           />
                         }
                       />
@@ -376,20 +378,20 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
                   {!isForgotPassword && isSignUp && (
                     <Input
-                      label="Profession"
+                      label={t('auth.profession')}
                       id="profession"
                       name="profession"
                       type="text"
                       value={profession}
                       onChange={(e) => setProfession(e.target.value)}
-                      placeholder="e.g. Lawyer, Researcher, Advocate"
+                      placeholder={t('auth.professionPlaceholder')}
                     />
                   )}
 
                   {!isForgotPassword && isSignUp && (
                     <div className="space-y-4">
                       <Select
-                        label="Organization"
+                        label={t('auth.organization')}
                         id="organization"
                         name="organization"
                         required
@@ -397,13 +399,13 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                         onChange={handleOrganizationChange}
                         error={validationErrors.organization}
                       >
-                        <option value="">Select your organization</option>
+                        <option value="">{t('auth.organizationSelectPlaceholder')}</option>
                         {PARTNER_ORGANIZATIONS.map((org) => (
                           <option key={org} value={org}>
                             {org}
                           </option>
                         ))}
-                        <option value={OTHER_ORGANIZATION_VALUE}>{OTHER_ORGANIZATION_VALUE} (specify below)</option>
+                        <option value={OTHER_ORGANIZATION_VALUE}>{t('auth.organizationOtherOption', { other: OTHER_ORGANIZATION_VALUE })}</option>
                       </Select>
 
                       {showCustomOrganization && (
@@ -414,18 +416,18 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                           transition={{ duration: 0.2 }}
                         >
                           <Input
-                            label="Organization Name"
+                            label={t('auth.organizationName')}
                             id="customOrganization"
                             name="customOrganization"
                             type="text"
                             required
                             value={customOrganization}
                             onChange={handleCustomOrganizationChange}
-                            placeholder="Enter your organization name"
+                            placeholder={t('auth.organizationNamePlaceholder')}
                             rightElement={
                               <HelpCircle
                                 className="h-5 w-5 text-stone-400"
-                                title="Enter the full name of your organization."
+                                title={t('auth.organizationNameHelp')}
                               />
                             }
                           />
@@ -436,7 +438,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
                   {!isForgotPassword && isSignUp && (
                     <Input
-                      label="Phone Number"
+                      label={t('auth.phoneNumber')}
                       id="phoneNumber"
                       name="phoneNumber"
                       type="tel"
@@ -447,7 +449,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                   )}
 
                   <Input
-                    label="Email address"
+                    label={t('auth.email')}
                     id="email"
                     name="email"
                     type="email"
@@ -460,11 +462,11 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                     }}
                     onBlur={handleEmailValidation}
                     error={validationErrors.email}
-                    placeholder="you@example.com"
+                    placeholder={t('auth.emailPlaceholder')}
                     rightElement={
                       <HelpCircle
                         className="h-5 w-5 text-stone-400 hover:text-stone-500 cursor-help"
-                        title={isSignUp ? "This email will be used to log in to your account and for account recovery." : "Enter the email address associated with your account."}
+                        title={isSignUp ? t('auth.emailHelpSignUp') : t('auth.emailHelpSignIn')}
                       />
                     }
                   />
@@ -472,7 +474,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                   {!isForgotPassword && (
                     <div>
                       <Input
-                        label="Password"
+                        label={t('auth.password')}
                         id="password"
                         name="password"
                         type={showPassword ? 'text' : 'password'}
@@ -489,22 +491,22 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                           handlePasswordValidation();
                         }}
                         error={validationErrors.password}
-                        placeholder={isSignUp ? 'Create a strong password' : 'Enter your password'}
+                        placeholder={isSignUp ? t('auth.passwordPlaceholderSignUp') : t('auth.passwordPlaceholderSignIn')}
                         rightElement={
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="text-stone-400 hover:text-stone-500"
-                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                             >
                               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                             </button>
                             <HelpCircle
                               className="h-5 w-5 text-stone-400 hover:text-stone-500 cursor-help"
                               title={isSignUp
-                                ? 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
-                                : 'Enter the password associated with your account.'}
+                                ? t('auth.passwordHelpSignUp')
+                                : t('auth.passwordHelpSignIn')}
                             />
                           </div>
                         }
@@ -528,13 +530,13 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                         }}
                         className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
                       >
-                        Forgot your password?
+                        {t('auth.forgotPassword')}
                       </button>
                     </div>
                   )}
 
                   <Button type="submit" loading={loading} size="lg" className="w-full">
-                    {loading ? 'Processing...' : isForgotPassword ? 'Send reset instructions' : isSignUp ? 'Sign up' : 'Sign in'}
+                    {loading ? t('auth.processing') : isForgotPassword ? t('auth.sendResetInstructions') : isSignUp ? t('auth.signUp') : t('auth.signIn')}
                   </Button>
                 </motion.form>
 
@@ -543,7 +545,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                     onClick={isForgotPassword ? () => setIsForgotPassword(false) : toggleAuthMode}
                     className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
                   >
-                    {isForgotPassword ? 'Back to sign in' : isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                    {isForgotPassword ? t('auth.backToSignIn') : isSignUp ? t('auth.haveAccountSignIn') : t('auth.noAccountSignUp')}
                   </button>
                 </div>
             </Card>
