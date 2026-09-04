@@ -391,6 +391,7 @@
     "completed": "{{count}} completed",
     "inProgress": "{{count}} in progress",
     "pending": "{{count}} pending",
+    "loadingTimeline": "Loading case timeline…",
     "noStagesFound": "No stages found for this case",
     "editStageAriaLabel": "Edit stage",
     "statusValues": {

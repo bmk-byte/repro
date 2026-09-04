@@ -143,7 +143,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className={`bg-white border-b border-stone-200 ${className}`} role="banner">
-      <nav className="relative" role="navigation" aria-label="Main navigation">
+      <nav className="relative" role="navigation" aria-label={t('common.mainNavigationAriaLabel')}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             <div className="flex items-center gap-3">
               {isLandingPage && !isAuthenticated && (
-                <div className="hidden md:flex items-center gap-6" role="navigation" aria-label="Page sections">
+                <div className="hidden md:flex items-center gap-6" role="navigation" aria-label={t('common.pageSectionsAriaLabel')}>
                   {landingPageLinks.map((link) => (
                     <button
                       key={link.id}
@@ -246,7 +246,7 @@ const Navbar: React.FC<NavbarProps> = ({
       </nav>
 
       {isAuthenticated && (
-        <nav className="hidden md:block bg-stone-50 border-t border-stone-200" role="navigation" aria-label="Dashboard navigation">
+        <nav className="hidden md:block bg-stone-50 border-t border-stone-200" role="navigation" aria-label={t('common.dashboardNavigationAriaLabel')}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-1 py-2">
               {navigationItems.map((item) => {

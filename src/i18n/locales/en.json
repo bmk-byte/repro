@@ -88,6 +88,9 @@
     "admins": "Admins",
     "settings": "Settings",
     "navigateTo": "Navigate to {{label}}",
+    "mainNavigationAriaLabel": "Main navigation",
+    "pageSectionsAriaLabel": "Page sections",
+    "dashboardNavigationAriaLabel": "Dashboard navigation",
     "notificationsUnread": "Notifications, {{count}} unread — go to moderation queue"
   },
   "landing": {

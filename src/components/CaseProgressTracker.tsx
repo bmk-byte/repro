@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileUp, ChevronDown, ChevronRight, Clock, FileText, Edit2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
@@ -28,6 +29,7 @@ interface CaseProgressTrackerProps {
 }
 
 const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpdate }) => {
+  const { t } = useTranslation('rapidResponse');
   const [loading, setLoading] = React.useState(true);
   const [stageGroups, setStageGroups] = React.useState<StageGroup[]>([]);
   const [expandedGroups, setExpandedGroups] = React.useState<string[]>([]);
@@ -78,7 +80,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
       }
     } catch (error) {
       console.error('Error fetching stages:', error);
-      toast.error('Failed to load case stages');
+      toast.error(t('tracker.toasts.failedToLoadStages'));
     } finally {
       setLoading(false);
     }
@@ -131,7 +133,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
         ]);
         
         if (!fileValidation.isValid) {
-          setFileError(fileValidation.error || 'Invalid file');
+          setFileError(fileValidation.error || t('tracker.toasts.invalidFile'));
           return;
         }
         
@@ -157,11 +159,11 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
 
         if (error) throw error;
 
-        toast.success('Document uploaded successfully');
+        toast.success(t('tracker.toasts.documentUploaded'));
         fetchStages();
       } catch (error) {
         console.error('Error uploading document:', error);
-        toast.error('Failed to upload document');
+        toast.error(t('tracker.toasts.failedToUploadDocument'));
       } finally {
         setUploading(false);
       }
@@ -191,13 +193,13 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
 
         if (error) throw error;
 
-        toast.success('Stage updated successfully');
+        toast.success(t('tracker.toasts.stageUpdated'));
         onClose();
         fetchStages();
         if (onUpdate) onUpdate();
       } catch (error) {
         console.error('Error updating stage:', error);
-        toast.error('Failed to update stage');
+        toast.error(t('tracker.toasts.failedToUpdateStage'));
       }
     };
 
@@ -205,15 +207,15 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
     const getDocumentTypeInfo = (url: string) => {
       const filename = url.split('/').pop() || '';
       const extension = filename.split('.').pop()?.toLowerCase() || '';
-      
+
       switch (extension) {
         case 'pdf':
-          return { icon: 'pdf', label: 'PDF Document' };
+          return { icon: 'pdf', label: t('tracker.documentTypes.pdf') };
         case 'doc':
         case 'docx':
-          return { icon: 'word', label: 'Word Document' };
+          return { icon: 'word', label: t('tracker.documentTypes.word') };
         default:
-          return { icon: 'file', label: 'Document' };
+          return { icon: 'file', label: t('tracker.documentTypes.file') };
       }
     };
 
@@ -233,35 +235,35 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Status
+                {t('tracker.modal.status')}
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as Stage['status'])}
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
+                <option value="Pending">{t('tracker.statusValues.Pending')}</option>
+                <option value="In Progress">{t('tracker.statusValues.In Progress')}</option>
+                <option value="Completed">{t('tracker.statusValues.Completed')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Notes
+                {t('tracker.modal.notes')}
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Add notes about this stage..."
+                placeholder={t('tracker.modal.notesPlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-2">
-                Documents
+                {t('tracker.modal.documents')}
               </label>
               <div
                 {...getRootProps()}
@@ -270,10 +272,10 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                 <input {...getInputProps()} />
                 <FileUp className="h-8 w-8 text-stone-400 mx-auto mb-2" />
                 <p className="text-stone-600">
-                  {uploading ? 'Uploading...' : 'Drop files here or click to upload'}
+                  {uploading ? t('tracker.modal.uploading') : t('tracker.modal.dropFilesHere')}
                 </p>
                 <p className="text-sm text-stone-500 mt-1">
-                  PDF, DOC, DOCX up to 5MB
+                  {t('tracker.modal.fileTypesHint')}
                 </p>
                 {fileError && (
                   <p className="text-sm text-red-500 mt-2">{fileError}</p>
@@ -309,13 +311,13 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-50"
               >
-                Cancel
+                {t('tracker.modal.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-lg hover:bg-primary-dark"
               >
-                Save Changes
+                {t('tracker.modal.saveChanges')}
               </button>
             </div>
           </form>
@@ -326,7 +328,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
 
   if (loading) {
     return (
-      <LoadingState label="Loading case timeline…" />
+      <LoadingState label={t('tracker.loadingTimeline')} />
     );
   }
 
@@ -343,7 +345,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
       {/* Progress summary */}
       <div className="bg-white p-4 rounded-lg border border-stone-200 mb-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-medium text-stone-700">Overall Progress</h3>
+          <h3 className="text-sm font-medium text-stone-700">{t('tracker.overallProgress')}</h3>
           <span className="text-sm font-medium text-stone-700">{completionPercentage}%</span>
         </div>
         <div className="w-full bg-stone-200 rounded-full h-2.5">
@@ -353,9 +355,9 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
           ></div>
         </div>
         <div className="flex justify-between text-xs text-stone-500 mt-2">
-          <span>{completedStages} completed</span>
-          <span>{inProgressStages} in progress</span>
-          <span>{totalStages - completedStages - inProgressStages} pending</span>
+          <span>{t('tracker.completed', { count: completedStages })}</span>
+          <span>{t('tracker.inProgress', { count: inProgressStages })}</span>
+          <span>{t('tracker.pending', { count: totalStages - completedStages - inProgressStages })}</span>
         </div>
       </div>
 
@@ -363,7 +365,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
       <div className="max-h-[300px] overflow-y-auto pr-2 rounded-lg border border-stone-200">
         {stageGroups.length === 0 ? (
           <div className="p-4 text-center text-stone-500">
-            No stages found for this case
+            {t('tracker.noStagesFound')}
           </div>
         ) : (
           stageGroups.map((group) => (
@@ -403,7 +405,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                               stage.status
                             )}`}
                           >
-                            {stage.status}
+                            {t(`tracker.statusValues.${stage.status}`)}
                           </span>
                           <span className="font-medium text-stone-900">
                             {stage.stage_name}
@@ -422,7 +424,7 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
                               handleStageClick(stage);
                             }}
                             className="p-1 text-stone-400 hover:text-primary rounded-full hover:bg-stone-100 transition-colors"
-                            aria-label="Edit stage"
+                            aria-label={t('tracker.editStageAriaLabel')}
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>

@@ -391,6 +391,7 @@
     "completed": "{{count}} terminée(s)",
     "inProgress": "{{count}} en cours",
     "pending": "{{count}} en attente",
+    "loadingTimeline": "Chargement de la chronologie du dossier…",
     "noStagesFound": "Aucune étape trouvée pour ce dossier",
     "editStageAriaLabel": "Modifier l'étape",
     "statusValues": {

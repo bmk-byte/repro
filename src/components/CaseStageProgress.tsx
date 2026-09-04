@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 interface CaseStageProgressProps {
@@ -11,18 +12,19 @@ interface CaseStageProgressProps {
 }
 
 const CaseStageProgress: React.FC<CaseStageProgressProps> = ({ 
-  stages = [], 
-  showCounts = false 
+  stages = [],
+  showCounts = false
 }) => {
+  const { t } = useTranslation('rapidResponse');
   // Default stages for rapid response workflow if none provided
   const defaultStages = [
-    { stage_name: 'Initial Contact', status: 'Pending' as const },
-    { stage_name: 'Investigation & Arrest', status: 'Pending' as const },
-    { stage_name: 'Local Mediation', status: 'Pending' as const },
-    { stage_name: 'Medical & Counselling', status: 'Pending' as const },
-    { stage_name: 'Legal Prosecution', status: 'Pending' as const },
-    { stage_name: 'Court Trial', status: 'Pending' as const },
-    { stage_name: 'Post-Trial', status: 'Pending' as const }
+    { stage_name: t('progress.stageNames.initialContact'), status: 'Pending' as const },
+    { stage_name: t('progress.stageNames.investigationAndArrest'), status: 'Pending' as const },
+    { stage_name: t('progress.stageNames.localMediation'), status: 'Pending' as const },
+    { stage_name: t('progress.stageNames.medicalAndCounselling'), status: 'Pending' as const },
+    { stage_name: t('progress.stageNames.legalProsecution'), status: 'Pending' as const },
+    { stage_name: t('progress.stageNames.courtTrial'), status: 'Pending' as const },
+    { stage_name: t('progress.stageNames.postTrial'), status: 'Pending' as const }
   ];
 
   // Use provided stages or default stages if none provided
@@ -41,7 +43,7 @@ const CaseStageProgress: React.FC<CaseStageProgressProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold inline-block text-primary">
-              Case Progress
+              {t('progress.caseProgress')}
             </span>
           </div>
           <div className="text-right">
@@ -89,9 +91,9 @@ const CaseStageProgress: React.FC<CaseStageProgressProps> = ({
 
       {/* Summary */}
       <div className="flex justify-between text-xs text-stone-500 mt-2">
-        <span>{completedStages} completed</span>
-        <span>{inProgressStages} in progress</span>
-        <span>{totalStages - completedStages - inProgressStages} pending</span>
+        <span>{t('progress.completed', { count: completedStages })}</span>
+        <span>{t('progress.inProgress', { count: inProgressStages })}</span>
+        <span>{t('progress.pending', { count: totalStages - completedStages - inProgressStages })}</span>
       </div>
     </div>
   );

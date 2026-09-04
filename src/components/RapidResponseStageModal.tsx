@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import CaseProgressTracker from './CaseProgressTracker';
 
@@ -15,6 +16,7 @@ const RapidResponseStageModal: React.FC<RapidResponseStageModalProps> = ({
   caseData,
   onUpdate
 }) => {
+  const { t } = useTranslation('rapidResponse');
   if (!isOpen) return null;
 
   return (
@@ -23,13 +25,13 @@ const RapidResponseStageModal: React.FC<RapidResponseStageModalProps> = ({
         <div className="sticky top-0 bg-white pb-4 mb-6 border-b">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-stone-900">Case Progress Tracker</h2>
+              <h2 className="text-xl font-semibold text-stone-900">{t('stageModal.title')}</h2>
               <p className="mt-1 text-sm text-stone-500">{caseData.case_filed}</p>
             </div>
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-stone-100 transition-colors"
-              aria-label="Close modal"
+              aria-label={t('stageModal.closeModalAriaLabel')}
             >
               <X className="h-5 w-5 text-stone-500" />
             </button>

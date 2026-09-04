@@ -88,6 +88,9 @@
     "admins": "Administrateurs",
     "settings": "Paramètres",
     "navigateTo": "Aller à {{label}}",
+    "mainNavigationAriaLabel": "Navigation principale",
+    "pageSectionsAriaLabel": "Sections de la page",
+    "dashboardNavigationAriaLabel": "Navigation du tableau de bord",
     "notificationsUnread": "Notifications, {{count}} non lues — accéder à la file de modération"
   },
   "landing": {
