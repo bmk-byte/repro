@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useState } from 'react';
 import { Card, Title, Tab, TabList, TabGroup, TabPanel, TabPanels } from '@tremor/react';
 import { RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { testConnection, handleSupabaseError } from '../lib/supabase';
 import { LoadingState } from './ui';
 import DataChart from './DataChart';
@@ -62,6 +63,7 @@ function SubViewSwitch<T extends string>({
 }
 
 const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) => {
+  const { t } = useTranslation('analytics');
   const [loading, setLoading] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -93,10 +95,10 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
         <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative" role="alert">
           <div className="flex justify-between items-center">
             <div className="flex-1">
-              <span className="block sm:inline font-semibold">Connection Error:</span>
+              <span className="block sm:inline font-semibold">{t('analyticsPage.connectionErrorLabel')}</span>
               <span className="block sm:inline ml-1">{connectionError}</span>
               {retryCount > 0 && (
-                <p className="text-sm mt-1">Retry attempt: {retryCount}</p>
+                <p className="text-sm mt-1">{t('analyticsPage.retryAttempt', { count: retryCount })}</p>
               )}
             </div>
             <button
@@ -105,7 +107,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
               className="flex items-center space-x-2 bg-danger text-white px-4 py-2 rounded hover:bg-danger-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span>{loading ? 'Retrying...' : 'Retry Connection'}</span>
+              <span>{loading ? t('analyticsPage.retrying') : t('analyticsPage.retryConnection')}</span>
             </button>
           </div>
         </div>
@@ -116,21 +118,21 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-serif font-semibold text-stone-900">Analytics</h2>
-        <p className="mt-1 text-sm text-stone-600">Trends, distribution, geography, and outcomes across all cases.</p>
+        <h2 className="text-2xl font-serif font-semibold text-stone-900">{t('analyticsPage.title')}</h2>
+        <p className="mt-1 text-sm text-stone-600">{t('analyticsPage.subtitle')}</p>
       </div>
 
       <Card>
         <TabGroup>
           <div className="w-full overflow-x-auto pb-2">
             <TabList variant="line" className="flex-nowrap">
-              <Tab value="trends">Trends</Tab>
-              <Tab value="distribution">Distribution</Tab>
-              <Tab value="geography">Geography</Tab>
-              <Tab value="outcomes">Stakeholders</Tab>
-              <Tab value="legal">Legal Framework</Tab>
-              <Tab value="health">Health &amp; Performance</Tab>
-              {isModerator && <Tab value="reports">Reports</Tab>}
+              <Tab value="trends">{t('analyticsPage.tabs.trends')}</Tab>
+              <Tab value="distribution">{t('analyticsPage.tabs.distribution')}</Tab>
+              <Tab value="geography">{t('analyticsPage.tabs.geography')}</Tab>
+              <Tab value="outcomes">{t('analyticsPage.tabs.stakeholders')}</Tab>
+              <Tab value="legal">{t('analyticsPage.tabs.legalFramework')}</Tab>
+              <Tab value="health">{t('analyticsPage.tabs.healthAndPerformance')}</Tab>
+              {isModerator && <Tab value="reports">{t('analyticsPage.tabs.reports')}</Tab>}
             </TabList>
           </div>
 
@@ -140,26 +142,26 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
                 value={trendsView}
                 onChange={setTrendsView}
                 options={[
-                  { value: 'overview', label: 'Monthly Trend' },
-                  { value: 'metrics', label: 'Performance Metrics' },
-                  { value: 'timeline', label: 'Timeline' },
+                  { value: 'overview', label: t('analyticsPage.subviews.trends.overview') },
+                  { value: 'metrics', label: t('analyticsPage.subviews.trends.metrics') },
+                  { value: 'timeline', label: t('analyticsPage.subviews.trends.timeline') },
                 ]}
               />
               {trendsView === 'overview' && (
                 <div>
-                  <Title>Monthly Case Trends</Title>
+                  <Title>{t('analyticsPage.monthlyCaseTrends')}</Title>
                   <div className="h-80">
                     <DataChart />
                   </div>
                 </div>
               )}
               {trendsView === 'metrics' && (
-                <Suspense fallback={<LoadingState label="Loading performance metrics…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.performanceMetrics')} />}>
                   <PerformanceMetrics dateRange={dateRange} />
                 </Suspense>
               )}
               {trendsView === 'timeline' && (
-                <Suspense fallback={<LoadingState label="Loading timeline…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.timeline')} />}>
                   <TimelineVisualization />
                 </Suspense>
               )}
@@ -170,17 +172,17 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
                 value={distributionView}
                 onChange={setDistributionView}
                 options={[
-                  { value: 'distribution', label: 'By Type & Status' },
-                  { value: 'outcomes', label: 'By Outcome' },
+                  { value: 'distribution', label: t('analyticsPage.subviews.distribution.byTypeAndStatus') },
+                  { value: 'outcomes', label: t('analyticsPage.subviews.distribution.byOutcome') },
                 ]}
               />
               {distributionView === 'distribution' && (
-                <Suspense fallback={<LoadingState label="Loading distribution charts…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.distributionCharts')} />}>
                   <DistributionCharts />
                 </Suspense>
               )}
               {distributionView === 'outcomes' && (
-                <Suspense fallback={<LoadingState label="Loading outcomes…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.outcomes')} />}>
                   <OutcomeMetricsDashboard />
                 </Suspense>
               )}
@@ -191,12 +193,12 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
                 value={geographyView}
                 onChange={setGeographyView}
                 options={[
-                  { value: 'globe', label: 'Country Intelligence' },
-                  { value: 'map', label: 'Africa Map' },
+                  { value: 'globe', label: t('analyticsPage.subviews.geography.countryIntelligence') },
+                  { value: 'map', label: t('analyticsPage.subviews.geography.africaMap') },
                 ]}
               />
               {geographyView === 'globe' && (
-                <Suspense fallback={<LoadingState label="Loading map…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.map')} />}>
                   <GeographicIntelligence
                     connectionError={connectionError}
                     setConnectionError={setConnectionError}
@@ -204,20 +206,20 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
                 </Suspense>
               )}
               {geographyView === 'map' && (
-                <Suspense fallback={<LoadingState label="Loading Africa map…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.africaMap')} />}>
                   <AfricaMap />
                 </Suspense>
               )}
             </TabPanel>
 
             <TabPanel value="outcomes">
-              <Suspense fallback={<LoadingState label="Loading stakeholder analytics…" />}>
+              <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.stakeholderAnalytics')} />}>
                 <StakeholderAnalytics />
               </Suspense>
             </TabPanel>
 
             <TabPanel value="legal">
-              <Suspense fallback={<LoadingState label="Loading legal framework analysis…" />}>
+              <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.legalFrameworkAnalysis')} />}>
                 <LegalFrameworkAnalysis />
               </Suspense>
             </TabPanel>
@@ -227,12 +229,12 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
                 value={healthView}
                 onChange={setHealthView}
                 options={[
-                  { value: 'health', label: 'Health Indicators' },
-                  { value: 'performance', label: 'Performance Tracking' },
+                  { value: 'health', label: t('analyticsPage.subviews.health.healthIndicators') },
+                  { value: 'performance', label: t('analyticsPage.subviews.health.performanceTracking') },
                 ]}
               />
               {healthView === 'health' && (
-                <Suspense fallback={<LoadingState label="Loading health indicators…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.healthIndicators')} />}>
                   <HealthIndicatorIntegration
                     connectionError={connectionError}
                     setConnectionError={setConnectionError}
@@ -240,7 +242,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
                 </Suspense>
               )}
               {healthView === 'performance' && (
-                <Suspense fallback={<LoadingState label="Loading performance tracking…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.performanceTracking')} />}>
                   <PerformanceTrackingModule />
                 </Suspense>
               )}
@@ -248,7 +250,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ isModerator = false }) =>
 
             {isModerator && (
               <TabPanel value="reports">
-                <Suspense fallback={<LoadingState label="Loading report generator…" />}>
+                <Suspense fallback={<LoadingState label={t('analyticsPage.loadingLabels.reportGenerator')} />}>
                   <ReportGenerationSystem />
                 </Suspense>
               </TabPanel>

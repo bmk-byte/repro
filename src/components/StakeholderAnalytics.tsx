@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Users, Building, Gavel } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { LoadingState, ErrorState, Button } from './ui';
@@ -30,6 +31,7 @@ interface CountryRegion {
  * between two near-duplicate screens.
  */
 const StakeholderAnalytics: React.FC = () => {
+  const { t } = useTranslation('analytics');
   const [litigantData, setLitigantData] = React.useState<StakeholderData[]>([]);
   const [defendingData, setDefendingData] = React.useState<StakeholderData[]>([]);
   const [judicialData, setJudicialData] = React.useState<StakeholderData[]>([]);
@@ -164,7 +166,7 @@ const StakeholderAnalytics: React.FC = () => {
 
       const judicialCounts: Record<string, number> = {};
       cases.forEach(caseItem => {
-        const judicialBody = caseItem.judicial_body || 'Unknown';
+        const judicialBody = caseItem.judicial_body || t('stakeholderAnalytics.unknownBody');
         judicialCounts[judicialBody] = (judicialCounts[judicialBody] || 0) + 1;
       });
 
@@ -182,7 +184,7 @@ const StakeholderAnalytics: React.FC = () => {
       const errorMessage = handleSupabaseError(err);
       console.error('Error fetching stakeholder data:', errorMessage);
       setError(errorMessage);
-      toast.error(`Failed to load stakeholder data: ${errorMessage}`);
+      toast.error(t('stakeholderAnalytics.loadErrorToast', { error: errorMessage }));
     } finally {
       setLoading(false);
     }
@@ -196,14 +198,14 @@ const StakeholderAnalytics: React.FC = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-        <Title>Stakeholder Analytics</Title>
+        <Title>{t('stakeholderAnalytics.title')}</Title>
         <div className="flex flex-wrap gap-2">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('stakeholderAnalytics.allCategories')}</option>
             {categories.map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
@@ -213,7 +215,7 @@ const StakeholderAnalytics: React.FC = () => {
             onChange={(e) => setSelectedRegion(e.target.value)}
             className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Regions</option>
+            <option value="all">{t('stakeholderAnalytics.allRegions')}</option>
             {regions.map(region => (
               <option key={region} value={region}>{region}</option>
             ))}
@@ -222,14 +224,14 @@ const StakeholderAnalytics: React.FC = () => {
       </div>
 
       {loading ? (
-        <LoadingState label="Loading stakeholder analytics…" />
+        <LoadingState label={t('stakeholderAnalytics.loading')} />
       ) : error ? (
         <div className="flex items-center justify-center h-64">
           <ErrorState
-            description={retryCount > 0 ? `${error} (Retry attempt: ${retryCount})` : error}
+            description={retryCount > 0 ? t('stakeholderAnalytics.retryAttempt', { error, count: retryCount }) : error}
             action={
               <Button onClick={handleRetry} loading={loading}>
-                Retry
+                {t('stakeholderAnalytics.retry')}
               </Button>
             }
           />
@@ -237,7 +239,7 @@ const StakeholderAnalytics: React.FC = () => {
       ) : (
         <>
           <div className="mb-6">
-            <Title>Key Player Analysis</Title>
+            <Title>{t('stakeholderAnalytics.keyPlayerAnalysis.title')}</Title>
             {litigantData.length > 0 || defendingData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={[...litigantData.map(d => ({ ...d, type: 'Litigant' })), ...defendingData.map(d => ({ ...d, type: 'Defending' }))]}>
@@ -248,7 +250,7 @@ const StakeholderAnalytics: React.FC = () => {
                   <Legend />
                   <Bar
                     dataKey="cases"
-                    name="Cases"
+                    name={t('stakeholderAnalytics.seriesName')}
                     fill={CHART_COLORS.primary}
                     stackId="a"
                   />
@@ -256,14 +258,14 @@ const StakeholderAnalytics: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <div className="flex justify-center items-center h-64">
-                <Text>No key player data available</Text>
+                <Text>{t('stakeholderAnalytics.keyPlayerAnalysis.noData')}</Text>
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <Title>Institution Engagement</Title>
+              <Title>{t('stakeholderAnalytics.institutionEngagement.title')}</Title>
               {defendingData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={chartHeight(defendingData.length, 300)}>
                   <BarChart
@@ -276,7 +278,7 @@ const StakeholderAnalytics: React.FC = () => {
                     <Tooltip />
                     <Bar
                       dataKey="cases"
-                      name="Cases"
+                      name={t('stakeholderAnalytics.seriesName')}
                       fill={CHART_COLORS.info}
                       radius={[0, 4, 4, 0]}
                     />
@@ -284,13 +286,13 @@ const StakeholderAnalytics: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex justify-center items-center h-64">
-                  <Text>No institution data available</Text>
+                  <Text>{t('stakeholderAnalytics.institutionEngagement.noData')}</Text>
                 </div>
               )}
             </div>
 
             <div>
-              <Title>Court Participation Patterns</Title>
+              <Title>{t('stakeholderAnalytics.courtParticipation.title')}</Title>
               {judicialData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -307,12 +309,12 @@ const StakeholderAnalytics: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [`${value} cases`, 'Count']} />
+                    <Tooltip formatter={(value) => [t('stakeholderAnalytics.tooltipCases', { count: value }), t('stakeholderAnalytics.tooltipCount')]} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="flex justify-center items-center h-64">
-                  <Text>No judicial body data available</Text>
+                  <Text>{t('stakeholderAnalytics.courtParticipation.noData')}</Text>
                 </div>
               )}
             </div>
@@ -322,14 +324,14 @@ const StakeholderAnalytics: React.FC = () => {
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <Users className="h-5 w-5 text-primary" />
-                <Text className="font-medium">Top Litigants</Text>
+                <Text className="font-medium">{t('stakeholderAnalytics.topLitigants.title')}</Text>
               </Flex>
               <div className="mt-2 space-y-2">
                 {litigantData.slice(0, 3).map((litigant, index) => (
                   <div key={index} className="space-y-1">
                     <div className="flex justify-between items-center">
                       <Text className="truncate pr-2">{litigant.name}</Text>
-                      <Text className="font-medium">{litigant.cases} cases</Text>
+                      <Text className="font-medium">{t('stakeholderAnalytics.casesCount', { count: litigant.cases })}</Text>
                     </div>
                     <div className="w-full bg-stone-200 rounded-full h-2">
                       <div
@@ -347,14 +349,14 @@ const StakeholderAnalytics: React.FC = () => {
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <Building className="h-5 w-5 text-blue-500" />
-                <Text className="font-medium">Top Defending Institutions</Text>
+                <Text className="font-medium">{t('stakeholderAnalytics.topDefendingInstitutions.title')}</Text>
               </Flex>
               <div className="mt-2 space-y-2">
                 {defendingData.slice(0, 3).map((institution, index) => (
                   <div key={index} className="space-y-1">
                     <div className="flex justify-between items-center">
                       <Text className="truncate pr-2">{institution.name}</Text>
-                      <Text className="font-medium">{institution.cases} cases</Text>
+                      <Text className="font-medium">{t('stakeholderAnalytics.casesCount', { count: institution.cases })}</Text>
                     </div>
                     <div className="w-full bg-stone-200 rounded-full h-2">
                       <div
@@ -372,14 +374,14 @@ const StakeholderAnalytics: React.FC = () => {
             <div className="bg-stone-50 p-4 rounded-lg">
               <Flex>
                 <Gavel className="h-5 w-5 text-purple-500" />
-                <Text className="font-medium">Judicial Bodies</Text>
+                <Text className="font-medium">{t('stakeholderAnalytics.judicialBodies.title')}</Text>
               </Flex>
               <div className="mt-2 space-y-2">
                 {judicialData.slice(0, 3).map((body, index) => (
                   <div key={index} className="space-y-1">
                     <div className="flex justify-between items-center">
                       <Text className="truncate pr-2">{body.name}</Text>
-                      <Text className="font-medium">{body.cases} cases</Text>
+                      <Text className="font-medium">{t('stakeholderAnalytics.casesCount', { count: body.cases })}</Text>
                     </div>
                     <div className="w-full bg-stone-200 rounded-full h-2">
                       <div

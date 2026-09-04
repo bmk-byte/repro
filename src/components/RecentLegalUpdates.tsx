@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Scale, Gavel } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { LoadingState } from './ui';
@@ -20,6 +21,7 @@ interface LegalUpdate {
 }
 
 const RecentLegalUpdates = () => {
+  const { t } = useTranslation('analytics');
   const [updates, setUpdates] = React.useState<LegalUpdate[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -124,8 +126,8 @@ const RecentLegalUpdates = () => {
       setUpdates(data || []);
     } catch (err) {
       console.error('Error fetching legal updates:', err);
-      setError('Failed to load recent legal updates');
-      toast.error('Failed to load recent legal updates');
+      setError(t('recentLegalUpdates.loadError'));
+      toast.error(t('recentLegalUpdates.loadError'));
     } finally {
       setLoading(false);
     }
@@ -142,14 +144,14 @@ const RecentLegalUpdates = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-stone-900">Recent Legal Updates</h2>
+        <h2 className="text-xl font-semibold text-stone-900">{t('recentLegalUpdates.title')}</h2>
         <div className="flex items-center space-x-4">
           <select
             value={selectedArea}
             onChange={(e) => setSelectedArea(e.target.value)}
             className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('recentLegalUpdates.allCategories')}</option>
             {categories.map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
@@ -160,7 +162,7 @@ const RecentLegalUpdates = () => {
             onChange={(e) => setSelectedJurisdiction(e.target.value)}
             className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Jurisdictions</option>
+            <option value="all">{t('recentLegalUpdates.allJurisdictions')}</option>
             {jurisdictions.map(jurisdiction => (
               <option key={jurisdiction.id} value={jurisdiction.id}>{jurisdiction.name}</option>
             ))}
@@ -173,7 +175,7 @@ const RecentLegalUpdates = () => {
               onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
               className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <span className="text-stone-500">to</span>
+            <span className="text-stone-500">{t('recentLegalUpdates.dateRangeTo')}</span>
             <input
               type="date"
               value={dateRange.end}
@@ -185,14 +187,14 @@ const RecentLegalUpdates = () => {
       </div>
 
       {loading ? (
-        <LoadingState label="Loading legal updates…" />
+        <LoadingState label={t('recentLegalUpdates.loading')} />
       ) : error ? (
         <div className="text-center py-12 text-red-500">
           {error}
         </div>
       ) : updates.length === 0 ? (
         <div className="text-center py-12 text-stone-500">
-          No recent legal updates found
+          {t('recentLegalUpdates.noUpdates')}
         </div>
       ) : (
         <div className="space-y-6">
@@ -212,7 +214,7 @@ const RecentLegalUpdates = () => {
                     </span>
                     <span className="text-sm text-stone-400">•</span>
                     <span className="text-sm font-medium text-primary">
-                      {update.countries?.name || 'Unknown'}
+                      {update.countries?.name || t('recentLegalUpdates.unknownCountry')}
                     </span>
                   </div>
                   <h3 className="text-lg font-semibold text-stone-900 mb-2">
@@ -247,7 +249,7 @@ const RecentLegalUpdates = () => {
                   )}
                 </div>
                 <button className="flex items-center text-primary hover:text-primary-dark ml-4">
-                  <span className="text-sm font-medium">View Details</span>
+                  <span className="text-sm font-medium">{t('recentLegalUpdates.viewDetails')}</span>
                   <ChevronRight className="h-5 w-5 ml-1" />
                 </button>
               </div>

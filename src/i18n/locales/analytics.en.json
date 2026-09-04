@@ -1,1 +1,441 @@
-{}
+{
+  "analyticsPage": {
+    "connectionErrorLabel": "Connection Error:",
+    "retryAttempt": "Retry attempt: {{count}}",
+    "retrying": "Retrying...",
+    "retryConnection": "Retry Connection",
+    "title": "Analytics",
+    "subtitle": "Trends, distribution, geography, and outcomes across all cases.",
+    "tabs": {
+      "trends": "Trends",
+      "distribution": "Distribution",
+      "geography": "Geography",
+      "stakeholders": "Stakeholders",
+      "legalFramework": "Legal Framework",
+      "healthAndPerformance": "Health & Performance",
+      "reports": "Reports"
+    },
+    "subviews": {
+      "trends": {
+        "overview": "Monthly Trend",
+        "metrics": "Performance Metrics",
+        "timeline": "Timeline"
+      },
+      "distribution": {
+        "byTypeAndStatus": "By Type & Status",
+        "byOutcome": "By Outcome"
+      },
+      "geography": {
+        "countryIntelligence": "Country Intelligence",
+        "africaMap": "Africa Map"
+      },
+      "health": {
+        "healthIndicators": "Health Indicators",
+        "performanceTracking": "Performance Tracking"
+      }
+    },
+    "monthlyCaseTrends": "Monthly Case Trends",
+    "loadingLabels": {
+      "performanceMetrics": "Loading performance metrics…",
+      "timeline": "Loading timeline…",
+      "distributionCharts": "Loading distribution charts…",
+      "outcomes": "Loading outcomes…",
+      "map": "Loading map…",
+      "africaMap": "Loading Africa map…",
+      "stakeholderAnalytics": "Loading stakeholder analytics…",
+      "legalFrameworkAnalysis": "Loading legal framework analysis…",
+      "healthIndicators": "Loading health indicators…",
+      "performanceTracking": "Loading performance tracking…",
+      "reportGenerator": "Loading report generator…"
+    }
+  },
+  "geographicIntelligence": {
+    "title": "Geographic Intelligence",
+    "connectionErrorTitle": "Connection Error",
+    "retryConnection": "Retry Connection",
+    "allRegions": "All Regions",
+    "loading": "Loading geographic data…",
+    "retry": "Retry",
+    "caseVolumeByCountry": "Case Volume by Country",
+    "totalCasesSeries": "Total Cases",
+    "noCountryData": "No country data available",
+    "successRateByCountry": "Success Rate by Country",
+    "successRateSeries": "Success Rate (%)",
+    "noSuccessRateData": "No success rate data available",
+    "topCaseCountries": "Top Case Countries",
+    "casesCount": "{{count}} cases",
+    "regionalDistribution": "Regional Distribution"
+  },
+  "legalFrameworkAnalysis": {
+    "allCategories": "All Categories",
+    "loading": "Loading legal framework data…",
+    "retry": "Retry",
+    "noData": "No legal framework data available",
+    "loadError": "Failed to load legal framework data. Please try again later.",
+    "title": "Legal Framework Analysis",
+    "instrumentsUsed": {
+      "title": "Legal Instruments Used",
+      "noData": "No time-based legal framework data available"
+    },
+    "legend": {
+      "domestic": "Domestic Law",
+      "international": "International Law",
+      "both": "Both"
+    },
+    "protocolCitation": {
+      "title": "Protocol Citation Frequency",
+      "seriesName": "Citations",
+      "noData": "No protocol citation data available"
+    },
+    "frameworkDistribution": {
+      "title": "Domestic vs International Law",
+      "domesticOnly": "Domestic Law Only",
+      "internationalOnly": "International Law Only",
+      "bothUsed": "Both Used",
+      "noData": "No framework distribution data available"
+    },
+    "tooltip": {
+      "cases": "{{count}} cases",
+      "count": "Count"
+    },
+    "summary": {
+      "domestic": {
+        "title": "Domestic Legal Frameworks",
+        "totalLabel": "Total Domestic Law Cases",
+        "noData": "No domestic law data available"
+      },
+      "international": {
+        "title": "International Instruments",
+        "totalLabel": "Total International Law Cases",
+        "noData": "No international law data available"
+      },
+      "combined": {
+        "title": "Combined Approach",
+        "totalLabel": "Total Combined Approach Cases",
+        "noData": "No combined approach data available"
+      }
+    }
+  },
+  "outcomeMetrics": {
+    "noData": "No outcome data available",
+    "loadError": "Failed to load outcome metrics. Please try again later.",
+    "title": "Outcome Metrics Dashboard",
+    "allJurisdictions": "All Jurisdictions",
+    "loading": "Loading outcome metrics…",
+    "retry": "Retry",
+    "unknownJurisdiction": "Unknown",
+    "outcomes": {
+      "won": "Won",
+      "lost": "Lost",
+      "settled": "Settled",
+      "ongoing": "Ongoing",
+      "dismissed": "Dismissed"
+    },
+    "percentOfTotalCases": "{{percent}}% of total cases",
+    "caseOutcomes": {
+      "title": "Case Outcomes",
+      "noData": "No outcome data available"
+    },
+    "seriesNameCases": "Cases",
+    "outcomeDistribution": {
+      "title": "Outcome Distribution",
+      "noData": "No outcome distribution data available"
+    },
+    "tooltip": {
+      "cases": "{{count}} cases",
+      "count": "Count",
+      "percent": "{{value}}%",
+      "successRate": "Success Rate"
+    },
+    "successRateByJurisdiction": {
+      "title": "Success Rate by Jurisdiction",
+      "seriesName": "Success Rate",
+      "noData": "No jurisdiction success rate data available"
+    },
+    "resolutionProgress": {
+      "title": "Case Resolution Progress",
+      "overallResolutionRate": "Overall Resolution Rate",
+      "resolvedVsTotal": "Resolved vs. Total Cases",
+      "resolvedOfTotal": "{{resolved}} of {{total}} cases",
+      "successRateLabel": "Success Rate",
+      "successfulOutcomes": "Successful outcomes",
+      "caseCompletion": "Case Completion",
+      "completedCasesLabel": "Completed cases",
+      "casesCount": "{{count}} cases"
+    },
+    "footer": {
+      "overallSuccessRate": "Overall Success Rate",
+      "basedOnResolvedCases": "Based on resolved cases",
+      "kpiTitle": "Key Performance Indicators",
+      "totalCases": "Total Cases: {{count}}",
+      "resolutionRate": "Resolution Rate: {{percent}}%"
+    }
+  },
+  "performanceMetrics": {
+    "noData": "No case data available for the selected date range",
+    "loadError": "Failed to load performance metrics. Please try again later.",
+    "loading": "Loading performance metrics…",
+    "retry": "Retry",
+    "title": "Case Resolution Trends",
+    "yAxisLabel": "Cases",
+    "tooltipCases": "{{count}} cases",
+    "legend": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "pending": "Pending"
+    },
+    "emptyState": "No case resolution data available"
+  },
+  "performanceTracking": {
+    "noData": "No performance data available",
+    "loadError": "Failed to load performance data. Please try again later.",
+    "title": "Performance Tracking",
+    "allOrganizations": "All Organizations",
+    "loading": "Loading performance data…",
+    "retry": "Retry",
+    "unknownOrg": "Unknown",
+    "stats": {
+      "avgProcessingTime": {
+        "title": "Avg. Processing Time",
+        "subtitle": "From filing to resolution"
+      },
+      "kpiAchievement": {
+        "title": "KPI Achievement",
+        "subtitle": "Average across organizations"
+      },
+      "collaborationScore": {
+        "title": "Collaboration Score",
+        "subtitle": "Inter-organization cooperation"
+      },
+      "strategicCases": {
+        "title": "Strategic Cases",
+        "subtitle": "High-impact litigation"
+      }
+    },
+    "daysValue": "{{count}} days",
+    "orgKpiDashboard": {
+      "title": "Organization KPI Dashboard",
+      "seriesName": "KPI Achievement (%)",
+      "noData": "No organization KPI data available"
+    },
+    "processingTimeTrends": {
+      "title": "Processing Time Trends",
+      "avgSeriesName": "Avg. Processing Time (days)",
+      "targetSeriesName": "Target Time (days)",
+      "noData": "No processing time data available"
+    },
+    "orgPerformance": {
+      "title": "Organization Performance"
+    },
+    "processingTimeByOrg": {
+      "title": "Processing Time by Organization"
+    }
+  },
+  "timeline": {
+    "title": "Case Timeline Progression",
+    "allCountries": "All Countries",
+    "loading": "Loading timeline…",
+    "noData": "No timeline data available",
+    "loadError": "Failed to load timeline data. Please try again later.",
+    "legend": {
+      "filed": "Filed",
+      "ongoing": "Ongoing",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
+    },
+    "stats": {
+      "filedCases": "Filed Cases",
+      "filedCasesSubtitle": "New cases in period",
+      "ongoingCases": "Ongoing Cases",
+      "ongoingCasesSubtitle": "Currently in progress",
+      "resolvedCases": "Resolved Cases",
+      "resolvedCasesSubtitle": "Successfully completed",
+      "dismissedCases": "Dismissed Cases",
+      "dismissedCasesSubtitle": "Unsuccessful outcomes"
+    },
+    "avgResolutionTime": {
+      "title": "Average Resolution Time",
+      "value": "{{count}} days",
+      "subtitle": "From filing to resolution"
+    },
+    "caseAging": {
+      "title": "Case Aging",
+      "lessThan30": "< 30 days: {{value}}%",
+      "between30And90": "30-90 days: {{value}}%",
+      "moreThan90": "> 90 days: {{value}}%"
+    }
+  },
+  "distributionCharts": {
+    "noApprovedData": "No approved case data available",
+    "loadErrorToast": "Failed to load distribution data: {{error}}",
+    "loading": "Loading distribution data…",
+    "retryAttempt": "{{error}} (Retry attempt: {{count}})",
+    "retry": "Retry",
+    "caseTypes": {
+      "title": "Case Types",
+      "subtitle": "Distribution of cases by type",
+      "totalCases": "Total Cases",
+      "noData": "No case type data available",
+      "ariaLabel": "Case types distribution chart"
+    },
+    "caseTypeLabels": {
+      "litigation": "Litigation",
+      "rapidResponse": "Rapid Response"
+    },
+    "statusLabels": {
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "pending": "Pending",
+      "onHold": "On Hold"
+    },
+    "unknownCountry": "Unknown",
+    "tooltip": {
+      "cases": "{{count}} cases",
+      "count": "Count",
+      "casesWithPercent": "{{count}} cases ({{percentage}}%)"
+    },
+    "statusDistribution": {
+      "title": "Status Distribution",
+      "subtitle": "Cases by current status",
+      "noData": "No status distribution data available"
+    },
+    "countryDistribution": {
+      "title": "Top 10 Countries by Case Volume",
+      "subtitle": "Geographic distribution of cases",
+      "seriesName": "Cases",
+      "noData": "No country distribution data available"
+    }
+  },
+  "stakeholderAnalytics": {
+    "allCategories": "All Categories",
+    "allRegions": "All Regions",
+    "loading": "Loading stakeholder analytics…",
+    "loadErrorToast": "Failed to load stakeholder data: {{error}}",
+    "retryAttempt": "{{error}} (Retry attempt: {{count}})",
+    "retry": "Retry",
+    "title": "Stakeholder Analytics",
+    "unknownBody": "Unknown",
+    "seriesName": "Cases",
+    "tooltipCases": "{{count}} cases",
+    "tooltipCount": "Count",
+    "casesCount": "{{count}} cases",
+    "keyPlayerAnalysis": {
+      "title": "Key Player Analysis",
+      "noData": "No key player data available"
+    },
+    "institutionEngagement": {
+      "title": "Institution Engagement",
+      "noData": "No institution data available"
+    },
+    "courtParticipation": {
+      "title": "Court Participation Patterns",
+      "noData": "No judicial body data available"
+    },
+    "topLitigants": {
+      "title": "Top Litigants"
+    },
+    "topDefendingInstitutions": {
+      "title": "Top Defending Institutions"
+    },
+    "judicialBodies": {
+      "title": "Judicial Bodies"
+    }
+  },
+  "healthIndicators": {
+    "noCountries": "No countries found in the database.",
+    "loadCountriesError": "Failed to load countries. Please try again later.",
+    "noDataFilters": "No health indicator data available for the selected filters.",
+    "loadDataErrorToast": "Failed to load health indicator data: {{error}}",
+    "title": "Health Indicators Dashboard",
+    "allCountries": "All Countries",
+    "loading": "Loading health indicator data…",
+    "retry": "Retry",
+    "unknownCountry": "Unknown",
+    "indicators": {
+      "maternalMortality": "Maternal Mortality",
+      "contraceptiveAccess": "Contraceptive Access",
+      "adolescentHealth": "Adolescent Health",
+      "sgbvReporting": "SGBV Reporting",
+      "hivTesting": "HIV Testing",
+      "antenatalCare": "Antenatal Care"
+    },
+    "changeFromPreviousYear": "{{change}} from previous year",
+    "monthlyTrends": {
+      "title": "Monthly Trends: {{indicator}}",
+      "noData": "No trend data available"
+    },
+    "correlation": {
+      "title": "Health Indicators vs. Case Volume",
+      "yAxis": "Reproductive Health Cases",
+      "zAxis": "Total Cases",
+      "seriesName": "Health-Case Correlation",
+      "noData": "No correlation data available"
+    },
+    "analysis": {
+      "title": "Health Indicator Analysis",
+      "description": "This dashboard shows the relationship between health indicators and legal cases across different countries. Higher values in maternal mortality and lower values in contraceptive access often correlate with increased case volumes related to reproductive rights.",
+      "keyInsightsTitle": "Key Insights",
+      "insights": {
+        "item1": "Countries with higher maternal mortality rates show increased litigation activity",
+        "item2": "Improved contraceptive access correlates with fewer legal challenges",
+        "item3": "Adolescent health indicators can predict future case trends",
+        "item4": "SGBV reporting rates show strong correlation with case outcomes"
+      },
+      "dataSourcesTitle": "Data Sources",
+      "sources": {
+        "item1": "World Health Organization (WHO) country statistics",
+        "item2": "United Nations Population Fund (UNFPA) reports",
+        "item3": "National health ministries and statistical agencies",
+        "item4": "NGO research and field reports"
+      }
+    }
+  },
+  "africaMap": {
+    "title": "Case Distribution",
+    "allCategories": "All Categories",
+    "range": {
+      "lastYear": "Last Year",
+      "last2Years": "Last 2 Years",
+      "last5Years": "Last 5 Years"
+    },
+    "loading": "Loading map data…",
+    "noData": "No data available for the selected filters",
+    "loadError": "Failed to load map data. Please try again later.",
+    "tooltip": {
+      "totalCases": "Total Cases: {{count}}",
+      "categories": "Categories:",
+      "trend": "{{count}} case trend"
+    },
+    "legend": {
+      "caseVolume": "Case Volume",
+      "low": "Low",
+      "high": "High"
+    }
+  },
+  "dataChart": {
+    "loading": "Loading chart data…",
+    "retry": "Retry",
+    "retryAttempt": "{{error}} (Retry attempt: {{count}})",
+    "noApprovedData": "No approved case data available",
+    "loadErrorToast": "Failed to load chart data: {{error}}",
+    "noData": "No case data available",
+    "tooltipCases": "{{count}} cases",
+    "series": {
+      "total": "Total Cases",
+      "completed": "Completed",
+      "inProgress": "In Progress"
+    }
+  },
+  "recentLegalUpdates": {
+    "title": "Recent Legal Updates",
+    "allCategories": "All Categories",
+    "allJurisdictions": "All Jurisdictions",
+    "dateRangeTo": "to",
+    "loading": "Loading legal updates…",
+    "loadError": "Failed to load recent legal updates",
+    "noUpdates": "No recent legal updates found",
+    "unknownCountry": "Unknown",
+    "viewDetails": "View Details"
+  },
+  "dashboardCard": {}
+}

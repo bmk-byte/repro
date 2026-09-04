@@ -3,6 +3,7 @@ import { ParentSize } from '@visx/responsive';
 import { Mercator } from '@visx/geo';
 import { scaleQuantize } from '@visx/scale';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import topology from '../data/africa-topo.json';
 import { feature } from 'topojson-client';
@@ -19,6 +20,7 @@ interface MapData {
 }
 
 const AfricaMap = () => {
+  const { t } = useTranslation('analytics');
   const [mapData, setMapData] = React.useState<MapData>({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -70,7 +72,7 @@ const AfricaMap = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch cases with filters
       let query = supabase
         .from('cases')
@@ -113,11 +115,11 @@ const AfricaMap = () => {
         }
 
         processedData[countryName].total++;
-        
+
         // Process categories
         if (caseItem.case_categories && Array.isArray(caseItem.case_categories)) {
           caseItem.case_categories.forEach(category => {
-            processedData[countryName].categories[category] = 
+            processedData[countryName].categories[category] =
               (processedData[countryName].categories[category] || 0) + 1;
           });
         }
@@ -140,7 +142,7 @@ const AfricaMap = () => {
       setMapData(processedData);
     } catch (err) {
       console.error('Error fetching case data:', err);
-      setError('Failed to load map data. Please try again later.');
+      setError(t('africaMap.loadError'));
     } finally {
       setLoading(false);
     }
@@ -171,19 +173,19 @@ const AfricaMap = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-stone-900">Case Distribution</h2>
+        <h2 className="text-xl font-semibold text-stone-900">{t('africaMap.title')}</h2>
         <div className="flex space-x-4">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('africaMap.allCategories')}</option>
             {availableCategories.map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
-          
+
           <select
             value={dateRange[1].getFullYear() - dateRange[0].getFullYear()}
             onChange={(e) => {
@@ -195,9 +197,9 @@ const AfricaMap = () => {
             }}
             className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="1">Last Year</option>
-            <option value="2">Last 2 Years</option>
-            <option value="5">Last 5 Years</option>
+            <option value="1">{t('africaMap.range.lastYear')}</option>
+            <option value="2">{t('africaMap.range.last2Years')}</option>
+            <option value="5">{t('africaMap.range.last5Years')}</option>
           </select>
         </div>
       </div>
@@ -211,11 +213,11 @@ const AfricaMap = () => {
       <div className="h-[600px] relative" onMouseMove={handleMouseMove}>
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <LoadingState label="Loading map data…" />
+            <LoadingState label={t('africaMap.loading')} />
           </div>
         ) : Object.keys(mapData).length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-stone-500">No data available for the selected filters</div>
+            <div className="text-stone-500">{t('africaMap.noData')}</div>
           </div>
         ) : (
           <ParentSize>
@@ -281,10 +283,10 @@ const AfricaMap = () => {
             }}
           >
             <div className="font-semibold mb-2">{tooltipData.name}</div>
-            <div className="text-stone-600">Total Cases: {tooltipData.total}</div>
+            <div className="text-stone-600">{t('africaMap.tooltip.totalCases', { count: tooltipData.total })}</div>
             {Object.entries(tooltipData.categories).length > 0 ? (
               <div className="mt-1 max-h-32 overflow-y-auto">
-                <div className="text-sm font-medium text-stone-700">Categories:</div>
+                <div className="text-sm font-medium text-stone-700">{t('africaMap.tooltip.categories')}</div>
                 {Object.entries(tooltipData.categories)
                   .sort(([, a]: [string, any], [, b]: [string, any]) => b - a)
                   .map(([category, count]: [string, any]) => (
@@ -297,7 +299,7 @@ const AfricaMap = () => {
             ) : null}
             <div className="mt-2 text-sm">
               <span className={tooltipData.trend >= 0 ? 'text-green-600' : 'text-red-600'}>
-                {tooltipData.trend >= 0 ? '↑' : '↓'} {Math.abs(tooltipData.trend)} case trend
+                {tooltipData.trend >= 0 ? '↑' : '↓'} {t('africaMap.tooltip.trend', { count: Math.abs(tooltipData.trend) })}
               </span>
             </div>
           </div>
@@ -306,12 +308,12 @@ const AfricaMap = () => {
 
       <div className="mt-6">
         <div className="flex justify-between items-center">
-          <div className="text-sm text-stone-500">Case Volume</div>
+          <div className="text-sm text-stone-500">{t('africaMap.legend.caseVolume')}</div>
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-[rgb(254,235,226)]"></div>
-            <div className="text-xs text-stone-500">Low</div>
+            <div className="text-xs text-stone-500">{t('africaMap.legend.low')}</div>
             <div className="w-3 h-3 bg-[rgb(122,1,119)]"></div>
-            <div className="text-xs text-stone-500">High</div>
+            <div className="text-xs text-stone-500">{t('africaMap.legend.high')}</div>
           </div>
         </div>
       </div>

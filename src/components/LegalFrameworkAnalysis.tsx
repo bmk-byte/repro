@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Title, Text, Flex, ProgressBar } from '@tremor/react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { FileText, Scale, BookOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { LoadingState, ErrorState, Button } from './ui';
 import { CHART_COLORS, CHART_CATEGORICAL_PALETTE } from '../lib/chartColors';
@@ -22,6 +23,7 @@ interface ProtocolData {
 }
 
 const LegalFrameworkAnalysis: React.FC = () => {
+  const { t } = useTranslation('analytics');
   const [timeData, setTimeData] = React.useState<LegalFrameworkData[]>([]);
   const [protocolData, setProtocolData] = React.useState<ProtocolData[]>([]);
   const [frameworkDistribution, setFrameworkDistribution] = React.useState<any[]>([]);
@@ -96,7 +98,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
         setTimeData([]);
         setProtocolData([]);
         setFrameworkDistribution([]);
-        setError('No legal framework data available');
+        setError(t('legalFrameworkAnalysis.noData'));
         return;
       }
 
@@ -114,7 +116,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
 
     } catch (err) {
       console.error('Error fetching legal framework data:', err);
-      setError('Failed to load legal framework data. Please try again later.');
+      setError(t('legalFrameworkAnalysis.loadError'));
     } finally {
       setLoading(false);
     }
@@ -123,7 +125,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
   const processTimeData = (cases: any[]): LegalFrameworkData[] => {
     // Group cases by month
     const monthlyData: { [key: string]: { domestic: number; international: number; both: number } } = {};
-    
+
     // Initialize the last 6 months
     const today = new Date();
     for (let i = 5; i >= 0; i--) {
@@ -131,12 +133,12 @@ const LegalFrameworkAnalysis: React.FC = () => {
       const monthKey = date.toLocaleString('default', { month: 'short', year: '2-digit' });
       monthlyData[monthKey] = { domestic: 0, international: 0, both: 0 };
     }
-    
+
     // Count cases by month and framework type
     cases.forEach(caseItem => {
       const date = new Date(caseItem.created_at);
       const monthKey = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-      
+
       if (monthlyData[monthKey]) {
         const frameworkType = caseItem.legal_framework_type?.toLowerCase() || 'unknown';
         if (frameworkType === 'domestic law') {
@@ -148,7 +150,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
         }
       }
     });
-    
+
     // Convert to array format for charts
     return Object.entries(monthlyData).map(([name, counts]) => ({
       name,
@@ -161,7 +163,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
   const processProtocolData = (cases: any[]): ProtocolData[] => {
     // Count protocol citations
     const protocolCounts: { [key: string]: number } = {};
-    
+
     cases.forEach(caseItem => {
       if (caseItem.protocols && Array.isArray(caseItem.protocols)) {
         caseItem.protocols.forEach((protocol: string) => {
@@ -169,7 +171,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
         });
       }
     });
-    
+
     // Convert to array and sort by count
     return Object.entries(protocolCounts)
       .map(([name, value]) => ({ name, value }))
@@ -180,37 +182,40 @@ const LegalFrameworkAnalysis: React.FC = () => {
   const processFrameworkDistribution = (cases: any[]): any[] => {
     // Count cases by framework type
     const frameworkCounts = {
-      'Domestic Law Only': 0,
-      'International Law Only': 0,
-      'Both Used': 0
+      domesticOnly: 0,
+      internationalOnly: 0,
+      bothUsed: 0
     };
-    
+
     cases.forEach(caseItem => {
       const frameworkType = caseItem.legal_framework_type?.toLowerCase() || 'unknown';
       if (frameworkType === 'domestic law') {
-        frameworkCounts['Domestic Law Only']++;
+        frameworkCounts.domesticOnly++;
       } else if (frameworkType === 'international law') {
-        frameworkCounts['International Law Only']++;
+        frameworkCounts.internationalOnly++;
       } else if (frameworkType === 'both') {
-        frameworkCounts['Both Used']++;
+        frameworkCounts.bothUsed++;
       }
     });
-    
+
     // Convert to array format for charts
-    return Object.entries(frameworkCounts)
-      .map(([name, value]) => ({ name, value }));
+    return [
+      { name: t('legalFrameworkAnalysis.frameworkDistribution.domesticOnly'), value: frameworkCounts.domesticOnly },
+      { name: t('legalFrameworkAnalysis.frameworkDistribution.internationalOnly'), value: frameworkCounts.internationalOnly },
+      { name: t('legalFrameworkAnalysis.frameworkDistribution.bothUsed'), value: frameworkCounts.bothUsed }
+    ];
   };
 
   return (
     <Card>
       <div className="flex justify-between items-center mb-6">
-        <Title>Legal Framework Analysis</Title>
+        <Title>{t('legalFrameworkAnalysis.title')}</Title>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="all">All Categories</option>
+          <option value="all">{t('legalFrameworkAnalysis.allCategories')}</option>
           {categories.map(category => (
             <option key={category} value={category}>{category}</option>
           ))}
@@ -218,15 +223,15 @@ const LegalFrameworkAnalysis: React.FC = () => {
       </div>
 
       {loading ? (
-        <LoadingState label="Loading legal framework data…" />
+        <LoadingState label={t('legalFrameworkAnalysis.loading')} />
       ) : error ? (
         <div className="flex justify-center items-center h-64">
-          <ErrorState description={error} action={<Button onClick={fetchLegalFrameworkData}>Retry</Button>} />
+          <ErrorState description={error} action={<Button onClick={fetchLegalFrameworkData}>{t('legalFrameworkAnalysis.retry')}</Button>} />
         </div>
       ) : (
         <>
           <div className="mb-6">
-            <Title>Legal Instruments Used</Title>
+            <Title>{t('legalFrameworkAnalysis.instrumentsUsed.title')}</Title>
             {timeData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={timeData}>
@@ -239,7 +244,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                     type="monotone"
                     dataKey="domestic"
                     stackId="1"
-                    name="Domestic Law"
+                    name={t('legalFrameworkAnalysis.legend.domestic')}
                     fill={FRAMEWORK_COLORS[0]}
                     fillOpacity={0.5}
                     stroke={FRAMEWORK_COLORS[0]}
@@ -248,7 +253,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                     type="monotone"
                     dataKey="international"
                     stackId="1"
-                    name="International Law"
+                    name={t('legalFrameworkAnalysis.legend.international')}
                     fill={FRAMEWORK_COLORS[1]}
                     fillOpacity={0.5}
                     stroke={FRAMEWORK_COLORS[1]}
@@ -257,7 +262,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                     type="monotone"
                     dataKey="both"
                     stackId="1"
-                    name="Both"
+                    name={t('legalFrameworkAnalysis.legend.both')}
                     fill={FRAMEWORK_COLORS[2]}
                     fillOpacity={0.5}
                     stroke={FRAMEWORK_COLORS[2]}
@@ -266,14 +271,14 @@ const LegalFrameworkAnalysis: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <div className="flex justify-center items-center h-64">
-                <Text>No time-based legal framework data available</Text>
+                <Text>{t('legalFrameworkAnalysis.instrumentsUsed.noData')}</Text>
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <Title>Protocol Citation Frequency</Title>
+              <Title>{t('legalFrameworkAnalysis.protocolCitation.title')}</Title>
               {protocolData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={chartHeight(protocolData.length, 300)}>
                   <BarChart
@@ -286,7 +291,7 @@ const LegalFrameworkAnalysis: React.FC = () => {
                     <Tooltip />
                     <Bar
                       dataKey="value"
-                      name="Citations"
+                      name={t('legalFrameworkAnalysis.protocolCitation.seriesName')}
                       fill={CHART_CATEGORICAL_PALETTE[4]}
                       radius={[0, 4, 4, 0]}
                     />
@@ -294,13 +299,13 @@ const LegalFrameworkAnalysis: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex justify-center items-center h-64">
-                  <Text>No protocol citation data available</Text>
+                  <Text>{t('legalFrameworkAnalysis.protocolCitation.noData')}</Text>
                 </div>
               )}
             </div>
-            
+
             <div>
-              <Title>Domestic vs International Law</Title>
+              <Title>{t('legalFrameworkAnalysis.frameworkDistribution.title')}</Title>
               {frameworkDistribution.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -317,12 +322,12 @@ const LegalFrameworkAnalysis: React.FC = () => {
                       <Cell fill={FRAMEWORK_COLORS[1]} />
                       <Cell fill={FRAMEWORK_COLORS[2]} />
                     </Pie>
-                    <Tooltip formatter={(value) => [`${value} cases`, 'Count']} />
+                    <Tooltip formatter={(value) => [t('legalFrameworkAnalysis.tooltip.cases', { count: value }), t('legalFrameworkAnalysis.tooltip.count')]} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="flex justify-center items-center h-64">
-                  <Text>No framework distribution data available</Text>
+                  <Text>{t('legalFrameworkAnalysis.frameworkDistribution.noData')}</Text>
                 </div>
               )}
             </div>
@@ -342,19 +347,19 @@ const LegalFrameworkAnalysis: React.FC = () => {
                 <div className="bg-stone-50 p-4 rounded-lg">
                   <Flex>
                     <FileText className="h-5 w-5 text-amber-500" />
-                    <Text className="font-medium">Domestic Legal Frameworks</Text>
+                    <Text className="font-medium">{t('legalFrameworkAnalysis.summary.domestic.title')}</Text>
                   </Flex>
                   <div className="mt-2 space-y-2">
                     {timeData.length > 0 ? (
                       <>
                         <div className="flex justify-between items-center">
-                          <Text>Total Domestic Law Cases</Text>
+                          <Text>{t('legalFrameworkAnalysis.summary.domestic.totalLabel')}</Text>
                           <Text className="font-medium">{domesticTotal}</Text>
                         </div>
                         <ProgressBar value={domesticPercent} color="amber" />
                       </>
                     ) : (
-                      <Text>No domestic law data available</Text>
+                      <Text>{t('legalFrameworkAnalysis.summary.domestic.noData')}</Text>
                     )}
                   </div>
                 </div>
@@ -362,19 +367,19 @@ const LegalFrameworkAnalysis: React.FC = () => {
                 <div className="bg-stone-50 p-4 rounded-lg">
                   <Flex>
                     <Scale className="h-5 w-5 text-blue-500" />
-                    <Text className="font-medium">International Instruments</Text>
+                    <Text className="font-medium">{t('legalFrameworkAnalysis.summary.international.title')}</Text>
                   </Flex>
                   <div className="mt-2 space-y-2">
                     {timeData.length > 0 ? (
                       <>
                         <div className="flex justify-between items-center">
-                          <Text>Total International Law Cases</Text>
+                          <Text>{t('legalFrameworkAnalysis.summary.international.totalLabel')}</Text>
                           <Text className="font-medium">{internationalTotal}</Text>
                         </div>
                         <ProgressBar value={internationalPercent} color="blue" />
                       </>
                     ) : (
-                      <Text>No international law data available</Text>
+                      <Text>{t('legalFrameworkAnalysis.summary.international.noData')}</Text>
                     )}
                   </div>
                 </div>
@@ -382,19 +387,19 @@ const LegalFrameworkAnalysis: React.FC = () => {
                 <div className="bg-stone-50 p-4 rounded-lg">
                   <Flex>
                     <BookOpen className="h-5 w-5 text-purple-500" />
-                    <Text className="font-medium">Combined Approach</Text>
+                    <Text className="font-medium">{t('legalFrameworkAnalysis.summary.combined.title')}</Text>
                   </Flex>
                   <div className="mt-2 space-y-2">
                     {timeData.length > 0 ? (
                       <>
                         <div className="flex justify-between items-center">
-                          <Text>Total Combined Approach Cases</Text>
+                          <Text>{t('legalFrameworkAnalysis.summary.combined.totalLabel')}</Text>
                           <Text className="font-medium">{bothTotal}</Text>
                         </div>
                         <ProgressBar value={bothPercent} color="violet" />
                       </>
                     ) : (
-                      <Text>No combined approach data available</Text>
+                      <Text>{t('legalFrameworkAnalysis.summary.combined.noData')}</Text>
                     )}
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, Title, Text } from '@tremor/react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { supabase, queryWithRetry, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { LoadingState, ErrorState, Button } from './ui';
@@ -13,6 +14,7 @@ const CASE_TYPE_COLORS = [CHART_COLORS.primary, CHART_COLORS.info];
 const STATUS_COLORS = [CHART_COLORS.warning, CHART_COLORS.success, CHART_COLORS.danger, CHART_COLORS.info];
 
 const DistributionCharts: React.FC = () => {
+  const { t } = useTranslation('analytics');
   const [data, setData] = React.useState<any>({
     caseTypes: [],
     statusDistribution: [],
@@ -32,7 +34,7 @@ const DistributionCharts: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch case types distribution with retry logic
       const caseTypes = await queryWithRetry(async () => {
         const { data, error } = await supabase
@@ -50,7 +52,7 @@ const DistributionCharts: React.FC = () => {
           statusDistribution: [],
           countryDistribution: []
         });
-        setError('No approved case data available');
+        setError(t('distributionCharts.noApprovedData'));
         return;
       }
 
@@ -68,9 +70,9 @@ const DistributionCharts: React.FC = () => {
       console.error('Error fetching distribution data:', err);
       const errorMessage = handleSupabaseError(err);
       setError(errorMessage);
-      
+
       // Show toast notification for user feedback
-      toast.error(`Failed to load distribution data: ${errorMessage}`);
+      toast.error(t('distributionCharts.loadErrorToast', { error: errorMessage }));
     } finally {
       setLoading(false);
     }
@@ -88,10 +90,11 @@ const DistributionCharts: React.FC = () => {
       return acc;
     }, {});
 
-    return Object.entries(types).map(([name, value]) => ({
-      name: name === 'litigation' ? 'Litigation' : 
-            name === 'rapid-response' ? 'Rapid Response' : 
-            name.charAt(0).toUpperCase() + name.slice(1),
+    return Object.entries(types).map(([key, value]) => ({
+      type: key,
+      name: key === 'litigation' ? t('distributionCharts.caseTypeLabels.litigation') :
+            key === 'rapid-response' ? t('distributionCharts.caseTypeLabels.rapidResponse') :
+            key.charAt(0).toUpperCase() + key.slice(1),
       value
     }));
   };
@@ -103,19 +106,19 @@ const DistributionCharts: React.FC = () => {
       return acc;
     }, {});
 
-    return Object.entries(statuses).map(([name, value]) => ({
-      name: name === 'in_progress' ? 'In Progress' :
-            name === 'completed' ? 'Completed' :
-            name === 'pending' ? 'Pending' :
-            name === 'on_hold' ? 'On Hold' :
-            name.charAt(0).toUpperCase() + name.slice(1),
+    return Object.entries(statuses).map(([key, value]) => ({
+      name: key === 'in_progress' ? t('distributionCharts.statusLabels.inProgress') :
+            key === 'completed' ? t('distributionCharts.statusLabels.completed') :
+            key === 'pending' ? t('distributionCharts.statusLabels.pending') :
+            key === 'on_hold' ? t('distributionCharts.statusLabels.onHold') :
+            key.charAt(0).toUpperCase() + key.slice(1),
       value
     }));
   };
 
   const processCountryDistribution = (cases: any[]) => {
     const countries = cases.reduce((acc: any, curr) => {
-      const countryName = curr.countries?.name || 'Unknown';
+      const countryName = curr.countries?.name || t('distributionCharts.unknownCountry');
       acc[countryName] = (acc[countryName] || 0) + 1;
       return acc;
     }, {});
@@ -134,11 +137,11 @@ const DistributionCharts: React.FC = () => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const percentage = totalCases > 0 ? ((data.value / totalCases) * 100).toFixed(1) : '0';
-      
+
       return (
         <div className="bg-white p-3 shadow-lg rounded-md border border-stone-200">
           <p className="font-medium text-stone-900">{data.name}</p>
-          <p className="text-stone-600">{data.value} cases ({percentage}%)</p>
+          <p className="text-stone-600">{t('distributionCharts.tooltip.casesWithPercent', { count: data.value, percentage })}</p>
         </div>
       );
     }
@@ -148,8 +151,8 @@ const DistributionCharts: React.FC = () => {
   // Animation variants for cards
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.6 }
     }
@@ -158,9 +161,9 @@ const DistributionCharts: React.FC = () => {
   // Get color for case type
   const getCaseTypeColor = (entry: any, index: number) => {
     // Use info blue for Rapid Response, primary color for Litigation
-    if (entry.name === 'Rapid Response') {
+    if (entry.type === 'rapid-response') {
       return CHART_COLORS.info;
-    } else if (entry.name === 'Litigation') {
+    } else if (entry.type === 'litigation') {
       return CHART_COLORS.primary;
     } else {
       return CASE_TYPE_COLORS[index % CASE_TYPE_COLORS.length];
@@ -168,17 +171,17 @@ const DistributionCharts: React.FC = () => {
   };
 
   if (loading) {
-    return <LoadingState label="Loading distribution data…" />;
+    return <LoadingState label={t('distributionCharts.loading')} />;
   }
 
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
         <ErrorState
-          description={retryCount > 0 ? `${error} (Retry attempt: ${retryCount})` : error}
+          description={retryCount > 0 ? t('distributionCharts.retryAttempt', { error, count: retryCount }) : error}
           action={
             <Button onClick={handleRetry} loading={loading}>
-              Retry
+              {t('distributionCharts.retry')}
             </Button>
           }
         />
@@ -196,8 +199,8 @@ const DistributionCharts: React.FC = () => {
           className="w-full"
         >
           <Card className="border-l-4 border-primary shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <Title className="text-xl font-bold text-stone-800">Case Types</Title>
-            <div className="mt-2 text-sm text-stone-500">Distribution of cases by type</div>
+            <Title className="text-xl font-bold text-stone-800">{t('distributionCharts.caseTypes.title')}</Title>
+            <div className="mt-2 text-sm text-stone-500">{t('distributionCharts.caseTypes.subtitle')}</div>
             {data.caseTypes.length > 0 ? (
               <div className="flex flex-col md:flex-row items-center justify-between mt-4">
                 <div className="w-full h-64 md:h-72 relative">
@@ -216,11 +219,11 @@ const DistributionCharts: React.FC = () => {
                         animationEasing="ease-out"
                         onMouseEnter={(_, index) => setActiveIndex(index)}
                         onMouseLeave={() => setActiveIndex(null)}
-                        aria-label="Case types distribution chart"
+                        aria-label={t('distributionCharts.caseTypes.ariaLabel')}
                       >
                         {data.caseTypes.map((entry: any, index: number) => (
-                          <Cell 
-                            key={`cell-${index}`} 
+                          <Cell
+                            key={`cell-${index}`}
                             fill={getCaseTypeColor(entry, index)}
                             stroke={getCaseTypeColor(entry, index)}
                             strokeWidth={activeIndex === index ? 2 : 1}
@@ -231,21 +234,21 @@ const DistributionCharts: React.FC = () => {
                       <Tooltip content={<CustomTooltip />} />
                     </PieChart>
                   </ResponsiveContainer>
-                  
+
                   {/* Center total count */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                     <div className="text-3xl font-bold font-inter text-stone-800">
                       {totalCases}
                     </div>
-                    <div className="text-sm text-stone-500">Total Cases</div>
+                    <div className="text-sm text-stone-500">{t('distributionCharts.caseTypes.totalCases')}</div>
                   </div>
                 </div>
-                
+
                 {/* Legend */}
                 <div className="mt-4 md:mt-0 w-full md:w-auto">
                   <div className="flex flex-col space-y-3 md:pl-4">
                     {data.caseTypes.map((entry: any, index: number) => (
-                      <div 
+                      <div
                         key={`legend-${index}`}
                         className={`flex items-center space-x-2 p-2 rounded-md transition-colors duration-300 ${
                           activeIndex === index ? 'bg-stone-100' : ''
@@ -253,8 +256,8 @@ const DistributionCharts: React.FC = () => {
                         onMouseEnter={() => setActiveIndex(index)}
                         onMouseLeave={() => setActiveIndex(null)}
                       >
-                        <div 
-                          className="w-4 h-4 rounded-full" 
+                        <div
+                          className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: getCaseTypeColor(entry, index) }}
                         />
                         <div className="flex flex-col md:flex-row md:items-center md:space-x-2">
@@ -270,7 +273,7 @@ const DistributionCharts: React.FC = () => {
               </div>
             ) : (
               <div className="h-72 flex items-center justify-center">
-                <Text>No case type data available</Text>
+                <Text>{t('distributionCharts.caseTypes.noData')}</Text>
               </div>
             )}
           </Card>
@@ -283,8 +286,8 @@ const DistributionCharts: React.FC = () => {
           transition={{ delay: 0.2 }}
         >
           <Card className="border-l-4 border-info shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <Title className="text-xl font-bold text-stone-800">Status Distribution</Title>
-            <div className="mt-2 text-sm text-stone-500">Cases by current status</div>
+            <Title className="text-xl font-bold text-stone-800">{t('distributionCharts.statusDistribution.title')}</Title>
+            <div className="mt-2 text-sm text-stone-500">{t('distributionCharts.statusDistribution.subtitle')}</div>
             {data.statusDistribution.length > 0 ? (
               <div style={{ height: chartHeight(data.statusDistribution.length, 288) }} className="mt-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -296,16 +299,16 @@ const DistributionCharts: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                     <XAxis type="number" />
                     <YAxis dataKey="name" type="category" width={100} />
-                    <Tooltip 
-                      formatter={(value: any) => [`${value} cases`, 'Count']}
+                    <Tooltip
+                      formatter={(value: any) => [t('distributionCharts.tooltip.cases', { count: value }), t('distributionCharts.tooltip.count')]}
                       contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                     />
                     <Legend />
                     {data.statusDistribution.map((entry: any, index: number) => (
-                      <Bar 
+                      <Bar
                         key={`status-bar-${index}`}
-                        dataKey="value" 
-                        name={entry.name} 
+                        dataKey="value"
+                        name={entry.name}
                         fill={STATUS_COLORS[index % STATUS_COLORS.length]}
                         radius={[0, 12, 12, 0]}
                         barSize={40}
@@ -319,7 +322,7 @@ const DistributionCharts: React.FC = () => {
               </div>
             ) : (
               <div className="h-72 flex items-center justify-center">
-                <Text>No status distribution data available</Text>
+                <Text>{t('distributionCharts.statusDistribution.noData')}</Text>
               </div>
             )}
           </Card>
@@ -334,8 +337,8 @@ const DistributionCharts: React.FC = () => {
         transition={{ delay: 0.4 }}
       >
         <Card className="border-l-4 border-success shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <Title className="text-xl font-bold text-stone-800">Top 10 Countries by Case Volume</Title>
-          <div className="mt-2 text-sm text-stone-500">Geographic distribution of cases</div>
+          <Title className="text-xl font-bold text-stone-800">{t('distributionCharts.countryDistribution.title')}</Title>
+          <div className="mt-2 text-sm text-stone-500">{t('distributionCharts.countryDistribution.subtitle')}</div>
           {data.countryDistribution.length > 0 ? (
             <div className="h-72 mt-4">
               <ResponsiveContainer width="100%" height="100%">
@@ -346,13 +349,13 @@ const DistributionCharts: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip 
-                    formatter={(value: any) => [`${value} cases`, 'Count']}
+                  <Tooltip
+                    formatter={(value: any) => [t('distributionCharts.tooltip.cases', { count: value }), t('distributionCharts.tooltip.count')]}
                     contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                   />
                   <Bar
                     dataKey="value"
-                    name="Cases"
+                    name={t('distributionCharts.countryDistribution.seriesName')}
                     fill={CHART_COLORS.primary}
                     radius={[4, 4, 0, 0]}
                     animationDuration={300}
@@ -363,7 +366,7 @@ const DistributionCharts: React.FC = () => {
             </div>
           ) : (
             <div className="h-72 flex items-center justify-center">
-              <Text>No country distribution data available</Text>
+              <Text>{t('distributionCharts.countryDistribution.noData')}</Text>
             </div>
           )}
         </Card>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Title, Text, Flex } from '@tremor/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from 'recharts';
 import { Activity, TrendingUp, Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '../lib/toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { LoadingState, ErrorState, Button } from './ui';
@@ -43,6 +44,7 @@ interface HealthIndicator {
 }
 
 const HealthIndicatorIntegration: React.FC = () => {
+  const { t } = useTranslation('analytics');
   const [healthData, setHealthData] = React.useState<HealthData[]>([]);
   const [correlationData, setCorrelationData] = React.useState<CorrelationData[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -57,6 +59,16 @@ const HealthIndicatorIntegration: React.FC = () => {
     adolescent_health: {value: 0, change: '0%'},
     sgbv_reporting: {value: 0, change: '0%'}
   });
+
+  const indicatorLabels: Record<string, string> = {
+    maternal_mortality: t('healthIndicators.indicators.maternalMortality'),
+    contraceptive_access: t('healthIndicators.indicators.contraceptiveAccess'),
+    adolescent_health: t('healthIndicators.indicators.adolescentHealth'),
+    sgbv_reporting: t('healthIndicators.indicators.sgbvReporting'),
+    hiv_testing: t('healthIndicators.indicators.hivTesting'),
+    antenatal_care: t('healthIndicators.indicators.antenatalCare'),
+  };
+  const selectedIndicatorLabel = indicatorLabels[selectedIndicator] || selectedIndicator;
 
   React.useEffect(() => {
     fetchCountries();
@@ -77,16 +89,16 @@ const HealthIndicatorIntegration: React.FC = () => {
         .order('name');
 
       if (error) throw error;
-      
+
       if (!data || data.length === 0) {
-        setError('No countries found in the database.');
+        setError(t('healthIndicators.noCountries'));
         return;
       }
 
       setCountries(data);
     } catch (err) {
       console.error('Error fetching countries:', err);
-      setError('Failed to load countries. Please try again later.');
+      setError(t('healthIndicators.loadCountriesError'));
     } finally {
       setLoading(false);
     }
@@ -121,7 +133,7 @@ const HealthIndicatorIntegration: React.FC = () => {
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        setError('No health indicator data available for the selected filters.');
+        setError(t('healthIndicators.noDataFilters'));
         setHealthData([]);
         setCorrelationData([]);
         setIndicatorStats({
@@ -150,7 +162,7 @@ const HealthIndicatorIntegration: React.FC = () => {
       console.error('Error fetching health data:', err);
       const errorMessage = handleSupabaseError(err);
       setError(errorMessage);
-      toast.error(`Failed to load health indicator data: ${errorMessage}`);
+      toast.error(t('healthIndicators.loadDataErrorToast', { error: errorMessage }));
     } finally {
       setLoading(false);
     }
@@ -159,7 +171,7 @@ const HealthIndicatorIntegration: React.FC = () => {
   const processHealthData = (data: HealthIndicator[]): HealthData[] => {
     // Group data by month
     const monthlyData: { [key: string]: { [key: string]: number } } = {};
-    
+
     // Initialize all months
     for (let month = 1; month <= 12; month++) {
       const monthName = new Date(2000, month - 1, 1).toLocaleString('default', { month: 'short' });
@@ -176,7 +188,7 @@ const HealthIndicatorIntegration: React.FC = () => {
         menstrual_health: 0
       };
     }
-    
+
     // Populate with actual data
     data.forEach(indicator => {
       const monthName = new Date(2000, indicator.month - 1, 1).toLocaleString('default', { month: 'short' });
@@ -184,7 +196,7 @@ const HealthIndicatorIntegration: React.FC = () => {
         monthlyData[monthName][indicator.indicator_type] = indicator.value;
       }
     });
-    
+
     // Convert to array format for charts
     return Object.entries(monthlyData).map(([name, values]) => ({
       name,
@@ -195,18 +207,18 @@ const HealthIndicatorIntegration: React.FC = () => {
   const generateCorrelationData = (data: HealthIndicator[]): CorrelationData[] => {
     // Group data by country
     const countryData: { [key: string]: { [key: string]: number } } = {};
-    
+
     data.forEach(indicator => {
-      const countryName = indicator.countries?.name || 'Unknown';
+      const countryName = indicator.countries?.name || t('healthIndicators.unknownCountry');
       if (!countryData[countryName]) {
         countryData[countryName] = {};
       }
       countryData[countryName][indicator.indicator_type] = indicator.value;
     });
-    
+
     // Create correlation data points
     const correlationPoints: CorrelationData[] = [];
-    
+
     Object.entries(countryData).forEach(([country, indicators]) => {
       // Only add points if we have both maternal_mortality and contraceptive_access data
       if (indicators.maternal_mortality !== undefined && indicators.contraceptive_access !== undefined) {
@@ -218,7 +230,7 @@ const HealthIndicatorIntegration: React.FC = () => {
         });
       }
     });
-    
+
     return correlationPoints;
   };
 
@@ -236,12 +248,12 @@ const HealthIndicatorIntegration: React.FC = () => {
         case_categories
       `)
       .eq('moderation_status', 'approved');
-    
+
     if (error) {
       console.error('Error fetching cases for correlation:', error);
       return [];
     }
-    
+
     // Group health indicators by country
     const countryHealthData: { [key: string]: { [key: string]: number } } = {};
     data.forEach(indicator => {
@@ -251,7 +263,7 @@ const HealthIndicatorIntegration: React.FC = () => {
       }
       countryHealthData[countryId][indicator.indicator_type] = indicator.value;
     });
-    
+
     // Count cases by country and category
     const countryCaseCounts: { [key: string]: { total: number, reproductive: number } } = {};
     cases.forEach(caseItem => {
@@ -259,42 +271,42 @@ const HealthIndicatorIntegration: React.FC = () => {
       if (!countryCaseCounts[countryId]) {
         countryCaseCounts[countryId] = { total: 0, reproductive: 0 };
       }
-      
+
       countryCaseCounts[countryId].total++;
-      
+
       // Check if case is related to reproductive health
-      const hasReproductiveCategory = caseItem.case_categories?.some(cat => 
-        cat.toLowerCase().includes('maternal') || 
+      const hasReproductiveCategory = caseItem.case_categories?.some(cat =>
+        cat.toLowerCase().includes('maternal') ||
         cat.toLowerCase().includes('reproductive') ||
         cat.toLowerCase().includes('abortion') ||
         cat.toLowerCase().includes('contraceptive')
       );
-      
+
       if (hasReproductiveCategory) {
         countryCaseCounts[countryId].reproductive++;
       }
     });
-    
+
     // Create correlation data points
     const correlationPoints: CorrelationData[] = [];
-    
+
     // Get country names for display
     const { data: countryData } = await supabase
       .from('countries')
       .select('id, name');
-    
+
     const countryNames: { [key: string]: string } = {};
     if (countryData) {
       countryData.forEach(country => {
         countryNames[country.id] = country.name;
       });
     }
-    
+
     // Create correlation points
     Object.entries(countryHealthData).forEach(([countryId, indicators]) => {
       // Only add points if we have both health indicator and case data
       if (indicators[selectedIndicator] !== undefined && countryCaseCounts[countryId]) {
-        const countryName = countryNames[countryId] || 'Unknown';
+        const countryName = countryNames[countryId] || t('healthIndicators.unknownCountry');
         correlationPoints.push({
           x: indicators[selectedIndicator],
           y: countryCaseCounts[countryId].reproductive,
@@ -303,7 +315,7 @@ const HealthIndicatorIntegration: React.FC = () => {
         });
       }
     });
-    
+
     return correlationPoints;
   };
 
@@ -315,14 +327,14 @@ const HealthIndicatorIntegration: React.FC = () => {
       adolescent_health: [],
       sgbv_reporting: []
     };
-    
+
     // Collect current year values
     data.forEach(indicator => {
       if (indicatorValues[indicator.indicator_type]) {
         indicatorValues[indicator.indicator_type].push(indicator.value);
       }
     });
-    
+
     // Calculate averages for current year
     const currentStats: Record<string, {value: number, change: string}> = {};
     Object.entries(indicatorValues).forEach(([type, values]) => {
@@ -333,7 +345,7 @@ const HealthIndicatorIntegration: React.FC = () => {
         currentStats[type] = { value: 0, change: '0%' };
       }
     });
-    
+
     // Fetch previous year data to calculate change
     const fetchPreviousYearData = async () => {
       try {
@@ -344,15 +356,15 @@ const HealthIndicatorIntegration: React.FC = () => {
             value
           `)
           .eq('year', selectedYear - 1);
-        
+
         if (selectedCountry !== 'all') {
           query = query.eq('country_id', selectedCountry);
         }
-        
+
         const { data: prevData, error } = await query;
-        
+
         if (error) throw error;
-        
+
         if (prevData && prevData.length > 0) {
           // Group by indicator type
           const prevIndicatorValues: { [key: string]: number[] } = {
@@ -361,35 +373,35 @@ const HealthIndicatorIntegration: React.FC = () => {
             adolescent_health: [],
             sgbv_reporting: []
           };
-          
+
           prevData.forEach(indicator => {
             if (prevIndicatorValues[indicator.indicator_type]) {
               prevIndicatorValues[indicator.indicator_type].push(indicator.value);
             }
           });
-          
+
           // Calculate changes
           Object.entries(prevIndicatorValues).forEach(([type, values]) => {
             if (values.length > 0 && currentStats[type]) {
               const prevAvg = values.reduce((sum, val) => sum + val, 0) / values.length;
               if (prevAvg > 0) {
                 const changePercent = ((currentStats[type].value - prevAvg) / prevAvg) * 100;
-                
+
                 // Format change with sign and limit to 1 decimal place
                 const formattedChange = (changePercent >= 0 ? '+' : '') + changePercent.toFixed(1) + '%';
-                
+
                 currentStats[type].change = formattedChange;
               }
             }
           });
         }
-        
+
         setIndicatorStats(currentStats);
       } catch (err) {
         console.error('Error fetching previous year data:', err);
       }
     };
-    
+
     fetchPreviousYearData();
   };
 
@@ -397,32 +409,32 @@ const HealthIndicatorIntegration: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <div className="flex justify-between items-center mb-6">
-          <Title>Health Indicators Dashboard</Title>
+          <Title>{t('healthIndicators.title')}</Title>
           <div className="flex space-x-4">
             <select
               value={selectedIndicator}
               onChange={(e) => setSelectedIndicator(e.target.value)}
               className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="maternal_mortality">Maternal Mortality</option>
-              <option value="contraceptive_access">Contraceptive Access</option>
-              <option value="adolescent_health">Adolescent Health</option>
-              <option value="sgbv_reporting">SGBV Reporting</option>
-              <option value="hiv_testing">HIV Testing</option>
-              <option value="antenatal_care">Antenatal Care</option>
+              <option value="maternal_mortality">{t('healthIndicators.indicators.maternalMortality')}</option>
+              <option value="contraceptive_access">{t('healthIndicators.indicators.contraceptiveAccess')}</option>
+              <option value="adolescent_health">{t('healthIndicators.indicators.adolescentHealth')}</option>
+              <option value="sgbv_reporting">{t('healthIndicators.indicators.sgbvReporting')}</option>
+              <option value="hiv_testing">{t('healthIndicators.indicators.hivTesting')}</option>
+              <option value="antenatal_care">{t('healthIndicators.indicators.antenatalCare')}</option>
             </select>
-            
+
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
               className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">All Countries</option>
+              <option value="all">{t('healthIndicators.allCountries')}</option>
               {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}
             </select>
-            
+
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
@@ -436,10 +448,10 @@ const HealthIndicatorIntegration: React.FC = () => {
         </div>
 
         {loading ? (
-          <LoadingState label="Loading health indicator data…" />
+          <LoadingState label={t('healthIndicators.loading')} />
         ) : error ? (
           <div className="flex justify-center items-center h-64">
-            <ErrorState description={error} action={<Button onClick={fetchHealthData}>Retry</Button>} />
+            <ErrorState description={error} action={<Button onClick={fetchHealthData}>{t('healthIndicators.retry')}</Button>} />
           </div>
         ) : (
           <>
@@ -447,59 +459,59 @@ const HealthIndicatorIntegration: React.FC = () => {
               <div className="bg-danger-light p-4 rounded-lg border border-danger/20">
                 <Flex>
                   <Heart className="h-5 w-5 text-danger" />
-                  <Text className="font-medium">Maternal Mortality</Text>
+                  <Text className="font-medium">{t('healthIndicators.indicators.maternalMortality')}</Text>
                 </Flex>
                 <Text className="mt-2 text-2xl font-bold text-danger-dark">
                   {indicatorStats.maternal_mortality.value}
                 </Text>
                 <Text className={`text-sm ${indicatorStats.maternal_mortality.change.startsWith('+') ? 'text-danger' : 'text-success'}`}>
-                  {indicatorStats.maternal_mortality.change} from previous year
+                  {t('healthIndicators.changeFromPreviousYear', { change: indicatorStats.maternal_mortality.change })}
                 </Text>
               </div>
 
               <div className="bg-info-light p-4 rounded-lg border border-info/20">
                 <Flex>
                   <Activity className="h-5 w-5 text-info" />
-                  <Text className="font-medium">Contraceptive Access</Text>
+                  <Text className="font-medium">{t('healthIndicators.indicators.contraceptiveAccess')}</Text>
                 </Flex>
                 <Text className="mt-2 text-2xl font-bold text-info-dark">
                   {indicatorStats.contraceptive_access.value}%
                 </Text>
                 <Text className={`text-sm ${indicatorStats.contraceptive_access.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>
-                  {indicatorStats.contraceptive_access.change} from previous year
+                  {t('healthIndicators.changeFromPreviousYear', { change: indicatorStats.contraceptive_access.change })}
                 </Text>
               </div>
 
               <div className="bg-success-light p-4 rounded-lg border border-success/20">
                 <Flex>
                   <TrendingUp className="h-5 w-5 text-success" />
-                  <Text className="font-medium">Adolescent Health</Text>
+                  <Text className="font-medium">{t('healthIndicators.indicators.adolescentHealth')}</Text>
                 </Flex>
                 <Text className="mt-2 text-2xl font-bold text-success-dark">
                   {indicatorStats.adolescent_health.value}
                 </Text>
                 <Text className={`text-sm ${indicatorStats.adolescent_health.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>
-                  {indicatorStats.adolescent_health.change} from previous year
+                  {t('healthIndicators.changeFromPreviousYear', { change: indicatorStats.adolescent_health.change })}
                 </Text>
               </div>
 
               <div className="bg-stone-100 p-4 rounded-lg border border-stone-200">
                 <Flex>
                   <Activity className="h-5 w-5 text-stone-700" />
-                  <Text className="font-medium">SGBV Reporting</Text>
+                  <Text className="font-medium">{t('healthIndicators.indicators.sgbvReporting')}</Text>
                 </Flex>
                 <Text className="mt-2 text-2xl font-bold text-stone-700">
                   {indicatorStats.sgbv_reporting.value}
                 </Text>
                 <Text className={`text-sm ${indicatorStats.sgbv_reporting.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>
-                  {indicatorStats.sgbv_reporting.change} from previous year
+                  {t('healthIndicators.changeFromPreviousYear', { change: indicatorStats.sgbv_reporting.change })}
                 </Text>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <Title>Monthly Trends: {selectedIndicator.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</Title>
+                <Title>{t('healthIndicators.monthlyTrends.title', { indicator: selectedIndicatorLabel })}</Title>
                 {healthData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={healthData}>
@@ -508,10 +520,10 @@ const HealthIndicatorIntegration: React.FC = () => {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line 
-                        type="monotone" 
+                      <Line
+                        type="monotone"
                         dataKey={selectedIndicator}
-                        name={selectedIndicator.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        name={selectedIndicatorLabel}
                         stroke={CHART_COLORS.primary}
                         activeDot={{ r: 8 }}
                       />
@@ -519,43 +531,43 @@ const HealthIndicatorIntegration: React.FC = () => {
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex justify-center items-center h-64">
-                    <Text>No trend data available</Text>
+                    <Text>{t('healthIndicators.monthlyTrends.noData')}</Text>
                   </div>
                 )}
               </div>
-              
+
               <div>
-                <Title>Health Indicators vs. Case Volume</Title>
+                <Title>{t('healthIndicators.correlation.title')}</Title>
                 {correlationData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <ScatterChart>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        type="number" 
-                        dataKey="x" 
-                        name={selectedIndicator.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} 
-                        unit="" 
+                      <XAxis
+                        type="number"
+                        dataKey="x"
+                        name={selectedIndicatorLabel}
+                        unit=""
                       />
-                      <YAxis 
-                        type="number" 
-                        dataKey="y" 
-                        name="Reproductive Health Cases" 
-                        unit="" 
+                      <YAxis
+                        type="number"
+                        dataKey="y"
+                        name={t('healthIndicators.correlation.yAxis')}
+                        unit=""
                       />
-                      <ZAxis 
-                        type="number" 
-                        dataKey="z" 
-                        range={[60, 400]} 
-                        name="Total Cases" 
-                        unit="" 
+                      <ZAxis
+                        type="number"
+                        dataKey="z"
+                        range={[60, 400]}
+                        name={t('healthIndicators.correlation.zAxis')}
+                        unit=""
                       />
-                      <Tooltip 
-                        cursor={{ strokeDasharray: '3 3' }} 
+                      <Tooltip
+                        cursor={{ strokeDasharray: '3 3' }}
                         formatter={(value, name) => [value, name]}
                         labelFormatter={(label) => correlationData[label]?.name || ''}
                       />
                       <Scatter
-                        name="Health-Case Correlation"
+                        name={t('healthIndicators.correlation.seriesName')}
                         data={correlationData}
                         fill={CHART_COLORS.primary}
                       />
@@ -563,38 +575,36 @@ const HealthIndicatorIntegration: React.FC = () => {
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex justify-center items-center h-64">
-                    <Text>No correlation data available</Text>
+                    <Text>{t('healthIndicators.correlation.noData')}</Text>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="bg-stone-50 p-6 rounded-lg">
-              <Title>Health Indicator Analysis</Title>
+              <Title>{t('healthIndicators.analysis.title')}</Title>
               <Text className="mt-2">
-                This dashboard shows the relationship between health indicators and legal cases across different countries.
-                Higher values in maternal mortality and lower values in contraceptive access often correlate with increased
-                case volumes related to reproductive rights.
+                {t('healthIndicators.analysis.description')}
               </Text>
-              
+
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Text className="font-medium">Key Insights</Text>
+                  <Text className="font-medium">{t('healthIndicators.analysis.keyInsightsTitle')}</Text>
                   <ul className="mt-2 space-y-2 text-sm text-stone-600">
-                    <li>• Countries with higher maternal mortality rates show increased litigation activity</li>
-                    <li>• Improved contraceptive access correlates with fewer legal challenges</li>
-                    <li>• Adolescent health indicators can predict future case trends</li>
-                    <li>• SGBV reporting rates show strong correlation with case outcomes</li>
+                    <li>• {t('healthIndicators.analysis.insights.item1')}</li>
+                    <li>• {t('healthIndicators.analysis.insights.item2')}</li>
+                    <li>• {t('healthIndicators.analysis.insights.item3')}</li>
+                    <li>• {t('healthIndicators.analysis.insights.item4')}</li>
                   </ul>
                 </div>
-                
+
                 <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Text className="font-medium">Data Sources</Text>
+                  <Text className="font-medium">{t('healthIndicators.analysis.dataSourcesTitle')}</Text>
                   <ul className="mt-2 space-y-2 text-sm text-stone-600">
-                    <li>• World Health Organization (WHO) country statistics</li>
-                    <li>• United Nations Population Fund (UNFPA) reports</li>
-                    <li>• National health ministries and statistical agencies</li>
-                    <li>• NGO research and field reports</li>
+                    <li>• {t('healthIndicators.analysis.sources.item1')}</li>
+                    <li>• {t('healthIndicators.analysis.sources.item2')}</li>
+                    <li>• {t('healthIndicators.analysis.sources.item3')}</li>
+                    <li>• {t('healthIndicators.analysis.sources.item4')}</li>
                   </ul>
                 </div>
               </div>

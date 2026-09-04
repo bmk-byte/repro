@@ -1,1 +1,441 @@
-{}
+{
+  "analyticsPage": {
+    "connectionErrorLabel": "Erreur de connexion :",
+    "retryAttempt": "Tentative n° {{count}}",
+    "retrying": "Nouvelle tentative…",
+    "retryConnection": "Relancer la connexion",
+    "title": "Statistiques",
+    "subtitle": "Tendances, répartition, géographie et résultats pour l'ensemble des dossiers.",
+    "tabs": {
+      "trends": "Tendances",
+      "distribution": "Répartition",
+      "geography": "Géographie",
+      "stakeholders": "Parties prenantes",
+      "legalFramework": "Cadre juridique",
+      "healthAndPerformance": "Santé et performance",
+      "reports": "Rapports"
+    },
+    "subviews": {
+      "trends": {
+        "overview": "Tendance mensuelle",
+        "metrics": "Indicateurs de performance",
+        "timeline": "Chronologie"
+      },
+      "distribution": {
+        "byTypeAndStatus": "Par type et statut",
+        "byOutcome": "Par issue"
+      },
+      "geography": {
+        "countryIntelligence": "Intelligence par pays",
+        "africaMap": "Carte de l'Afrique"
+      },
+      "health": {
+        "healthIndicators": "Indicateurs de santé",
+        "performanceTracking": "Suivi de la performance"
+      }
+    },
+    "monthlyCaseTrends": "Tendances mensuelles des dossiers",
+    "loadingLabels": {
+      "performanceMetrics": "Chargement des indicateurs de performance…",
+      "timeline": "Chargement de la chronologie…",
+      "distributionCharts": "Chargement des graphiques de répartition…",
+      "outcomes": "Chargement des résultats…",
+      "map": "Chargement de la carte…",
+      "africaMap": "Chargement de la carte de l'Afrique…",
+      "stakeholderAnalytics": "Chargement de l'analyse des parties prenantes…",
+      "legalFrameworkAnalysis": "Chargement de l'analyse du cadre juridique…",
+      "healthIndicators": "Chargement des indicateurs de santé…",
+      "performanceTracking": "Chargement du suivi de la performance…",
+      "reportGenerator": "Chargement du générateur de rapports…"
+    }
+  },
+  "geographicIntelligence": {
+    "title": "Intelligence géographique",
+    "connectionErrorTitle": "Erreur de connexion",
+    "retryConnection": "Relancer la connexion",
+    "allRegions": "Toutes les régions",
+    "loading": "Chargement des données géographiques…",
+    "retry": "Réessayer",
+    "caseVolumeByCountry": "Volume de dossiers par pays",
+    "totalCasesSeries": "Total des dossiers",
+    "noCountryData": "Aucune donnée par pays disponible",
+    "successRateByCountry": "Taux de réussite par pays",
+    "successRateSeries": "Taux de réussite (%)",
+    "noSuccessRateData": "Aucune donnée de taux de réussite disponible",
+    "topCaseCountries": "Pays comptant le plus de dossiers",
+    "casesCount": "{{count}} dossiers",
+    "regionalDistribution": "Répartition régionale"
+  },
+  "legalFrameworkAnalysis": {
+    "allCategories": "Toutes les catégories",
+    "loading": "Chargement des données sur le cadre juridique…",
+    "retry": "Réessayer",
+    "noData": "Aucune donnée sur le cadre juridique disponible",
+    "loadError": "Échec du chargement des données sur le cadre juridique. Veuillez réessayer plus tard.",
+    "title": "Analyse du cadre juridique",
+    "instrumentsUsed": {
+      "title": "Instruments juridiques utilisés",
+      "noData": "Aucune donnée chronologique sur le cadre juridique disponible"
+    },
+    "legend": {
+      "domestic": "Droit interne",
+      "international": "Droit international",
+      "both": "Les deux"
+    },
+    "protocolCitation": {
+      "title": "Fréquence de citation des protocoles",
+      "seriesName": "Citations",
+      "noData": "Aucune donnée de citation de protocoles disponible"
+    },
+    "frameworkDistribution": {
+      "title": "Droit interne c. droit international",
+      "domesticOnly": "Droit interne uniquement",
+      "internationalOnly": "Droit international uniquement",
+      "bothUsed": "Les deux utilisés",
+      "noData": "Aucune donnée de répartition par cadre juridique disponible"
+    },
+    "tooltip": {
+      "cases": "{{count}} dossiers",
+      "count": "Nombre"
+    },
+    "summary": {
+      "domestic": {
+        "title": "Cadres juridiques internes",
+        "totalLabel": "Total des dossiers relevant du droit interne",
+        "noData": "Aucune donnée sur le droit interne disponible"
+      },
+      "international": {
+        "title": "Instruments internationaux",
+        "totalLabel": "Total des dossiers relevant du droit international",
+        "noData": "Aucune donnée sur le droit international disponible"
+      },
+      "combined": {
+        "title": "Approche combinée",
+        "totalLabel": "Total des dossiers à approche combinée",
+        "noData": "Aucune donnée sur l'approche combinée disponible"
+      }
+    }
+  },
+  "outcomeMetrics": {
+    "noData": "Aucune donnée sur les résultats disponible",
+    "loadError": "Échec du chargement des indicateurs de résultats. Veuillez réessayer plus tard.",
+    "title": "Tableau de bord des résultats",
+    "allJurisdictions": "Toutes les juridictions",
+    "loading": "Chargement des indicateurs de résultats…",
+    "retry": "Réessayer",
+    "unknownJurisdiction": "Inconnue",
+    "outcomes": {
+      "won": "Gagnés",
+      "lost": "Perdus",
+      "settled": "Réglés à l'amiable",
+      "ongoing": "En cours",
+      "dismissed": "Rejetés"
+    },
+    "percentOfTotalCases": "{{percent}} % du total des dossiers",
+    "caseOutcomes": {
+      "title": "Issues des dossiers",
+      "noData": "Aucune donnée sur les résultats disponible"
+    },
+    "seriesNameCases": "Dossiers",
+    "outcomeDistribution": {
+      "title": "Répartition des résultats",
+      "noData": "Aucune donnée de répartition des résultats disponible"
+    },
+    "tooltip": {
+      "cases": "{{count}} dossiers",
+      "count": "Nombre",
+      "percent": "{{value}} %",
+      "successRate": "Taux de réussite"
+    },
+    "successRateByJurisdiction": {
+      "title": "Taux de réussite par juridiction",
+      "seriesName": "Taux de réussite",
+      "noData": "Aucune donnée de taux de réussite par juridiction disponible"
+    },
+    "resolutionProgress": {
+      "title": "Progression du règlement des dossiers",
+      "overallResolutionRate": "Taux de règlement global",
+      "resolvedVsTotal": "Dossiers réglés c. total des dossiers",
+      "resolvedOfTotal": "{{resolved}} sur {{total}} dossiers",
+      "successRateLabel": "Taux de réussite",
+      "successfulOutcomes": "Issues favorables",
+      "caseCompletion": "Clôture des dossiers",
+      "completedCasesLabel": "Dossiers clôturés",
+      "casesCount": "{{count}} dossiers"
+    },
+    "footer": {
+      "overallSuccessRate": "Taux de réussite global",
+      "basedOnResolvedCases": "Calculé sur les dossiers réglés",
+      "kpiTitle": "Indicateurs clés de performance",
+      "totalCases": "Total des dossiers : {{count}}",
+      "resolutionRate": "Taux de règlement : {{percent}} %"
+    }
+  },
+  "performanceMetrics": {
+    "noData": "Aucune donnée de dossier disponible pour la période sélectionnée",
+    "loadError": "Échec du chargement des indicateurs de performance. Veuillez réessayer plus tard.",
+    "loading": "Chargement des indicateurs de performance…",
+    "retry": "Réessayer",
+    "title": "Tendances de règlement des dossiers",
+    "yAxisLabel": "Dossiers",
+    "tooltipCases": "{{count}} dossiers",
+    "legend": {
+      "completed": "Terminés",
+      "inProgress": "En cours",
+      "pending": "En attente"
+    },
+    "emptyState": "Aucune donnée de règlement de dossiers disponible"
+  },
+  "performanceTracking": {
+    "noData": "Aucune donnée de performance disponible",
+    "loadError": "Échec du chargement des données de performance. Veuillez réessayer plus tard.",
+    "title": "Suivi de la performance",
+    "allOrganizations": "Toutes les organisations",
+    "loading": "Chargement des données de performance…",
+    "retry": "Réessayer",
+    "unknownOrg": "Inconnue",
+    "stats": {
+      "avgProcessingTime": {
+        "title": "Délai de traitement moyen",
+        "subtitle": "Du dépôt au règlement"
+      },
+      "kpiAchievement": {
+        "title": "Réalisation des objectifs",
+        "subtitle": "Moyenne entre les organisations"
+      },
+      "collaborationScore": {
+        "title": "Indice de collaboration",
+        "subtitle": "Coopération inter-organisations"
+      },
+      "strategicCases": {
+        "title": "Dossiers stratégiques",
+        "subtitle": "Contentieux à fort impact"
+      }
+    },
+    "daysValue": "{{count}} jours",
+    "orgKpiDashboard": {
+      "title": "Tableau de bord des objectifs par organisation",
+      "seriesName": "Réalisation des objectifs (%)",
+      "noData": "Aucune donnée d'objectifs par organisation disponible"
+    },
+    "processingTimeTrends": {
+      "title": "Tendances des délais de traitement",
+      "avgSeriesName": "Délai de traitement moyen (jours)",
+      "targetSeriesName": "Délai cible (jours)",
+      "noData": "Aucune donnée de délai de traitement disponible"
+    },
+    "orgPerformance": {
+      "title": "Performance par organisation"
+    },
+    "processingTimeByOrg": {
+      "title": "Délai de traitement par organisation"
+    }
+  },
+  "timeline": {
+    "title": "Progression chronologique des dossiers",
+    "allCountries": "Tous les pays",
+    "loading": "Chargement de la chronologie…",
+    "noData": "Aucune donnée chronologique disponible",
+    "loadError": "Échec du chargement des données chronologiques. Veuillez réessayer plus tard.",
+    "legend": {
+      "filed": "Déposés",
+      "ongoing": "En cours",
+      "resolved": "Résolus",
+      "dismissed": "Rejetés"
+    },
+    "stats": {
+      "filedCases": "Dossiers déposés",
+      "filedCasesSubtitle": "Nouveaux dossiers sur la période",
+      "ongoingCases": "Dossiers en cours",
+      "ongoingCasesSubtitle": "Actuellement en instruction",
+      "resolvedCases": "Dossiers résolus",
+      "resolvedCasesSubtitle": "Menés à bien",
+      "dismissedCases": "Dossiers rejetés",
+      "dismissedCasesSubtitle": "Issues défavorables"
+    },
+    "avgResolutionTime": {
+      "title": "Délai moyen de résolution",
+      "value": "{{count}} jours",
+      "subtitle": "Du dépôt à la résolution"
+    },
+    "caseAging": {
+      "title": "Ancienneté des dossiers",
+      "lessThan30": "Moins de 30 jours : {{value}} %",
+      "between30And90": "30 à 90 jours : {{value}} %",
+      "moreThan90": "Plus de 90 jours : {{value}} %"
+    }
+  },
+  "distributionCharts": {
+    "noApprovedData": "Aucune donnée de dossier approuvé disponible",
+    "loadErrorToast": "Échec du chargement des données de répartition : {{error}}",
+    "loading": "Chargement des données de répartition…",
+    "retryAttempt": "{{error}} (tentative n° {{count}})",
+    "retry": "Réessayer",
+    "caseTypes": {
+      "title": "Types de dossiers",
+      "subtitle": "Répartition des dossiers par type",
+      "totalCases": "Total des dossiers",
+      "noData": "Aucune donnée par type de dossier disponible",
+      "ariaLabel": "Graphique de répartition des types de dossiers"
+    },
+    "caseTypeLabels": {
+      "litigation": "Contentieux",
+      "rapidResponse": "Réponse rapide"
+    },
+    "statusLabels": {
+      "inProgress": "En cours",
+      "completed": "Terminé",
+      "pending": "En attente",
+      "onHold": "En pause"
+    },
+    "unknownCountry": "Inconnu",
+    "tooltip": {
+      "cases": "{{count}} dossiers",
+      "count": "Nombre",
+      "casesWithPercent": "{{count}} dossiers ({{percentage}} %)"
+    },
+    "statusDistribution": {
+      "title": "Répartition par statut",
+      "subtitle": "Dossiers selon leur statut actuel",
+      "noData": "Aucune donnée de répartition par statut disponible"
+    },
+    "countryDistribution": {
+      "title": "Top 10 des pays par volume de dossiers",
+      "subtitle": "Répartition géographique des dossiers",
+      "seriesName": "Dossiers",
+      "noData": "Aucune donnée de répartition par pays disponible"
+    }
+  },
+  "stakeholderAnalytics": {
+    "allCategories": "Toutes les catégories",
+    "allRegions": "Toutes les régions",
+    "loading": "Chargement de l'analyse des parties prenantes…",
+    "loadErrorToast": "Échec du chargement des données sur les parties prenantes : {{error}}",
+    "retryAttempt": "{{error}} (tentative n° {{count}})",
+    "retry": "Réessayer",
+    "title": "Analyse des parties prenantes",
+    "unknownBody": "Inconnue",
+    "seriesName": "Dossiers",
+    "tooltipCases": "{{count}} dossiers",
+    "tooltipCount": "Nombre",
+    "casesCount": "{{count}} dossiers",
+    "keyPlayerAnalysis": {
+      "title": "Analyse des acteurs clés",
+      "noData": "Aucune donnée sur les acteurs clés disponible"
+    },
+    "institutionEngagement": {
+      "title": "Engagement des institutions",
+      "noData": "Aucune donnée sur les institutions disponible"
+    },
+    "courtParticipation": {
+      "title": "Répartition par instance judiciaire",
+      "noData": "Aucune donnée sur les instances judiciaires disponible"
+    },
+    "topLitigants": {
+      "title": "Principaux plaignants"
+    },
+    "topDefendingInstitutions": {
+      "title": "Principales institutions défenderesses"
+    },
+    "judicialBodies": {
+      "title": "Instances judiciaires"
+    }
+  },
+  "healthIndicators": {
+    "noCountries": "Aucun pays trouvé dans la base de données.",
+    "loadCountriesError": "Échec du chargement des pays. Veuillez réessayer plus tard.",
+    "noDataFilters": "Aucune donnée d'indicateur de santé disponible pour les filtres sélectionnés.",
+    "loadDataErrorToast": "Échec du chargement des données d'indicateurs de santé : {{error}}",
+    "title": "Tableau de bord des indicateurs de santé",
+    "allCountries": "Tous les pays",
+    "loading": "Chargement des données d'indicateurs de santé…",
+    "retry": "Réessayer",
+    "unknownCountry": "Inconnu",
+    "indicators": {
+      "maternalMortality": "Mortalité maternelle",
+      "contraceptiveAccess": "Accès à la contraception",
+      "adolescentHealth": "Santé des adolescents",
+      "sgbvReporting": "Signalement des VSBG",
+      "hivTesting": "Dépistage du VIH",
+      "antenatalCare": "Soins prénatals"
+    },
+    "changeFromPreviousYear": "{{change}} par rapport à l'année précédente",
+    "monthlyTrends": {
+      "title": "Tendances mensuelles : {{indicator}}",
+      "noData": "Aucune donnée de tendance disponible"
+    },
+    "correlation": {
+      "title": "Indicateurs de santé c. volume de dossiers",
+      "yAxis": "Dossiers liés à la santé reproductive",
+      "zAxis": "Total des dossiers",
+      "seriesName": "Corrélation santé-dossiers",
+      "noData": "Aucune donnée de corrélation disponible"
+    },
+    "analysis": {
+      "title": "Analyse des indicateurs de santé",
+      "description": "Ce tableau de bord illustre le lien entre les indicateurs de santé et les dossiers juridiques selon les pays. Une mortalité maternelle élevée et un accès réduit à la contraception sont souvent corrélés à une hausse du volume de dossiers liés aux droits reproductifs.",
+      "keyInsightsTitle": "Principaux constats",
+      "insights": {
+        "item1": "Les pays affichant une mortalité maternelle plus élevée connaissent une activité contentieuse accrue",
+        "item2": "Un meilleur accès à la contraception est corrélé à moins de contentieux",
+        "item3": "Les indicateurs de santé des adolescents permettent d'anticiper les tendances des dossiers",
+        "item4": "Les taux de signalement des VSBG sont fortement corrélés aux issues des dossiers"
+      },
+      "dataSourcesTitle": "Sources des données",
+      "sources": {
+        "item1": "Statistiques nationales de l'Organisation mondiale de la santé (OMS)",
+        "item2": "Rapports du Fonds des Nations unies pour la population (UNFPA)",
+        "item3": "Ministères de la santé et organismes statistiques nationaux",
+        "item4": "Recherches d'ONG et rapports de terrain"
+      }
+    }
+  },
+  "africaMap": {
+    "title": "Répartition des dossiers",
+    "allCategories": "Toutes les catégories",
+    "range": {
+      "lastYear": "Dernière année",
+      "last2Years": "2 dernières années",
+      "last5Years": "5 dernières années"
+    },
+    "loading": "Chargement des données cartographiques…",
+    "noData": "Aucune donnée disponible pour les filtres sélectionnés",
+    "loadError": "Échec du chargement des données cartographiques. Veuillez réessayer plus tard.",
+    "tooltip": {
+      "totalCases": "Total des dossiers : {{count}}",
+      "categories": "Catégories :",
+      "trend": "{{count}} en tendance"
+    },
+    "legend": {
+      "caseVolume": "Volume de dossiers",
+      "low": "Faible",
+      "high": "Élevé"
+    }
+  },
+  "dataChart": {
+    "loading": "Chargement des données du graphique…",
+    "retry": "Réessayer",
+    "retryAttempt": "{{error}} (tentative n° {{count}})",
+    "noApprovedData": "Aucune donnée de dossier approuvé disponible",
+    "loadErrorToast": "Échec du chargement des données du graphique : {{error}}",
+    "noData": "Aucune donnée de dossier disponible",
+    "tooltipCases": "{{count}} dossiers",
+    "series": {
+      "total": "Total des dossiers",
+      "completed": "Terminés",
+      "inProgress": "En cours"
+    }
+  },
+  "recentLegalUpdates": {
+    "title": "Actualités juridiques récentes",
+    "allCategories": "Toutes les catégories",
+    "allJurisdictions": "Toutes les juridictions",
+    "dateRangeTo": "à",
+    "loading": "Chargement des actualités juridiques…",
+    "loadError": "Échec du chargement des actualités juridiques récentes",
+    "noUpdates": "Aucune actualité juridique récente trouvée",
+    "unknownCountry": "Inconnu",
+    "viewDetails": "Voir les détails"
+  },
+  "dashboardCard": {}
+}

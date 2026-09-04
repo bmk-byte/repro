@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Title } from '@tremor/react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { LoadingState, ErrorState, Button } from './ui';
@@ -10,6 +11,7 @@ interface PerformanceMetricsProps {
 }
 
 const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) => {
+  const { t } = useTranslation('analytics');
   const [metrics, setMetrics] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -40,16 +42,16 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
 
       if (!cases || cases.length === 0) {
         setMetrics([]);
-        setError('No case data available for the selected date range');
+        setError(t('performanceMetrics.noData'));
         return;
       }
-      
+
       // Process data for charts
       const processedData = processMetricsData(cases);
       setMetrics(processedData);
     } catch (err) {
       console.error('Error fetching metrics:', err);
-      setError('Failed to load performance metrics. Please try again later.');
+      setError(t('performanceMetrics.loadError'));
     } finally {
       setLoading(false);
     }
@@ -58,26 +60,26 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
   const processMetricsData = (cases: any[]) => {
     // Group cases by month
     const monthlyData: { [key: string]: { total: number, completed: number, in_progress: number, pending: number } } = {};
-    
+
     // Initialize months in the date range
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
     const currentDate = new Date(startDate);
-    
+
     while (currentDate <= endDate) {
       const monthKey = currentDate.toLocaleString('default', { month: 'short', year: '2-digit' });
       monthlyData[monthKey] = { total: 0, completed: 0, in_progress: 0, pending: 0 };
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
-    
+
     // Count cases by month and status
     cases.forEach(caseItem => {
       const date = new Date(caseItem.created_at);
       const monthKey = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-      
+
       if (monthlyData[monthKey]) {
         monthlyData[monthKey].total++;
-        
+
         if (caseItem.status === 'completed') {
           monthlyData[monthKey].completed++;
         } else if (caseItem.status === 'in_progress') {
@@ -87,7 +89,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
         }
       }
     });
-    
+
     // Convert to array format for charts
     return Object.entries(monthlyData).map(([name, counts]) => ({
       name,
@@ -96,13 +98,13 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
   };
 
   if (loading) {
-    return <LoadingState label="Loading performance metrics…" />;
+    return <LoadingState label={t('performanceMetrics.loading')} />;
   }
 
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <ErrorState description={error} action={<Button onClick={fetchMetrics}>Retry</Button>} />
+        <ErrorState description={error} action={<Button onClick={fetchMetrics}>{t('performanceMetrics.retry')}</Button>} />
       </div>
     );
   }
@@ -110,7 +112,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
   return (
     <div className="space-y-6">
       <Card className="border-none">
-        <Title>Case Resolution Trends</Title>
+        <Title>{t('performanceMetrics.title')}</Title>
         {metrics.length > 0 ? (
           <div className="h-72 mt-4">
             <ResponsiveContainer width="100%" height="100%">
@@ -147,7 +149,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
                   tickCount={6}
                   domain={[0, 'auto']}
                   label={{
-                    value: 'Cases',
+                    value: t('performanceMetrics.yAxisLabel'),
                     angle: -90,
                     position: 'insideLeft',
                     style: { textAnchor: 'middle', fill: CHART_AXIS_COLOR, fontSize: 12 }
@@ -160,7 +162,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                     border: `1px solid ${CHART_GRID_COLOR}`
                   }}
-                  formatter={(value: any) => [`${value} cases`, '']}
+                  formatter={(value: any) => [t('performanceMetrics.tooltipCases', { count: value }), '']}
                 />
                 <Legend
                   verticalAlign="top"
@@ -170,7 +172,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
                 <Area
                   type="monotone"
                   dataKey="completed"
-                  name="Completed"
+                  name={t('performanceMetrics.legend.completed')}
                   stroke={CHART_COLORS.success}
                   fillOpacity={1}
                   fill="url(#colorCompleted)"
@@ -180,7 +182,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
                 <Area
                   type="monotone"
                   dataKey="in_progress"
-                  name="In Progress"
+                  name={t('performanceMetrics.legend.inProgress')}
                   stroke={CHART_COLORS.info}
                   fillOpacity={1}
                   fill="url(#colorInProgress)"
@@ -190,7 +192,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
                 <Area
                   type="monotone"
                   dataKey="pending"
-                  name="Pending"
+                  name={t('performanceMetrics.legend.pending')}
                   stroke={CHART_COLORS.warning}
                   fillOpacity={1}
                   fill="url(#colorPending)"
@@ -202,7 +204,7 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ dateRange }) =>
           </div>
         ) : (
           <div className="h-72 flex items-center justify-center">
-            <p className="text-stone-500">No case resolution data available</p>
+            <p className="text-stone-500">{t('performanceMetrics.emptyState')}</p>
           </div>
         )}
       </Card>
