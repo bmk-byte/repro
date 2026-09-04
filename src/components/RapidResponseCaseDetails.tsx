@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, MapPin, FileText, CreditCard as Edit2, TriangleAlert as AlertTriangle, CircleAlert as AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import { toast } from '../lib/toast';
@@ -40,6 +41,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
   onUpdate,
   currentUserId
 }) => {
+  const { t } = useTranslation('rapidResponse');
   const [caseData, setCaseData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
@@ -131,8 +133,8 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
       setCaseData(data);
     } catch (error) {
       console.error('Error fetching case details:', error);
-      setError('Failed to load case details');
-      toast.error('Failed to load case details');
+      setError(t('caseDetails.errors.failedToLoadCaseDetails'));
+      toast.error(t('caseDetails.errors.failedToLoadCaseDetails'));
     } finally {
       setLoading(false);
     }
@@ -166,7 +168,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
   };
 
   if (loading) {
-    return <LoadingState label="Loading case details…" />;
+    return <LoadingState label={t('caseDetails.states.loadingCaseDetails')} />;
   }
 
   if (accessDenied || !caseData) {
@@ -176,19 +178,19 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
           <AlertCircle className="h-12 w-12 text-danger" />
         </div>
         <p className="text-stone-900 font-medium mb-2">
-          {accessDenied ? 'Access Denied' : 'Case not found'}
+          {accessDenied ? t('caseDetails.states.accessDeniedTitle') : t('caseDetails.states.caseNotFoundTitle')}
         </p>
         <p className="text-stone-500 mb-6">
           {accessDenied
-            ? 'You do not have permission to view this case. It may belong to another organization.'
-            : 'The case you are looking for does not exist.'}
+            ? t('caseDetails.states.accessDeniedMessage')
+            : t('caseDetails.states.caseNotFoundMessage')}
         </p>
         <button
           onClick={onBack}
           className="text-primary hover:text-primary-dark flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Cases
+          {t('caseDetails.backToCases')}
         </button>
       </div>
     );
@@ -197,14 +199,14 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
   if (error) {
     return (
       <div className="bg-danger-light border border-danger/30 text-danger-dark px-4 py-3 rounded relative">
-        <strong className="font-bold">Error: </strong>
+        <strong className="font-bold">{t('caseDetails.states.errorPrefix')}</strong>
         <span className="block sm:inline">{error}</span>
         <button
           onClick={onBack}
           className="mt-4 text-primary hover:text-primary-dark flex items-center"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Cases
+          {t('caseDetails.backToCases')}
         </button>
       </div>
     );
@@ -224,16 +226,16 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
             className="text-stone-500 hover:text-stone-700 flex items-center mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Cases
+            {t('caseDetails.backToCases')}
           </button>
-          
+
           {isModerator && onEditCase && caseData?.user_id === currentUserId && caseData?.case_type === 'rapid-response' && (
             <button
               onClick={() => onEditCase(caseData)}
               className="text-primary hover:text-primary-dark flex items-center"
             >
               <Edit2 className="h-4 w-4 mr-1" />
-              Edit Case
+              {t('caseDetails.editCase')}
             </button>
           )}
         </div>
@@ -244,7 +246,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
               <h1 className="text-2xl font-semibold text-stone-900">{caseData.case_filed}</h1>
               {caseData.case_reference && (
                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-stone-100 text-stone-800">
-                  Ref: {caseData.case_reference}
+                  {t('caseDetails.refPrefix', { reference: caseData.case_reference })}
                 </span>
               )}
             </div>
@@ -264,11 +266,11 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
               caseData.status === 'in_progress' ? 'bg-info-light text-info-dark' :
               'bg-warning-light text-warning-dark'
             }`}>
-              {caseData.status}
+              {t(`dashboard.statusLabels.${caseData.status}`)}
             </span>
             {caseData.priority_level && (
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(caseData.priority_level)}`}>
-                {caseData.priority_level}
+                {t(`caseForm.priorities.${caseData.priority_level.toLowerCase()}`)}
               </span>
             )}
             {caseData.case_category && (
@@ -286,14 +288,14 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
           {/* Case Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Information</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('caseDetails.sections.caseInformation')}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Client Name</label>
-                  <p className="mt-1">{caseData.client_name || 'Not specified'}</p>
+                  <label className="text-sm font-medium text-stone-500">{t('caseDetails.fields.clientName')}</label>
+                  <p className="mt-1">{caseData.client_name || t('caseDetails.notSpecified')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Client Contact</label>
+                  <label className="text-sm font-medium text-stone-500">{t('caseDetails.fields.clientContact')}</label>
                   <div className="mt-1 space-y-1">
                     {caseData.client_email && (
                       <p className="text-sm">{caseData.client_email}</p>
@@ -304,19 +306,19 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Nature of Case</label>
+                  <label className="text-sm font-medium text-stone-500">{t('caseDetails.fields.natureOfCase')}</label>
                   <p className="mt-1">{caseData.nature_of_case}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-stone-500">Partner Organization</label>
-                  <p className="mt-1">{caseData.partner || 'Not specified'}</p>
+                  <label className="text-sm font-medium text-stone-500">{t('caseDetails.fields.partnerOrganization')}</label>
+                  <p className="mt-1">{caseData.partner || t('caseDetails.notSpecified')}</p>
                 </div>
                 {caseData.case_categories && caseData.case_categories.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-stone-500">Categories</label>
+                    <label className="text-sm font-medium text-stone-500">{t('caseDetails.fields.categories')}</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {caseData.case_categories.map((category: string, idx: number) => (
-                        <span 
+                        <span
                           key={idx}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-light text-info-dark"
                         >
@@ -331,13 +333,13 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
 
             {/* Case Summary */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Summary</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('caseDetails.sections.caseSummary')}</h2>
               <p className="text-stone-600 whitespace-pre-line">{caseData.case_summary}</p>
             </div>
 
             {/* Key Deadlines */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Key Deadlines</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('caseDetails.sections.keyDeadlines')}</h2>
               {caseData.key_deadlines && caseData.key_deadlines.length > 0 ? (
                 <div className="space-y-3">
                   {caseData.key_deadlines.map((deadline: any, index: number) => (
@@ -351,7 +353,7 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                   ))}
                 </div>
               ) : (
-                <p className="text-stone-500 text-sm">No deadlines specified</p>
+                <p className="text-stone-500 text-sm">{t('caseDetails.noDeadlinesSpecified')}</p>
               )}
             </div>
           </div>
@@ -360,24 +362,24 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
           <div className="space-y-6">
             {/* Documents */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Documents</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('caseDetails.sections.caseDocuments')}</h2>
               {caseData.pdf_url && (
                 <div className="bg-stone-50 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <FileText className="h-5 w-5 text-stone-400 mr-2" />
-                      <span className="text-sm text-stone-900">Main Case Document</span>
+                      <span className="text-sm text-stone-900">{t('caseDetails.mainCaseDocument')}</span>
                     </div>
                     <button
                       onClick={() => setShowDocumentModal(true)}
                       className="text-sm text-primary hover:text-primary-dark"
                     >
-                      View Document
+                      {t('caseDetails.viewDocument')}
                     </button>
                   </div>
                 </div>
               )}
-              
+
               {caseData.case_documents?.length > 0 ? (
                 <div className="space-y-3">
                   {caseData.case_documents.map((doc: any) => (
@@ -398,20 +400,20 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
                           }}
                           className="text-xs text-primary hover:text-primary-dark mt-2 inline-block"
                         >
-                          View Document
+                          {t('caseDetails.viewDocument')}
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : !caseData.pdf_url ? (
-                <p className="text-stone-500 text-sm">No documents uploaded</p>
+                <p className="text-stone-500 text-sm">{t('caseDetails.noDocumentsUploaded')}</p>
               ) : null}
             </div>
 
             {/* Progress Tracking */}
             <div>
-              <h2 className="text-lg font-medium text-stone-900 mb-3">Case Progress</h2>
+              <h2 className="text-lg font-medium text-stone-900 mb-3">{t('caseDetails.sections.caseProgress')}</h2>
               <CaseProgressTracker
                 caseId={caseData.id}
                 onUpdate={onUpdate || fetchCaseDetails}

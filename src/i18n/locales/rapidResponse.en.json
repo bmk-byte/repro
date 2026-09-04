@@ -1,1 +1,426 @@
-{}
+{
+  "caseForm": {
+    "sections": {
+      "basicInformation": "Basic Information",
+      "priorityAndStatus": "Priority and Status",
+      "clientInformation": "Client Information",
+      "partnerOrganization": "Partner Organization",
+      "keyDeadlines": "Key Deadlines",
+      "actionDetails": "Action Details",
+      "documentUpload": "Document Upload"
+    },
+    "fields": {
+      "caseReference": "Case Reference",
+      "caseReferenceHelper": "Unique identifier",
+      "caseReferencePlaceholder": "e.g., RR-2025-001",
+      "caseTitle": "Case Title",
+      "countryJurisdiction": "Country/Jurisdiction",
+      "selectCountry": "Select a country",
+      "caseCategory": "Case Category",
+      "selectCategory": "Select a category",
+      "caseDescription": "Case Description",
+      "priorityLevel": "Priority Level",
+      "currentStage": "Current Stage",
+      "natureOfCase": "Nature of Case",
+      "clientName": "Client Name",
+      "clientEmail": "Client Email",
+      "clientPhone": "Client Phone",
+      "partnerOrganization": "Partner Organization",
+      "partnerOrganizationPlaceholder": "e.g., Afya Na Haki, LIRA Programme, KELIN",
+      "partnerOrganizationHelper": "Enter the name of the partner organization involved in this case",
+      "deadlineDate": "Deadline Date",
+      "deadlineDescription": "Deadline Description",
+      "deadlineDescriptionPlaceholder": "Describe this deadline",
+      "actionTaken": "Action Taken",
+      "nextSteps": "Next Steps",
+      "actionTimeframe": "Action Timeframe",
+      "actionTimeframePlaceholder": "e.g., 48 hours, 1 week, 30 days"
+    },
+    "stageHelpers": {
+      "intake": "Initial assessment and information gathering",
+      "review": "Analyzing case details and planning response",
+      "action": "Implementing response strategies",
+      "resolution": "Case resolution and follow-up"
+    },
+    "priorities": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "stages": {
+      "intake": "Intake",
+      "review": "Review",
+      "action": "Action",
+      "resolution": "Resolution"
+    },
+    "categories": {
+      "accessToSafeAbortion": "Access to Safe Abortion",
+      "maternalHealthAndMortality": "Maternal Health and Mortality",
+      "forcedSterilization": "Forced Sterilization",
+      "contraceptiveAccessAndDenial": "Contraceptive Access and Denial",
+      "sgbv": "Sexual and Gender-Based Violence (SGBV)",
+      "childMarriage": "Child Marriage and Early/Forced Marriage",
+      "menstrualHealthAndHygiene": "Menstrual Health and Hygiene Rights",
+      "srhEducation": "Sexual and Reproductive Health Education",
+      "criminalizationOfPregnancyOutcomes": "Criminalization of Pregnancy Outcomes",
+      "accessToAssistedReproductiveTechnologies": "Access to Assisted Reproductive Technologies",
+      "accessForIncarceratedWomen": "Access to Reproductive Health Services for Incarcerated Women",
+      "consentForAdolescentsAndMinors": "Consent and Access for Adolescents and Minors",
+      "discriminationInReproductiveHealthcare": "Discrimination in Reproductive Healthcare",
+      "reproductiveRightsInConflict": "Reproductive Rights in Conflict and Humanitarian Settings",
+      "accessForMarginalizedGroups": "Access to Reproductive Health Services for Marginalized Groups",
+      "parentalLeaveAndReproductiveLaborRights": "Parental Leave and Reproductive Labor Rights",
+      "violationOfConfidentialityAndPrivacy": "Violation of Confidentiality and Privacy in Reproductive Healthcare",
+      "denialOfPostAbortionCare": "Denial of Post-Abortion Care",
+      "reproductiveHealthAndEnvironmentalJustice": "Reproductive Health and Environmental Justice",
+      "religiousAndCulturalBarriers": "Religious and Cultural Barriers to Reproductive Healthcare Access",
+      "other": "Other"
+    },
+    "deadlines": {
+      "saveChanges": "Save Changes",
+      "addDeadline": "Add Deadline",
+      "cancelEdit": "Cancel Edit",
+      "edit": "Edit",
+      "removeDeadlineAriaLabel": "Remove deadline: {{description}}"
+    },
+    "documentUpload": {
+      "dropFileHere": "Drop your file here or click to browse",
+      "fileTypesHint": "PDF, DOC, DOCX up to 10MB",
+      "removeSelectedFile": "Remove selected file",
+      "uploadAriaLabel": "Upload case document"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "updateCase": "Update Case",
+      "createCase": "Create Case"
+    },
+    "errors": {
+      "fieldRequired": "{{label}} is required",
+      "caseReferenceRequired": "Case reference is required",
+      "caseCategoryRequired": "Case category is required",
+      "fileTooLarge": "That file is larger than 10MB. Please choose a smaller file.",
+      "invalidFileType": "Only PDF, DOC, and DOCX files are accepted.",
+      "fileNotAccepted": "That file could not be accepted.",
+      "failedToLoadCountries": "Failed to load countries",
+      "userNotAuthenticated": "User not authenticated",
+      "errorSavingCase": "An error occurred while saving the case"
+    },
+    "toasts": {
+      "draftRestored": "Restored your previous draft. You can continue where you left off."
+    },
+    "emails": {
+      "urgentModeratorSubject": "Urgent: New Rapid Response Case awaiting review",
+      "newSubmissionModeratorSubject": "New submission awaiting review",
+      "urgentModeratorHeading": "Urgent: New Rapid Response Case Awaiting Review",
+      "newSubmissionModeratorHeading": "New Submission Awaiting Review",
+      "moderatorBody": "A new rapid response case, \"{{caseTitle}}\", has been submitted and needs moderation.",
+      "submitterSubject": "We received your submission",
+      "submitterHeading": "Submission Received",
+      "submitterBody": "Thanks for submitting \"{{caseTitle}}\". Our moderators will review it, and you'll be notified once a decision is made."
+    }
+  },
+  "casesPage": {
+    "pageTitle": "Rapid Response Cases",
+    "pageSubtitle": "Track and manage time-sensitive legal response cases",
+    "orgAccessNotice": "You are viewing cases uploaded by <strong>{{organization}}</strong> only. Cases from other organizations are not visible.",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "allCases": "All Cases"
+    },
+    "form": {
+      "editCaseTitle": "Edit Rapid Response Case",
+      "createCaseTitle": "Create Rapid Response Case"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Search cases by title, description, or client name...",
+      "filters": "Filters",
+      "export": "Export",
+      "exportTitle": "Export the current page of results to CSV",
+      "newCase": "New Case"
+    },
+    "filters": {
+      "timePeriod": "Time Period",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisQuarter": "This Quarter",
+      "thisYear": "This Year",
+      "allTime": "All Time",
+      "priority": "Priority",
+      "allPriorities": "All Priorities",
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "partnerOrganization": "Partner Organization",
+      "allPartners": "All Partners",
+      "country": "Country",
+      "allCountries": "All Countries",
+      "category": "Category",
+      "allCategories": "All Categories",
+      "caseOwner": "Case Owner",
+      "showOnlyMyCases": "Show only my cases",
+      "dateRange": "Date Range"
+    },
+    "categoryOptions": {
+      "abortion": "Abortion",
+      "rape": "Rape",
+      "defilement": "Defilement",
+      "sgbv": "SGBV",
+      "incest": "Incest"
+    },
+    "activeFilters": {
+      "search": "Search: {{term}}",
+      "clearSearchAriaLabel": "Clear search",
+      "timePeriod": "Time: {{value}}",
+      "clearTimePeriodAriaLabel": "Clear time period filter",
+      "priority": "Priority: {{value}}",
+      "clearPriorityAriaLabel": "Clear priority filter",
+      "status": "Status: {{value}}",
+      "clearStatusAriaLabel": "Clear status filter",
+      "partner": "Partner: {{value}}",
+      "clearPartnerAriaLabel": "Clear partner filter",
+      "country": "Country: {{value}}",
+      "clearCountryAriaLabel": "Clear country filter",
+      "category": "Category: {{value}}",
+      "clearCategoryAriaLabel": "Clear category filter",
+      "myCasesOnly": "My Cases Only",
+      "clearMyCasesAriaLabel": "Clear my cases filter",
+      "dateRange": "Date Range: {{start}} to {{end}}",
+      "any": "Any",
+      "clearDateRangeAriaLabel": "Clear date range filter",
+      "clearAllFilters": "Clear all filters"
+    },
+    "table": {
+      "case": "Case",
+      "priority": "Priority",
+      "status": "Status",
+      "category": "Category",
+      "client": "Client",
+      "filed": "Filed",
+      "country": "Country",
+      "partner": "Partner",
+      "submittedBy": "Submitted By",
+      "notSet": "Not set",
+      "notAvailable": "N/A",
+      "noEmail": "No email",
+      "notSpecified": "Not specified",
+      "unknown": "Unknown",
+      "mine": "Mine"
+    },
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} cases",
+      "first": "First",
+      "previous": "Previous",
+      "next": "Next",
+      "last": "Last"
+    },
+    "states": {
+      "loadingCases": "Loading cases…",
+      "retry": "Retry",
+      "noCasesFound": "No rapid response cases found",
+      "createNewCase": "Create New Case",
+      "checkingAccess": "Checking access…",
+      "accessDeniedTitle": "Access Denied",
+      "accessDeniedMessage": "You do not have permission to access the Rapid Response system.",
+      "errorPrefix": "Error: "
+    },
+    "errors": {
+      "failedToLoadCases": "Failed to load rapid response cases",
+      "noCasesToExport": "No cases to export"
+    },
+    "toasts": {
+      "caseUpdated": "Rapid response case updated successfully",
+      "caseCreated": "Rapid response case created successfully",
+      "exportedCases": "Exported {{count}} case",
+      "exportedCases_plural": "Exported {{count}} cases"
+    },
+    "export": {
+      "headers": {
+        "caseTitle": "Case Title",
+        "summary": "Summary",
+        "priority": "Priority",
+        "status": "Status",
+        "stage": "Stage",
+        "category": "Category",
+        "partner": "Partner",
+        "country": "Country",
+        "dateFiled": "Date Filed",
+        "submittedBy": "Submitted By",
+        "organization": "Organization"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Rapid Response Dashboard",
+    "timeRange": {
+      "lastWeek": "Last Week",
+      "lastMonth": "Last Month",
+      "lastQuarter": "Last Quarter",
+      "lastYear": "Last Year"
+    },
+    "filtersButton": "Filters",
+    "filters": {
+      "priority": "Priority",
+      "allPriorities": "All Priorities",
+      "stage": "Stage",
+      "allStages": "All Stages",
+      "category": "Category",
+      "allCategories": "All Categories",
+      "partner": "Partner",
+      "allPartners": "All Partners",
+      "country": "Country",
+      "allCountries": "All Countries",
+      "status": "Status",
+      "allStatuses": "All Statuses"
+    },
+    "clearAllFilters": "Clear all filters",
+    "states": {
+      "loadingCases": "Loading rapid response cases…"
+    },
+    "summary": {
+      "showingCases": "Showing {{count}} rapid response cases",
+      "filteredSuffix": " (filtered)",
+      "fromLastSuffix": " from the last {{timeRange}}",
+      "useFiltersHint": "Use filters above to refine results",
+      "refresh": "Refresh",
+      "refreshTitle": "Refresh data"
+    },
+    "stats": {
+      "totalCases": "Total Cases",
+      "activeCases": "Active Cases",
+      "completedCases": "Completed Cases",
+      "avgResolutionTime": "Avg. Resolution Time",
+      "daysSuffix": "{{count}} days"
+    },
+    "charts": {
+      "priorityDistribution": "Priority Distribution",
+      "partnerOrgEngagement": "Partner Organization Engagement",
+      "caseCategoryDistribution": "Case Category Distribution",
+      "caseStageProgress": "Case Stage Progress",
+      "casesValueFormat": "{{value}} cases",
+      "noPriorityData": "No priority data available",
+      "noPartnerData": "No partner organization data available",
+      "noCategoryData": "No category data available"
+    },
+    "recentCases": {
+      "title": "Recent Cases",
+      "viewAllCases": "View All Cases",
+      "noRecentCases": "No recent cases",
+      "createNewCase": "Create New Case"
+    },
+    "errors": {
+      "failedToLoadDashboardData": "Failed to load dashboard data",
+      "retry": "Retry"
+    },
+    "toasts": {
+      "newCaseAdded": "New rapid response case added",
+      "caseUpdated": "Rapid response case updated"
+    },
+    "stageNames": {
+      "initialContact": "Initial Contact",
+      "investigationAndArrest": "Investigation & Arrest",
+      "localMediation": "Local Mediation",
+      "medicalAndCounselling": "Medical & Counselling",
+      "legalProsecution": "Legal Prosecution",
+      "courtTrial": "Court Trial",
+      "postTrial": "Post-Trial"
+    },
+    "statusLabels": {
+      "pending": "Pending",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "on_hold": "On hold"
+    }
+  },
+  "caseDetails": {
+    "backToCases": "Back to Cases",
+    "editCase": "Edit Case",
+    "refPrefix": "Ref: {{reference}}",
+    "sections": {
+      "caseInformation": "Case Information",
+      "caseSummary": "Case Summary",
+      "keyDeadlines": "Key Deadlines",
+      "caseDocuments": "Case Documents",
+      "caseProgress": "Case Progress"
+    },
+    "fields": {
+      "clientName": "Client Name",
+      "clientContact": "Client Contact",
+      "natureOfCase": "Nature of Case",
+      "partnerOrganization": "Partner Organization",
+      "categories": "Categories"
+    },
+    "notSpecified": "Not specified",
+    "noDeadlinesSpecified": "No deadlines specified",
+    "mainCaseDocument": "Main Case Document",
+    "viewDocument": "View Document",
+    "noDocumentsUploaded": "No documents uploaded",
+    "states": {
+      "loadingCaseDetails": "Loading case details…",
+      "accessDeniedTitle": "Access Denied",
+      "accessDeniedMessage": "You do not have permission to view this case. It may belong to another organization.",
+      "caseNotFoundTitle": "Case not found",
+      "caseNotFoundMessage": "The case you are looking for does not exist.",
+      "errorPrefix": "Error: "
+    },
+    "errors": {
+      "failedToLoadCaseDetails": "Failed to load case details"
+    }
+  },
+  "stageModal": {
+    "title": "Case Progress Tracker",
+    "closeModalAriaLabel": "Close modal"
+  },
+  "progress": {
+    "caseProgress": "Case Progress",
+    "completed": "{{count}} completed",
+    "inProgress": "{{count}} in progress",
+    "pending": "{{count}} pending",
+    "stageNames": {
+      "initialContact": "Initial Contact",
+      "investigationAndArrest": "Investigation & Arrest",
+      "localMediation": "Local Mediation",
+      "medicalAndCounselling": "Medical & Counselling",
+      "legalProsecution": "Legal Prosecution",
+      "courtTrial": "Court Trial",
+      "postTrial": "Post-Trial"
+    }
+  },
+  "tracker": {
+    "overallProgress": "Overall Progress",
+    "completed": "{{count}} completed",
+    "inProgress": "{{count}} in progress",
+    "pending": "{{count}} pending",
+    "noStagesFound": "No stages found for this case",
+    "editStageAriaLabel": "Edit stage",
+    "statusValues": {
+      "Pending": "Pending",
+      "In Progress": "In Progress",
+      "Completed": "Completed"
+    },
+    "modal": {
+      "status": "Status",
+      "notes": "Notes",
+      "notesPlaceholder": "Add notes about this stage...",
+      "documents": "Documents",
+      "uploading": "Uploading...",
+      "dropFilesHere": "Drop files here or click to upload",
+      "fileTypesHint": "PDF, DOC, DOCX up to 5MB",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes"
+    },
+    "documentTypes": {
+      "pdf": "PDF Document",
+      "word": "Word Document",
+      "file": "Document"
+    },
+    "toasts": {
+      "documentUploaded": "Document uploaded successfully",
+      "failedToUploadDocument": "Failed to upload document",
+      "stageUpdated": "Stage updated successfully",
+      "failedToUpdateStage": "Failed to update stage",
+      "failedToLoadStages": "Failed to load case stages",
+      "invalidFile": "Invalid file"
+    }
+  }
+}

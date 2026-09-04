@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Title, Text, BarChart } from '@tremor/react';
 import { supabase } from '../lib/supabase';
 import { RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '../lib/toast';
 import CaseStageProgress from './CaseStageProgress';
 import { LoadingState, Badge, Select, Button, EmptyState, ErrorState } from './ui';
@@ -24,6 +25,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
   onCreateCase,
   onCaseClick
 }) => {
+  const { t } = useTranslation('rapidResponse');
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -95,9 +97,9 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           fetchDashboardData();
           
           if (payload.eventType === 'INSERT') {
-            toast.success('New rapid response case added');
+            toast.success(t('dashboard.toasts.newCaseAdded'));
           } else if (payload.eventType === 'UPDATE') {
-            toast.success('Rapid response case updated');
+            toast.success(t('dashboard.toasts.caseUpdated'));
           }
         }
       )
@@ -393,25 +395,27 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         .sort((a, b) => b.value - a.value)
         .slice(0, 5); // Top 5 partners
 
-      // Process stages for progress component
-      const rapidResponseStages = [
-        'Initial Contact',
-        'Investigation & Arrest',
-        'Local Mediation',
-        'Medical & Counselling',
-        'Legal Prosecution',
-        'Court Trial',
-        'Post-Trial'
+      // Process stages for progress component. `value` is the literal
+      // stage_group string stored in the database (used to match case_stages
+      // rows); `labelKey` resolves the translated label shown in the UI.
+      const rapidResponseStages: { value: string; labelKey: string }[] = [
+        { value: 'Initial Contact', labelKey: 'dashboard.stageNames.initialContact' },
+        { value: 'Investigation & Arrest', labelKey: 'dashboard.stageNames.investigationAndArrest' },
+        { value: 'Local Mediation', labelKey: 'dashboard.stageNames.localMediation' },
+        { value: 'Medical & Counselling', labelKey: 'dashboard.stageNames.medicalAndCounselling' },
+        { value: 'Legal Prosecution', labelKey: 'dashboard.stageNames.legalProsecution' },
+        { value: 'Court Trial', labelKey: 'dashboard.stageNames.courtTrial' },
+        { value: 'Post-Trial', labelKey: 'dashboard.stageNames.postTrial' }
       ];
 
-      const processedStagesForProgress = rapidResponseStages.map(stageName => {
+      const processedStagesForProgress = rapidResponseStages.map(({ value: stageName, labelKey }) => {
         const stageData = stagesData?.filter(stage => stage.stage_group === stageName) || [];
         const completedCount = stageData.filter(stage => stage.status === 'Completed').length;
         const inProgressCount = stageData.filter(stage => stage.status === 'In Progress').length;
         const totalCount = stageData.length;
 
         let status: 'Pending' | 'In Progress' | 'Completed' = 'Pending';
-        
+
         if (completedCount === totalCount && totalCount > 0) {
           status = 'Completed';
         } else if (inProgressCount > 0 || completedCount > 0) {
@@ -419,7 +423,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         }
 
         return {
-          stage_name: stageName,
+          stage_name: t(labelKey),
           status,
           count: totalCount
         };
@@ -455,8 +459,8 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError('Failed to load dashboard data');
-      toast.error('Failed to load dashboard data');
+      setError(t('dashboard.errors.failedToLoadDashboardData'));
+      toast.error(t('dashboard.errors.failedToLoadDashboardData'));
     } finally {
       setLoading(false);
     }
@@ -524,25 +528,25 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
       <Card className="bg-white">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center space-x-4">
-            <Title>Rapid Response Dashboard</Title>
+            <Title>{t('dashboard.title')}</Title>
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'quarter' | 'year')}
               className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="week">Last Week</option>
-              <option value="month">Last Month</option>
-              <option value="quarter">Last Quarter</option>
-              <option value="year">Last Year</option>
+              <option value="week">{t('dashboard.timeRange.lastWeek')}</option>
+              <option value="month">{t('dashboard.timeRange.lastMonth')}</option>
+              <option value="quarter">{t('dashboard.timeRange.lastQuarter')}</option>
+              <option value="year">{t('dashboard.timeRange.lastYear')}</option>
             </select>
           </div>
-          
+
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             icon={<Filter className="h-4 w-4" />}
           >
-            <span>Filters</span>
+            <span>{t('dashboard.filtersButton')}</span>
             {hasActiveFilters && (
               <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-primary rounded-full">
                 {Object.values(filters).filter(value => value !== 'all').length}
@@ -556,90 +560,104 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           <div className="mt-4 p-4 bg-stone-50 rounded-lg">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               <Select
-                label="Priority"
+                label={t('dashboard.filters.priority')}
                 value={filters.priority}
                 onChange={(e) => handleFilterChange('priority', e.target.value)}
               >
-                <option value="all">All Priorities</option>
+                <option value="all">{t('dashboard.filters.allPriorities')}</option>
                 {filterOptions.priorities.map(priority => (
-                  <option key={priority} value={priority}>{priority}</option>
+                  <option key={priority} value={priority}>{t(`caseForm.priorities.${priority.toLowerCase()}`)}</option>
                 ))}
               </Select>
 
               <Select
-                label="Stage"
+                label={t('dashboard.filters.stage')}
                 value={filters.stage}
                 onChange={(e) => handleFilterChange('stage', e.target.value)}
               >
-                <option value="all">All Stages</option>
+                <option value="all">{t('dashboard.filters.allStages')}</option>
                 {filterOptions.stages.map(stage => (
-                  <option key={stage} value={stage}>{stage.charAt(0).toUpperCase() + stage.slice(1)}</option>
+                  <option key={stage} value={stage}>{t(`caseForm.stages.${stage}`)}</option>
                 ))}
               </Select>
 
               <Select
-                label="Category"
+                label={t('dashboard.filters.category')}
                 value={filters.category}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
               >
-                <option value="all">All Categories</option>
+                <option value="all">{t('dashboard.filters.allCategories')}</option>
                 {filterOptions.categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </Select>
 
               <Select
-                label="Partner"
+                label={t('dashboard.filters.partner')}
                 value={filters.partner}
                 onChange={(e) => handleFilterChange('partner', e.target.value)}
               >
-                <option value="all">All Partners</option>
+                <option value="all">{t('dashboard.filters.allPartners')}</option>
                 {filterOptions.partners.map(partner => (
                   <option key={partner} value={partner}>{partner}</option>
                 ))}
               </Select>
 
               <Select
-                label="Country"
+                label={t('dashboard.filters.country')}
                 value={filters.country}
                 onChange={(e) => handleFilterChange('country', e.target.value)}
               >
-                <option value="all">All Countries</option>
+                <option value="all">{t('dashboard.filters.allCountries')}</option>
                 {filterOptions.countries.map(country => (
                   <option key={country.id} value={country.id}>{country.name}</option>
                 ))}
               </Select>
 
               <Select
-                label="Status"
+                label={t('dashboard.filters.status')}
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
               >
-                <option value="all">All Statuses</option>
+                <option value="all">{t('dashboard.filters.allStatuses')}</option>
                 {filterOptions.statuses.map(status => (
-                  <option key={status} value={status}>{status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
+                  <option key={status} value={status}>{t(`dashboard.statusLabels.${status}`)}</option>
                 ))}
               </Select>
             </div>
-            
+
             {/* Active filters display */}
             {hasActiveFilters && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {Object.entries(filters).map(([key, value]) => {
                   if (value === 'all') return null;
-                  
+
                   let displayValue = value;
                   if (key === 'country') {
                     const country = filterOptions.countries.find(c => c.id === value);
                     displayValue = country?.name || value;
+                  } else if (key === 'priority') {
+                    displayValue = t(`caseForm.priorities.${value.toLowerCase()}`);
+                  } else if (key === 'stage') {
+                    displayValue = t(`caseForm.stages.${value}`);
+                  } else if (key === 'status') {
+                    displayValue = t(`dashboard.statusLabels.${value}`);
                   }
-                  
+
+                  const filterLabelKey = key === 'partner' ? 'dashboard.filters.partner'
+                    : key === 'category' ? 'dashboard.filters.category'
+                    : key === 'country' ? 'dashboard.filters.country'
+                    : key === 'priority' ? 'dashboard.filters.priority'
+                    : key === 'stage' ? 'dashboard.filters.stage'
+                    : key === 'status' ? 'dashboard.filters.status'
+                    : null;
+
                   return (
                     <span
                       key={key}
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
                     >
-                      {key.charAt(0).toUpperCase() + key.slice(1)}: {displayValue}
+                      {filterLabelKey ? t(filterLabelKey) : key.charAt(0).toUpperCase() + key.slice(1)}: {displayValue}
                       <button
                         onClick={() => handleFilterChange(key, 'all')}
                         className="ml-1 text-primary hover:text-primary-dark"
@@ -649,9 +667,9 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                     </span>
                   );
                 })}
-                
+
                 <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-                  Clear all filters
+                  {t('dashboard.clearAllFilters')}
                 </Button>
               </div>
             )}
@@ -664,14 +682,14 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             description={error}
             action={
               <Button onClick={fetchDashboardData} icon={<RefreshCw className="h-4 w-4" />}>
-                Retry
+                {t('dashboard.errors.retry')}
               </Button>
             }
           />
         </Card>
       ) : loading ? (
         <Card>
-          <LoadingState label="Loading rapid response cases…" />
+          <LoadingState label={t('dashboard.states.loadingCases')} />
         </Card>
       ) : (
         <>
@@ -680,13 +698,13 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
             <div className="flex justify-between items-center">
               <div>
                 <Text className="text-stone-500">
-                  Showing {stats.totalCases} rapid response cases
-                  {hasActiveFilters && ' (filtered)'}
-                  {timeRange !== 'year' && ` from the last ${timeRange}`}
+                  {t('dashboard.summary.showingCases', { count: stats.totalCases })}
+                  {hasActiveFilters && t('dashboard.summary.filteredSuffix')}
+                  {timeRange !== 'year' && t('dashboard.summary.fromLastSuffix', { timeRange: t(`dashboard.timeRange.last${timeRange.charAt(0).toUpperCase()}${timeRange.slice(1)}`) })}
                 </Text>
                 {hasActiveFilters && (
                   <Text className="text-sm text-stone-400 mt-1">
-                    Use filters above to refine results
+                    {t('dashboard.summary.useFiltersHint')}
                   </Text>
                 )}
               </div>
@@ -694,10 +712,10 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={fetchDashboardData}
-                title="Refresh data"
+                title={t('dashboard.summary.refreshTitle')}
                 icon={<RefreshCw className="h-4 w-4" />}
               >
-                Refresh
+                {t('dashboard.summary.refresh')}
               </Button>
             </div>
           </Card>
@@ -705,26 +723,26 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <DashboardCard
-              title="Total Cases"
+              title={t('dashboard.stats.totalCases')}
               value={stats.totalCases}
               change="+0.0%"
               type="cases"
             />
             <DashboardCard
-              title="Active Cases"
+              title={t('dashboard.stats.activeCases')}
               value={stats.activeCases}
               change="+0.0%"
               type="judgments"
             />
             <DashboardCard
-              title="Completed Cases"
+              title={t('dashboard.stats.completedCases')}
               value={stats.completedCases}
               change="+0.0%"
               type="success"
             />
             <DashboardCard
-              title="Avg. Resolution Time"
-              value={`${stats.averageResolutionTime} days`}
+              title={t('dashboard.stats.avgResolutionTime')}
+              value={t('dashboard.stats.daysSuffix', { count: stats.averageResolutionTime })}
               change="+0.0%"
               type="cases"
             />
@@ -734,7 +752,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Priority Distribution */}
             <Card className="bg-white">
-              <Title>Priority Distribution</Title>
+              <Title>{t('dashboard.charts.priorityDistribution')}</Title>
               {stats.priorityDistribution.length > 0 ? (
                 <BarChart
                   className="mt-6 h-60"
@@ -749,16 +767,16 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                   showXAxis={true}
                   showGridLines={true}
                   yAxisWidth={90}
-                  valueFormatter={(value) => `${value} cases`}
+                  valueFormatter={(value) => t('dashboard.charts.casesValueFormat', { value })}
                 />
               ) : (
-                <EmptyState title="No priority data available" />
+                <EmptyState title={t('dashboard.charts.noPriorityData')} />
               )}
             </Card>
 
             {/* Partner Organization Engagement */}
             <Card className="bg-white">
-              <Title>Partner Organization Engagement</Title>
+              <Title>{t('dashboard.charts.partnerOrgEngagement')}</Title>
               {stats.partnerDistribution.length > 0 ? (
                 <BarChart
                   className="mt-6"
@@ -774,17 +792,17 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                   showXAxis={true}
                   showGridLines={true}
                   yAxisWidth={220}
-                  valueFormatter={(value) => `${value} cases`}
+                  valueFormatter={(value) => t('dashboard.charts.casesValueFormat', { value })}
                 />
               ) : (
-                <EmptyState title="No partner organization data available" />
+                <EmptyState title={t('dashboard.charts.noPartnerData')} />
               )}
             </Card>
           </div>
 
           {/* Case Category Distribution */}
           <Card className="bg-white">
-            <Title>Case Category Distribution</Title>
+            <Title>{t('dashboard.charts.caseCategoryDistribution')}</Title>
             {stats.categoryDistribution.length > 0 ? (
               <BarChart
                 className="mt-6"
@@ -800,20 +818,20 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                 showXAxis={true}
                 showGridLines={true}
                 yAxisWidth={160}
-                valueFormatter={(value) => `${value} cases`}
+                valueFormatter={(value) => t('dashboard.charts.casesValueFormat', { value })}
               />
             ) : (
-              <EmptyState title="No category data available" />
+              <EmptyState title={t('dashboard.charts.noCategoryData')} />
             )}
           </Card>
 
           {/* Case Stage Progress */}
           <Card className="bg-white">
-            <Title>Case Stage Progress</Title>
+            <Title>{t('dashboard.charts.caseStageProgress')}</Title>
             <div className="mt-4">
-              <CaseStageProgress 
-                stages={stats.processedStagesForProgress} 
-                showCounts={true} 
+              <CaseStageProgress
+                stages={stats.processedStagesForProgress}
+                showCounts={true}
               />
             </div>
           </Card>
@@ -821,14 +839,14 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           {/* Recent Cases */}
           <Card className="bg-white">
             <div className="flex justify-between items-center mb-4">
-              <Title>Recent Cases</Title>
+              <Title>{t('dashboard.recentCases.title')}</Title>
               {onViewAllCases && (
                 <Button variant="ghost" size="sm" onClick={onViewAllCases}>
-                  View All Cases
+                  {t('dashboard.recentCases.viewAllCases')}
                 </Button>
               )}
             </div>
-            
+
             <div className="space-y-4">
               {recentCases.length > 0 ? (
                 recentCases.map((caseItem) => (
@@ -845,17 +863,17 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                       <div className="flex flex-wrap justify-end gap-2">
                         {caseItem.status && (
                           <Badge tone={getStatusTone(caseItem.status)}>
-                            {caseItem.status.replace('_', ' ')}
+                            {t(`dashboard.statusLabels.${caseItem.status}`)}
                           </Badge>
                         )}
                         {caseItem.priority_level && (
                           <Badge tone={getPriorityTone(caseItem.priority_level)}>
-                            {caseItem.priority_level}
+                            {t(`caseForm.priorities.${caseItem.priority_level.toLowerCase()}`)}
                           </Badge>
                         )}
                         {caseItem.rapid_response_stage && (
                           <Badge tone={getStageTone(caseItem.rapid_response_stage)}>
-                            {caseItem.rapid_response_stage}
+                            {t(`caseForm.stages.${caseItem.rapid_response_stage}`)}
                           </Badge>
                         )}
                         {caseItem.case_categories && caseItem.case_categories.length > 0 && (
@@ -883,10 +901,10 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
                 ))
               ) : (
                 <EmptyState
-                  title="No recent cases"
+                  title={t('dashboard.recentCases.noRecentCases')}
                   action={
                     onCreateCase ? (
-                      <Button onClick={onCreateCase}>Create New Case</Button>
+                      <Button onClick={onCreateCase}>{t('dashboard.recentCases.createNewCase')}</Button>
                     ) : undefined
                   }
                 />

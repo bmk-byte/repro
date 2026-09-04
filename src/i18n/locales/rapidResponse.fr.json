@@ -1,1 +1,426 @@
-{}
+{
+  "caseForm": {
+    "sections": {
+      "basicInformation": "Informations générales",
+      "priorityAndStatus": "Priorité et statut",
+      "clientInformation": "Informations sur le/la client(e)",
+      "partnerOrganization": "Organisation partenaire",
+      "keyDeadlines": "Échéances clés",
+      "actionDetails": "Détails de l'intervention",
+      "documentUpload": "Téléversement de documents"
+    },
+    "fields": {
+      "caseReference": "Référence du dossier",
+      "caseReferenceHelper": "Identifiant unique",
+      "caseReferencePlaceholder": "ex. RR-2025-001",
+      "caseTitle": "Titre du dossier",
+      "countryJurisdiction": "Pays/Juridiction",
+      "selectCountry": "Sélectionnez un pays",
+      "caseCategory": "Catégorie du dossier",
+      "selectCategory": "Sélectionnez une catégorie",
+      "caseDescription": "Description du dossier",
+      "priorityLevel": "Niveau de priorité",
+      "currentStage": "Étape actuelle",
+      "natureOfCase": "Nature du dossier",
+      "clientName": "Nom du/de la client(e)",
+      "clientEmail": "E-mail du/de la client(e)",
+      "clientPhone": "Téléphone du/de la client(e)",
+      "partnerOrganization": "Organisation partenaire",
+      "partnerOrganizationPlaceholder": "ex. Afya Na Haki, Programme LIRA, KELIN",
+      "partnerOrganizationHelper": "Indiquez le nom de l'organisation partenaire impliquée dans ce dossier",
+      "deadlineDate": "Date d'échéance",
+      "deadlineDescription": "Description de l'échéance",
+      "deadlineDescriptionPlaceholder": "Décrivez cette échéance",
+      "actionTaken": "Intervention réalisée",
+      "nextSteps": "Prochaines étapes",
+      "actionTimeframe": "Délai d'intervention",
+      "actionTimeframePlaceholder": "ex. 48 heures, 1 semaine, 30 jours"
+    },
+    "stageHelpers": {
+      "intake": "Évaluation initiale et collecte d'informations",
+      "review": "Analyse des détails du dossier et planification de la réponse",
+      "action": "Mise en œuvre des stratégies de réponse",
+      "resolution": "Résolution du dossier et suivi"
+    },
+    "priorities": {
+      "urgent": "Urgent",
+      "high": "Élevée",
+      "medium": "Moyenne",
+      "low": "Faible"
+    },
+    "stages": {
+      "intake": "Accueil",
+      "review": "Examen",
+      "action": "Intervention",
+      "resolution": "Résolution"
+    },
+    "categories": {
+      "accessToSafeAbortion": "Accès à l'avortement sécurisé",
+      "maternalHealthAndMortality": "Santé maternelle et mortalité",
+      "forcedSterilization": "Stérilisation forcée",
+      "contraceptiveAccessAndDenial": "Accès à la contraception et refus",
+      "sgbv": "Violences sexuelles et basées sur le genre (VSBG)",
+      "childMarriage": "Mariage d'enfants et mariage précoce/forcé",
+      "menstrualHealthAndHygiene": "Santé menstruelle et droits liés à l'hygiène",
+      "srhEducation": "Éducation à la santé sexuelle et reproductive",
+      "criminalizationOfPregnancyOutcomes": "Criminalisation des issues de grossesse",
+      "accessToAssistedReproductiveTechnologies": "Accès aux techniques de procréation médicalement assistée",
+      "accessForIncarceratedWomen": "Accès aux services de santé reproductive pour les femmes incarcérées",
+      "consentForAdolescentsAndMinors": "Consentement et accès pour les adolescent(e)s et mineur(e)s",
+      "discriminationInReproductiveHealthcare": "Discrimination dans les soins de santé reproductive",
+      "reproductiveRightsInConflict": "Droits reproductifs en contexte de conflit et humanitaire",
+      "accessForMarginalizedGroups": "Accès aux services de santé reproductive pour les groupes marginalisés",
+      "parentalLeaveAndReproductiveLaborRights": "Congé parental et droits du travail liés à la reproduction",
+      "violationOfConfidentialityAndPrivacy": "Violation de la confidentialité et de la vie privée dans les soins de santé reproductive",
+      "denialOfPostAbortionCare": "Refus de soins post-avortement",
+      "reproductiveHealthAndEnvironmentalJustice": "Santé reproductive et justice environnementale",
+      "religiousAndCulturalBarriers": "Obstacles religieux et culturels à l'accès aux soins de santé reproductive",
+      "other": "Autre"
+    },
+    "deadlines": {
+      "saveChanges": "Enregistrer les modifications",
+      "addDeadline": "Ajouter une échéance",
+      "cancelEdit": "Annuler la modification",
+      "edit": "Modifier",
+      "removeDeadlineAriaLabel": "Supprimer l'échéance : {{description}}"
+    },
+    "documentUpload": {
+      "dropFileHere": "Déposez votre fichier ici ou cliquez pour parcourir",
+      "fileTypesHint": "PDF, DOC, DOCX jusqu'à 10 Mo",
+      "removeSelectedFile": "Supprimer le fichier sélectionné",
+      "uploadAriaLabel": "Téléverser le document du dossier"
+    },
+    "actions": {
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "updateCase": "Mettre à jour le dossier",
+      "createCase": "Créer le dossier"
+    },
+    "errors": {
+      "fieldRequired": "{{label}} est obligatoire",
+      "caseReferenceRequired": "La référence du dossier est obligatoire",
+      "caseCategoryRequired": "La catégorie du dossier est obligatoire",
+      "fileTooLarge": "Ce fichier dépasse 10 Mo. Veuillez choisir un fichier plus petit.",
+      "invalidFileType": "Seuls les fichiers PDF, DOC et DOCX sont acceptés.",
+      "fileNotAccepted": "Ce fichier n'a pas pu être accepté.",
+      "failedToLoadCountries": "Échec du chargement des pays",
+      "userNotAuthenticated": "Utilisateur non authentifié",
+      "errorSavingCase": "Une erreur est survenue lors de l'enregistrement du dossier"
+    },
+    "toasts": {
+      "draftRestored": "Votre brouillon précédent a été restauré. Vous pouvez reprendre là où vous en étiez."
+    },
+    "emails": {
+      "urgentModeratorSubject": "Urgent : nouveau dossier de réponse rapide en attente d'examen",
+      "newSubmissionModeratorSubject": "Nouvelle soumission en attente d'examen",
+      "urgentModeratorHeading": "Urgent : nouveau dossier de réponse rapide en attente d'examen",
+      "newSubmissionModeratorHeading": "Nouvelle soumission en attente d'examen",
+      "moderatorBody": "Un nouveau dossier de réponse rapide, « {{caseTitle}} », a été soumis et doit être modéré.",
+      "submitterSubject": "Nous avons bien reçu votre soumission",
+      "submitterHeading": "Soumission reçue",
+      "submitterBody": "Merci d'avoir soumis « {{caseTitle}} ». Nos modérateurs l'examineront et vous serez informé(e) dès qu'une décision sera prise."
+    }
+  },
+  "casesPage": {
+    "pageTitle": "Dossiers de réponse rapide",
+    "pageSubtitle": "Suivez et gérez les dossiers d'intervention juridique urgents",
+    "orgAccessNotice": "Vous ne visualisez que les dossiers soumis par <strong>{{organization}}</strong>. Les dossiers d'autres organisations ne sont pas visibles.",
+    "tabs": {
+      "dashboard": "Tableau de bord",
+      "allCases": "Tous les dossiers"
+    },
+    "form": {
+      "editCaseTitle": "Modifier le dossier de réponse rapide",
+      "createCaseTitle": "Créer un dossier de réponse rapide"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Rechercher des dossiers par titre, description ou nom du/de la client(e)...",
+      "filters": "Filtres",
+      "export": "Exporter",
+      "exportTitle": "Exporter la page actuelle des résultats au format CSV",
+      "newCase": "Nouveau dossier"
+    },
+    "filters": {
+      "timePeriod": "Période",
+      "thisWeek": "Cette semaine",
+      "thisMonth": "Ce mois-ci",
+      "thisQuarter": "Ce trimestre",
+      "thisYear": "Cette année",
+      "allTime": "Toute la période",
+      "priority": "Priorité",
+      "allPriorities": "Toutes les priorités",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts",
+      "partnerOrganization": "Organisation partenaire",
+      "allPartners": "Tous les partenaires",
+      "country": "Pays",
+      "allCountries": "Tous les pays",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "caseOwner": "Propriétaire du dossier",
+      "showOnlyMyCases": "Afficher uniquement mes dossiers",
+      "dateRange": "Plage de dates"
+    },
+    "categoryOptions": {
+      "abortion": "Avortement",
+      "rape": "Viol",
+      "defilement": "Détournement de mineur(e)",
+      "sgbv": "VSBG",
+      "incest": "Inceste"
+    },
+    "activeFilters": {
+      "search": "Recherche : {{term}}",
+      "clearSearchAriaLabel": "Effacer la recherche",
+      "timePeriod": "Période : {{value}}",
+      "clearTimePeriodAriaLabel": "Effacer le filtre de période",
+      "priority": "Priorité : {{value}}",
+      "clearPriorityAriaLabel": "Effacer le filtre de priorité",
+      "status": "Statut : {{value}}",
+      "clearStatusAriaLabel": "Effacer le filtre de statut",
+      "partner": "Partenaire : {{value}}",
+      "clearPartnerAriaLabel": "Effacer le filtre de partenaire",
+      "country": "Pays : {{value}}",
+      "clearCountryAriaLabel": "Effacer le filtre de pays",
+      "category": "Catégorie : {{value}}",
+      "clearCategoryAriaLabel": "Effacer le filtre de catégorie",
+      "myCasesOnly": "Mes dossiers uniquement",
+      "clearMyCasesAriaLabel": "Effacer le filtre « mes dossiers »",
+      "dateRange": "Plage de dates : {{start}} à {{end}}",
+      "any": "Indifférent",
+      "clearDateRangeAriaLabel": "Effacer le filtre de plage de dates",
+      "clearAllFilters": "Effacer tous les filtres"
+    },
+    "table": {
+      "case": "Dossier",
+      "priority": "Priorité",
+      "status": "Statut",
+      "category": "Catégorie",
+      "client": "Client(e)",
+      "filed": "Déposé le",
+      "country": "Pays",
+      "partner": "Partenaire",
+      "submittedBy": "Soumis par",
+      "notSet": "Non défini",
+      "notAvailable": "N/D",
+      "noEmail": "Aucun e-mail",
+      "notSpecified": "Non spécifié",
+      "unknown": "Inconnu",
+      "mine": "Le mien"
+    },
+    "pagination": {
+      "showing": "Affichage de {{from}} à {{to}} sur {{total}} dossiers",
+      "first": "Première",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "last": "Dernière"
+    },
+    "states": {
+      "loadingCases": "Chargement des dossiers…",
+      "retry": "Réessayer",
+      "noCasesFound": "Aucun dossier de réponse rapide trouvé",
+      "createNewCase": "Créer un nouveau dossier",
+      "checkingAccess": "Vérification des droits d'accès…",
+      "accessDeniedTitle": "Accès refusé",
+      "accessDeniedMessage": "Vous n'avez pas l'autorisation d'accéder au système de réponse rapide.",
+      "errorPrefix": "Erreur : "
+    },
+    "errors": {
+      "failedToLoadCases": "Échec du chargement des dossiers de réponse rapide",
+      "noCasesToExport": "Aucun dossier à exporter"
+    },
+    "toasts": {
+      "caseUpdated": "Dossier de réponse rapide mis à jour avec succès",
+      "caseCreated": "Dossier de réponse rapide créé avec succès",
+      "exportedCases": "{{count}} dossier exporté",
+      "exportedCases_plural": "{{count}} dossiers exportés"
+    },
+    "export": {
+      "headers": {
+        "caseTitle": "Titre du dossier",
+        "summary": "Résumé",
+        "priority": "Priorité",
+        "status": "Statut",
+        "stage": "Étape",
+        "category": "Catégorie",
+        "partner": "Partenaire",
+        "country": "Pays",
+        "dateFiled": "Date de dépôt",
+        "submittedBy": "Soumis par",
+        "organization": "Organisation"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord — Réponse rapide",
+    "timeRange": {
+      "lastWeek": "Semaine dernière",
+      "lastMonth": "Mois dernier",
+      "lastQuarter": "Trimestre dernier",
+      "lastYear": "Année dernière"
+    },
+    "filtersButton": "Filtres",
+    "filters": {
+      "priority": "Priorité",
+      "allPriorities": "Toutes les priorités",
+      "stage": "Étape",
+      "allStages": "Toutes les étapes",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "partner": "Partenaire",
+      "allPartners": "Tous les partenaires",
+      "country": "Pays",
+      "allCountries": "Tous les pays",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts"
+    },
+    "clearAllFilters": "Effacer tous les filtres",
+    "states": {
+      "loadingCases": "Chargement des dossiers de réponse rapide…"
+    },
+    "summary": {
+      "showingCases": "Affichage de {{count}} dossiers de réponse rapide",
+      "filteredSuffix": " (filtré)",
+      "fromLastSuffix": " sur la période : {{timeRange}}",
+      "useFiltersHint": "Utilisez les filtres ci-dessus pour affiner les résultats",
+      "refresh": "Actualiser",
+      "refreshTitle": "Actualiser les données"
+    },
+    "stats": {
+      "totalCases": "Total des dossiers",
+      "activeCases": "Dossiers actifs",
+      "completedCases": "Dossiers clôturés",
+      "avgResolutionTime": "Délai moyen de résolution",
+      "daysSuffix": "{{count}} jours"
+    },
+    "charts": {
+      "priorityDistribution": "Répartition par priorité",
+      "partnerOrgEngagement": "Engagement des organisations partenaires",
+      "caseCategoryDistribution": "Répartition par catégorie de dossier",
+      "caseStageProgress": "Progression des étapes du dossier",
+      "casesValueFormat": "{{value}} dossiers",
+      "noPriorityData": "Aucune donnée de priorité disponible",
+      "noPartnerData": "Aucune donnée d'organisation partenaire disponible",
+      "noCategoryData": "Aucune donnée de catégorie disponible"
+    },
+    "recentCases": {
+      "title": "Dossiers récents",
+      "viewAllCases": "Voir tous les dossiers",
+      "noRecentCases": "Aucun dossier récent",
+      "createNewCase": "Créer un nouveau dossier"
+    },
+    "errors": {
+      "failedToLoadDashboardData": "Échec du chargement des données du tableau de bord",
+      "retry": "Réessayer"
+    },
+    "toasts": {
+      "newCaseAdded": "Nouveau dossier de réponse rapide ajouté",
+      "caseUpdated": "Dossier de réponse rapide mis à jour"
+    },
+    "stageNames": {
+      "initialContact": "Premier contact",
+      "investigationAndArrest": "Enquête et arrestation",
+      "localMediation": "Médiation locale",
+      "medicalAndCounselling": "Prise en charge médicale et psychosociale",
+      "legalProsecution": "Poursuite judiciaire",
+      "courtTrial": "Procès",
+      "postTrial": "Après le procès"
+    },
+    "statusLabels": {
+      "pending": "En attente",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "on_hold": "En pause"
+    }
+  },
+  "caseDetails": {
+    "backToCases": "Retour aux dossiers",
+    "editCase": "Modifier le dossier",
+    "refPrefix": "Réf. : {{reference}}",
+    "sections": {
+      "caseInformation": "Informations sur le dossier",
+      "caseSummary": "Résumé du dossier",
+      "keyDeadlines": "Échéances clés",
+      "caseDocuments": "Documents du dossier",
+      "caseProgress": "Progression du dossier"
+    },
+    "fields": {
+      "clientName": "Nom du/de la client(e)",
+      "clientContact": "Contact du/de la client(e)",
+      "natureOfCase": "Nature du dossier",
+      "partnerOrganization": "Organisation partenaire",
+      "categories": "Catégories"
+    },
+    "notSpecified": "Non spécifié",
+    "noDeadlinesSpecified": "Aucune échéance spécifiée",
+    "mainCaseDocument": "Document principal du dossier",
+    "viewDocument": "Voir le document",
+    "noDocumentsUploaded": "Aucun document téléversé",
+    "states": {
+      "loadingCaseDetails": "Chargement des détails du dossier…",
+      "accessDeniedTitle": "Accès refusé",
+      "accessDeniedMessage": "Vous n'avez pas l'autorisation de consulter ce dossier. Il peut appartenir à une autre organisation.",
+      "caseNotFoundTitle": "Dossier introuvable",
+      "caseNotFoundMessage": "Le dossier que vous recherchez n'existe pas.",
+      "errorPrefix": "Erreur : "
+    },
+    "errors": {
+      "failedToLoadCaseDetails": "Échec du chargement des détails du dossier"
+    }
+  },
+  "stageModal": {
+    "title": "Suivi de la progression du dossier",
+    "closeModalAriaLabel": "Fermer la fenêtre"
+  },
+  "progress": {
+    "caseProgress": "Progression du dossier",
+    "completed": "{{count}} terminée(s)",
+    "inProgress": "{{count}} en cours",
+    "pending": "{{count}} en attente",
+    "stageNames": {
+      "initialContact": "Premier contact",
+      "investigationAndArrest": "Enquête et arrestation",
+      "localMediation": "Médiation locale",
+      "medicalAndCounselling": "Prise en charge médicale et psychosociale",
+      "legalProsecution": "Poursuite judiciaire",
+      "courtTrial": "Procès",
+      "postTrial": "Après le procès"
+    }
+  },
+  "tracker": {
+    "overallProgress": "Progression générale",
+    "completed": "{{count}} terminée(s)",
+    "inProgress": "{{count}} en cours",
+    "pending": "{{count}} en attente",
+    "noStagesFound": "Aucune étape trouvée pour ce dossier",
+    "editStageAriaLabel": "Modifier l'étape",
+    "statusValues": {
+      "Pending": "En attente",
+      "In Progress": "En cours",
+      "Completed": "Terminée"
+    },
+    "modal": {
+      "status": "Statut",
+      "notes": "Notes",
+      "notesPlaceholder": "Ajoutez des notes sur cette étape...",
+      "documents": "Documents",
+      "uploading": "Téléversement en cours...",
+      "dropFilesHere": "Déposez des fichiers ici ou cliquez pour téléverser",
+      "fileTypesHint": "PDF, DOC, DOCX jusqu'à 5 Mo",
+      "cancel": "Annuler",
+      "saveChanges": "Enregistrer les modifications"
+    },
+    "documentTypes": {
+      "pdf": "Document PDF",
+      "word": "Document Word",
+      "file": "Document"
+    },
+    "toasts": {
+      "documentUploaded": "Document téléversé avec succès",
+      "failedToUploadDocument": "Échec du téléversement du document",
+      "stageUpdated": "Étape mise à jour avec succès",
+      "failedToUpdateStage": "Échec de la mise à jour de l'étape",
+      "failedToLoadStages": "Échec du chargement des étapes du dossier",
+      "invalidFile": "Fichier invalide"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import { toast } from '../lib/toast';
@@ -26,6 +27,7 @@ const RESTRICTED_ORGANIZATIONS = [
 const PAGE_SIZE = 50;
 
 const RapidResponseCasesPage: React.FC = () => {
+  const { t } = useTranslation('rapidResponse');
   const [view, setView] = useState<'dashboard' | 'list'>('dashboard');
   const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -307,8 +309,8 @@ const RapidResponseCasesPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching rapid response cases:', err);
-      setError('Failed to load rapid response cases');
-      toast.error('Failed to load rapid response cases');
+      setError(t('casesPage.errors.failedToLoadCases'));
+      toast.error(t('casesPage.errors.failedToLoadCases'));
     } finally {
       setLoading(false);
     }
@@ -330,7 +332,7 @@ const RapidResponseCasesPage: React.FC = () => {
     setShowForm(false);
     setEditingCase(null);
     fetchCases();
-    toast.success(editingCase ? 'Rapid response case updated successfully' : 'Rapid response case created successfully');
+    toast.success(editingCase ? t('casesPage.toasts.caseUpdated') : t('casesPage.toasts.caseCreated'));
   };
 
   const handleCaseClick = (caseId: string) => {
@@ -393,14 +395,18 @@ const RapidResponseCasesPage: React.FC = () => {
     return (
       <div className="p-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="text-sm text-stone-500">
-          Showing {(currentPage - 1) * PAGE_SIZE + 1} to {Math.min(currentPage * PAGE_SIZE, totalCases)} of {totalCases} cases
+          {t('casesPage.pagination.showing', {
+            from: (currentPage - 1) * PAGE_SIZE + 1,
+            to: Math.min(currentPage * PAGE_SIZE, totalCases),
+            total: totalCases,
+          })}
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-center">
-          <button className={navButtonClass} onClick={() => handlePageChange(1)} disabled={currentPage === 1}>First</button>
-          <button className={navButtonClass} onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+          <button className={navButtonClass} onClick={() => handlePageChange(1)} disabled={currentPage === 1}>{t('casesPage.pagination.first')}</button>
+          <button className={navButtonClass} onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>{t('casesPage.pagination.previous')}</button>
           {pages}
-          <button className={navButtonClass} onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
-          <button className={navButtonClass} onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>Last</button>
+          <button className={navButtonClass} onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>{t('casesPage.pagination.next')}</button>
+          <button className={navButtonClass} onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>{t('casesPage.pagination.last')}</button>
         </div>
       </div>
     );
@@ -440,7 +446,7 @@ const RapidResponseCasesPage: React.FC = () => {
 
   const exportToCSV = () => {
     if (cases.length === 0) {
-      toast.error('No cases to export');
+      toast.error(t('casesPage.errors.noCasesToExport'));
       return;
     }
 
@@ -452,9 +458,9 @@ const RapidResponseCasesPage: React.FC = () => {
     };
 
     const headers = [
-      'Case Title', 'Summary', 'Priority', 'Status', 'Stage',
-      'Category', 'Partner', 'Country', 'Date Filed',
-      'Submitted By', 'Organization'
+      t('casesPage.export.headers.caseTitle'), t('casesPage.export.headers.summary'), t('casesPage.export.headers.priority'), t('casesPage.export.headers.status'), t('casesPage.export.headers.stage'),
+      t('casesPage.export.headers.category'), t('casesPage.export.headers.partner'), t('casesPage.export.headers.country'), t('casesPage.export.headers.dateFiled'),
+      t('casesPage.export.headers.submittedBy'), t('casesPage.export.headers.organization')
     ];
 
     const rows = cases.map(c => [
@@ -479,7 +485,7 @@ const RapidResponseCasesPage: React.FC = () => {
     link.download = `rapid-response-cases-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    toast.success(`Exported ${cases.length} case${cases.length !== 1 ? 's' : ''}`);
+    toast.success(t('casesPage.toasts.exportedCases', { count: cases.length }));
   };
 
   const renderContent = () => {
@@ -500,7 +506,7 @@ const RapidResponseCasesPage: React.FC = () => {
       return (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-stone-900 mb-6">
-            {editingCase ? 'Edit Rapid Response Case' : 'Create Rapid Response Case'}
+            {editingCase ? t('casesPage.form.editCaseTitle') : t('casesPage.form.createCaseTitle')}
           </h2>
           <RapidResponseCaseForm
             onSuccess={handleCaseCreated}
@@ -534,7 +540,7 @@ const RapidResponseCasesPage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
               <input
                 type="text"
-                placeholder="Search cases by title, description, or client name..."
+                placeholder={t('casesPage.toolbar.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
@@ -546,23 +552,23 @@ const RapidResponseCasesPage: React.FC = () => {
                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <Filter className="h-4 w-4" />
-                <span>Filters</span>
+                <span>{t('casesPage.toolbar.filters')}</span>
                 {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               <button
                 onClick={exportToCSV}
-                title="Export the current page of results to CSV"
+                title={t('casesPage.toolbar.exportTitle')}
                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
               >
                 <Download className="h-4 w-4" />
-                <span>Export</span>
+                <span>{t('casesPage.toolbar.export')}</span>
               </button>
               <button
                 onClick={handleCreateCase}
                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark"
               >
                 <Plus className="h-4 w-4" />
-                <span>New Case</span>
+                <span>{t('casesPage.toolbar.newCase')}</span>
               </button>
             </div>
           </div>
@@ -571,7 +577,7 @@ const RapidResponseCasesPage: React.FC = () => {
             <div className="mt-4 space-y-4">
               {/* Time Period Filter */}
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Time Period</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{t('casesPage.filters.timePeriod')}</label>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'week' }))}
@@ -581,7 +587,7 @@ const RapidResponseCasesPage: React.FC = () => {
                         : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
-                    This Week
+                    {t('casesPage.filters.thisWeek')}
                   </button>
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'month' }))}
@@ -591,7 +597,7 @@ const RapidResponseCasesPage: React.FC = () => {
                         : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
-                    This Month
+                    {t('casesPage.filters.thisMonth')}
                   </button>
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'quarter' }))}
@@ -601,7 +607,7 @@ const RapidResponseCasesPage: React.FC = () => {
                         : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
-                    This Quarter
+                    {t('casesPage.filters.thisQuarter')}
                   </button>
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'year' }))}
@@ -611,7 +617,7 @@ const RapidResponseCasesPage: React.FC = () => {
                         : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
-                    This Year
+                    {t('casesPage.filters.thisYear')}
                   </button>
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'all' }))}
@@ -621,7 +627,7 @@ const RapidResponseCasesPage: React.FC = () => {
                         : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
                     }`}
                   >
-                    All Time
+                    {t('casesPage.filters.allTime')}
                   </button>
                 </div>
               </div>
@@ -629,43 +635,43 @@ const RapidResponseCasesPage: React.FC = () => {
               {/* Other Filters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Priority</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.priority')}</label>
                 <select
                   value={filters.priority}
                   onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <option value="">All Priorities</option>
-                  <option value="Urgent">Urgent</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
+                  <option value="">{t('casesPage.filters.allPriorities')}</option>
+                  <option value="Urgent">{t('caseForm.priorities.urgent')}</option>
+                  <option value="High">{t('caseForm.priorities.high')}</option>
+                  <option value="Medium">{t('caseForm.priorities.medium')}</option>
+                  <option value="Low">{t('caseForm.priorities.low')}</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.status')}</label>
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <option value="">All Statuses</option>
-                  <option value="intake">Intake</option>
-                  <option value="review">Review</option>
-                  <option value="action">Action</option>
-                  <option value="resolution">Resolution</option>
+                  <option value="">{t('casesPage.filters.allStatuses')}</option>
+                  <option value="intake">{t('caseForm.stages.intake')}</option>
+                  <option value="review">{t('caseForm.stages.review')}</option>
+                  <option value="action">{t('caseForm.stages.action')}</option>
+                  <option value="resolution">{t('caseForm.stages.resolution')}</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Partner Organization</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.partnerOrganization')}</label>
                 <select
                   value={filters.partner}
                   onChange={(e) => setFilters(prev => ({ ...prev, partner: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <option value="">All Partners</option>
+                  <option value="">{t('casesPage.filters.allPartners')}</option>
                   {partnerOrganizations.map(partner => (
                     <option key={partner} value={partner}>{partner}</option>
                   ))}
@@ -673,13 +679,13 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Country</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.country')}</label>
                 <select
                   value={filters.country}
                   onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <option value="">All Countries</option>
+                  <option value="">{t('casesPage.filters.allCountries')}</option>
                   {countries.map(country => (
                     <option key={country.id} value={country.id}>{country.name}</option>
                   ))}
@@ -687,23 +693,23 @@ const RapidResponseCasesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.category')}</label>
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <option value="">All Categories</option>
-                  <option value="Abortion">Abortion</option>
-                  <option value="Rape">Rape</option>
-                  <option value="Defilement">Defilement</option>
-                  <option value="SGBV (Sexual and Gender-Based Violence)">SGBV</option>
-                  <option value="Incest">Incest</option>
+                  <option value="">{t('casesPage.filters.allCategories')}</option>
+                  <option value="Abortion">{t('casesPage.categoryOptions.abortion')}</option>
+                  <option value="Rape">{t('casesPage.categoryOptions.rape')}</option>
+                  <option value="Defilement">{t('casesPage.categoryOptions.defilement')}</option>
+                  <option value="SGBV (Sexual and Gender-Based Violence)">{t('casesPage.categoryOptions.sgbv')}</option>
+                  <option value="Incest">{t('casesPage.categoryOptions.incest')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Case Owner</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.caseOwner')}</label>
                 <div className="flex items-center space-x-2 mt-2">
                   <input
                     type="checkbox"
@@ -713,13 +719,13 @@ const RapidResponseCasesPage: React.FC = () => {
                     className="h-4 w-4 text-primary focus:ring-primary border-stone-300 rounded"
                   />
                   <label htmlFor="myCases" className="text-sm text-stone-700 cursor-pointer">
-                    Show only my cases
+                    {t('casesPage.filters.showOnlyMyCases')}
                   </label>
                 </div>
               </div>
-              
+
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-stone-700 mb-1">Date Range</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t('casesPage.filters.dateRange')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="date"
@@ -750,8 +756,8 @@ const RapidResponseCasesPage: React.FC = () => {
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-light text-info-dark">
-                  Search: {searchTerm}
-                  <button onClick={() => setSearchTerm('')} className="ml-1 text-info hover:text-info-dark">
+                  {t('casesPage.activeFilters.search', { term: searchTerm })}
+                  <button onClick={() => setSearchTerm('')} aria-label={t('casesPage.activeFilters.clearSearchAriaLabel')} className="ml-1 text-info hover:text-info-dark">
                     <X className="h-3 w-3" />
                   </button>
                 </span>
@@ -759,8 +765,10 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.timePeriod !== 'all' && (
                 <Badge tone="primary">
-                  Time: {filters.timePeriod === 'week' ? 'This Week' : filters.timePeriod === 'month' ? 'This Month' : filters.timePeriod === 'quarter' ? 'This Quarter' : 'This Year'}
-                  <button onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'all' }))} aria-label="Clear time period filter" className="ml-1">
+                  {t('casesPage.activeFilters.timePeriod', {
+                    value: filters.timePeriod === 'week' ? t('casesPage.filters.thisWeek') : filters.timePeriod === 'month' ? t('casesPage.filters.thisMonth') : filters.timePeriod === 'quarter' ? t('casesPage.filters.thisQuarter') : t('casesPage.filters.thisYear'),
+                  })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, timePeriod: 'all' }))} aria-label={t('casesPage.activeFilters.clearTimePeriodAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -768,8 +776,8 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.priority && (
                 <Badge tone="primary">
-                  Priority: {filters.priority}
-                  <button onClick={() => setFilters(prev => ({ ...prev, priority: '' }))} aria-label="Clear priority filter" className="ml-1">
+                  {t('casesPage.activeFilters.priority', { value: filters.priority })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, priority: '' }))} aria-label={t('casesPage.activeFilters.clearPriorityAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -777,8 +785,8 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.status && (
                 <Badge tone="primary">
-                  Status: {filters.status}
-                  <button onClick={() => setFilters(prev => ({ ...prev, status: '' }))} aria-label="Clear status filter" className="ml-1">
+                  {t('casesPage.activeFilters.status', { value: filters.status })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, status: '' }))} aria-label={t('casesPage.activeFilters.clearStatusAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -786,8 +794,8 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.partner && (
                 <Badge tone="primary">
-                  Partner: {filters.partner}
-                  <button onClick={() => setFilters(prev => ({ ...prev, partner: '' }))} aria-label="Clear partner filter" className="ml-1">
+                  {t('casesPage.activeFilters.partner', { value: filters.partner })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, partner: '' }))} aria-label={t('casesPage.activeFilters.clearPartnerAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -795,8 +803,8 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.country && (
                 <Badge tone="primary">
-                  Country: {countries.find(c => c.id === filters.country)?.name || filters.country}
-                  <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label="Clear country filter" className="ml-1">
+                  {t('casesPage.activeFilters.country', { value: countries.find(c => c.id === filters.country)?.name || filters.country })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, country: '' }))} aria-label={t('casesPage.activeFilters.clearCountryAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -804,8 +812,8 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.category && (
                 <Badge tone="primary">
-                  Category: {filters.category}
-                  <button onClick={() => setFilters(prev => ({ ...prev, category: '' }))} aria-label="Clear category filter" className="ml-1">
+                  {t('casesPage.activeFilters.category', { value: filters.category })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, category: '' }))} aria-label={t('casesPage.activeFilters.clearCategoryAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -813,8 +821,8 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {filters.myCases && (
                 <Badge tone="primary">
-                  My Cases Only
-                  <button onClick={() => setFilters(prev => ({ ...prev, myCases: false }))} aria-label="Clear my cases filter" className="ml-1">
+                  {t('casesPage.activeFilters.myCasesOnly')}
+                  <button onClick={() => setFilters(prev => ({ ...prev, myCases: false }))} aria-label={t('casesPage.activeFilters.clearMyCasesAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -822,18 +830,21 @@ const RapidResponseCasesPage: React.FC = () => {
 
               {(filters.dateRange.start || filters.dateRange.end) && (
                 <Badge tone="primary">
-                  Date Range: {filters.dateRange.start || 'Any'} to {filters.dateRange.end || 'Any'}
-                  <button onClick={() => setFilters(prev => ({ ...prev, dateRange: { start: '', end: '' } }))} aria-label="Clear date range filter" className="ml-1">
+                  {t('casesPage.activeFilters.dateRange', {
+                    start: filters.dateRange.start || t('casesPage.activeFilters.any'),
+                    end: filters.dateRange.end || t('casesPage.activeFilters.any'),
+                  })}
+                  <button onClick={() => setFilters(prev => ({ ...prev, dateRange: { start: '', end: '' } }))} aria-label={t('casesPage.activeFilters.clearDateRangeAriaLabel')} className="ml-1">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               )}
-              
+
               <button
                 onClick={handleClearFilters}
                 className="text-sm text-primary hover:text-primary-dark"
               >
-                Clear all filters
+                {t('casesPage.activeFilters.clearAllFilters')}
               </button>
             </div>
           )}
@@ -842,7 +853,7 @@ const RapidResponseCasesPage: React.FC = () => {
         {/* Cases List */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {loading ? (
-            <LoadingState label="Loading cases…" />
+            <LoadingState label={t('casesPage.states.loadingCases')} />
           ) : error ? (
             <div className="p-6 text-center">
               <AlertTriangle className="h-8 w-8 text-danger mx-auto mb-2" />
@@ -851,18 +862,18 @@ const RapidResponseCasesPage: React.FC = () => {
                 onClick={fetchCases}
                 className="mt-4 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark"
               >
-                Retry
+                {t('casesPage.states.retry')}
               </button>
             </div>
           ) : cases.length === 0 ? (
             <div className="p-6 text-center">
               <FileText className="h-8 w-8 text-stone-400 mx-auto mb-2" />
-              <p className="text-stone-500">No rapid response cases found</p>
+              <p className="text-stone-500">{t('casesPage.states.noCasesFound')}</p>
               <button
                 onClick={handleCreateCase}
                 className="mt-4 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark"
               >
-                Create New Case
+                {t('casesPage.states.createNewCase')}
               </button>
             </div>
           ) : (
@@ -871,31 +882,31 @@ const RapidResponseCasesPage: React.FC = () => {
                 <thead className="bg-stone-50">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Case
+                      {t('casesPage.table.case')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Priority
+                      {t('casesPage.table.priority')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Status
+                      {t('casesPage.table.status')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Category
+                      {t('casesPage.table.category')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Client
+                      {t('casesPage.table.client')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Filed
+                      {t('casesPage.table.filed')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Country
+                      {t('casesPage.table.country')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Partner
+                      {t('casesPage.table.partner')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
-                      Submitted By
+                      {t('casesPage.table.submittedBy')}
                     </th>
                   </tr>
                 </thead>
@@ -914,38 +925,38 @@ const RapidResponseCasesPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge tone={getPriorityTone(caseItem.priority_level)}>
-                          {caseItem.priority_level || 'Not set'}
+                          {caseItem.priority_level ? t(`caseForm.priorities.${caseItem.priority_level.toLowerCase()}`) : t('casesPage.table.notSet')}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge tone={getStageTone(caseItem.rapid_response_stage)}>
-                          {caseItem.rapid_response_stage || 'Not set'}
+                          {caseItem.rapid_response_stage ? t(`caseForm.stages.${caseItem.rapid_response_stage}`) : t('casesPage.table.notSet')}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryColor(caseItem.case_categories?.[0])}`}>
-                          {caseItem.case_categories?.[0] || 'Not set'}
+                          {caseItem.case_categories?.[0] || t('casesPage.table.notSet')}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-stone-900">{caseItem.client_name || 'N/A'}</div>
-                        <div className="text-sm text-stone-500">{caseItem.client_email || 'No email'}</div>
+                        <div className="text-sm text-stone-900">{caseItem.client_name || t('casesPage.table.notAvailable')}</div>
+                        <div className="text-sm text-stone-500">{caseItem.client_email || t('casesPage.table.noEmail')}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                         {new Date(caseItem.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
-                        {caseItem.countries?.name || 'Not specified'}
+                        {caseItem.countries?.name || t('casesPage.table.notSpecified')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
-                        {caseItem.partner || 'Not specified'}
+                        {caseItem.partner || t('casesPage.table.notSpecified')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           {caseItem.profiles?.full_name ? (
                             <span className="text-sm text-stone-900">{caseItem.profiles.full_name}</span>
                           ) : (
-                            <span className="text-sm text-stone-400">Unknown</span>
+                            <span className="text-sm text-stone-400">{t('casesPage.table.unknown')}</span>
                           )}
                           {caseItem.profiles?.organization && (
                             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-stone-100 text-stone-600 border border-stone-200 w-fit">
@@ -954,7 +965,7 @@ const RapidResponseCasesPage: React.FC = () => {
                           )}
                           {caseItem.user_id === currentUserId && (
                             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-info-light text-info-dark w-fit">
-                              Mine
+                              {t('casesPage.table.mine')}
                             </span>
                           )}
                         </div>
@@ -973,7 +984,7 @@ const RapidResponseCasesPage: React.FC = () => {
 
   // If moderator status is loading, show loading indicator
   if (moderatorLoading) {
-    return <LoadingState label="Checking access…" />;
+    return <LoadingState label={t('casesPage.states.checkingAccess')} />;
   }
 
   // If user is not a moderator, show access denied message
@@ -982,13 +993,13 @@ const RapidResponseCasesPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center py-12">
           <Shield className="mx-auto h-12 w-12 text-stone-400" />
-          <h3 className="mt-2 text-sm font-medium text-stone-900">Access Denied</h3>
+          <h3 className="mt-2 text-sm font-medium text-stone-900">{t('casesPage.states.accessDeniedTitle')}</h3>
           <p className="mt-1 text-sm text-stone-500">
-            You do not have permission to access the Rapid Response system.
+            {t('casesPage.states.accessDeniedMessage')}
           </p>
           {moderatorError && (
             <p className="mt-4 text-sm text-danger">
-              Error: {moderatorError}
+              {t('casesPage.states.errorPrefix')}{moderatorError}
             </p>
           )}
         </div>
@@ -1001,41 +1012,46 @@ const RapidResponseCasesPage: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-stone-900">Rapid Response Cases</h1>
+          <h1 className="text-2xl font-bold text-stone-900">{t('casesPage.pageTitle')}</h1>
           <p className="mt-1 text-sm text-stone-500">
-            Track and manage time-sensitive legal response cases
+            {t('casesPage.pageSubtitle')}
           </p>
           {accessScope === 'organization' && userOrganization && (
             <div className="mt-3 p-3 bg-info-light border border-info/30 rounded-md flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
               <p className="text-sm text-info-dark">
-                You are viewing cases uploaded by <strong>{userOrganization}</strong> only. Cases from other organizations are not visible.
+                <Trans
+                  i18nKey="casesPage.orgAccessNotice"
+                  ns="rapidResponse"
+                  values={{ organization: userOrganization }}
+                  components={{ strong: <strong /> }}
+                />
               </p>
             </div>
           )}
         </div>
-        
+
         {!selectedCase && !showForm && (
           <div className="flex space-x-2">
             <button
               onClick={() => setView('dashboard')}
               className={`px-4 py-2 text-sm font-medium rounded-md ${
-                view === 'dashboard' 
-                  ? 'bg-primary text-white' 
+                view === 'dashboard'
+                  ? 'bg-primary text-white'
                   : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
               }`}
             >
-              Dashboard
+              {t('casesPage.tabs.dashboard')}
             </button>
             <button
               onClick={() => setView('list')}
               className={`px-4 py-2 text-sm font-medium rounded-md ${
-                view === 'list' 
-                  ? 'bg-primary text-white' 
+                view === 'list'
+                  ? 'bg-primary text-white'
                   : 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50'
               }`}
             >
-              All Cases
+              {t('casesPage.tabs.allCases')}
             </button>
           </div>
         )}

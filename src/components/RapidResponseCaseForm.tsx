@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, CircleAlert as AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { useDropzone, FileRejection } from 'react-dropzone';
@@ -52,6 +53,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
   onCancel,
   caseData
 }) => {
+  const { t } = useTranslation('rapidResponse');
   const [loading, setLoading] = useState(false);
   const [countries, setCountries] = useState<{ id: string; name: string }[]>([]);
 
@@ -106,7 +108,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       if (draft.deadlines && draft.deadlines.length > 0) {
         setDeadlines(draft.deadlines);
       }
-      toast.success('Restored your previous draft. You can continue where you left off.', {
+      toast.success(t('caseForm.toasts.draftRestored'), {
         duration: 6000,
         onClick: () => toast.dismiss(),
       });
@@ -123,29 +125,31 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
     return () => clearTimeout(timeout);
   }, [formData, deadlines, saveDraft, isEditing]);
 
-  // Case category options
-  const caseCategoryOptions = [
-    'Access to Safe Abortion',
-    'Maternal Health and Mortality',
-    'Forced Sterilization',
-    'Contraceptive Access and Denial',
-    'Sexual and Gender-Based Violence (SGBV)',
-    'Child Marriage and Early/Forced Marriage',
-    'Menstrual Health and Hygiene Rights',
-    'Sexual and Reproductive Health Education',
-    'Criminalization of Pregnancy Outcomes',
-    'Access to Assisted Reproductive Technologies',
-    'Access to Reproductive Health Services for Incarcerated Women',
-    'Consent and Access for Adolescents and Minors',
-    'Discrimination in Reproductive Healthcare',
-    'Reproductive Rights in Conflict and Humanitarian Settings',
-    'Access to Reproductive Health Services for Marginalized Groups',
-    'Parental Leave and Reproductive Labor Rights',
-    'Violation of Confidentiality and Privacy in Reproductive Healthcare',
-    'Denial of Post-Abortion Care',
-    'Reproductive Health and Environmental Justice',
-    'Religious and Cultural Barriers to Reproductive Healthcare Access',
-    'Other'
+  // Case category options — the `value` is the literal string stored in the
+  // database (case_categories array); `labelKey` resolves the translated
+  // display label shown to the user.
+  const caseCategoryOptions: { value: string; labelKey: string }[] = [
+    { value: 'Access to Safe Abortion', labelKey: 'caseForm.categories.accessToSafeAbortion' },
+    { value: 'Maternal Health and Mortality', labelKey: 'caseForm.categories.maternalHealthAndMortality' },
+    { value: 'Forced Sterilization', labelKey: 'caseForm.categories.forcedSterilization' },
+    { value: 'Contraceptive Access and Denial', labelKey: 'caseForm.categories.contraceptiveAccessAndDenial' },
+    { value: 'Sexual and Gender-Based Violence (SGBV)', labelKey: 'caseForm.categories.sgbv' },
+    { value: 'Child Marriage and Early/Forced Marriage', labelKey: 'caseForm.categories.childMarriage' },
+    { value: 'Menstrual Health and Hygiene Rights', labelKey: 'caseForm.categories.menstrualHealthAndHygiene' },
+    { value: 'Sexual and Reproductive Health Education', labelKey: 'caseForm.categories.srhEducation' },
+    { value: 'Criminalization of Pregnancy Outcomes', labelKey: 'caseForm.categories.criminalizationOfPregnancyOutcomes' },
+    { value: 'Access to Assisted Reproductive Technologies', labelKey: 'caseForm.categories.accessToAssistedReproductiveTechnologies' },
+    { value: 'Access to Reproductive Health Services for Incarcerated Women', labelKey: 'caseForm.categories.accessForIncarceratedWomen' },
+    { value: 'Consent and Access for Adolescents and Minors', labelKey: 'caseForm.categories.consentForAdolescentsAndMinors' },
+    { value: 'Discrimination in Reproductive Healthcare', labelKey: 'caseForm.categories.discriminationInReproductiveHealthcare' },
+    { value: 'Reproductive Rights in Conflict and Humanitarian Settings', labelKey: 'caseForm.categories.reproductiveRightsInConflict' },
+    { value: 'Access to Reproductive Health Services for Marginalized Groups', labelKey: 'caseForm.categories.accessForMarginalizedGroups' },
+    { value: 'Parental Leave and Reproductive Labor Rights', labelKey: 'caseForm.categories.parentalLeaveAndReproductiveLaborRights' },
+    { value: 'Violation of Confidentiality and Privacy in Reproductive Healthcare', labelKey: 'caseForm.categories.violationOfConfidentialityAndPrivacy' },
+    { value: 'Denial of Post-Abortion Care', labelKey: 'caseForm.categories.denialOfPostAbortionCare' },
+    { value: 'Reproductive Health and Environmental Justice', labelKey: 'caseForm.categories.reproductiveHealthAndEnvironmentalJustice' },
+    { value: 'Religious and Cultural Barriers to Reproductive Healthcare Access', labelKey: 'caseForm.categories.religiousAndCulturalBarriers' },
+    { value: 'Other', labelKey: 'caseForm.categories.other' }
   ];
 
   // Function to map rapid response stage to general case status
@@ -220,7 +224,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       setCountries(data || []);
     } catch (err) {
       console.error('Error fetching countries:', err);
-      toast.error('Failed to load countries');
+      toast.error(t('caseForm.errors.failedToLoadCountries'));
     }
   };
 
@@ -230,10 +234,10 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
         const reason = rejections[0].errors[0];
         setFileError(
           reason?.code === 'file-too-large'
-            ? 'That file is larger than 10MB. Please choose a smaller file.'
+            ? t('caseForm.errors.fileTooLarge')
             : reason?.code === 'file-invalid-type'
-              ? 'Only PDF, DOC, and DOCX files are accepted.'
-              : reason?.message || 'That file could not be accepted.'
+              ? t('caseForm.errors.invalidFileType')
+              : reason?.message || t('caseForm.errors.fileNotAccepted')
         );
         return;
       }
@@ -325,12 +329,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
     // Validate required fields
     if (!formData.case_reference) {
-      toast.error('Case reference is required');
+      toast.error(t('caseForm.errors.caseReferenceRequired'));
       return;
     }
 
     if (!formData.case_category) {
-      toast.error('Case category is required');
+      toast.error(t('caseForm.errors.caseCategoryRequired'));
       return;
     }
 
@@ -339,7 +343,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error(t('caseForm.errors.userNotAuthenticated'));
 
       // Prepare case data - transform case_category to case_categories array
       const { case_category, ...restFormData } = formData;
@@ -415,13 +419,13 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                 sendEmail({
                   to: email,
                   subject: isUrgent
-                    ? 'Urgent: New Rapid Response Case awaiting review'
-                    : 'New submission awaiting review',
+                    ? t('caseForm.emails.urgentModeratorSubject')
+                    : t('caseForm.emails.newSubmissionModeratorSubject'),
                   html: renderEmail({
                     heading: isUrgent
-                      ? 'Urgent: New Rapid Response Case Awaiting Review'
-                      : 'New Submission Awaiting Review',
-                    body: `A new rapid response case, "${formData.case_filed}", has been submitted and needs moderation.`,
+                      ? t('caseForm.emails.urgentModeratorHeading')
+                      : t('caseForm.emails.newSubmissionModeratorHeading'),
+                    body: t('caseForm.emails.moderatorBody', { caseTitle: formData.case_filed }),
                   }),
                 })
               )
@@ -434,10 +438,10 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
         if (user.email) {
           sendEmail({
             to: user.email,
-            subject: 'We received your submission',
+            subject: t('caseForm.emails.submitterSubject'),
             html: renderEmail({
-              heading: 'Submission Received',
-              body: `Thanks for submitting "${formData.case_filed}". Our moderators will review it, and you'll be notified once a decision is made.`,
+              heading: t('caseForm.emails.submitterHeading'),
+              body: t('caseForm.emails.submitterBody', { caseTitle: formData.case_filed }),
             }),
           }).catch((err) => console.error('Failed to send submitter confirmation email:', err));
         }
@@ -457,93 +461,93 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
   // Per-field inline error, shown once the field has been touched (blurred).
   const fieldError = (field: string, label: string, isEmpty: boolean): string | undefined =>
-    touched[field] && isEmpty ? `${label} is required` : undefined;
+    touched[field] && isEmpty ? t('caseForm.errors.fieldRequired', { label }) : undefined;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-stone-900">Basic Information</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.basicInformation')}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="Case Reference"
+              label={t('caseForm.fields.caseReference')}
               name="case_reference"
               required
               value={formData.case_reference}
               onChange={handleInputChange}
               onBlur={() => markTouched('case_reference')}
-              error={fieldError('case_reference', 'Case Reference', !formData.case_reference)}
-              helperText="Unique identifier"
-              placeholder="e.g., RR-2025-001"
+              error={fieldError('case_reference', t('caseForm.fields.caseReference'), !formData.case_reference)}
+              helperText={t('caseForm.fields.caseReferenceHelper')}
+              placeholder={t('caseForm.fields.caseReferencePlaceholder')}
             />
 
             <Input
-              label="Case Title"
+              label={t('caseForm.fields.caseTitle')}
               name="case_filed"
               required
               value={formData.case_filed}
               onChange={handleInputChange}
               onBlur={() => markTouched('case_filed')}
-              error={fieldError('case_filed', 'Case Title', !formData.case_filed)}
+              error={fieldError('case_filed', t('caseForm.fields.caseTitle'), !formData.case_filed)}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Select
-              label="Country/Jurisdiction"
+              label={t('caseForm.fields.countryJurisdiction')}
               name="country_id"
               required
               value={formData.country_id}
               onChange={handleInputChange}
               onBlur={() => markTouched('country_id')}
-              error={fieldError('country_id', 'Country/Jurisdiction', !formData.country_id)}
+              error={fieldError('country_id', t('caseForm.fields.countryJurisdiction'), !formData.country_id)}
             >
-              <option value="">Select a country</option>
+              <option value="">{t('caseForm.fields.selectCountry')}</option>
               {countries.map(country => (
                 <option key={country.id} value={country.id}>{country.name}</option>
               ))}
             </Select>
 
             <Select
-              label="Case Category"
+              label={t('caseForm.fields.caseCategory')}
               name="case_category"
               required
               value={formData.case_category}
               onChange={handleInputChange}
               onBlur={() => markTouched('case_category')}
-              error={fieldError('case_category', 'Case Category', !formData.case_category)}
+              error={fieldError('case_category', t('caseForm.fields.caseCategory'), !formData.case_category)}
             >
-              <option value="">Select a category</option>
+              <option value="">{t('caseForm.fields.selectCategory')}</option>
               {caseCategoryOptions.map(category => (
-                <option key={category} value={category}>{category}</option>
+                <option key={category.value} value={category.value}>{t(category.labelKey)}</option>
               ))}
             </Select>
           </div>
 
           <Textarea
-            label="Case Description"
+            label={t('caseForm.fields.caseDescription')}
             name="case_summary"
             required
             rows={3}
             value={formData.case_summary}
             onChange={handleInputChange}
             onBlur={() => markTouched('case_summary')}
-            error={fieldError('case_summary', 'Case Description', !formData.case_summary)}
+            error={fieldError('case_summary', t('caseForm.fields.caseDescription'), !formData.case_summary)}
           />
         </div>
 
         {/* Priority and Status */}
         <div className="space-y-6">
-          <h3 className="text-lg font-medium text-stone-900">Priority and Status</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.priorityAndStatus')}</h3>
 
           <div className="flex flex-col gap-1.5">
             {/* Label typography matches Select's rendered label exactly, so
                 this bespoke segmented group reads consistently with the
                 "Current Stage" Select right below it. */}
             <span className="text-sm font-medium text-stone-700">
-              Priority Level
+              {t('caseForm.fields.priorityLevel')}
               <span className="text-danger ml-0.5" aria-hidden="true">*</span>
             </span>
             <div className="grid grid-cols-4 gap-2">
@@ -565,7 +569,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                       onChange={() => handlePriorityChange(priority)}
                       className="sr-only"
                     />
-                    {priority}
+                    {t(`caseForm.priorities.${priority.toLowerCase()}`)}
                   </label>
                 );
               })}
@@ -573,52 +577,52 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           </div>
 
           <Select
-            label="Current Stage"
+            label={t('caseForm.fields.currentStage')}
             name="rapid_response_stage"
             required
             value={formData.rapid_response_stage}
             onChange={handleInputChange}
             onBlur={() => markTouched('rapid_response_stage')}
-            error={fieldError('rapid_response_stage', 'Current Stage', !formData.rapid_response_stage)}
+            error={fieldError('rapid_response_stage', t('caseForm.fields.currentStage'), !formData.rapid_response_stage)}
             helperText={
-              formData.rapid_response_stage === 'intake' ? 'Initial assessment and information gathering' :
-              formData.rapid_response_stage === 'review' ? 'Analyzing case details and planning response' :
-              formData.rapid_response_stage === 'action' ? 'Implementing response strategies' :
-              formData.rapid_response_stage === 'resolution' ? 'Case resolution and follow-up' :
+              formData.rapid_response_stage === 'intake' ? t('caseForm.stageHelpers.intake') :
+              formData.rapid_response_stage === 'review' ? t('caseForm.stageHelpers.review') :
+              formData.rapid_response_stage === 'action' ? t('caseForm.stageHelpers.action') :
+              formData.rapid_response_stage === 'resolution' ? t('caseForm.stageHelpers.resolution') :
               undefined
             }
           >
-            <option value="intake">Intake</option>
-            <option value="review">Review</option>
-            <option value="action">Action</option>
-            <option value="resolution">Resolution</option>
+            <option value="intake">{t('caseForm.stages.intake')}</option>
+            <option value="review">{t('caseForm.stages.review')}</option>
+            <option value="action">{t('caseForm.stages.action')}</option>
+            <option value="resolution">{t('caseForm.stages.resolution')}</option>
           </Select>
 
           <Textarea
-            label="Nature of Case"
+            label={t('caseForm.fields.natureOfCase')}
             name="nature_of_case"
             required
             rows={2}
             value={formData.nature_of_case}
             onChange={handleInputChange}
             onBlur={() => markTouched('nature_of_case')}
-            error={fieldError('nature_of_case', 'Nature of Case', !formData.nature_of_case)}
+            error={fieldError('nature_of_case', t('caseForm.fields.natureOfCase'), !formData.nature_of_case)}
           />
         </div>
 
         {/* Client Information */}
         <div className="space-y-6">
-          <h3 className="text-lg font-medium text-stone-900">Client Information</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.clientInformation')}</h3>
 
           <Input
-            label="Client Name"
+            label={t('caseForm.fields.clientName')}
             name="client_name"
             value={formData.client_name}
             onChange={handleInputChange}
           />
 
           <Input
-            label="Client Email"
+            label={t('caseForm.fields.clientEmail')}
             name="client_email"
             type="email"
             value={formData.client_email}
@@ -626,7 +630,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           />
 
           <Input
-            label="Client Phone"
+            label={t('caseForm.fields.clientPhone')}
             name="client_phone"
             type="tel"
             value={formData.client_phone}
@@ -636,31 +640,31 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
         {/* Partner Organization */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-stone-900">Partner Organization</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.partnerOrganization')}</h3>
 
           <Input
-            label="Partner Organization"
+            label={t('caseForm.fields.partnerOrganization')}
             name="partner"
             value={formData.partner}
             onChange={handleInputChange}
-            placeholder="e.g., Afya Na Haki, LIRA Programme, KELIN"
-            helperText="Enter the name of the partner organization involved in this case"
+            placeholder={t('caseForm.fields.partnerOrganizationPlaceholder')}
+            helperText={t('caseForm.fields.partnerOrganizationHelper')}
           />
         </div>
 
         {/* Key Deadlines */}
         <div className="space-y-4 md:col-span-2">
-          <h3 className="text-lg font-medium text-stone-900">Key Deadlines</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.keyDeadlines')}</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-3 items-end">
             <Input
-              label="Deadline Date"
+              label={t('caseForm.fields.deadlineDate')}
               type="date"
               value={deadlineDraftDate}
               onChange={(e) => setDeadlineDraftDate(e.target.value)}
             />
             <Input
-              label="Deadline Description"
+              label={t('caseForm.fields.deadlineDescription')}
               value={deadlineDraftDescription}
               onChange={(e) => setDeadlineDraftDescription(e.target.value)}
               onKeyDown={(e) => {
@@ -669,17 +673,17 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                   commitDeadline();
                 }
               }}
-              placeholder="Describe this deadline"
+              placeholder={t('caseForm.fields.deadlineDescriptionPlaceholder')}
             />
           </div>
 
           <div className="flex gap-2">
             <Button type="button" onClick={commitDeadline}>
-              {editingDeadlineIndex !== null ? 'Save Changes' : 'Add Deadline'}
+              {editingDeadlineIndex !== null ? t('caseForm.deadlines.saveChanges') : t('caseForm.deadlines.addDeadline')}
             </Button>
             {editingDeadlineIndex !== null && (
               <Button type="button" variant="ghost" onClick={cancelEditDeadline}>
-                Cancel Edit
+                {t('caseForm.deadlines.cancelEdit')}
               </Button>
             )}
           </div>
@@ -703,12 +707,12 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                       onClick={() => startEditDeadline(index)}
                       className="rounded px-2 py-1 text-xs font-medium text-primary hover:bg-primary-50"
                     >
-                      Edit
+                      {t('caseForm.deadlines.edit')}
                     </button>
                     <button
                       type="button"
                       onClick={() => removeDeadline(index)}
-                      aria-label={`Remove deadline: ${deadline.description}`}
+                      aria-label={t('caseForm.deadlines.removeDeadlineAriaLabel', { description: deadline.description })}
                       className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-danger"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -722,47 +726,47 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
         {/* Action Details */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-stone-900">Action Details</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.actionDetails')}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Textarea
-              label="Action Taken"
+              label={t('caseForm.fields.actionTaken')}
               name="action_taken"
               required
               rows={3}
               value={formData.action_taken}
               onChange={handleInputChange}
               onBlur={() => markTouched('action_taken')}
-              error={fieldError('action_taken', 'Action Taken', !formData.action_taken)}
+              error={fieldError('action_taken', t('caseForm.fields.actionTaken'), !formData.action_taken)}
             />
 
             <Textarea
-              label="Next Steps"
+              label={t('caseForm.fields.nextSteps')}
               name="next_steps"
               required
               rows={3}
               value={formData.next_steps}
               onChange={handleInputChange}
               onBlur={() => markTouched('next_steps')}
-              error={fieldError('next_steps', 'Next Steps', !formData.next_steps)}
+              error={fieldError('next_steps', t('caseForm.fields.nextSteps'), !formData.next_steps)}
             />
           </div>
 
           <Input
-            label="Action Timeframe"
+            label={t('caseForm.fields.actionTimeframe')}
             name="action_timeframe"
             required
             value={formData.action_timeframe}
             onChange={handleInputChange}
             onBlur={() => markTouched('action_timeframe')}
-            error={fieldError('action_timeframe', 'Action Timeframe', !formData.action_timeframe)}
-            placeholder="e.g., 48 hours, 1 week, 30 days"
+            error={fieldError('action_timeframe', t('caseForm.fields.actionTimeframe'), !formData.action_timeframe)}
+            placeholder={t('caseForm.fields.actionTimeframePlaceholder')}
           />
         </div>
 
         {/* Document Upload */}
         <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-stone-900">Document Upload</h3>
+          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.documentUpload')}</h3>
 
           <div
             {...getRootProps()}
@@ -774,7 +778,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                   : 'border-stone-300 hover:border-primary'
             }`}
           >
-            <input {...getInputProps()} aria-label="Upload case document" />
+            <input {...getInputProps()} aria-label={t('caseForm.documentUpload.uploadAriaLabel')} />
             {file ? (
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm text-stone-900 font-medium">{createSafeDisplayName(file.name)}</span>
@@ -784,7 +788,7 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
                     e.stopPropagation();
                     setFile(null);
                   }}
-                  aria-label="Remove selected file"
+                  aria-label={t('caseForm.documentUpload.removeSelectedFile')}
                   className="ml-2 text-stone-500 hover:text-danger"
                 >
                   <X className="h-4 w-4" />
@@ -792,8 +796,8 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
               </div>
             ) : (
               <div>
-                <p className="text-stone-600">Drop your file here or click to browse</p>
-                <p className="text-xs text-stone-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
+                <p className="text-stone-600">{t('caseForm.documentUpload.dropFileHere')}</p>
+                <p className="text-xs text-stone-500 mt-1">{t('caseForm.documentUpload.fileTypesHint')}</p>
               </div>
             )}
           </div>
@@ -808,10 +812,10 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
       <div className="flex justify-end space-x-3 pt-6">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t('caseForm.actions.cancel')}
         </Button>
         <Button type="submit" loading={loading}>
-          {loading ? 'Saving...' : isEditing ? 'Update Case' : 'Create Case'}
+          {loading ? t('caseForm.actions.saving') : isEditing ? t('caseForm.actions.updateCase') : t('caseForm.actions.createCase')}
         </Button>
       </div>
     </form>
