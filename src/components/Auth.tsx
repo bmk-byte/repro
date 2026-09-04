@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { supabase, handleSupabaseError } from '../lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey, handleSupabaseError } from '../lib/supabase';
 import { validateModeratorOrganization } from '../lib/moderatorService';
 import { toast } from '../lib/toast';
 import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff } from 'lucide-react';
@@ -19,6 +19,33 @@ interface ValidationState {
   email: string;
   password: string;
   organization: string;
+}
+
+// Login/signup go through the auth-login/auth-signup edge functions rather
+// than calling supabase.auth.signInWithPassword/signUp directly — those
+// functions enforce check_rate_limit() server-side (via the service-role
+// key) before ever reaching GoTrue, so the limit can't be bypassed by a
+// caller that skips the client SDK entirely. Both functions pass GoTrue's
+// own response straight through, so the shapes below match what the SDK
+// would have returned.
+const AUTH_FUNCTIONS_URL = `${supabaseUrl}/functions/v1`;
+
+async function callAuthProxy(path: 'auth-login' | 'auth-signup', body: unknown) {
+  const res = await fetch(`${AUTH_FUNCTIONS_URL}/${path}`, {
+    method: 'POST',
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${supabaseAnonKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  return { ok: res.ok, data };
+}
+
+function proxyErrorMessage(data: any): string {
+  return data?.msg || data?.error_description || data?.message || data?.error || 'Request failed';
 }
 
 const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }) => {
@@ -189,41 +216,44 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           return;
         }
 
-        // Fail open: only an explicit `false` blocks — an RPC error (e.g.
-        // offline) shouldn't itself lock the user out of signing up.
-        const { data: signUpAllowed, error: signUpRateLimitError } = await supabase.rpc('check_rate_limit', {
-          p_key: `signup:${email.toLowerCase()}`,
-          p_max_count: 3,
-          p_window_seconds: 3600,
-        });
-        if (!signUpRateLimitError && signUpAllowed === false) {
-          toast.error(t('auth.rateLimitedSignup'));
-          setLoading(false);
-          return;
-        }
-
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        const signUpResult = await callAuthProxy('auth-signup', {
           email,
           password,
-          options: {
-            data: {
-              full_name: fullName.trim(),
-              phone_number: phoneNumber.trim(),
-              profession: profession.trim(),
-              organization: organization.trim()
-            }
-          }
+          data: {
+            full_name: fullName.trim(),
+            phone_number: phoneNumber.trim(),
+            profession: profession.trim(),
+            organization: organization.trim(),
+          },
         });
 
-        if (signUpError) {
-          console.error('Sign up error:', signUpError);
-          throw signUpError;
+        if (!signUpResult.ok) {
+          if (signUpResult.data?.code === 'rate_limited') {
+            toast.error(t('auth.rateLimitedSignup'));
+            setLoading(false);
+            return;
+          }
+          console.error('Sign up error:', signUpResult.data);
+          throw new Error(proxyErrorMessage(signUpResult.data));
         }
 
-        if (!authData.user) {
+        // GoTrue's signup response is a raw User object when email
+        // confirmation is pending (no session yet), or {access_token,
+        // refresh_token, user} when confirmation isn't required.
+        const signedUpUser = signUpResult.data.user ?? signUpResult.data;
+
+        if (!signedUpUser?.id) {
           toast.error(t('auth.registrationFailed'));
           setLoading(false);
           return;
+        }
+
+        if (signUpResult.data.access_token) {
+          const { error: setSessionError } = await supabase.auth.setSession({
+            access_token: signUpResult.data.access_token,
+            refresh_token: signUpResult.data.refresh_token,
+          });
+          if (setSessionError) throw setSessionError;
         }
 
         // is_moderator/role are decided server-side by a trigger on INSERT
@@ -232,7 +262,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
-            id: authData.user.id,
+            id: signedUpUser.id,
             full_name: fullName.trim(),
             email: email,
             phone_number: phoneNumber.trim(),
@@ -253,27 +283,18 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         toast.success(t('auth.registrationSuccess'));
         setIsSignUp(false);
       } else {
-        // Fail open: only an explicit `false` blocks — an RPC error (e.g.
-        // offline) shouldn't itself lock the user out of signing in.
-        const { data: loginAllowed, error: loginRateLimitError } = await supabase.rpc('check_rate_limit', {
-          p_key: `login:${email.toLowerCase()}`,
-          p_max_count: 5,
-          p_window_seconds: 300,
-        });
-        if (!loginRateLimitError && loginAllowed === false) {
-          toast.error(t('auth.rateLimitedLogin'));
-          setLoading(false);
-          return;
-        }
+        const signInResult = await callAuthProxy('auth-login', { email, password });
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        if (!signInResult.ok) {
+          if (signInResult.data?.code === 'rate_limited') {
+            toast.error(t('auth.rateLimitedLogin'));
+            setLoading(false);
+            return;
+          }
 
-        if (error) {
+          const message = proxyErrorMessage(signInResult.data);
           // Directly show toast for invalid credentials without throwing
-          if (error.message === 'Invalid login credentials') {
+          if (message === 'Invalid login credentials') {
             setValidationErrors(prev => ({ ...prev, password: t('auth.invalidCredentials') }));
             // Trigger shake animation
             setShakeAnimation(true);
@@ -282,10 +303,16 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
             return;
           }
           // For other errors, throw to be caught by the catch block
-          throw error;
+          throw new Error(message);
         }
-        
-        if (data.user) {
+
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: signInResult.data.access_token,
+          refresh_token: signInResult.data.refresh_token,
+        });
+        if (setSessionError) throw setSessionError;
+
+        if (signInResult.data.user) {
           toast.success(t('auth.welcomeBack'));
           if (onSuccess) onSuccess();
         } else {

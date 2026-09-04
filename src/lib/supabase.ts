@@ -9,6 +9,10 @@ const devLog = (...args: unknown[]) => {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Exported for the auth-login/auth-signup edge function proxies (Auth.tsx),
+// which call those functions directly via fetch rather than the SDK.
+export { supabaseUrl, supabaseAnonKey };
+
 // Validate environment variables
 if (!supabaseUrl) {
   console.error('Missing VITE_SUPABASE_URL environment variable');
