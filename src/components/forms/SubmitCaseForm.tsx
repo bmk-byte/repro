@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from 'lucide-react';
+import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle, Check } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
@@ -17,7 +17,10 @@ interface SubmitCaseFormProps {
   isDirectUpload?: boolean;
 }
 
-const CASE_CATEGORIES = [
+// Exported so BulkCaseUpload.tsx can validate against the exact same
+// allowlist the single-entry form uses (and the DB CHECK constraint on
+// pending_cases.case_categories mirrors) — one source of truth.
+export const CASE_CATEGORIES = [
   'Access to Safe Abortion',
   'Maternal Health and Mortality',
   'Forced Sterilization',
@@ -116,13 +119,22 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
   }, [loadDraft]);
 
   // Auto-save form data (debounced)
+  const [justSaved, setJustSaved] = useState(false);
   useEffect(() => {
     if (!draftLoaded.current) return;
     const timeout = setTimeout(() => {
       saveDraft({ formData, currentStep });
+      setJustSaved(true);
     }, 800);
     return () => clearTimeout(timeout);
   }, [formData, currentStep, saveDraft]);
+
+  // Fade the "Progress saved" indicator back out a couple seconds after it appears.
+  useEffect(() => {
+    if (!justSaved) return;
+    const timeout = setTimeout(() => setJustSaved(false), 2500);
+    return () => clearTimeout(timeout);
+  }, [justSaved]);
 
   // Form steps
   const steps = [
@@ -943,11 +955,20 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <MultiStepFormProgress
-        steps={steps}
-        currentStep={currentStep}
-        onStepClick={goToStep}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <MultiStepFormProgress
+          steps={steps}
+          currentStep={currentStep}
+          onStepClick={goToStep}
+        />
+        <span
+          role="status"
+          className={`mt-4 flex-none flex items-center gap-1 text-xs font-medium text-success transition-opacity duration-300 ${justSaved ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+          {t('common.progressSaved')}
+        </span>
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-6">
         {renderStepContent()}

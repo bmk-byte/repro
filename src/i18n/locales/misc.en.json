@@ -2,6 +2,7 @@
   "app": {
     "submitCaseForReview": "Submit Case for Review",
     "submitJudgmentForReview": "Submit Judgment for Review",
+    "bulkUploadCases": "Bulk Upload Cases",
     "uploadCase": "Upload Case",
     "addNewCase": "Add New Case",
     "connectionError": "Connection Error:",

@@ -44,7 +44,58 @@
     "caseImpactLabel": "Impact de l'affaire",
     "caseCategoriesLabel": "Catégories de l'affaire",
     "atLeastOneCategoryRequired": "Au moins une catégorie est obligatoire",
-    "moderationNotice": "Votre soumission sera examinée par un modérateur avant sa publication. Vous serez averti(e) une fois l'examen terminé."
+    "moderationNotice": "Votre soumission sera examinée par un modérateur avant sa publication. Vous serez averti(e) une fois l'examen terminé.",
+    "progressSaved": "Progression enregistrée"
+  },
+  "bulkCaseUpload": {
+    "heading": "Importation groupée de dossiers",
+    "description": "Téléchargez le modèle CSV, remplissez une ligne par dossier, puis importez-le ici. Chaque dossier est soumis à l'examen d'un modérateur, comme pour une soumission individuelle.",
+    "instructions": {
+      "multiValue": "Les champs acceptant plusieurs valeurs (comme Plaignants ou Catégories de l'affaire) doivent être séparés par un point-virgule (;) dans la cellule.",
+      "enums": "Statut de la chronologie, Type d'organe judiciaire et Type de cadre juridique doivent utiliser exactement l'une des valeurs indiquées dans l'en-tête de colonne.",
+      "country": "Le pays doit correspondre au nom d'un pays déjà présent dans le système.",
+      "document": "Les documents justificatifs (PDF) ne peuvent pas être joints via le tableur — ajoutez-les ensuite en modifiant chaque dossier.",
+      "maxRows": "Jusqu'à {{max}} dossiers peuvent être importés par fichier."
+    },
+    "downloadTemplate": "Télécharger le modèle CSV",
+    "uploadAriaLabel": "Importer un fichier CSV",
+    "dropzonePrompt": "Déposez votre fichier CSV complété ici ou cliquez pour parcourir",
+    "maxFileSize": "Taille maximale du fichier : 10 Mo",
+    "clear": "Effacer",
+    "validCount": "{{count}} valide(s)",
+    "invalidCount": "{{count}} à corriger",
+    "submitting": "Envoi en cours...",
+    "submitButton": "Soumettre {{count}} dossier(s) pour examen",
+    "table": {
+      "row": "Ligne",
+      "title": "Titre",
+      "country": "Pays",
+      "status": "Statut",
+      "ok": "Prêt"
+    },
+    "results": {
+      "summary": "{{success}} dossier(s) soumis pour examen. {{failed}} en échec.",
+      "failureLine": "Ligne {{row}} ({{title}}) : {{message}}",
+      "viewCases": "Voir les dossiers"
+    },
+    "toasts": {
+      "submitted": "{{count}} dossier(s) soumis pour examen"
+    },
+    "errors": {
+      "countriesLoadError": "Échec du chargement de la liste des pays",
+      "fileInvalidType": "Seuls les fichiers CSV sont acceptés.",
+      "fileRejectedGeneric": "Ce fichier n'a pas pu être accepté.",
+      "emptyFile": "Le fichier importé ne contient aucune ligne de données.",
+      "tooManyRows": "Ce fichier contient {{count}} lignes, ce qui dépasse la limite de {{max}} lignes. Veuillez le diviser en fichiers plus petits.",
+      "fieldRequired": "{{field}} est obligatoire",
+      "unknownCountry": "« {{country}} » ne correspond à aucun pays connu",
+      "invalidTimelineStatus": "« {{value}} » n'est pas un statut de chronologie valide",
+      "invalidJudicialBodyType": "« {{value}} » n'est pas un type d'organe judiciaire valide",
+      "invalidLegalFrameworkType": "« {{value}} » n'est pas un type de cadre juridique valide",
+      "invalidCategory": "« {{value}} » n'est pas une catégorie d'affaire reconnue",
+      "rateLimited": "Trop d'importations groupées. Veuillez réessayer plus tard.",
+      "submitFailed": "Échec de la soumission des dossiers"
+    }
   },
   "submitCaseForm": {
     "toasts": {

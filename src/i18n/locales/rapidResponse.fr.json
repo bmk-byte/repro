@@ -1,5 +1,6 @@
 {
   "caseForm": {
+    "progressSaved": "Progression enregistrée",
     "sections": {
       "basicInformation": "Informations générales",
       "priorityAndStatus": "Priorité et statut",

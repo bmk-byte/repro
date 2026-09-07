@@ -2,6 +2,7 @@
   "app": {
     "submitCaseForReview": "Soumettre un dossier pour examen",
     "submitJudgmentForReview": "Soumettre une décision pour examen",
+    "bulkUploadCases": "Importation groupée de dossiers",
     "uploadCase": "Ajouter un dossier",
     "addNewCase": "Ajouter un nouveau dossier",
     "connectionError": "Erreur de connexion :",

@@ -44,7 +44,58 @@
     "caseImpactLabel": "Case Impact",
     "caseCategoriesLabel": "Case Categories",
     "atLeastOneCategoryRequired": "At least one category is required",
-    "moderationNotice": "Your submission will be reviewed by a moderator before being published. You will be notified once the review is complete."
+    "moderationNotice": "Your submission will be reviewed by a moderator before being published. You will be notified once the review is complete.",
+    "progressSaved": "Progress saved"
+  },
+  "bulkCaseUpload": {
+    "heading": "Bulk Upload Cases",
+    "description": "Download the CSV template, fill in one row per case, then upload it here. Each case is submitted for moderator review, just like a single submission.",
+    "instructions": {
+      "multiValue": "Fields that accept multiple values (like Litigants or Case Categories) should be separated with a semicolon (;) within the cell.",
+      "enums": "Timeline Status, Judicial Body Type, and Legal Framework Type must use one of the exact values shown in the column header.",
+      "country": "Country must match the name of a country already in the system.",
+      "document": "Supporting documents (PDFs) can't be attached through the spreadsheet — attach them afterward by editing each case.",
+      "maxRows": "Up to {{max}} cases can be uploaded per file."
+    },
+    "downloadTemplate": "Download CSV Template",
+    "uploadAriaLabel": "Upload CSV file",
+    "dropzonePrompt": "Drop your completed CSV file here or click to browse",
+    "maxFileSize": "Maximum file size: 10MB",
+    "clear": "Clear",
+    "validCount": "{{count}} valid",
+    "invalidCount": "{{count}} need fixing",
+    "submitting": "Submitting...",
+    "submitButton": "Submit {{count}} case(s) for review",
+    "table": {
+      "row": "Row",
+      "title": "Title",
+      "country": "Country",
+      "status": "Status",
+      "ok": "Ready"
+    },
+    "results": {
+      "summary": "{{success}} case(s) submitted for review. {{failed}} failed.",
+      "failureLine": "Row {{row}} ({{title}}): {{message}}",
+      "viewCases": "View Cases"
+    },
+    "toasts": {
+      "submitted": "{{count}} case(s) submitted for review"
+    },
+    "errors": {
+      "countriesLoadError": "Failed to load countries",
+      "fileInvalidType": "Only CSV files are accepted.",
+      "fileRejectedGeneric": "That file could not be accepted.",
+      "emptyFile": "The uploaded file has no data rows.",
+      "tooManyRows": "This file has {{count}} rows, which is more than the {{max}}-row limit. Please split it into smaller files.",
+      "fieldRequired": "{{field}} is required",
+      "unknownCountry": "\"{{country}}\" does not match a known country",
+      "invalidTimelineStatus": "\"{{value}}\" is not a valid Timeline Status",
+      "invalidJudicialBodyType": "\"{{value}}\" is not a valid Judicial Body Type",
+      "invalidLegalFrameworkType": "\"{{value}}\" is not a valid Legal Framework Type",
+      "invalidCategory": "\"{{value}}\" is not a recognized Case Category",
+      "rateLimited": "Too many bulk uploads. Please try again later.",
+      "submitFailed": "Failed to submit cases"
+    }
   },
   "submitCaseForm": {
     "toasts": {

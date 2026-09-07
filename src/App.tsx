@@ -25,6 +25,7 @@ const CasesPage = lazy(() => import('./components/CasesPage'));
 const DashboardLayout = lazy(() => import('./components/DashboardLayout'));
 const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
 const SubmissionForm = lazy(() => import('./components/SubmissionForm'));
+const BulkCaseUpload = lazy(() => import('./components/forms/BulkCaseUpload'));
 const ModerationPage = lazy(() => import('./components/ModerationPage'));
 const ModeratorAdminPanel = lazy(() => import('./components/ModeratorAdminPanel'));
 const AdminManagementPanel = lazy(() => import('./components/AdminManagementPanel'));
@@ -438,6 +439,14 @@ function DashboardApp() {
                       onSuccess={() => setActiveTab('judgments')}
                       onCancel={() => setActiveTab('judgments')}
                     />
+                  </div>
+                );
+
+              case 'bulk-upload-cases':
+                return (
+                  <div className="max-w-5xl mx-auto px-4">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('app.bulkUploadCases')}</h2>
+                    <BulkCaseUpload onDone={() => setActiveTab('cases')} />
                   </div>
                 );
 

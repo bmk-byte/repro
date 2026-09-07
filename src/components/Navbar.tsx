@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2 } from 'lucide-react';
+import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Button, Badge, LanguageSwitcher } from './ui';
@@ -118,7 +118,8 @@ const Navbar: React.FC<NavbarProps> = ({
       { id: 'rapid-response', label: t('nav.rapidResponse'), icon: AlertOctagon, badge: t('nav.rapidResponseBadge') }
     ] : [
       { id: 'submit-case', label: t('nav.submitCase'), icon: Send },
-      { id: 'submit-judgment', label: t('nav.submitJudgment'), icon: Send }
+      { id: 'submit-judgment', label: t('nav.submitJudgment'), icon: Send },
+      { id: 'bulk-upload-cases', label: t('nav.bulkUploadCases'), icon: FileSpreadsheet }
     ]),
     { id: 'cases', label: t('nav.cases'), icon: Scale },
     { id: 'judgments', label: t('nav.judgments'), icon: Gavel },

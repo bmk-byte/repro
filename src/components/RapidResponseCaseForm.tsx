@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, CircleAlert as AlertCircle } from 'lucide-react';
+import { X, CircleAlert as AlertCircle, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -117,13 +117,22 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
   }, [loadDraft, isEditing]);
 
   // Auto-save form data and deadlines (debounced)
+  const [justSaved, setJustSaved] = useState(false);
   useEffect(() => {
     if (!draftLoaded.current || isEditing) return;
     const timeout = setTimeout(() => {
       saveDraft({ formData, deadlines });
+      setJustSaved(true);
     }, 800);
     return () => clearTimeout(timeout);
   }, [formData, deadlines, saveDraft, isEditing]);
+
+  // Fade the "Progress saved" indicator back out a couple seconds after it appears.
+  useEffect(() => {
+    if (!justSaved) return;
+    const timeout = setTimeout(() => setJustSaved(false), 2500);
+    return () => clearTimeout(timeout);
+  }, [justSaved]);
 
   // Case category options — the `value` is the literal string stored in the
   // database (case_categories array); `labelKey` resolves the translated
@@ -465,6 +474,17 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {!isEditing && (
+        <div className="flex justify-end">
+          <span
+            role="status"
+            className={`flex items-center gap-1 text-xs font-medium text-success transition-opacity duration-300 ${justSaved ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <Check className="h-3.5 w-3.5" aria-hidden="true" />
+            {t('caseForm.progressSaved')}
+          </span>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
         <div className="space-y-6 md:col-span-2">
