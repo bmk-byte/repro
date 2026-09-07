@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download } from 'lucide-react';
+import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download, FileSpreadsheet } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import { toast } from '../lib/toast';
 import RapidResponseCaseForm from './RapidResponseCaseForm';
+import BulkRapidResponseUpload from './forms/BulkRapidResponseUpload';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
 import RapidResponseDashboard from './RapidResponseDashboard';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
@@ -33,6 +34,7 @@ const RapidResponseCasesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingCase, setEditingCase] = useState<any>(null);
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -318,8 +320,14 @@ const RapidResponseCasesPage: React.FC = () => {
 
   const handleCreateCase = () => {
     setShowForm(true);
+    setShowBulkUpload(false);
     setEditingCase(null);
     setSelectedCase(null);
+  };
+
+  const handleBulkUploadDone = () => {
+    setShowBulkUpload(false);
+    fetchCases();
   };
 
   const handleEditCase = (caseData: any) => {
@@ -521,6 +529,23 @@ const RapidResponseCasesPage: React.FC = () => {
       );
     }
 
+    if (showBulkUpload) {
+      return (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-stone-900">{t('bulkUpload.heading')}</h2>
+            <button
+              onClick={() => setShowBulkUpload(false)}
+              className="text-sm font-medium text-stone-500 hover:text-stone-700"
+            >
+              {t('caseForm.actions.cancel')}
+            </button>
+          </div>
+          <BulkRapidResponseUpload onDone={handleBulkUploadDone} />
+        </div>
+      );
+    }
+
     if (view === 'dashboard') {
       return (
         <RapidResponseDashboard 
@@ -562,6 +587,13 @@ const RapidResponseCasesPage: React.FC = () => {
               >
                 <Download className="h-4 w-4" />
                 <span>{t('casesPage.toolbar.export')}</span>
+              </button>
+              <button
+                onClick={() => { setShowBulkUpload(true); setShowForm(false); setEditingCase(null); setSelectedCase(null); }}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-md hover:bg-stone-50"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span>{t('bulkUpload.toolbarButton')}</span>
               </button>
               <button
                 onClick={handleCreateCase}

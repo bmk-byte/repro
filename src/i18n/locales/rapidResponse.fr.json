@@ -122,6 +122,54 @@
       "submitterBody": "Merci d'avoir soumis « {{caseTitle}} ». Nos modérateurs l'examineront et vous serez informé(e) dès qu'une décision sera prise."
     }
   },
+  "bulkUpload": {
+    "toolbarButton": "Importation groupée",
+    "heading": "Importation groupée de dossiers de réponse rapide",
+    "description": "Téléchargez le modèle CSV, remplissez une ligne par dossier, puis importez-le ici. Les dossiers sont créés directement (sans étape d'examen), comme lors de l'ajout d'un dossier individuel.",
+    "instructions": {
+      "enums": "Niveau de priorité et Étape actuelle doivent utiliser exactement l'une des valeurs indiquées dans l'en-tête de colonne (des valeurs par défaut sont utilisées si le champ est laissé vide).",
+      "country": "Le pays doit correspondre au nom d'un pays déjà présent dans le système.",
+      "deadlinesAndDocument": "Les échéances clés et un document justificatif ne peuvent pas être définis via le tableur — ajoutez-les ensuite en modifiant le dossier.",
+      "maxRows": "Jusqu'à {{max}} dossiers peuvent être importés par fichier."
+    },
+    "downloadTemplate": "Télécharger le modèle CSV",
+    "uploadAriaLabel": "Importer un fichier CSV",
+    "dropzonePrompt": "Déposez votre fichier CSV complété ici ou cliquez pour parcourir",
+    "maxFileSize": "Taille maximale du fichier : 10 Mo",
+    "clear": "Effacer",
+    "validCount": "{{count}} valide(s)",
+    "invalidCount": "{{count}} à corriger",
+    "submitting": "Envoi en cours...",
+    "submitButton": "Créer {{count}} dossier(s)",
+    "table": {
+      "row": "Ligne",
+      "reference": "Référence",
+      "title": "Titre",
+      "status": "Statut",
+      "ok": "Prêt"
+    },
+    "results": {
+      "summary": "{{success}} dossier(s) créé(s). {{failed}} en échec.",
+      "failureLine": "Ligne {{row}} ({{title}}) : {{message}}",
+      "viewCases": "Voir les dossiers"
+    },
+    "toasts": {
+      "submitted": "{{count}} dossier(s) créé(s)"
+    },
+    "errors": {
+      "fileInvalidType": "Seuls les fichiers CSV sont acceptés.",
+      "fileRejectedGeneric": "Ce fichier n'a pas pu être accepté.",
+      "emptyFile": "Le fichier importé ne contient aucune ligne de données.",
+      "tooManyRows": "Ce fichier contient {{count}} lignes, ce qui dépasse la limite de {{max}} lignes. Veuillez le diviser en fichiers plus petits.",
+      "fieldRequired": "{{field}} est obligatoire",
+      "unknownCountry": "« {{country}} » ne correspond à aucun pays connu",
+      "invalidPriorityLevel": "« {{value}} » n'est pas un niveau de priorité valide",
+      "invalidStage": "« {{value}} » n'est pas une étape actuelle valide",
+      "invalidCategory": "« {{value}} » n'est pas une catégorie d'affaire reconnue",
+      "rateLimited": "Trop d'importations groupées. Veuillez réessayer plus tard.",
+      "submitFailed": "Échec de la création des dossiers"
+    }
+  },
   "casesPage": {
     "pageTitle": "Dossiers de réponse rapide",
     "pageSubtitle": "Suivez et gérez les dossiers d'intervention juridique urgents",
