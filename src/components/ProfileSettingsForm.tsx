@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Camera, Bell, Pencil } from 'lucide-react';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import { sanitizeURL, sanitizeText, sanitizePhone, safeFileExtension } from '../lib/sanitize';
 import { Badge, Spinner, Button, Input } from './ui';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
@@ -73,6 +74,8 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
         }
       } catch (error) {
         console.error('Error loading profile:', error);
+        reportError(error, { context: 'ProfileSettingsForm.loadProfile', category: 'DATA' });
+        toast.error(t('profileSettingsForm.loadFailed'));
       } finally {
         setLoading(false);
       }

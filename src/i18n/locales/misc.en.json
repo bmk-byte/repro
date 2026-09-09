@@ -12,6 +12,7 @@
     "error": "Error:"
   },
   "profileSettingsForm": {
+    "loadFailed": "Failed to load your profile. Some fields may be out of date — try refreshing the page.",
     "changePhoto": "Change profile photo",
     "clickToChangePhoto": "Click the camera icon to change your photo",
     "notificationPreferences": "Notification Preferences",

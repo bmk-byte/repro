@@ -4,6 +4,7 @@ import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle, Check
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
+import { reportError } from '../../lib/errorReporting';
 import MultiStepFormProgress from './MultiStepFormProgress';
 import { useFormDraft } from '../../hooks/useFormDraft';
 import { createSafeDisplayName, safeFileExtension } from '../../lib/sanitize';
@@ -515,6 +516,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             );
           } catch (err) {
             console.error('Failed to send moderator notification emails:', err);
+            // Best-effort background notification, sent after the case
+            // submission itself already succeeded — no toast here, since
+            // the submitter's action succeeded and a failed moderator
+            // notification isn't something they can act on. Still
+            // reported so a persistent notification-delivery gap is
+            // visible to operators instead of only ever appearing in logs.
+            reportError(err, { context: 'SubmitCaseForm.notifyModerators', category: 'RELIABILITY' });
           }
         })();
 

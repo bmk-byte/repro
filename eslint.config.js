@@ -5,7 +5,16 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  {
+    // Edge Functions run on Deno, not the browser/Node environment this
+    // config targets (globals.browser below doesn't know about `Deno`,
+    // and `npm:`/`https://deno.land/...` specifiers aren't resolvable by
+    // this project's TS setup). They have their own linter — `deno lint`
+    // — which is the correct tool for them; see docs/TESTING_STRATEGY.md
+    // for why Edge Functions are tested/linted separately from the rest
+    // of the app.
+    ignores: ['dist', 'supabase/functions/**'],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

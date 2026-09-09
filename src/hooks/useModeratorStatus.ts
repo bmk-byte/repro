@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 
 interface UseModeratorStatusProps {
   isConnected?: boolean;
@@ -32,6 +33,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
         setUser(data.user);
       } catch (err) {
         console.error('Failed to get initial user:', err);
+        reportError(err, { context: 'useModeratorStatus.getInitialUser', category: 'AUTHENTICATION' });
         setLoading(false);
       }
     };
@@ -85,6 +87,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
           }
 
           console.error('Error checking moderator status:', profileError);
+          reportError(profileError, { context: 'useModeratorStatus.checkModeratorStatus', category: 'SECURITY' });
           setError('Failed to verify your permissions. Please refresh the page.');
           setIsModerator(false);
           setIsAdmin(false);
@@ -107,6 +110,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
         }
 
         console.error('Error checking moderator status:', err);
+        reportError(err, { context: 'useModeratorStatus.checkModeratorStatus.catch', category: 'SECURITY' });
         setError('Failed to verify your permissions. Please refresh the page.');
         setIsModerator(false);
         setIsAdmin(false);

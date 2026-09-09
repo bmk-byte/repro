@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Needed so the lint-diff step below can `git diff` against the
+          # base commit/branch rather than only the single checked-out commit.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -29,11 +33,34 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Informational for now: the existing codebase has a large pre-existing
-      # lint backlog (unused vars, exhaustive-deps warnings) across most
-      # components. Fixing that backlog is tracked separately — this step
-      # reports it without blocking merges until that cleanup lands, at
-      # which point `continue-on-error` should be removed.
-      - name: Lint (non-blocking — see comment above)
+      # Blocking, but only for NEW lint errors on lines this push/PR
+      # actually changed — see scripts/lint-diff.mjs and docs/MONITORING.md
+      # "Lint pathway" for why line-scoping (not just file-scoping) matters
+      # here: this repo has a real, measured 492-error pre-existing
+      # backlog, and simply linting whole changed files would fail on that
+      # backlog every time an unrelated change touches a file that already
+      # had debt in it.
+      - name: Lint changed lines (blocking)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "No usable base commit (e.g. first push to a new branch) — skipping diff-scoped lint for this run."
+            exit 0
+          fi
+
+          node scripts/lint-diff.mjs "$BASE_SHA"
+
+      # Informational for the rest of the codebase: the existing repo has a
+      # large pre-existing lint backlog (492 errors / 138 warnings as
+      # measured when this comment was written — see
+      # docs/MONITORING.md). Fixing that backlog is tracked separately;
+      # this step reports it without blocking merges until that cleanup
+      # lands, at which point `continue-on-error` should be removed.
+      - name: Lint full repo (non-blocking — see comment above)
         run: npm run lint
         continue-on-error: true

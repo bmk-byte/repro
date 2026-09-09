@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import { toast } from '../lib/toast';
 import { reportError } from '../lib/errorReporting';
+import { fetchCountries as fetchCountriesData } from '../lib/data/countries';
 import RapidResponseCaseForm from './RapidResponseCaseForm';
 import BulkRapidResponseUpload from './forms/BulkRapidResponseUpload';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
@@ -103,7 +104,7 @@ const RapidResponseCasesPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching current user:', err);
-      reportError(err, { context: 'fetchCurrentUser' });
+      reportError(err, { context: 'fetchCurrentUser', category: 'DATA' });
       toast.error(t('casesPage.errors.failedToLoadUserProfile'));
     }
   };
@@ -129,7 +130,7 @@ const RapidResponseCasesPage: React.FC = () => {
       setTeamMembers(data || []);
     } catch (err) {
       console.error('Error fetching team members:', err);
-      reportError(err, { context: 'fetchTeamMembers' });
+      reportError(err, { context: 'fetchTeamMembers', category: 'DATA' });
       toast.error(t('casesPage.errors.failedToLoadTeamMembers'));
     }
   };
@@ -149,23 +150,18 @@ const RapidResponseCasesPage: React.FC = () => {
       setPartnerOrganizations(partners.sort());
     } catch (err) {
       console.error('Error fetching partner organizations:', err);
-      reportError(err, { context: 'fetchPartnerOrganizations' });
+      reportError(err, { context: 'fetchPartnerOrganizations', category: 'DATA' });
       toast.error(t('casesPage.errors.failedToLoadPartnerOrganizations'));
     }
   };
 
   const fetchCountries = async () => {
     try {
-      const { data, error } = await supabase
-        .from('countries')
-        .select('id, name')
-        .order('name');
-
+      const { data, error } = await fetchCountriesData();
       if (error) throw error;
-      setCountries(data || []);
+      setCountries(data ?? []);
     } catch (err) {
       console.error('Error fetching countries:', err);
-      reportError(err, { context: 'fetchCountries' });
       toast.error(t('casesPage.errors.failedToLoadCountries'));
     }
   };
@@ -320,7 +316,7 @@ const RapidResponseCasesPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching rapid response cases:', err);
-      reportError(err, { context: 'fetchRapidResponseCases' });
+      reportError(err, { context: 'fetchRapidResponseCases', category: 'DATA' });
       setError(t('casesPage.errors.failedToLoadCases'));
       toast.error(t('casesPage.errors.failedToLoadCases'));
     } finally {

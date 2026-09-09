@@ -12,6 +12,7 @@
     "error": "Erreur :"
   },
   "profileSettingsForm": {
+    "loadFailed": "Échec du chargement de votre profil. Certains champs peuvent être obsolètes — essayez d'actualiser la page.",
     "changePhoto": "Changer la photo de profil",
     "clickToChangePhoto": "Cliquez sur l'icône de l'appareil photo pour changer votre photo",
     "notificationPreferences": "Préférences de notification",

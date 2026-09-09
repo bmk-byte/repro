@@ -7,8 +7,9 @@ import CaseCard from './CaseCard';
 import CaseDetails from './CaseDetails';
 import EditCaseModal from './EditCaseModal';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
-import { sanitizeSearchTerm } from '../lib/sanitize';
 import { RESTRICTED_ORGANIZATIONS } from '../constants/organizations';
+import { fetchCountries } from '../lib/data/countries';
+import { fetchLitigationCases, fetchCaseFilterOptions } from '../lib/data/cases';
 import { Button, Select, Badge, EmptyState, SkeletonCard } from './ui';
 
 const devLog = (...args: unknown[]) => {
@@ -140,127 +141,48 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   }, []);
 
   const fetchFilterOptions = async () => {
-    try {
-      // Fetch countries
-      const { data: countriesData, error: countriesError } = await supabase
-        .from('countries')
-        .select('id, name')
-        .order('name');
-      
-      if (countriesError) throw countriesError;
-      setCountries(countriesData || []);
+    const [{ data: countriesData, error: countriesError }, { data: options, error: optionsError }] = await Promise.all([
+      fetchCountries(),
+      fetchCaseFilterOptions(),
+    ]);
 
-      // Fetch case categories (only from litigation cases)
-      const { data: casesData, error: casesError } = await supabase
-        .from('cases')
-        .select('case_categories')
-        .eq('case_type', 'litigation')
-        .not('case_categories', 'is', null);
-      
-      if (casesError) throw casesError;
-      
-      // Flatten and get unique categories
-      const allCategories = casesData?.flatMap(c => c.case_categories || []) || [];
-      const uniqueCategories = Array.from(new Set(allCategories));
-      setCategories(uniqueCategories);
-
-      // Fetch partner organizations (only from litigation cases)
-      const { data: partnersData, error: partnersError } = await supabase
-        .from('cases')
-        .select('partner')
-        .eq('case_type', 'litigation')
-        .not('partner', 'is', null);
-        
-      if (partnersError) throw partnersError;
-      
-      // Get unique partners
-      const allPartners = partnersData?.map(p => p.partner).filter(Boolean) || [];
-      const uniquePartners = Array.from(new Set(allPartners));
-      setPartners(uniquePartners);
-    } catch (error) {
-      console.error('Error fetching filter options:', error);
+    if (countriesError || optionsError) {
+      console.error('Error fetching filter options:', countriesError ?? optionsError);
       toast.error(t('common.failedToLoadFilterOptions'));
+      return;
     }
+
+    setCountries(countriesData ?? []);
+    setCategories(options?.categories ?? []);
+    setPartners(options?.partners ?? []);
   };
 
   const fetchCases = async () => {
-    try {
-      setLoading(true);
-      setFetchError(null);
+    setLoading(true);
+    setFetchError(null);
 
-      let query = supabase
-        .from('cases')
-        .select(`
-          id,
-          case_filed,
-          created_at,
-          status,
-          case_type,
-          priority_level,
-          rapid_response_stage,
-          case_categories,
-          partner,
-          countries (name),
-          user_id
-        `, { count: 'exact' })
-        .eq('case_type', 'litigation')
-        .eq('moderation_status', 'approved');
+    // Access control is enforced by RLS policies at the database level.
+    // No client-side user_id filtering needed — RLS already restricts
+    // regular users and restricted-org moderators to their own cases,
+    // while other moderators and afyanahaki moderators see all cases.
+    const PAGE_SIZE = 9; // Number of cases per page
+    const { data, count, error } = await fetchLitigationCases(filters, searchTerm, currentPage, PAGE_SIZE);
 
-      // Access control is enforced by RLS policies at the database level.
-      // No client-side user_id filtering needed — RLS already restricts
-      // regular users and restricted-org moderators to their own cases,
-      // while other moderators and afyanahaki moderators see all cases.
-
-      // Apply filters
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.type) {
-        query = query.eq('case_type', filters.type);
-      }
-      if (filters.country) {
-        query = query.eq('country_id', filters.country);
-      }
-      if (filters.category) {
-        query = query.contains('case_categories', [filters.category]);
-      }
-      if (filters.partner) {
-        query = query.eq('partner', filters.partner);
-      }
-
-      // Apply search term
-      if (searchTerm) {
-        const sanitized = sanitizeSearchTerm(searchTerm);
-        query = query.or(`case_filed.ilike.%${sanitized}%,case_summary.ilike.%${sanitized}%`);
-      }
-
-      // Apply pagination
-      const PAGE_SIZE = 9; // Number of cases per page
-      const from = (currentPage - 1) * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      query = query
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      const { data, count, error } = await query;
-
-      if (error) throw error;
-
-      setCases(data || []);
-
-      // Calculate total pages
-      if (count !== null) {
-        setTotalCases(count);
-        setTotalPages(Math.ceil(count / PAGE_SIZE));
-      }
-    } catch (error) {
+    if (error) {
       console.error('Error fetching cases:', error);
       toast.error(t('cases.failedToLoad'));
       setFetchError(t('cases.unableToLoad'));
-    } finally {
       setLoading(false);
+      return;
     }
+
+    setCases(data ?? []);
+
+    if (count !== null) {
+      setTotalCases(count);
+      setTotalPages(Math.ceil(count / PAGE_SIZE));
+    }
+    setLoading(false);
   };
 
   const handleEditCase = (caseData: any) => {

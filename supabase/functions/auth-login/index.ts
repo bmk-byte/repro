@@ -6,6 +6,9 @@
 // instead of the SDK's signInWithPassword; on success it hydrates the
 // session locally via supabase.auth.setSession().
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { checkRateLimitsFailOpen } from '../_shared/rateLimit.ts';
+import { fetchWithTimeout, UpstreamTimeoutError } from '../_shared/fetchWithTimeout.ts';
+import { reportEdgeFunctionError } from '../_shared/sentry.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -58,45 +61,56 @@ Deno.serve(async (req) => {
 
   // Fail OPEN on limiter unavailability, same convention as send-email and
   // the rate-limit migration comments — a limiter outage must never lock
-  // everyone out of login. Only an explicit `false` result blocks.
-  try {
-    const [emailCheck, ipCheck] = await Promise.all([
-      adminClient.rpc('check_rate_limit', {
-        p_key: `login:${email}`,
-        p_max_count: EMAIL_MAX,
-        p_window_seconds: EMAIL_WINDOW_SECONDS,
-      }),
-      adminClient.rpc('check_rate_limit', {
-        p_key: `login-ip:${ip}`,
-        p_max_count: IP_MAX,
-        p_window_seconds: IP_WINDOW_SECONDS,
-      }),
-    ]);
+  // everyone out of login. Only an explicit `false` result blocks. Every
+  // fail-open path is logged (RATE_LIMITER_FAIL_OPEN) so a persistent
+  // limiter outage is discoverable in Supabase Function Logs instead of
+  // being silently invisible.
+  const { blocked } = await checkRateLimitsFailOpen(adminClient, 'auth-login', [
+    { key: `login:${email}`, maxCount: EMAIL_MAX, windowSeconds: EMAIL_WINDOW_SECONDS },
+    { key: `login-ip:${ip}`, maxCount: IP_MAX, windowSeconds: IP_WINDOW_SECONDS },
+  ]);
 
-    if ((!emailCheck.error && emailCheck.data === false) || (!ipCheck.error && ipCheck.data === false)) {
-      return errorResponse('Too many login attempts. Please try again later.', 429, 'rate_limited');
-    }
-  } catch (err) {
-    console.error('auth-login rate limit check failed, failing open:', err);
+  if (blocked) {
+    return errorResponse('Too many login attempts. Please try again later.', 429, 'rate_limited');
   }
 
   // Forward straight to GoTrue's own token endpoint and pass its response
   // through as-is (status included) — the client already knows how to parse
   // this shape (access_token/refresh_token/user on success, msg/error_description
   // on failure), it's exactly what supabase-js itself would have received.
-  const tokenRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-    method: 'POST',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  //
+  // A timeout (not a retry: a timed-out password grant may have already
+  // succeeded server-side, so retrying is not safe here) fails gracefully
+  // with a message the client already knows how to show via
+  // proxyErrorMessage().
+  try {
+    const tokenRes = await fetchWithTimeout(
+      `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+      {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      },
+      10_000
+    );
 
-  const tokenData = await tokenRes.json();
+    const tokenData = await tokenRes.json();
 
-  return new Response(JSON.stringify(tokenData), {
-    status: tokenRes.status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
+    return new Response(JSON.stringify(tokenData), {
+      status: tokenRes.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (err) {
+    if (err instanceof UpstreamTimeoutError) {
+      console.error('auth-login: upstream GoTrue request timed out');
+      await reportEdgeFunctionError(err, { category: 'RELIABILITY', functionName: 'auth-login', extra: { reason: 'upstream_timeout' } });
+      return errorResponse('The sign-in request took too long. Please try again.', 504, 'upstream_timeout');
+    }
+    console.error('auth-login: upstream GoTrue request failed:', err);
+    await reportEdgeFunctionError(err, { category: 'RELIABILITY', functionName: 'auth-login', extra: { reason: 'upstream_error' } });
+    return errorResponse('Sign-in is temporarily unavailable. Please try again shortly.', 502, 'upstream_error');
+  }
 });

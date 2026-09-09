@@ -6,55 +6,19 @@ import { Download, Upload, FileSpreadsheet, CircleCheck as CheckCircle, CircleAl
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
 import { reportError } from '../../lib/errorReporting';
-import { sanitizeText } from '../../lib/sanitize';
+import { fetchCountries, toCountryIdByName, type Country } from '../../lib/data/countries';
 import { Button, Card } from '../ui';
-import { CASE_CATEGORIES } from './SubmitCaseForm';
+import {
+  COLUMNS,
+  MAX_ROWS,
+  mapStageToStatus,
+  validateRapidResponseRow,
+  type ParsedRow,
+} from '../../lib/validation/bulkRapidResponseUpload';
 
 interface BulkRapidResponseUploadProps {
   onDone?: () => void;
 }
-
-// Kept in sync with RapidResponseCaseForm.tsx's own enums (PRIORITY_LEVELS,
-// the rapid_response_stage <option> values, and mapStageToStatus).
-const PRIORITY_LEVELS = ['Urgent', 'High', 'Medium', 'Low'];
-const STAGE_VALUES = ['intake', 'review', 'action', 'resolution'];
-
-const mapStageToStatus = (stage: string): string => {
-  switch (stage) {
-    case 'intake': return 'pending';
-    case 'review': return 'in_progress';
-    case 'action': return 'in_progress';
-    case 'resolution': return 'completed';
-    default: return 'pending';
-  }
-};
-
-const MAX_ROWS = 200;
-
-interface ColumnDef {
-  key: string;
-  header: string;
-  required: boolean;
-  example: string;
-}
-
-const COLUMNS: ColumnDef[] = [
-  { key: 'case_reference', header: 'Case Reference', required: true, example: 'RR-2025-001' },
-  { key: 'case_filed', header: 'Case Title', required: true, example: 'Doe v. Ministry of Health' },
-  { key: 'country', header: 'Country', required: true, example: 'Kenya' },
-  { key: 'case_category', header: `Case Category (must match: ${CASE_CATEGORIES.join(', ')})`, required: true, example: 'Maternal Health and Mortality' },
-  { key: 'case_summary', header: 'Case Summary', required: true, example: 'Brief summary of the case.' },
-  { key: 'priority_level', header: `Priority Level (${PRIORITY_LEVELS.join('/')})`, required: false, example: 'Medium' },
-  { key: 'rapid_response_stage', header: `Current Stage (${STAGE_VALUES.join('/')})`, required: false, example: 'intake' },
-  { key: 'nature_of_case', header: 'Nature of Case', required: true, example: 'Constitutional challenge' },
-  { key: 'action_taken', header: 'Action Taken', required: true, example: 'Petition filed in High Court' },
-  { key: 'action_timeframe', header: 'Action Timeframe', required: true, example: 'Q1 2025' },
-  { key: 'next_steps', header: 'Next Steps', required: true, example: 'Awaiting hearing date' },
-  { key: 'partner', header: 'Partner Organization', required: false, example: 'Example Partner Org' },
-  { key: 'client_name', header: 'Client Name', required: false, example: '' },
-  { key: 'client_email', header: 'Client Email', required: false, example: '' },
-  { key: 'client_phone', header: 'Client Phone', required: false, example: '' },
-];
 
 const escapeCSV = (val: unknown): string => {
   const str = val == null ? '' : String(val);
@@ -62,12 +26,6 @@ const escapeCSV = (val: unknown): string => {
     ? `"${str.replace(/"/g, '""')}"`
     : str;
 };
-
-interface ParsedRow {
-  rowNumber: number;
-  data: Record<string, any>;
-  errors: string[];
-}
 
 interface SubmitResults {
   successCount: number;
@@ -82,32 +40,23 @@ interface SubmitResults {
 // editing the case.
 const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDone }) => {
   const { t } = useTranslation('rapidResponse');
-  const [countries, setCountries] = useState<{ id: string; name: string }[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [rows, setRows] = useState<ParsedRow[] | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [results, setResults] = useState<SubmitResults | null>(null);
 
   useEffect(() => {
-    supabase
-      .from('countries')
-      .select('id, name')
-      .order('name')
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Error fetching countries:', error);
-          toast.error(t('caseForm.errors.failedToLoadCountries'));
-          return;
-        }
-        setCountries(data || []);
-      });
+    fetchCountries().then(({ data, error }) => {
+      if (error) {
+        toast.error(t('caseForm.errors.failedToLoadCountries'));
+        return;
+      }
+      setCountries(data ?? []);
+    });
   }, [t]);
 
-  const countryIdByName = useMemo(() => {
-    const map = new Map<string, string>();
-    countries.forEach(c => map.set(c.name.trim().toLowerCase(), c.id));
-    return map;
-  }, [countries]);
+  const countryIdByName = useMemo(() => toCountryIdByName(countries), [countries]);
 
   const downloadTemplate = () => {
     const header = COLUMNS.map(c => escapeCSV(c.header)).join(',');
@@ -122,53 +71,8 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
     URL.revokeObjectURL(url);
   };
 
-  const validateRow = (rawRow: Record<string, string>, rowNumber: number): ParsedRow => {
-    const errors: string[] = [];
-    const data: Record<string, any> = {};
-
-    for (const col of COLUMNS) {
-      const value = sanitizeText((rawRow[col.header] ?? '').toString());
-      if (col.required && !value) {
-        errors.push(t('bulkUpload.errors.fieldRequired', { field: col.header }));
-      }
-      data[col.key] = value;
-    }
-
-    if (data.country) {
-      const countryId = countryIdByName.get(String(data.country).toLowerCase());
-      if (!countryId) {
-        errors.push(t('bulkUpload.errors.unknownCountry', { country: data.country }));
-      } else {
-        data.country_id = countryId;
-      }
-    }
-
-    const matchEnum = (value: string, allowed: string[]): string | null =>
-      allowed.find(a => a.toLowerCase() === value.trim().toLowerCase()) ?? null;
-
-    data.priority_level = data.priority_level ? matchEnum(data.priority_level, PRIORITY_LEVELS) : 'Medium';
-    if (!data.priority_level) {
-      errors.push(t('bulkUpload.errors.invalidPriorityLevel', { value: rawRow[COLUMNS[5].header] }));
-      data.priority_level = 'Medium';
-    }
-
-    data.rapid_response_stage = data.rapid_response_stage ? matchEnum(data.rapid_response_stage, STAGE_VALUES) : 'intake';
-    if (!data.rapid_response_stage) {
-      errors.push(t('bulkUpload.errors.invalidStage', { value: rawRow[COLUMNS[6].header] }));
-      data.rapid_response_stage = 'intake';
-    }
-
-    if (data.case_category) {
-      const matched = CASE_CATEGORIES.find(c => c.toLowerCase() === String(data.case_category).toLowerCase());
-      if (!matched) {
-        errors.push(t('bulkUpload.errors.invalidCategory', { value: data.case_category }));
-      } else {
-        data.case_category = matched;
-      }
-    }
-
-    return { rowNumber, data, errors };
-  };
+  const validateRow = (rawRow: Record<string, string>, rowNumber: number): ParsedRow =>
+    validateRapidResponseRow(rawRow, rowNumber, countryIdByName, t);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -273,7 +177,7 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
 
         if (error) {
           console.error(`Bulk rapid response upload row ${row.rowNumber} failed:`, error);
-          reportError(error, { context: 'bulkRapidResponseUpload.row', rowNumber: row.rowNumber });
+          reportError(error, { context: 'bulkRapidResponseUpload.row', rowNumber: row.rowNumber, category: 'DATA' });
           failures.push({
             rowNumber: row.rowNumber,
             title: d.case_filed,
@@ -293,7 +197,7 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
       }
     } catch (error: any) {
       console.error('Bulk rapid response upload error:', error);
-      reportError(error, { context: 'bulkRapidResponseUpload.submit' });
+      reportError(error, { context: 'bulkRapidResponseUpload.submit', category: 'DATA' });
       toast.error(t('bulkUpload.errors.submitFailed'));
     } finally {
       setSubmitting(false);

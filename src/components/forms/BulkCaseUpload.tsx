@@ -6,61 +6,13 @@ import { Download, Upload, FileSpreadsheet, CircleCheck as CheckCircle, CircleAl
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
 import { reportError } from '../../lib/errorReporting';
-import { sanitizeArray, sanitizeText } from '../../lib/sanitize';
+import { fetchCountries, toCountryIdByName, type Country } from '../../lib/data/countries';
 import { Button, Card } from '../ui';
-import { CASE_CATEGORIES } from './SubmitCaseForm';
+import { COLUMNS, MAX_ROWS, validateCaseRow, type ParsedRow } from '../../lib/validation/bulkCaseUpload';
 
 interface BulkCaseUploadProps {
   onDone?: () => void;
 }
-
-// Accepted enum values, kept in sync with the CHECK constraints on
-// pending_cases (supabase/migrations/20250630113200_mute_temple.sql) and the
-// <option> values in SubmitCaseForm.tsx's own selects.
-const TIMELINE_STATUS_VALUES = ['filed', 'ongoing', 'resolved', 'dismissed'];
-const JUDICIAL_BODY_TYPE_VALUES = ['National Court', 'Regional Court'];
-const LEGAL_FRAMEWORK_TYPE_VALUES = ['Domestic Law', 'International Law', 'Both'];
-
-const MAX_ROWS = 200;
-
-// Column definition drives both the downloadable template and the parser —
-// `header` is the exact CSV column label used in both directions, so a
-// partner who doesn't rename headers round-trips cleanly.
-interface ColumnDef {
-  key: string;
-  header: string;
-  required: boolean;
-  multi?: boolean;
-  example: string;
-}
-
-const COLUMNS: ColumnDef[] = [
-  { key: 'title', header: 'Case Title', required: true, example: 'Doe v. Ministry of Health' },
-  { key: 'summary', header: 'Case Summary', required: true, example: 'Brief summary of the case.' },
-  { key: 'country', header: 'Country', required: true, example: 'Kenya' },
-  { key: 'tracking_period', header: 'Tracking Period', required: true, example: '2024-2025' },
-  { key: 'programme', header: 'Programme', required: true, example: 'Reproductive Rights Litigation' },
-  { key: 'partner', header: 'Partner', required: true, example: 'Example Partner Org' },
-  { key: 'nature_of_case', header: 'Nature of Case', required: true, example: 'Constitutional challenge' },
-  { key: 'action_taken', header: 'Action Taken', required: true, example: 'Petition filed in High Court' },
-  { key: 'action_timeframe', header: 'Action Timeframe', required: true, example: 'Q1 2025' },
-  { key: 'next_steps', header: 'Next Steps', required: true, example: 'Awaiting hearing date' },
-  { key: 'court', header: 'Court', required: true, example: 'High Court' },
-  { key: 'timeline_status', header: 'Timeline Status (filed/ongoing/resolved/dismissed)', required: true, example: 'ongoing' },
-  { key: 'litigants', header: 'Litigants (semicolon-separated)', required: true, multi: true, example: 'Jane Doe' },
-  { key: 'defending_institutions', header: 'Defending Institutions (semicolon-separated)', required: true, multi: true, example: 'Ministry of Health' },
-  { key: 'case_outcome', header: 'Case Outcome', required: false, example: '' },
-  { key: 'judicial_body_type', header: 'Judicial Body Type (National Court/Regional Court)', required: true, example: 'National Court' },
-  { key: 'judicial_body', header: 'Judicial Body', required: true, example: 'Supreme Court of Kenya' },
-  { key: 'regional_appeals', header: 'Regional Appeals (true/false)', required: false, example: 'false' },
-  { key: 'regional_bodies', header: 'Regional Bodies (semicolon-separated)', required: false, multi: true, example: '' },
-  { key: 'legal_framework_type', header: 'Legal Framework Type (Domestic Law/International Law/Both)', required: true, example: 'Domestic Law' },
-  { key: 'domestic_laws', header: 'Domestic Laws (semicolon-separated)', required: false, multi: true, example: 'Constitution Article 43' },
-  { key: 'international_laws', header: 'International Laws (semicolon-separated)', required: false, multi: true, example: '' },
-  { key: 'protocols', header: 'Protocols (semicolon-separated)', required: false, multi: true, example: '' },
-  { key: 'case_impact', header: 'Case Impact', required: true, example: 'Sets precedent for access to care.' },
-  { key: 'case_categories', header: `Case Categories (semicolon-separated; must match: ${CASE_CATEGORIES.join(', ')})`, required: true, multi: true, example: 'Maternal Health and Mortality' },
-];
 
 const escapeCSV = (val: unknown): string => {
   const str = val == null ? '' : String(val);
@@ -69,12 +21,6 @@ const escapeCSV = (val: unknown): string => {
     : str;
 };
 
-interface ParsedRow {
-  rowNumber: number;
-  data: Record<string, any>;
-  errors: string[];
-}
-
 interface SubmitResults {
   successCount: number;
   failures: { rowNumber: number; title: string; message: string }[];
@@ -82,32 +28,23 @@ interface SubmitResults {
 
 const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
   const { t } = useTranslation('forms');
-  const [countries, setCountries] = useState<{ id: string; name: string }[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [rows, setRows] = useState<ParsedRow[] | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [results, setResults] = useState<SubmitResults | null>(null);
 
   useEffect(() => {
-    supabase
-      .from('countries')
-      .select('id, name')
-      .order('name')
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Error fetching countries:', error);
-          toast.error(t('bulkCaseUpload.errors.countriesLoadError'));
-          return;
-        }
-        setCountries(data || []);
-      });
+    fetchCountries().then(({ data, error }) => {
+      if (error) {
+        toast.error(t('bulkCaseUpload.errors.countriesLoadError'));
+        return;
+      }
+      setCountries(data ?? []);
+    });
   }, [t]);
 
-  const countryIdByName = useMemo(() => {
-    const map = new Map<string, string>();
-    countries.forEach(c => map.set(c.name.trim().toLowerCase(), c.id));
-    return map;
-  }, [countries]);
+  const countryIdByName = useMemo(() => toCountryIdByName(countries), [countries]);
 
   const downloadTemplate = () => {
     const header = COLUMNS.map(c => escapeCSV(c.header)).join(',');
@@ -122,90 +59,8 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
     URL.revokeObjectURL(url);
   };
 
-  const validateRow = (rawRow: Record<string, string>, rowNumber: number): ParsedRow => {
-    const errors: string[] = [];
-    const data: Record<string, any> = {};
-
-    for (const col of COLUMNS) {
-      const raw = (rawRow[col.header] ?? '').toString();
-
-      if (col.key === 'regional_appeals') {
-        data.regional_appeals = /^(true|yes|1)$/i.test(raw.trim());
-        continue;
-      }
-
-      if (col.multi) {
-        const list = sanitizeArray(raw.split(';'));
-        if (col.required && list.length === 0) {
-          errors.push(t('bulkCaseUpload.errors.fieldRequired', { field: col.header }));
-        }
-        data[col.key] = list;
-        continue;
-      }
-
-      const value = sanitizeText(raw);
-      if (col.required && !value) {
-        errors.push(t('bulkCaseUpload.errors.fieldRequired', { field: col.header }));
-      }
-      data[col.key] = value;
-    }
-
-    // Country -> country_id lookup
-    if (data.country) {
-      const countryId = countryIdByName.get(String(data.country).toLowerCase());
-      if (!countryId) {
-        errors.push(t('bulkCaseUpload.errors.unknownCountry', { country: data.country }));
-      } else {
-        data.country_id = countryId;
-      }
-    }
-
-    // Enum normalization/validation
-    const matchEnum = (value: string, allowed: string[]): string | null =>
-      allowed.find(a => a.toLowerCase() === value.trim().toLowerCase()) ?? null;
-
-    if (data.timeline_status) {
-      const matched = matchEnum(data.timeline_status, TIMELINE_STATUS_VALUES);
-      if (!matched) {
-        errors.push(t('bulkCaseUpload.errors.invalidTimelineStatus', { value: data.timeline_status }));
-      } else {
-        data.timeline_status = matched;
-      }
-    }
-
-    if (data.judicial_body_type) {
-      const matched = matchEnum(data.judicial_body_type, JUDICIAL_BODY_TYPE_VALUES);
-      if (!matched) {
-        errors.push(t('bulkCaseUpload.errors.invalidJudicialBodyType', { value: data.judicial_body_type }));
-      } else {
-        data.judicial_body_type = matched;
-      }
-    }
-
-    if (data.legal_framework_type) {
-      const matched = matchEnum(data.legal_framework_type, LEGAL_FRAMEWORK_TYPE_VALUES);
-      if (!matched) {
-        errors.push(t('bulkCaseUpload.errors.invalidLegalFrameworkType', { value: data.legal_framework_type }));
-      } else {
-        data.legal_framework_type = matched;
-      }
-    }
-
-    if (Array.isArray(data.case_categories) && data.case_categories.length > 0) {
-      const normalized: string[] = [];
-      for (const cat of data.case_categories as string[]) {
-        const matched = CASE_CATEGORIES.find(c => c.toLowerCase() === cat.toLowerCase());
-        if (!matched) {
-          errors.push(t('bulkCaseUpload.errors.invalidCategory', { value: cat }));
-        } else {
-          normalized.push(matched);
-        }
-      }
-      data.case_categories = normalized;
-    }
-
-    return { rowNumber, data, errors };
-  };
+  const validateRow = (rawRow: Record<string, string>, rowNumber: number): ParsedRow =>
+    validateCaseRow(rawRow, rowNumber, countryIdByName, t);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -318,7 +173,7 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
 
         if (error) {
           console.error(`Bulk case upload row ${row.rowNumber} failed:`, error);
-          reportError(error, { context: 'bulkCaseUpload.row', rowNumber: row.rowNumber });
+          reportError(error, { context: 'bulkCaseUpload.row', rowNumber: row.rowNumber, category: 'DATA' });
           failures.push({
             rowNumber: row.rowNumber,
             title: d.title,
@@ -338,7 +193,7 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
       }
     } catch (error: any) {
       console.error('Bulk case upload error:', error);
-      reportError(error, { context: 'bulkCaseUpload.submit' });
+      reportError(error, { context: 'bulkCaseUpload.submit', category: 'DATA' });
       toast.error(t('bulkCaseUpload.errors.submitFailed'));
     } finally {
       setSubmitting(false);

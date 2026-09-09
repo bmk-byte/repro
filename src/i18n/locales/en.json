@@ -184,6 +184,7 @@
     "signInFailed": "Sign in failed. Please try again.",
     "rateLimitedSignup": "Too many sign-up attempts for this email. Please try again in an hour.",
     "rateLimitedLogin": "Too many sign-in attempts. Please try again in a few minutes.",
+    "requestTimedOut": "This is taking longer than expected. Please check your connection and try again.",
     "invalidCredentials": "The email or password you entered is incorrect",
     "emailRegisteredListed": "This email is registered for \"{{org}}\". Please select that organization from the dropdown, or choose \"Other\" to enter a different one.",
     "emailRegisteredOther": "This email is registered for \"{{org}}\". Please choose \"Other\" in the dropdown and enter \"{{org}}\" as your organization.",

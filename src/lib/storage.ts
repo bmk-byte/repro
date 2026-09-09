@@ -41,6 +41,7 @@ export async function getFreshFileUrl(fileUrl: string): Promise<string> {
     reportError(error ?? new Error('createSignedUrl returned no signedUrl'), {
       bucket: parsed.bucket,
       path: parsed.path,
+      category: 'RELIABILITY',
     });
     throw error ?? new Error('Failed to refresh file URL');
   }

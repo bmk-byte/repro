@@ -184,6 +184,7 @@
     "signInFailed": "Échec de la connexion. Veuillez réessayer.",
     "rateLimitedSignup": "Trop de tentatives d'inscription pour cet e-mail. Veuillez réessayer dans une heure.",
     "rateLimitedLogin": "Trop de tentatives de connexion. Veuillez réessayer dans quelques minutes.",
+    "requestTimedOut": "Cela prend plus de temps que prévu. Veuillez vérifier votre connexion et réessayer.",
     "invalidCredentials": "L'e-mail ou le mot de passe saisi est incorrect",
     "emailRegisteredListed": "Cet e-mail est enregistré pour « {{org}} ». Veuillez sélectionner cette organisation dans la liste, ou choisir « Autre » pour en saisir une différente.",
     "emailRegisteredOther": "Cet e-mail est enregistré pour « {{org}} ». Veuillez choisir « Autre » dans la liste et saisir « {{org}} » comme organisation.",

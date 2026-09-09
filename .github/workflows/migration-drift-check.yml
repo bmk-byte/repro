@@ -1,0 +1,44 @@
+name: Migration Drift Check
+
+# Detects drift between this repository's supabase/migrations/ and the
+# linked production project's migration-history table. See
+# docs/DATABASE_GOVERNANCE.md for the full runbook.
+#
+# Deliberately NOT run on every push to master: a migration merged to
+# master is expected to sit "local-only, not yet applied" until someone
+# deliberately runs `supabase db push` as a separate, reviewed deploy step
+# (this repository does not auto-deploy schema changes). Gating every push
+# on immediate 1:1 remote sync would produce constant false alarms. Instead
+# this runs on a schedule (to catch drift introduced by out-of-band changes,
+# e.g. a direct Studio SQL edit) and on demand.
+#
+# This workflow only ever reads migration history. It never runs
+# `supabase db push` or `supabase migration repair` — see
+# scripts/check-migration-drift.mjs for why.
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily, 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    # Skip entirely (rather than fail) when the required secrets aren't
+    # configured yet, so adding this workflow file doesn't immediately
+    # break CI for a fork or a repo that hasn't set up the secrets — see
+    # docs/DATABASE_GOVERNANCE.md for what to configure and why.
+    if: ${{ vars.MIGRATION_DRIFT_CHECK_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check migration drift
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: node scripts/check-migration-drift.mjs

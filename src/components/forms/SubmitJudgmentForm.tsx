@@ -4,6 +4,7 @@ import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle } from
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { supabase, queryWithRetry, handleSupabaseError, verifyTableExists } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
+import { reportError } from '../../lib/errorReporting';
 import MultiStepFormProgress from './MultiStepFormProgress';
 import { useFormDraft } from '../../hooks/useFormDraft';
 import { createSafeDisplayName, safeFileExtension } from '../../lib/sanitize';
@@ -157,6 +158,8 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       }
     } catch (error) {
       console.error('Error verifying pending_judgments table:', error);
+      reportError(error, { context: 'SubmitJudgmentForm.verifyPendingJudgmentsTable', category: 'DATA' });
+      toast.error(t('submitJudgmentForm.toasts.dbConfigIssue'));
     }
   };
 
@@ -532,6 +535,11 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
             );
           } catch (err) {
             console.error('Failed to send moderator notification emails:', err);
+            // Best-effort background notification after a successful
+            // submission — no toast (nothing for the submitter to act
+            // on), but reported so a persistent gap is visible to
+            // operators.
+            reportError(err, { context: 'SubmitJudgmentForm.notifyModerators', category: 'RELIABILITY' });
           }
         })();
 

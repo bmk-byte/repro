@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { supabase, supabaseUrl, supabaseAnonKey, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff } from 'lucide-react';
 import { PARTNER_ORGANIZATIONS, OTHER_ORGANIZATION_VALUE } from '../constants/organizations';
 import { Input, Select, Button, Card, PasswordStrengthMeter } from './ui';
@@ -29,18 +30,45 @@ interface ValidationState {
 // would have returned.
 const AUTH_FUNCTIONS_URL = `${supabaseUrl}/functions/v1`;
 
+// The auth-login/auth-signup edge functions have their own internal
+// timeout around the GoTrue call (see supabase/functions/_shared/
+// fetchWithTimeout.ts), but that doesn't protect against this client-to-
+// edge-function call itself hanging (a cold start, a network stall). This
+// timeout is client-side only and never retried automatically — retrying a
+// possibly-already-processed login/signup could duplicate side effects.
+const PROXY_TIMEOUT_MS = 15_000;
+
+class ProxyTimeoutError extends Error {
+  constructor() {
+    super('Auth proxy request timed out');
+    this.name = 'ProxyTimeoutError';
+  }
+}
+
 async function callAuthProxy(path: 'auth-login' | 'auth-signup', body: unknown) {
-  const res = await fetch(`${AUTH_FUNCTIONS_URL}/${path}`, {
-    method: 'POST',
-    headers: {
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return { ok: res.ok, data };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${AUTH_FUNCTIONS_URL}/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const data = await res.json();
+    return { ok: res.ok, data };
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ProxyTimeoutError();
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function proxyErrorMessage(data: any): string {
@@ -272,7 +300,12 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error(handleSupabaseError(error));
+      if (error instanceof ProxyTimeoutError) {
+        reportError(error, { context: 'Auth.callAuthProxy', category: 'RELIABILITY' });
+        toast.error(t('auth.requestTimedOut'));
+      } else {
+        toast.error(handleSupabaseError(error));
+      }
       // Trigger shake animation
       setShakeAnimation(true);
       setTimeout(() => setShakeAnimation(false), 500);

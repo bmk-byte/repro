@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import DocumentModal from './DocumentModal';
 import CaseProgressTracker from './CaseProgressTracker';
 import { LoadingState } from './ui';
@@ -66,6 +67,11 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
         }
       } catch (error) {
         console.error('Error fetching user info:', error);
+        // Non-fatal: the case details themselves still load below via
+        // fetchCaseDetails(); this only affects org-restricted display
+        // logic, so no toast — but reported since it could otherwise mask
+        // a real access-control display bug.
+        reportError(error, { context: 'RapidResponseCaseDetails.fetchUserInfo', category: 'DATA' });
       }
       await fetchCaseDetails();
     };

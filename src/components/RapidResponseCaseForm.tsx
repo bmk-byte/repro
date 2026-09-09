@@ -3,6 +3,7 @@ import { X, CircleAlert as AlertCircle, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { useFormDraft } from '../hooks/useFormDraft';
 import { createSafeDisplayName, safeFileExtension } from '../lib/sanitize';
@@ -216,6 +217,11 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           })) : []);
         } catch (err) {
           console.error('Error parsing deadlines:', err);
+          // Falls back to an empty deadline list rather than blocking the
+          // form — but this means existing deadline data for this case is
+          // effectively hidden from the editor, so it's reported rather
+          // than left as a console-only trace.
+          reportError(err, { context: 'RapidResponseCaseForm.parseDeadlines', category: 'DATA' });
           setDeadlines([]);
         }
       }
@@ -441,6 +447,13 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
             );
           } catch (err) {
             console.error('Failed to send moderator notification emails:', err);
+            // Best-effort background notification after a successful
+            // submission — no toast (nothing for the submitter to act
+            // on). Reported rather than left console-only because this
+            // path also covers urgent Rapid Response cases, where a
+            // silent notification-delivery gap is more time-sensitive
+            // than for a routine case/judgment submission.
+            reportError(err, { context: 'RapidResponseCaseForm.notifyModerators', category: 'RELIABILITY', isUrgent });
           }
         })();
 
