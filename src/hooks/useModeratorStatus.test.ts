@@ -10,9 +10,11 @@ import { renderHook, waitFor } from '@testing-library/react';
  * .upsert() on `profiles`, that's the vulnerability being reintroduced.
  */
 
-const updateSpy = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
-const upsertSpy = vi.fn().mockResolvedValue({ error: null });
-const maybeSingleSpy = vi.fn().mockResolvedValue({ data: { is_moderator: false }, error: null });
+const { updateSpy, upsertSpy, maybeSingleSpy } = vi.hoisted(() => ({
+  updateSpy: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+  upsertSpy: vi.fn().mockResolvedValue({ error: null }),
+  maybeSingleSpy: vi.fn().mockResolvedValue({ data: { is_moderator: false }, error: null }),
+}));
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
