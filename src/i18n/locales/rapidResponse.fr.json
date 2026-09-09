@@ -348,9 +348,13 @@
     },
     "charts": {
       "priorityDistribution": "Répartition par priorité",
+      "priorityDistributionDescription": "Dossiers de réponse rapide par niveau de priorité",
       "partnerOrgEngagement": "Engagement des organisations partenaires",
+      "partnerOrgEngagementDescription": "Dossiers soumis par organisation partenaire",
       "caseCategoryDistribution": "Répartition par catégorie de dossier",
+      "caseCategoryDistributionDescription": "Nombre de dossiers par catégorie de santé reproductive",
       "caseStageProgress": "Progression des étapes du dossier",
+      "casesLabel": "Dossiers",
       "casesValueFormat": "{{value}} dossiers",
       "noPriorityData": "Aucune donnée de priorité disponible",
       "noPartnerData": "Aucune donnée d'organisation partenaire disponible",

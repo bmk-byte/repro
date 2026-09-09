@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Title, Text, BarChart } from '@tremor/react';
+import { Card, Title, Text } from '@tremor/react';
+import { ChartCard, RankedBarChart } from './charts';
 import { supabase } from '../lib/supabase';
 import { RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +8,6 @@ import { toast } from '../lib/toast';
 import CaseStageProgress from './CaseStageProgress';
 import { LoadingState, Badge, Select, Button, EmptyState, ErrorState } from './ui';
 import type { BadgeProps } from './ui';
-import { chartHeight } from '../lib/chartLayout';
 import DashboardCard from './DashboardCard';
 
 const devLog = (...args: unknown[]) => {
@@ -515,12 +515,6 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
     }
   };
 
-  // Tremor's `colors` prop only accepts its own named palette (e.g. "red",
-  // "blue") — arbitrary hex codes don't match any known color and silently
-  // fall back to black bars, so these must stay as Tremor color names.
-  const priorityColors = ["red", "orange", "blue", "emerald"];
-  const categoryColors = ["violet", "red", "pink", "orange", "indigo"];
-  const partnerColors = ["rose", "blue", "emerald", "amber", "violet"];
 
   return (
     <div className="space-y-6">
@@ -750,80 +744,49 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Priority Distribution */}
-            <Card className="bg-white">
-              <Title>{t('dashboard.charts.priorityDistribution')}</Title>
-              {stats.priorityDistribution.length > 0 ? (
-                <BarChart
-                  className="mt-6 h-60"
-                  data={stats.priorityDistribution}
-                  index="name"
-                  categories={["value"]}
-                  colors={priorityColors}
-                  layout="vertical"
-                  showLegend={false}
-                  showAnimation={true}
-                  showYAxis={true}
-                  showXAxis={true}
-                  showGridLines={true}
-                  yAxisWidth={90}
-                  valueFormatter={(value) => t('dashboard.charts.casesValueFormat', { value })}
-                />
-              ) : (
-                <EmptyState title={t('dashboard.charts.noPriorityData')} />
-              )}
-            </Card>
+            <ChartCard
+              title={t('dashboard.charts.priorityDistribution')}
+              description={t('dashboard.charts.priorityDistributionDescription')}
+            >
+              <RankedBarChart
+                data={stats.priorityDistribution}
+                valueLabel={t('dashboard.charts.casesLabel')}
+                showPercent={false}
+                labelWidth={90}
+                minHeight={180}
+                emptyTitle={t('dashboard.charts.noPriorityData')}
+              />
+            </ChartCard>
 
-            {/* Partner Organization Engagement */}
-            <Card className="bg-white">
-              <Title>{t('dashboard.charts.partnerOrgEngagement')}</Title>
-              {stats.partnerDistribution.length > 0 ? (
-                <BarChart
-                  className="mt-6"
-                  style={{ height: chartHeight(stats.partnerDistribution.length, 320) }}
-                  data={stats.partnerDistribution}
-                  index="name"
-                  categories={["value"]}
-                  colors={partnerColors}
-                  layout="vertical"
-                  showLegend={false}
-                  showAnimation={true}
-                  showYAxis={true}
-                  showXAxis={true}
-                  showGridLines={true}
-                  yAxisWidth={220}
-                  valueFormatter={(value) => t('dashboard.charts.casesValueFormat', { value })}
-                />
-              ) : (
-                <EmptyState title={t('dashboard.charts.noPartnerData')} />
-              )}
-            </Card>
+            <ChartCard
+              title={t('dashboard.charts.partnerOrgEngagement')}
+              description={t('dashboard.charts.partnerOrgEngagementDescription')}
+            >
+              <RankedBarChart
+                data={stats.partnerDistribution}
+                valueLabel={t('dashboard.charts.casesLabel')}
+                showPercent={false}
+                labelWidth={200}
+                minHeight={220}
+                emptyTitle={t('dashboard.charts.noPartnerData')}
+              />
+            </ChartCard>
           </div>
 
-          {/* Case Category Distribution */}
-          <Card className="bg-white">
-            <Title>{t('dashboard.charts.caseCategoryDistribution')}</Title>
-            {stats.categoryDistribution.length > 0 ? (
-              <BarChart
-                className="mt-6"
-                style={{ height: chartHeight(stats.categoryDistribution.length, 240) }}
-                data={stats.categoryDistribution}
-                index="name"
-                categories={["value"]}
-                colors={categoryColors}
-                layout="vertical"
-                showLegend={false}
-                showAnimation={true}
-                showYAxis={true}
-                showXAxis={true}
-                showGridLines={true}
-                yAxisWidth={160}
-                valueFormatter={(value) => t('dashboard.charts.casesValueFormat', { value })}
-              />
-            ) : (
-              <EmptyState title={t('dashboard.charts.noCategoryData')} />
-            )}
-          </Card>
+          <ChartCard
+            title={t('dashboard.charts.caseCategoryDistribution')}
+            description={t('dashboard.charts.caseCategoryDistributionDescription')}
+          >
+            <RankedBarChart
+              data={stats.categoryDistribution}
+              valueLabel={t('dashboard.charts.casesLabel')}
+              showPercent
+              labelWidth={240}
+              minHeight={220}
+              emptyTitle={t('dashboard.charts.noCategoryData')}
+              highlightTop
+            />
+          </ChartCard>
 
           {/* Case Stage Progress */}
           <Card className="bg-white">

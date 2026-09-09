@@ -8,6 +8,10 @@
  */
 export const CHART_COLORS = {
   primary: '#9C1D20',
+  // A lighter tint of primary, used as the default bar/series color so a
+  // single `highlightTop`-style accent (full-strength primary) actually
+  // reads as an accent rather than every bar looking identical.
+  primaryMuted: '#C9807F',
   success: '#15803D',
   warning: '#B45309',
   danger: '#DC2626',

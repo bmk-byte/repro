@@ -348,9 +348,13 @@
     },
     "charts": {
       "priorityDistribution": "Priority Distribution",
+      "priorityDistributionDescription": "Rapid Response cases by priority level",
       "partnerOrgEngagement": "Partner Organization Engagement",
+      "partnerOrgEngagementDescription": "Cases submitted per partner organization",
       "caseCategoryDistribution": "Case Category Distribution",
+      "caseCategoryDistributionDescription": "Number of cases by reproductive health category",
       "caseStageProgress": "Case Stage Progress",
+      "casesLabel": "Cases",
       "casesValueFormat": "{{value}} cases",
       "noPriorityData": "No priority data available",
       "noPartnerData": "No partner organization data available",

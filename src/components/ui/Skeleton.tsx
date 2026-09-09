@@ -2,11 +2,12 @@ import React from 'react';
 
 export interface SkeletonProps {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 /** A pulsing placeholder block — shows the shape of content that's still loading, instead of a centered spinner. */
-export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => (
-  <div className={`animate-pulse rounded bg-stone-200 ${className}`} aria-hidden="true" />
+export const Skeleton: React.FC<SkeletonProps> = ({ className = '', style }) => (
+  <div className={`animate-pulse rounded bg-stone-200 ${className}`} style={style} aria-hidden="true" />
 );
 
 /** A single list-row-shaped skeleton (e.g. a table/list item while data loads). */
