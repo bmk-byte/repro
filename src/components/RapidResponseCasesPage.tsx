@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import RapidResponseCaseForm from './RapidResponseCaseForm';
 import BulkRapidResponseUpload from './forms/BulkRapidResponseUpload';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
@@ -102,6 +103,8 @@ const RapidResponseCasesPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching current user:', err);
+      reportError(err, { context: 'fetchCurrentUser' });
+      toast.error(t('casesPage.errors.failedToLoadUserProfile'));
     }
   };
 
@@ -126,6 +129,8 @@ const RapidResponseCasesPage: React.FC = () => {
       setTeamMembers(data || []);
     } catch (err) {
       console.error('Error fetching team members:', err);
+      reportError(err, { context: 'fetchTeamMembers' });
+      toast.error(t('casesPage.errors.failedToLoadTeamMembers'));
     }
   };
 
@@ -144,6 +149,8 @@ const RapidResponseCasesPage: React.FC = () => {
       setPartnerOrganizations(partners.sort());
     } catch (err) {
       console.error('Error fetching partner organizations:', err);
+      reportError(err, { context: 'fetchPartnerOrganizations' });
+      toast.error(t('casesPage.errors.failedToLoadPartnerOrganizations'));
     }
   };
 
@@ -158,6 +165,8 @@ const RapidResponseCasesPage: React.FC = () => {
       setCountries(data || []);
     } catch (err) {
       console.error('Error fetching countries:', err);
+      reportError(err, { context: 'fetchCountries' });
+      toast.error(t('casesPage.errors.failedToLoadCountries'));
     }
   };
 
@@ -311,6 +320,7 @@ const RapidResponseCasesPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching rapid response cases:', err);
+      reportError(err, { context: 'fetchRapidResponseCases' });
       setError(t('casesPage.errors.failedToLoadCases'));
       toast.error(t('casesPage.errors.failedToLoadCases'));
     } finally {

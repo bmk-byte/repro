@@ -167,7 +167,8 @@
       "invalidStage": "\"{{value}}\" is not a valid Current Stage",
       "invalidCategory": "\"{{value}}\" is not a recognized Case Category",
       "rateLimited": "Too many bulk uploads. Please try again later.",
-      "submitFailed": "Failed to create cases"
+      "submitFailed": "Failed to create cases",
+      "unexpectedRowError": "This row could not be saved due to an unexpected error"
     }
   },
   "casesPage": {
@@ -275,7 +276,11 @@
     },
     "errors": {
       "failedToLoadCases": "Failed to load rapid response cases",
-      "noCasesToExport": "No cases to export"
+      "noCasesToExport": "No cases to export",
+      "failedToLoadTeamMembers": "Failed to load team members",
+      "failedToLoadPartnerOrganizations": "Failed to load partner organizations",
+      "failedToLoadCountries": "Failed to load countries",
+      "failedToLoadUserProfile": "Failed to load your user profile"
     },
     "toasts": {
       "caseUpdated": "Rapid response case updated successfully",

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { reportError } from './errorReporting';
 
 const SIGNED_URL_EXPIRY = 3600;
 
@@ -37,7 +38,11 @@ export async function getFreshFileUrl(fileUrl: string): Promise<string> {
     .createSignedUrl(parsed.path, SIGNED_URL_EXPIRY);
 
   if (error || !data?.signedUrl) {
-    return fileUrl;
+    reportError(error ?? new Error('createSignedUrl returned no signedUrl'), {
+      bucket: parsed.bucket,
+      path: parsed.path,
+    });
+    throw error ?? new Error('Failed to refresh file URL');
   }
 
   return data.signedUrl;

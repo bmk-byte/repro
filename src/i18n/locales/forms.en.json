@@ -94,7 +94,8 @@
       "invalidLegalFrameworkType": "\"{{value}}\" is not a valid Legal Framework Type",
       "invalidCategory": "\"{{value}}\" is not a recognized Case Category",
       "rateLimited": "Too many bulk uploads. Please try again later.",
-      "submitFailed": "Failed to submit cases"
+      "submitFailed": "Failed to submit cases",
+      "unexpectedRowError": "This row could not be saved due to an unexpected error"
     }
   },
   "submitCaseForm": {

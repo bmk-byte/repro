@@ -5,6 +5,7 @@ import { useDropzone, FileRejection } from 'react-dropzone';
 import { Download, Upload, FileSpreadsheet, CircleCheck as CheckCircle, CircleAlert as AlertCircle, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
+import { reportError } from '../../lib/errorReporting';
 import { sanitizeText } from '../../lib/sanitize';
 import { Button, Card } from '../ui';
 import { CASE_CATEGORIES } from './SubmitCaseForm';
@@ -271,7 +272,13 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
         });
 
         if (error) {
-          failures.push({ rowNumber: row.rowNumber, title: d.case_filed, message: error.message });
+          console.error(`Bulk rapid response upload row ${row.rowNumber} failed:`, error);
+          reportError(error, { context: 'bulkRapidResponseUpload.row', rowNumber: row.rowNumber });
+          failures.push({
+            rowNumber: row.rowNumber,
+            title: d.case_filed,
+            message: t('bulkUpload.errors.unexpectedRowError'),
+          });
         } else {
           successCount += 1;
         }
@@ -286,7 +293,8 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
       }
     } catch (error: any) {
       console.error('Bulk rapid response upload error:', error);
-      toast.error(error.message || t('bulkUpload.errors.submitFailed'));
+      reportError(error, { context: 'bulkRapidResponseUpload.submit' });
+      toast.error(t('bulkUpload.errors.submitFailed'));
     } finally {
       setSubmitting(false);
     }

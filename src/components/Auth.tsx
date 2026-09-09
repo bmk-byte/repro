@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { supabase, supabaseUrl, supabaseAnonKey, handleSupabaseError } from '../lib/supabase';
-import { validateModeratorOrganization } from '../lib/moderatorService';
 import { toast } from '../lib/toast';
 import { Scale, ArrowLeft, CircleHelp as HelpCircle, Eye, EyeOff } from 'lucide-react';
 import { PARTNER_ORGANIZATIONS, OTHER_ORGANIZATION_VALUE } from '../constants/organizations';
@@ -181,41 +180,6 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
     try {
       if (isSignUp) {
-        const orgValidation = validateModeratorOrganization(email, organization.trim());
-
-        if (!orgValidation.isValid && orgValidation.expectedOrganization) {
-          const expectedOrg = orgValidation.expectedOrganization;
-          const isListed = PARTNER_ORGANIZATIONS.some(
-            (org) => org.toLowerCase() === expectedOrg.toLowerCase()
-          );
-          const actionableMessage = isListed
-            ? t('auth.emailRegisteredListed', { org: expectedOrg })
-            : t('auth.emailRegisteredOther', { org: expectedOrg });
-
-          toast.error(actionableMessage);
-          setValidationErrors(prev => ({
-            ...prev,
-            organization: actionableMessage,
-            password: ''
-          }));
-
-          if (isListed) {
-            setSelectedOrganization(expectedOrg);
-            setShowCustomOrganization(false);
-            setOrganization(expectedOrg);
-          } else {
-            setSelectedOrganization(OTHER_ORGANIZATION_VALUE);
-            setShowCustomOrganization(true);
-            setCustomOrganization(expectedOrg);
-            setOrganization(expectedOrg);
-          }
-
-          setShakeAnimation(true);
-          setTimeout(() => setShakeAnimation(false), 500);
-          setLoading(false);
-          return;
-        }
-
         const signUpResult = await callAuthProxy('auth-signup', {
           email,
           password,
@@ -256,25 +220,12 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           if (setSessionError) throw setSessionError;
         }
 
-        // is_moderator/role are decided server-side by a trigger on INSERT
-        // (see supabase/migrations/*_lock_is_moderator_column.sql) — do not
-        // send them from the client.
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: signedUpUser.id,
-            full_name: fullName.trim(),
-            email: email,
-            phone_number: phoneNumber.trim(),
-            profession: profession.trim(),
-            organization: organization.trim(),
-            role: 'user'
-          });
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          throw profileError;
-        }
+        // The profiles row (and its is_moderator/is_admin/role) is created
+        // server-side by a SECURITY DEFINER trigger on auth.users (see
+        // supabase/migrations/20260908110000_create_profile_via_auth_trigger.sql)
+        // — not by the client. It has to be: when email confirmation is
+        // pending, GoTrue returns no session here, so a client-side insert
+        // would run as `anon` and be rejected by RLS.
 
         // Moderator status is decided server-side (see the trigger comment
         // above) and isn't known client-side at this point — this component

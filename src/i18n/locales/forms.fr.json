@@ -94,7 +94,8 @@
       "invalidLegalFrameworkType": "« {{value}} » n'est pas un type de cadre juridique valide",
       "invalidCategory": "« {{value}} » n'est pas une catégorie d'affaire reconnue",
       "rateLimited": "Trop d'importations groupées. Veuillez réessayer plus tard.",
-      "submitFailed": "Échec de la soumission des dossiers"
+      "submitFailed": "Échec de la soumission des dossiers",
+      "unexpectedRowError": "Cette ligne n'a pas pu être enregistrée en raison d'une erreur inattendue"
     }
   },
   "submitCaseForm": {

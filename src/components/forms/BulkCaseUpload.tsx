@@ -5,6 +5,7 @@ import { useDropzone, FileRejection } from 'react-dropzone';
 import { Download, Upload, FileSpreadsheet, CircleCheck as CheckCircle, CircleAlert as AlertCircle, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
+import { reportError } from '../../lib/errorReporting';
 import { sanitizeArray, sanitizeText } from '../../lib/sanitize';
 import { Button, Card } from '../ui';
 import { CASE_CATEGORIES } from './SubmitCaseForm';
@@ -316,7 +317,13 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
         });
 
         if (error) {
-          failures.push({ rowNumber: row.rowNumber, title: d.title, message: error.message });
+          console.error(`Bulk case upload row ${row.rowNumber} failed:`, error);
+          reportError(error, { context: 'bulkCaseUpload.row', rowNumber: row.rowNumber });
+          failures.push({
+            rowNumber: row.rowNumber,
+            title: d.title,
+            message: t('bulkCaseUpload.errors.unexpectedRowError'),
+          });
         } else {
           successCount += 1;
         }
@@ -331,7 +338,8 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
       }
     } catch (error: any) {
       console.error('Bulk case upload error:', error);
-      toast.error(error.message || t('bulkCaseUpload.errors.submitFailed'));
+      reportError(error, { context: 'bulkCaseUpload.submit' });
+      toast.error(t('bulkCaseUpload.errors.submitFailed'));
     } finally {
       setSubmitting(false);
     }
