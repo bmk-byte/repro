@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateRapidResponseRow, COLUMNS, mapStageToStatus, type Translate } from './bulkRapidResponseUpload';
-import { CASE_CATEGORIES } from '../../components/forms/SubmitCaseForm';
+import { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 const t: Translate = (key, params) => (params ? `${key}:${JSON.stringify(params)}` : key);
 

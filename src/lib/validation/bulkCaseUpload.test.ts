@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateCaseRow, COLUMNS, type Translate } from './bulkCaseUpload';
-import { CASE_CATEGORIES } from '../../components/forms/SubmitCaseForm';
+import { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 // Identity-ish translator so assertions can check on the key/params actually
 // used, without needing react-i18next configured in this test file.

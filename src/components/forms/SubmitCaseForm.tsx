@@ -18,32 +18,11 @@ interface SubmitCaseFormProps {
   isDirectUpload?: boolean;
 }
 
-// Exported so BulkCaseUpload.tsx can validate against the exact same
-// allowlist the single-entry form uses (and the DB CHECK constraint on
-// pending_cases.case_categories mirrors) — one source of truth.
-export const CASE_CATEGORIES = [
-  'Access to Safe Abortion',
-  'Maternal Health and Mortality',
-  'Forced Sterilization',
-  'Contraceptive Access and Denial',
-  'Sexual and Gender-Based Violence (SGBV)',
-  'Child Marriage and Early/Forced Marriage',
-  'Menstrual Health and Hygiene Rights',
-  'Sexual and Reproductive Health Education',
-  'Criminalization of Pregnancy Outcomes',
-  'Access to Assisted Reproductive Technologies',
-  'Access to Reproductive Health Services for Incarcerated Women',
-  'Consent and Access for Adolescents and Minors',
-  'Discrimination in Reproductive Healthcare',
-  'Reproductive Rights in Conflict and Humanitarian Settings',
-  'Access to Reproductive Health Services for Marginalized Groups',
-  'Parental Leave and Reproductive Labor Rights',
-  'Violation of Confidentiality and Privacy in Reproductive Healthcare',
-  'Denial of Post-Abortion Care',
-  'Reproductive Health and Environmental Justice',
-  'Religious and Cultural Barriers to Reproductive Healthcare Access',
-  'Other'
-];
+// Re-exported for backward compatibility — the canonical definition now
+// lives in src/constants/caseCategories.ts (a side-effect-free module, so
+// validation logic and tests can use it without pulling in this
+// component's full dependency chain, including the Supabase client).
+export { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
   onSuccess,

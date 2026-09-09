@@ -1,5 +1,5 @@
 import { sanitizeText } from '../sanitize';
-import { CASE_CATEGORIES } from '../../components/forms/SubmitCaseForm';
+import { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 /**
  * Pure validation logic for the bulk Rapid Response CSV upload, extracted
