@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, Title, Text } from '@tremor/react';
 import { ChartCard, RankedBarChart } from './charts';
 import { supabase } from '../lib/supabase';
 import { RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import CaseStageProgress from './CaseStageProgress';
 import { LoadingState, Badge, Select, Button, EmptyState, ErrorState } from './ui';
 import type { BadgeProps } from './ui';
@@ -67,6 +68,16 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
   const [recentCases, setRecentCases] = useState<any[]>([]);
+
+  // Guards against overlapping fetchDashboardData() calls: the real-time
+  // subscriptions below call it on every postgres_changes event, and a
+  // burst of replayed events (e.g. after a backgrounded tab reconnects)
+  // can start several calls concurrently. Without this, a stale call that
+  // finishes (or hangs) after a newer one has already completed could
+  // clobber loading/error state set by the newer call — including leaving
+  // `loading` stuck true forever if the stale call never settles at all.
+  // Only the most-recently-started call is allowed to update state.
+  const dashboardRequestIdRef = useRef(0);
 
   useEffect(() => {
     fetchFilterOptions();
@@ -188,6 +199,7 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
   };
 
   const fetchDashboardData = async () => {
+    const requestId = ++dashboardRequestIdRef.current;
     try {
       devLog('Fetching dashboard data...');
       setLoading(true);
@@ -443,6 +455,12 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 5);
 
+      // A newer fetchDashboardData() call has started since this one began
+      // (see dashboardRequestIdRef above) — its own result supersedes
+      // whatever this call found, so don't apply stale data or touch
+      // loading/error state on the way out.
+      if (requestId !== dashboardRequestIdRef.current) return;
+
       // Update state with calculated stats
       setStats({
         totalCases,
@@ -458,11 +476,13 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
       });
 
     } catch (error) {
+      if (requestId !== dashboardRequestIdRef.current) return;
       console.error('Error fetching dashboard data:', error);
+      reportError(error, { context: 'RapidResponseDashboard.fetchDashboardData', category: 'DATA' });
       setError(t('dashboard.errors.failedToLoadDashboardData'));
       toast.error(t('dashboard.errors.failedToLoadDashboardData'));
     } finally {
-      setLoading(false);
+      if (requestId === dashboardRequestIdRef.current) setLoading(false);
     }
   };
 

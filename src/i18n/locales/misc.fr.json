@@ -9,7 +9,8 @@
     "connectionErrorDescription": "Impossible de se connecter à la base de données. Veuillez vérifier votre connexion internet.",
     "retryConnection": "Réessayer la connexion",
     "retryingConnection": "Nouvelle tentative de connexion... Tentative {{count}} sur {{max}}",
-    "error": "Erreur :"
+    "error": "Erreur :",
+    "statsLoadFailed": "Impossible de charger les chiffres récapitulatifs du tableau de bord. Le reste du tableau de bord n'est pas affecté."
   },
   "profileSettingsForm": {
     "loadFailed": "Échec du chargement de votre profil. Certains champs peuvent être obsolètes — essayez d'actualiser la page.",

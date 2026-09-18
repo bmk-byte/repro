@@ -9,7 +9,8 @@
     "connectionErrorDescription": "Unable to connect to the database. Please check your internet connection.",
     "retryConnection": "Retry Connection",
     "retryingConnection": "Retrying connection... Attempt {{count}} of {{max}}",
-    "error": "Error:"
+    "error": "Error:",
+    "statsLoadFailed": "Couldn't load dashboard summary numbers. The rest of the dashboard is unaffected."
   },
   "profileSettingsForm": {
     "loadFailed": "Failed to load your profile. Some fields may be out of date — try refreshing the page.",

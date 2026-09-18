@@ -9,6 +9,8 @@ import ResetPassword from './components/ResetPassword';
 import ErrorBoundary from './components/ErrorBoundary';
 import LandingPage from './components/LandingPage';
 import { supabase, handleSupabaseError, testConnection } from './lib/supabase';
+import { toast } from './lib/toast';
+import { reportError } from './lib/errorReporting';
 import Navbar from './components/Navbar';
 import { useModeratorStatus } from './hooks/useModeratorStatus';
 import { can } from './lib/permissions';
@@ -164,7 +166,13 @@ function DashboardApp() {
   React.useEffect(() => {
     devLog('Initial connection check effect running');
     checkConnection();
-  }, [checkConnection]);
+    // Intentionally run once, not on every `checkConnection` identity
+    // change: checkConnection is a useCallback keyed on `retryCount`, so
+    // depending on it here re-ran this effect on every retry IN ADDITION
+    // to the retry's own internal setTimeout-driven recursive call —
+    // firing two overlapping connection checks per retry instead of one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     devLog('Session check effect running, connectionStatus:', connectionStatus);
@@ -343,8 +351,15 @@ function DashboardApp() {
       setDashboardStats(stats);
 
     } catch (error) {
+      // Deliberately does NOT call setError() here — that state gates the
+      // entire renderContent() output (see the connectionStatus/error
+      // branch further down), so a failure fetching two small summary
+      // numbers was blanking the whole dashboard behind a generic error
+      // banner instead of just showing degraded stats. This fetch's own
+      // failure is scoped to the stats widget via `loading`/a toast only.
       console.error('Error fetching dashboard stats:', error);
-      setError(handleSupabaseError(error));
+      reportError(error, { context: 'DashboardApp.fetchDashboardStats', category: 'DATA' });
+      toast.error(t('app.statsLoadFailed'));
     } finally {
       setLoading(false);
     }
@@ -566,42 +581,51 @@ function DashboardApp() {
             renderContent()
           )}
       </div>
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#fff',
-            color: '#524A3C', // stone-700
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            border: '1px solid #E7E3DB', // stone-200
-            borderRadius: '0.5rem',
-            padding: '16px',
-            cursor: 'pointer',
-          },
-          success: {
-            iconTheme: {
-              primary: '#9C1D20', // primary
-              secondary: '#fff',
-            },
-            style: {
-              borderLeft: '4px solid #15803D', // success
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#DC2626', // danger
-              secondary: '#fff',
-            },
-            style: {
-              borderLeft: '4px solid #DC2626', // danger
-            },
-          },
-        }}
-      />
     </div>
   );
 }
+
+// Rendered once, above the router: react-hot-toast's <Toaster> is a
+// portal, not route content, so it must not live inside DashboardApp —
+// it previously did, which meant toast.success()/toast.error() calls
+// anywhere on the /reset-password route (a sibling route, not a child of
+// DashboardApp) had no <Toaster> mounted to render into and silently did
+// nothing. This is the single shared toast portal for every route.
+const AppToaster = () => (
+  <Toaster
+    position="top-right"
+    toastOptions={{
+      duration: 4000,
+      style: {
+        background: '#fff',
+        color: '#524A3C', // stone-700
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #E7E3DB', // stone-200
+        borderRadius: '0.5rem',
+        padding: '16px',
+        cursor: 'pointer',
+      },
+      success: {
+        iconTheme: {
+          primary: '#9C1D20', // primary
+          secondary: '#fff',
+        },
+        style: {
+          borderLeft: '4px solid #15803D', // success
+        },
+      },
+      error: {
+        iconTheme: {
+          primary: '#DC2626', // danger
+          secondary: '#fff',
+        },
+        style: {
+          borderLeft: '4px solid #DC2626', // danger
+        },
+      },
+    }}
+  />
+);
 
 export default function App() {
   return (
@@ -612,6 +636,7 @@ export default function App() {
           <Route path="*" element={<DashboardApp />} />
         </Routes>
       </BrowserRouter>
+      <AppToaster />
     </ErrorBoundary>
   );
 }
