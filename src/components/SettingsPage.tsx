@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import ProfileSettingsForm from './ProfileSettingsForm';
 import { User, Bell, Lock, Shield } from 'lucide-react';
 import { toast } from '../lib/toast';
+import { reportError } from '../lib/errorReporting';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { usePasswordStrength } from '../hooks/usePasswordStrength';
 import { getToastsEnabled, setToastsEnabled } from '../lib/toastPreference';
@@ -34,15 +35,25 @@ const SettingsPage: React.FC = () => {
       return;
     }
     setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setChangingPassword(false);
-    if (error) {
-      toast.error(error.message || t('settings.unableToUpdatePassword'));
-      return;
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error(error.message || t('settings.unableToUpdatePassword'));
+        return;
+      }
+      toast.success(t('settings.passwordUpdated'));
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      // supabase-js can reject instead of resolving with { error } (e.g. a
+      // stale/expired session). Without this catch, the button was left
+      // stuck in its loading state with no feedback — a silent failure.
+      console.error('Error changing password:', err);
+      reportError(err, { context: 'SettingsPage.handleChangePassword', category: 'RELIABILITY' });
+      toast.error(t('settings.unableToUpdatePassword'));
+    } finally {
+      setChangingPassword(false);
     }
-    toast.success(t('settings.passwordUpdated'));
-    setNewPassword('');
-    setConfirmPassword('');
   };
 
   const handleToggleToasts = (enabled: boolean) => {

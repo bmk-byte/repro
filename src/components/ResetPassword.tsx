@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { LockKeyhole } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
+import { reportError } from '../lib/errorReporting';
 import { usePasswordStrength } from '../hooks/usePasswordStrength';
 import { PasswordStrengthMeter } from './ui';
 
@@ -35,15 +36,27 @@ export default function ResetPassword() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message || t('resetPassword.unableToUpdatePassword'));
-      return;
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        toast.error(error.message || t('resetPassword.unableToUpdatePassword'));
+        return;
+      }
+      toast.success(t('resetPassword.passwordUpdatedSignIn'));
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (err) {
+      // supabase-js can reject (e.g. AuthSessionMissingError) instead of
+      // resolving with { error } — most likely when the recovery link's
+      // session hasn't finished establishing yet. Without this catch, the
+      // button was left stuck in its loading state with no feedback at
+      // all: a silent failure from the user's point of view.
+      console.error('Error updating password via recovery link:', err);
+      reportError(err, { context: 'ResetPassword.handleSubmit', category: 'RELIABILITY' });
+      toast.error(t('resetPassword.unableToUpdatePassword'));
+    } finally {
+      setLoading(false);
     }
-    toast.success(t('resetPassword.passwordUpdatedSignIn'));
-    await supabase.auth.signOut();
-    navigate('/');
   };
 
   return (
