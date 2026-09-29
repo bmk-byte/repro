@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const { queryBuilder, fromSpy } = vi.hoisted(() => {
   const builder: Record<string, ReturnType<typeof vi.fn>> = {};
-  const methods = ['select', 'eq', 'contains', 'or', 'order', 'range', 'not'];
+  const methods = ['select', 'eq', 'contains', 'or', 'order', 'range', 'not', 'in'];
   for (const method of methods) {
     builder[method] = vi.fn(() => builder);
   }
@@ -17,7 +17,7 @@ vi.mock('../errorReporting', () => ({
   reportError: vi.fn(),
 }));
 
-import { fetchLitigationCases, fetchCaseFilterOptions } from './cases';
+import { fetchLitigationCases, fetchCaseFilterOptions, findExistingCaseReferences } from './cases';
 import { reportError } from '../errorReporting';
 
 // The mocked query builder needs to be "thenable" so `await query` resolves
@@ -115,6 +115,50 @@ describe('fetchCaseFilterOptions', () => {
     queryBuilder.not.mockImplementationOnce(() => Promise.resolve({ data: null, error: dbError }));
 
     const result = await fetchCaseFilterOptions();
+    expect(result.data).toBeNull();
+    expect(result.error).toBe(dbError);
+    expect(reportError).toHaveBeenCalledWith(dbError, expect.objectContaining({ category: 'DATA' }));
+  });
+});
+
+describe('findExistingCaseReferences', () => {
+  it('returns an empty set without querying the database when given no case references', async () => {
+    const result = await findExistingCaseReferences([]);
+    expect(fromSpy).not.toHaveBeenCalled();
+    expect(result.data).toEqual(new Set());
+  });
+
+  it('returns an empty set when given only blank/whitespace values, without querying', async () => {
+    const result = await findExistingCaseReferences(['', '   ']);
+    expect(fromSpy).not.toHaveBeenCalled();
+    expect(result.data).toEqual(new Set());
+  });
+
+  it('returns the set of case_reference values that already exist', async () => {
+    queryBuilder.in.mockResolvedValue({
+      data: [{ case_reference: 'RR-2025-001' }, { case_reference: 'RR-2025-003' }],
+      error: null,
+    });
+
+    const result = await findExistingCaseReferences(['RR-2025-001', 'RR-2025-002', 'RR-2025-003']);
+
+    expect(fromSpy).toHaveBeenCalledWith('cases');
+    expect(queryBuilder.in).toHaveBeenCalledWith('case_reference', ['RR-2025-001', 'RR-2025-002', 'RR-2025-003']);
+    expect(result.data).toEqual(new Set(['RR-2025-001', 'RR-2025-003']));
+  });
+
+  it('trims whitespace and drops blanks before querying', async () => {
+    queryBuilder.in.mockResolvedValue({ data: [], error: null });
+    await findExistingCaseReferences([' RR-2025-001 ', '', '  ']);
+    expect(queryBuilder.in).toHaveBeenCalledWith('case_reference', ['RR-2025-001']);
+  });
+
+  it('reports and returns the error on failure, without throwing', async () => {
+    const dbError = new Error('query failed');
+    queryBuilder.in.mockResolvedValue({ data: null, error: dbError });
+
+    const result = await findExistingCaseReferences(['RR-2025-001']);
+
     expect(result.data).toBeNull();
     expect(result.error).toBe(dbError);
     expect(reportError).toHaveBeenCalledWith(dbError, expect.objectContaining({ category: 'DATA' }));

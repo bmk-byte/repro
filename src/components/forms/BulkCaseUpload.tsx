@@ -7,19 +7,13 @@ import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
 import { reportError } from '../../lib/errorReporting';
 import { fetchCountries, toCountryIdByName, type Country } from '../../lib/data/countries';
+import { toCsv, downloadCsv } from '../../lib/csv';
 import { Button, Card } from '../ui';
-import { COLUMNS, MAX_ROWS, validateCaseRow, type ParsedRow } from '../../lib/validation/bulkCaseUpload';
+import { COLUMNS, MAX_ROWS, validateCaseRow, markWithinFileDuplicates, type ParsedRow } from '../../lib/validation/bulkCaseUpload';
 
 interface BulkCaseUploadProps {
   onDone?: () => void;
 }
-
-const escapeCSV = (val: unknown): string => {
-  const str = val == null ? '' : String(val);
-  return str.includes(',') || str.includes('"') || str.includes('\n')
-    ? `"${str.replace(/"/g, '""')}"`
-    : str;
-};
 
 interface SubmitResults {
   successCount: number;
@@ -47,16 +41,8 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
   const countryIdByName = useMemo(() => toCountryIdByName(countries), [countries]);
 
   const downloadTemplate = () => {
-    const header = COLUMNS.map(c => escapeCSV(c.header)).join(',');
-    const example = COLUMNS.map(c => escapeCSV(c.example)).join(',');
-    const csv = `${header}\n${example}\n`;
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'bulk-case-upload-template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    const csv = toCsv([COLUMNS.map(c => c.header), COLUMNS.map(c => c.example)]);
+    downloadCsv(csv, 'bulk-case-upload-template.csv');
   };
 
   const validateRow = (rawRow: Record<string, string>, rowNumber: number): ParsedRow =>
@@ -93,7 +79,7 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
             return;
           }
           const parsed = result.data.map((rawRow, index) => validateRow(rawRow, index + 2)); // +2: header is row 1, data starts at row 2
-          setRows(parsed);
+          setRows(markWithinFileDuplicates(parsed, t));
         },
         error: (err) => {
           setFileError(err.message || t('bulkCaseUpload.errors.fileRejectedGeneric'));

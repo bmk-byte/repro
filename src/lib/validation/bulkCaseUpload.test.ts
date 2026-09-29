@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateCaseRow, COLUMNS, type Translate } from './bulkCaseUpload';
+import { validateCaseRow, markWithinFileDuplicates, COLUMNS, type Translate, type ParsedRow } from './bulkCaseUpload';
 import { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 // Identity-ish translator so assertions can check on the key/params actually
@@ -137,5 +137,74 @@ describe('validateCaseRow — row numbering / metadata', () => {
   it('preserves the row number passed in (used for +2 offset in the caller: header=row 1)', () => {
     const result = validateCaseRow(buildValidRawRow(), 17, countryIdByName, t);
     expect(result.rowNumber).toBe(17);
+  });
+});
+
+describe('markWithinFileDuplicates', () => {
+  const row = (rowNumber: number, title: string, countryId: string, natureOfCase: string, errors: string[] = []): ParsedRow => ({
+    rowNumber,
+    data: { title, country_id: countryId, nature_of_case: natureOfCase },
+    errors,
+  });
+
+  it('leaves rows with distinct (title, country, nature_of_case) tuples untouched', () => {
+    const rows = [
+      row(2, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+      row(3, 'Roe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+    ];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors).toEqual([]);
+  });
+
+  it('flags the second occurrence of a repeated (title, country, nature_of_case) tuple — mirrors the DB unique constraint', () => {
+    // pending_cases enforces UNIQUE(title, country_id, nature_of_case) at
+    // the database level, so this never actually produces a duplicate row
+    // — but without this check the user only discovers a duplicate after
+    // clicking submit, one generic per-row failure at a time, rather than
+    // seeing it in the preview before submitting.
+    const rows = [
+      row(2, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+      row(3, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+    ];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors.some(e => e.includes('duplicateRowInFile'))).toBe(true);
+  });
+
+  it('treats the same title in a different country as distinct, not a duplicate', () => {
+    const rows = [
+      row(2, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+      row(3, 'Doe v. Ministry', 'uganda-id', 'Constitutional challenge'),
+    ];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors).toEqual([]);
+  });
+
+  it('matches case-insensitively on title and nature_of_case', () => {
+    const rows = [
+      row(2, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+      row(3, 'DOE V. MINISTRY', 'kenya-id', 'CONSTITUTIONAL CHALLENGE'),
+    ];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[1].errors.some(e => e.includes('duplicateRowInFile'))).toBe(true);
+  });
+
+  it('does not flag rows missing title or nature_of_case against each other (already caught by required-field checks)', () => {
+    const rows = [row(2, '', 'kenya-id', ''), row(3, '', 'kenya-id', '')];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors).toEqual([]);
+  });
+
+  it('preserves pre-existing errors on a row alongside the new duplicate error', () => {
+    const rows = [
+      row(2, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge'),
+      row(3, 'Doe v. Ministry', 'kenya-id', 'Constitutional challenge', ['some other error']),
+    ];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[1].errors).toContain('some other error');
+    expect(result[1].errors.some(e => e.includes('duplicateRowInFile'))).toBe(true);
   });
 });

@@ -110,3 +110,45 @@ export function validateRapidResponseRow(
 
   return { rowNumber, data, errors };
 }
+
+/**
+ * Flags rows whose case_reference repeats an earlier row in the same
+ * upload. This is a real, verified gap: unlike the Cases bulk upload
+ * (pending_cases has a DB-level UNIQUE(title, country_id, nature_of_case)
+ * constraint), the `cases` table this uploader inserts into has NO unique
+ * constraint on case_reference or anything else — nothing at the database
+ * layer stops two rows in the same file (or a re-uploaded file) from
+ * becoming two full duplicate, immediately-published cases
+ * (moderation_status: 'approved'). This function catches the
+ * within-file half of that gap before submission; see
+ * checkExistingCaseReferences in bulkRapidResponseUpload's caller for the
+ * against-the-database half.
+ *
+ * The first occurrence of a given case_reference is left alone; the 2nd
+ * and later occurrences are marked invalid, since the first is presumably
+ * the intended, correct row.
+ */
+export function markWithinFileDuplicates(rows: ParsedRow[], t: Translate): ParsedRow[] {
+  const seen = new Map<string, number>(); // normalized case_reference -> first row number
+  return rows.map(row => {
+    const ref = row.data.case_reference?.trim().toLowerCase();
+    if (!ref) return row;
+
+    const firstRowNumber = seen.get(ref);
+    if (firstRowNumber === undefined) {
+      seen.set(ref, row.rowNumber);
+      return row;
+    }
+
+    return {
+      ...row,
+      errors: [
+        ...row.errors,
+        t('bulkUpload.errors.duplicateCaseReferenceInFile', {
+          value: row.data.case_reference,
+          row: firstRowNumber,
+        }),
+      ],
+    };
+  });
+}

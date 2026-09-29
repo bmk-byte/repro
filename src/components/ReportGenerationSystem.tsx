@@ -4,6 +4,7 @@ import { Card, Title, Text, Flex } from '@tremor/react';
 import { Download, FileText, BarChartHorizontal, PieChart, RefreshCw } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
+import { sanitizeCsvCell, downloadCsv } from '../lib/csv';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -16,23 +17,6 @@ const RESTRICTED_ORGANIZATIONS = [
   'Ubuntu Justice center',
   'Dumaic Global Health'
 ];
-
-const escapeCSV = (val: unknown): string => {
-  const str = val == null ? '' : String(val);
-  return str.includes(',') || str.includes('"') || str.includes('\n')
-    ? `"${str.replace(/"/g, '""')}"`
-    : str;
-};
-
-const downloadFile = (content: string, filename: string, mimeType: string) => {
-  const blob = new Blob(['\uFEFF' + content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-};
 
 const ReportGenerationSystem: React.FC = () => {
   const { t } = useTranslation('misc');
@@ -145,7 +129,7 @@ const ReportGenerationSystem: React.FC = () => {
     const headers = new Set<string>(['Case ID', 'Case Title']);
     allMetrics.forEach(m => headerMap[m]?.forEach(h => headers.add(h)));
 
-    const headerRow = Array.from(headers).map(escapeCSV).join(',');
+    const headerRow = Array.from(headers).map(sanitizeCsvCell).join(',');
 
     const rows = cases.map(c => {
       const row: Record<string, unknown> = {
@@ -162,7 +146,7 @@ const ReportGenerationSystem: React.FC = () => {
         'Priority': c.priority_level ?? '',
         'Summary': c.case_summary ?? '',
       };
-      return Array.from(headers).map(h => escapeCSV(row[h])).join(',');
+      return Array.from(headers).map(h => sanitizeCsvCell(row[h])).join(',');
     });
 
     return [headerRow, ...rows].join('\r\n');
@@ -170,8 +154,8 @@ const ReportGenerationSystem: React.FC = () => {
 
   // Build summary CSV for template reports
   const buildSummaryCSV = (title: string, rows: [string, unknown][]): string => {
-    const header = `${escapeCSV(title)} - Generated ${new Date().toLocaleDateString()}`;
-    const lines = rows.map(([label, value]) => `${escapeCSV(label)},${escapeCSV(value)}`);
+    const header = `${sanitizeCsvCell(title)} - Generated ${new Date().toLocaleDateString()}`;
+    const lines = rows.map(([label, value]) => `${sanitizeCsvCell(label)},${sanitizeCsvCell(value)}`);
     return [header, '', ...lines].join('\r\n');
   };
 
@@ -230,7 +214,7 @@ const ReportGenerationSystem: React.FC = () => {
 
       if (selectedFormat === 'csv') {
         const csv = buildCSVFromCases(cases, selectedMetrics);
-        downloadFile(csv, `report-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
+        downloadCsv(csv, `report-${dateSuffix}.csv`);
         toast.success(t('reportGenerationSystem.downloadedCsv', { count: cases.length }));
 
       } else if (selectedFormat === 'pdf') {
@@ -315,7 +299,7 @@ const ReportGenerationSystem: React.FC = () => {
           ['Avg Processing Time (days)', reportStats.avgProcessingTime],
         ];
         const csv = buildSummaryCSV('Performance Summary Report', rows);
-        downloadFile(csv, `performance-summary-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
+        downloadCsv(csv, `performance-summary-${dateSuffix}.csv`);
         toast.success(t('reportGenerationSystem.performanceSummaryDownloaded'));
 
       } else if (type === 'country') {
@@ -326,7 +310,7 @@ const ReportGenerationSystem: React.FC = () => {
         });
         const rows: [string, unknown][] = Object.entries(byCountry).sort((a, b) => (b[1] as number) - (a[1] as number));
         const csv = buildSummaryCSV('Country Analysis Report', [['Country', 'Case Count'], ...rows]);
-        downloadFile(csv, `country-analysis-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
+        downloadCsv(csv, `country-analysis-${dateSuffix}.csv`);
         toast.success(t('reportGenerationSystem.countryAnalysisDownloaded'));
 
       } else if (type === 'impact') {
@@ -344,7 +328,7 @@ const ReportGenerationSystem: React.FC = () => {
           ...Object.entries(byCategory).sort((a, b) => (b[1] as number) - (a[1] as number)) as [string, unknown][],
         ];
         const csv = buildSummaryCSV('Impact Assessment Report', rows);
-        downloadFile(csv, `impact-assessment-${dateSuffix}.csv`, 'text/csv;charset=utf-8;');
+        downloadCsv(csv, `impact-assessment-${dateSuffix}.csv`);
         toast.success(t('reportGenerationSystem.impactAssessmentDownloaded'));
       }
 

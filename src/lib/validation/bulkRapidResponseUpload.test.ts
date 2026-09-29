@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateRapidResponseRow, COLUMNS, mapStageToStatus, type Translate } from './bulkRapidResponseUpload';
+import { validateRapidResponseRow, markWithinFileDuplicates, COLUMNS, mapStageToStatus, type Translate, type ParsedRow } from './bulkRapidResponseUpload';
 import { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 const t: Translate = (key, params) => (params ? `${key}:${JSON.stringify(params)}` : key);
@@ -91,6 +91,57 @@ describe('validateRapidResponseRow — malformed / invalid values', () => {
     const row = buildValidRawRow({ [header]: 'Not A Real Category' });
     const result = validateRapidResponseRow(row, 2, countryIdByName, t);
     expect(result.errors.some(e => e.includes('invalidCategory'))).toBe(true);
+  });
+});
+
+describe('markWithinFileDuplicates', () => {
+  const row = (rowNumber: number, caseReference: string): ParsedRow => ({
+    rowNumber,
+    data: { case_reference: caseReference },
+    errors: [],
+  });
+
+  it('leaves rows with unique case_reference values untouched', () => {
+    const rows = [row(2, 'RR-2025-001'), row(3, 'RR-2025-002')];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors).toEqual([]);
+  });
+
+  it('flags the second (and later) occurrence of a repeated case_reference, leaving the first untouched', () => {
+    // This is a regression test for a real, verified production bug: the
+    // `cases` table (where this uploader inserts) has no unique constraint
+    // of any kind, so a re-uploaded or overlapping file previously created
+    // full duplicate, immediately-published cases with no warning at all.
+    const rows = [row(2, 'RR-2025-001'), row(3, 'RR-2025-002'), row(4, 'RR-2025-001')];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]); // first occurrence (row 2) is fine
+    expect(result[1].errors).toEqual([]); // unrelated reference is fine
+    expect(result[2].errors.some(e => e.includes('duplicateCaseReferenceInFile'))).toBe(true); // second occurrence (row 4) is flagged
+  });
+
+  it('matches case-insensitively and ignores surrounding whitespace', () => {
+    const rows = [row(2, 'RR-2025-001'), row(3, ' rr-2025-001 ')];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors.some(e => e.includes('duplicateCaseReferenceInFile'))).toBe(true);
+  });
+
+  it('does not flag rows with an empty case_reference against each other (already caught by the required-field check)', () => {
+    const rows = [row(2, ''), row(3, '')];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[0].errors).toEqual([]);
+    expect(result[1].errors).toEqual([]);
+  });
+
+  it('preserves pre-existing errors on a row alongside the new duplicate error', () => {
+    const rows: ParsedRow[] = [
+      row(2, 'RR-2025-001'),
+      { rowNumber: 3, data: { case_reference: 'RR-2025-001' }, errors: ['some other error'] },
+    ];
+    const result = markWithinFileDuplicates(rows, t);
+    expect(result[1].errors).toContain('some other error');
+    expect(result[1].errors.some(e => e.includes('duplicateCaseReferenceInFile'))).toBe(true);
   });
 });
 

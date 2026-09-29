@@ -168,7 +168,9 @@
       "invalidCategory": "« {{value}} » n'est pas une catégorie d'affaire reconnue",
       "rateLimited": "Trop d'importations groupées. Veuillez réessayer plus tard.",
       "submitFailed": "Échec de la création des dossiers",
-      "unexpectedRowError": "Cette ligne n'a pas pu être enregistrée en raison d'une erreur inattendue"
+      "unexpectedRowError": "Cette ligne n'a pas pu être enregistrée en raison d'une erreur inattendue",
+      "duplicateCaseReferenceInFile": "La référence de dossier « {{value}} » est également utilisée à la ligne {{row}} de ce fichier — chaque dossier doit avoir une référence unique",
+      "duplicateCaseReferenceExisting": "La référence de dossier « {{value}} » existe déjà — ce dossier a déjà été créé"
     }
   },
   "casesPage": {

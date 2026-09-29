@@ -168,7 +168,9 @@
       "invalidCategory": "\"{{value}}\" is not a recognized Case Category",
       "rateLimited": "Too many bulk uploads. Please try again later.",
       "submitFailed": "Failed to create cases",
-      "unexpectedRowError": "This row could not be saved due to an unexpected error"
+      "unexpectedRowError": "This row could not be saved due to an unexpected error",
+      "duplicateCaseReferenceInFile": "Case Reference \"{{value}}\" is also used in row {{row}} of this file — each case must have a unique reference",
+      "duplicateCaseReferenceExisting": "Case Reference \"{{value}}\" already exists — this case has already been created"
     }
   },
   "casesPage": {

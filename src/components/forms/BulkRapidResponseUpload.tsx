@@ -7,25 +7,21 @@ import { supabase } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
 import { reportError } from '../../lib/errorReporting';
 import { fetchCountries, toCountryIdByName, type Country } from '../../lib/data/countries';
+import { findExistingCaseReferences } from '../../lib/data/cases';
+import { toCsv, downloadCsv } from '../../lib/csv';
 import { Button, Card } from '../ui';
 import {
   COLUMNS,
   MAX_ROWS,
   mapStageToStatus,
   validateRapidResponseRow,
+  markWithinFileDuplicates,
   type ParsedRow,
 } from '../../lib/validation/bulkRapidResponseUpload';
 
 interface BulkRapidResponseUploadProps {
   onDone?: () => void;
 }
-
-const escapeCSV = (val: unknown): string => {
-  const str = val == null ? '' : String(val);
-  return str.includes(',') || str.includes('"') || str.includes('\n')
-    ? `"${str.replace(/"/g, '""')}"`
-    : str;
-};
 
 interface SubmitResults {
   successCount: number;
@@ -59,16 +55,8 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
   const countryIdByName = useMemo(() => toCountryIdByName(countries), [countries]);
 
   const downloadTemplate = () => {
-    const header = COLUMNS.map(c => escapeCSV(c.header)).join(',');
-    const example = COLUMNS.map(c => escapeCSV(c.example)).join(',');
-    const csv = `${header}\n${example}\n`;
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'bulk-rapid-response-upload-template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    const csv = toCsv([COLUMNS.map(c => c.header), COLUMNS.map(c => c.example)]);
+    downloadCsv(csv, 'bulk-rapid-response-upload-template.csv');
   };
 
   const validateRow = (rawRow: Record<string, string>, rowNumber: number): ParsedRow =>
@@ -105,7 +93,7 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
             return;
           }
           const parsed = result.data.map((rawRow, index) => validateRow(rawRow, index + 2));
-          setRows(parsed);
+          setRows(markWithinFileDuplicates(parsed, t));
         },
         error: (err) => {
           setFileError(err.message || t('bulkUpload.errors.fileRejectedGeneric'));
@@ -144,13 +132,39 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
         return;
       }
 
-      // One row at a time, not a single array insert, so one bad row's
-      // error is attributable and doesn't abort the whole batch.
+      // `cases` has no unique constraint of any kind (unlike pending_cases),
+      // so nothing at the database level stops a re-uploaded or overlapping
+      // file from creating full duplicate, immediately-published cases.
+      // Check case_reference against existing rows before inserting
+      // anything — see findExistingCaseReferences's own comment for the
+      // production evidence that motivated this.
       const failures: SubmitResults['failures'] = [];
       let successCount = 0;
 
+      const { data: existingRefs, error: existingRefsError } = await findExistingCaseReferences(
+        validRows.map(row => row.data.case_reference).filter(Boolean)
+      );
+      if (existingRefsError) {
+        // Fail closed here, unlike the rate limiter: inserting without
+        // having been able to check for duplicates risks creating exactly
+        // the duplicate cases this check exists to prevent.
+        throw existingRefsError;
+      }
+
+      // One row at a time, not a single array insert, so one bad row's
+      // error is attributable and doesn't abort the whole batch.
       for (const row of validRows) {
         const d = row.data;
+
+        if (d.case_reference && existingRefs?.has(d.case_reference)) {
+          failures.push({
+            rowNumber: row.rowNumber,
+            title: d.case_filed,
+            message: t('bulkUpload.errors.duplicateCaseReferenceExisting', { value: d.case_reference }),
+          });
+          continue;
+        }
+
         const { error } = await supabase.from('cases').insert({
           case_reference: d.case_reference,
           case_filed: d.case_filed,

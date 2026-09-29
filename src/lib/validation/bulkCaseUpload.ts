@@ -146,3 +146,42 @@ export function validateCaseRow(
 
   return { rowNumber, data, errors };
 }
+
+/**
+ * Flags rows whose (title, country, nature_of_case) combination repeats an
+ * earlier row in the same upload — the same tuple the database's
+ * `pending_cases_unique_submission` UNIQUE(title, country_id,
+ * nature_of_case) constraint enforces at insert time. That DB constraint
+ * already guarantees no duplicate ever actually gets committed, but
+ * without this check the user only finds out a row was a duplicate after
+ * clicking submit (surfaced as a generic per-row failure), one row at a
+ * time, rather than seeing it flagged in the preview before submitting at
+ * all. This is a UX complement to existing DB-level protection, not a
+ * substitute for it.
+ *
+ * The first occurrence of a given tuple is left alone; later occurrences
+ * are marked invalid.
+ */
+export function markWithinFileDuplicates(rows: ParsedRow[], t: Translate): ParsedRow[] {
+  const seen = new Map<string, number>(); // normalized tuple key -> first row number
+  return rows.map(row => {
+    const title = row.data.title?.trim().toLowerCase();
+    const natureOfCase = row.data.nature_of_case?.trim().toLowerCase();
+    if (!title || !natureOfCase) return row; // missing-required-field errors already cover this row
+
+    const key = `${title}\u0000${row.data.country_id ?? ''}\u0000${natureOfCase}`;
+    const firstRowNumber = seen.get(key);
+    if (firstRowNumber === undefined) {
+      seen.set(key, row.rowNumber);
+      return row;
+    }
+
+    return {
+      ...row,
+      errors: [
+        ...row.errors,
+        t('bulkCaseUpload.errors.duplicateRowInFile', { row: firstRowNumber }),
+      ],
+    };
+  });
+}

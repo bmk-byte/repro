@@ -144,3 +144,41 @@ export async function fetchCaseFilterOptions(): Promise<
 
   return { data: { categories, partners }, error: null };
 }
+
+/**
+ * Returns which of the given case_reference values already exist in
+ * `cases`. Used by the Rapid Response bulk upload to catch duplicates
+ * against already-published cases BEFORE inserting — `cases` has no
+ * unique constraint of any kind (unlike `pending_cases`, which enforces
+ * UNIQUE(title, country_id, nature_of_case) at the database level), so
+ * without this check a re-uploaded or overlapping file silently creates
+ * full duplicate, immediately-published cases. This was found to have
+ * already happened in production: 9 pairs of cases sharing the same
+ * case_reference, created minutes apart — the signature of a duplicate
+ * submission, not unrelated data.
+ *
+ * This check narrows the risk window but is not a substitute for a
+ * database-level constraint — two submissions racing between this check
+ * and the actual insert could still both succeed. Adding a proper unique
+ * constraint on `cases.case_reference` requires first resolving the
+ * existing duplicate pairs already in production, which is a data
+ * decision for a human to make (which of each pair is correct, whether
+ * they've diverged since creation) — deliberately not done automatically
+ * by this change.
+ */
+export async function findExistingCaseReferences(caseReferences: string[]): Promise<DataResult<Set<string>>> {
+  const nonEmpty = caseReferences.map(r => r.trim()).filter(Boolean);
+  if (nonEmpty.length === 0) return { data: new Set(), error: null };
+
+  const { data, error } = await supabase
+    .from('cases')
+    .select('case_reference')
+    .in('case_reference', nonEmpty);
+
+  if (error) {
+    reportError(error, { context: 'data.cases.findExistingCaseReferences', category: 'DATA' });
+    return { data: null, error };
+  }
+
+  return { data: new Set((data ?? []).map((row: { case_reference: string | null }) => row.case_reference ?? '')), error: null };
+}

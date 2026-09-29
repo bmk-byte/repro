@@ -6,6 +6,7 @@ import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import { toast } from '../lib/toast';
 import { reportError } from '../lib/errorReporting';
 import { fetchCountries as fetchCountriesData } from '../lib/data/countries';
+import { toCsv, downloadCsv } from '../lib/csv';
 import RapidResponseCaseForm from './RapidResponseCaseForm';
 import BulkRapidResponseUpload from './forms/BulkRapidResponseUpload';
 import RapidResponseCaseDetails from './RapidResponseCaseDetails';
@@ -464,13 +465,6 @@ const RapidResponseCasesPage: React.FC = () => {
       return;
     }
 
-    const escape = (val: unknown) => {
-      const str = val == null ? '' : String(val);
-      return str.includes(',') || str.includes('"') || str.includes('\n')
-        ? `"${str.replace(/"/g, '""')}"`
-        : str;
-    };
-
     const headers = [
       t('casesPage.export.headers.caseTitle'), t('casesPage.export.headers.summary'), t('casesPage.export.headers.priority'), t('casesPage.export.headers.status'), t('casesPage.export.headers.stage'),
       t('casesPage.export.headers.category'), t('casesPage.export.headers.partner'), t('casesPage.export.headers.country'), t('casesPage.export.headers.dateFiled'),
@@ -478,27 +472,21 @@ const RapidResponseCasesPage: React.FC = () => {
     ];
 
     const rows = cases.map(c => [
-      escape(c.case_filed),
-      escape(c.case_summary),
-      escape(c.priority_level),
-      escape(c.status),
-      escape(c.rapid_response_stage),
-      escape(Array.isArray(c.case_categories) ? c.case_categories.join('; ') : c.case_categories),
-      escape(c.partner),
-      escape(c.countries?.name),
-      escape(c.created_at ? new Date(c.created_at).toLocaleDateString() : ''),
-      escape(c.profiles?.full_name),
-      escape(c.profiles?.organization),
+      c.case_filed,
+      c.case_summary,
+      c.priority_level,
+      c.status,
+      c.rapid_response_stage,
+      Array.isArray(c.case_categories) ? c.case_categories.join('; ') : c.case_categories,
+      c.partner,
+      c.countries?.name,
+      c.created_at ? new Date(c.created_at).toLocaleDateString() : '',
+      c.profiles?.full_name,
+      c.profiles?.organization,
     ]);
 
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `rapid-response-cases-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    const csv = toCsv([headers, ...rows]);
+    downloadCsv(csv, `rapid-response-cases-${new Date().toISOString().slice(0, 10)}.csv`);
     toast.success(t('casesPage.toasts.exportedCases', { count: cases.length }));
   };
 
