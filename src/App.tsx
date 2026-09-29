@@ -214,12 +214,6 @@ function DashboardApp() {
       if (event === 'SIGNED_OUT' || !session) {
         signedInUserId.current = null;
         setUserProfile(null);
-
-        // ELU Analytics: clear the identified user on sign-out so subsequent
-        // activity is no longer attributed to the previous person.
-        if (typeof window !== 'undefined' && window.elu) {
-          window.elu.reset();
-        }
         return;
       }
 
@@ -245,14 +239,6 @@ function DashboardApp() {
       setShowAuthModal(false);
       setActiveTab('dashboard');
       fetchUserProfile(session.user.id);
-
-      // ELU Analytics: attach the signed-in user's email to their session so product
-      // analytics can attribute behavior to a real person instead of an anonymous
-      // device. Optional — safe to remove if you don't want to share email with
-      // analytics. See https://elu.dev for docs.
-      if (typeof window !== 'undefined' && window.elu && session.user?.email) {
-        window.elu.identify(session.user.email, { email: session.user.email });
-      }
     });
 
     return () => subscription.unsubscribe();

@@ -194,6 +194,7 @@
     "loadingDetails": "Loading submission details…",
     "failedToCheckRecord": "Failed to check for existing record",
     "documentDownloadStarted": "Document download started",
+    "documentDownloadFailed": "Couldn't load this document. Please try again.",
     "submissionInformation": "Submission Information",
     "titleLabel": "Title",
     "submissionDate": "Submission Date",

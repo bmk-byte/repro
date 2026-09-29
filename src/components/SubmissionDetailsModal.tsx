@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
+import { getFreshFileUrl } from '../lib/storage';
 import CaseDetails from './CaseDetails';
 import JudgmentDetails from './JudgmentDetails';
 import { LoadingState } from './ui';
@@ -59,16 +60,25 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
     }
   };
 
-  const handleDownloadDocument = () => {
+  const handleDownloadDocument = async () => {
     if (!submission.document_url) return;
-    
+
+    let downloadUrl = submission.document_url;
+    try {
+      downloadUrl = await getFreshFileUrl(submission.document_url);
+    } catch (err) {
+      console.error('Failed to resolve a fresh document URL:', err);
+      toast.error(t('submissionDetailsModal.documentDownloadFailed'));
+      return;
+    }
+
     const link = document.createElement('a');
-    link.href = submission.document_url;
+    link.href = downloadUrl;
     link.download = submission.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     toast.success(t('submissionDetailsModal.documentDownloadStarted'));
   };
 

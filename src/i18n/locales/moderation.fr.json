@@ -194,6 +194,7 @@
     "loadingDetails": "Chargement des détails de la soumission…",
     "failedToCheckRecord": "Échec de la vérification de l'existence de l'enregistrement",
     "documentDownloadStarted": "Téléchargement du document commencé",
+    "documentDownloadFailed": "Impossible de charger ce document. Veuillez réessayer.",
     "submissionInformation": "Informations sur la soumission",
     "titleLabel": "Titre",
     "submissionDate": "Date de soumission",

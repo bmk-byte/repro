@@ -9,17 +9,13 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { checkRateLimitsFailOpen } from '../_shared/rateLimit.ts';
 import { fetchWithTimeout, UpstreamTimeoutError } from '../_shared/fetchWithTimeout.ts';
 import { reportEdgeFunctionError } from '../_shared/sentry.ts';
+import { buildCorsHeaders } from '../_shared/cors.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-function errorResponse(message: string, status: number, code?: string): Response {
+function errorResponse(corsHeaders: Record<string, string>, message: string, status: number, code?: string): Response {
   return new Response(JSON.stringify({ error: message, code }), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -37,24 +33,26 @@ const IP_MAX = 20;
 const IP_WINDOW_SECONDS = 300;
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
   if (req.method !== 'POST') {
-    return errorResponse('Method not allowed', 405);
+    return errorResponse(corsHeaders, 'Method not allowed', 405);
   }
 
   let body: { email?: string; password?: string };
   try {
     body = await req.json();
   } catch {
-    return errorResponse('Invalid JSON body', 400);
+    return errorResponse(corsHeaders, 'Invalid JSON body', 400);
   }
 
   const email = body.email?.trim().toLowerCase();
   const password = body.password;
   if (!email || !password) {
-    return errorResponse('email and password are required', 400);
+    return errorResponse(corsHeaders, 'email and password are required', 400);
   }
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
@@ -71,7 +69,7 @@ Deno.serve(async (req) => {
   ]);
 
   if (blocked) {
-    return errorResponse('Too many login attempts. Please try again later.', 429, 'rate_limited');
+    return errorResponse(corsHeaders, 'Too many login attempts. Please try again later.', 429, 'rate_limited');
   }
 
   // Forward straight to GoTrue's own token endpoint and pass its response
@@ -107,10 +105,10 @@ Deno.serve(async (req) => {
     if (err instanceof UpstreamTimeoutError) {
       console.error('auth-login: upstream GoTrue request timed out');
       await reportEdgeFunctionError(err, { category: 'RELIABILITY', functionName: 'auth-login', extra: { reason: 'upstream_timeout' } });
-      return errorResponse('The sign-in request took too long. Please try again.', 504, 'upstream_timeout');
+      return errorResponse(corsHeaders, 'The sign-in request took too long. Please try again.', 504, 'upstream_timeout');
     }
     console.error('auth-login: upstream GoTrue request failed:', err);
     await reportEdgeFunctionError(err, { category: 'RELIABILITY', functionName: 'auth-login', extra: { reason: 'upstream_error' } });
-    return errorResponse('Sign-in is temporarily unavailable. Please try again shortly.', 502, 'upstream_error');
+    return errorResponse(corsHeaders, 'Sign-in is temporarily unavailable. Please try again shortly.', 502, 'upstream_error');
   }
 });

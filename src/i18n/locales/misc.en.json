@@ -210,6 +210,7 @@
     "popupBlocked": "Pop-up blocked. Allow pop-ups to download PDF.",
     "selectAtLeastOneMetric": "Please select at least one metric",
     "noDataAvailable": "No data available for the selected criteria",
+    "rateLimited": "Too many reports generated. Please try again later.",
     "downloadedCsv": "Downloaded CSV with {{count}} records",
     "printDialogOpened": "Print dialog opened — choose \"Save as PDF\"",
     "failedToGenerateReport": "Failed to generate report. Please try again.",

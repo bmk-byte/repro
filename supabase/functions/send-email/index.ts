@@ -1,12 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { buildCorsHeaders } from '../_shared/cors.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const EMAIL_FROM = Deno.env.get('EMAIL_FROM') ?? 'onboarding@resend.dev';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 /** Uniform `{ error, code?, status }` shape for this function's error responses. */
 function errorResponse(message: string, status: number, extraHeaders: Record<string, string> = {}, code?: string): Response {
@@ -29,6 +25,8 @@ interface SendEmailRequest {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

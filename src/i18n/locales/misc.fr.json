@@ -210,6 +210,7 @@
     "popupBlocked": "Fenêtre pop-up bloquée. Autorisez les pop-ups pour télécharger le PDF.",
     "selectAtLeastOneMetric": "Veuillez sélectionner au moins un indicateur",
     "noDataAvailable": "Aucune donnée disponible pour les critères sélectionnés",
+    "rateLimited": "Trop de rapports générés. Veuillez réessayer plus tard.",
     "downloadedCsv": "CSV téléchargé avec {{count}} enregistrements",
     "printDialogOpened": "Boîte de dialogue d'impression ouverte — choisissez « Enregistrer au format PDF »",
     "failedToGenerateReport": "Échec de la génération du rapport. Veuillez réessayer.",

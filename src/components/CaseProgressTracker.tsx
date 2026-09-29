@@ -146,11 +146,13 @@ const CaseProgressTracker: React.FC<CaseProgressTrackerProps> = ({ caseId, onUpd
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
+        const { data, error: signError } = await supabase.storage
           .from('stage-documents')
-          .getPublicUrl(fileName);
+          .createSignedUrl(fileName, 3600);
 
-        const documents = [...stage.documents, publicUrl];
+        if (signError || !data?.signedUrl) throw signError ?? new Error('Failed to sign uploaded file URL');
+
+        const documents = [...stage.documents, data.signedUrl];
 
         const { error } = await supabase
           .from('case_stages')

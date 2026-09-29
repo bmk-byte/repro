@@ -201,6 +201,20 @@ const ReportGenerationSystem: React.FC = () => {
       return;
     }
 
+    if (currentUserId) {
+      // Fail open: only an explicit `false` blocks — an RPC error (e.g.
+      // offline) shouldn't itself lock a user out of generating a report.
+      const { data: allowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
+        p_key: `report-export:${currentUserId}`,
+        p_max_count: 20,
+        p_window_seconds: 3600,
+      });
+      if (!rateLimitError && allowed === false) {
+        toast.error(t('reportGenerationSystem.rateLimited'));
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const { data: cases, error } = await buildBaseQuery();
@@ -265,6 +279,18 @@ const ReportGenerationSystem: React.FC = () => {
   };
 
   const handleTemplateDownload = async (type: 'performance' | 'country' | 'impact') => {
+    if (currentUserId) {
+      const { data: allowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
+        p_key: `report-export:${currentUserId}`,
+        p_max_count: 20,
+        p_window_seconds: 3600,
+      });
+      if (!rateLimitError && allowed === false) {
+        toast.error(t('reportGenerationSystem.rateLimited'));
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const isAfyanahakiModerator = isModerator && userOrganization === 'Afya na Haki';

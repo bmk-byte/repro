@@ -113,7 +113,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
           </div>
         ) : (
           <div className="flex-1 overflow-hidden">
-            <PDFViewer fileUrl={documentUrl} />
+            <PDFViewer fileUrl={resolvedUrl} />
           </div>
         )}
       </div>

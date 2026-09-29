@@ -158,6 +158,28 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
       if (!isEmailValid) return;
       setLoading(true);
       try {
+        // Fail open: only an explicit `false` blocks — an RPC error must
+        // not itself lock someone out of resetting their password. This is
+        // a client-enforced check (unlike login/signup, which are proxied
+        // through an edge function specifically so the limit can't be
+        // bypassed) — a direct API call to resetPasswordForEmail would skip
+        // it. Closing that gap would mean adding an edge-function proxy for
+        // password reset too, which is a larger change than this pass.
+        const normalizedEmail = email.trim().toLowerCase();
+        const { data: allowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
+          p_key: `pwreset:${normalizedEmail}`,
+          p_max_count: 3,
+          p_window_seconds: 900,
+        });
+        if (rateLimitError) {
+          reportError(rateLimitError, { context: 'Auth.passwordReset.rateLimit', category: 'SECURITY' });
+        }
+        if (!rateLimitError && allowed === false) {
+          toast.error(t('auth.resetRateLimited'));
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: `${window.location.origin}/reset-password`,
         });
@@ -225,7 +247,16 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
             setLoading(false);
             return;
           }
-          console.error('Sign up error:', signUpResult.data);
+          // Log only the error-describing fields, not the full response body
+          // — on some failure paths GoTrue's response can carry a partial
+          // user object (email, metadata), which has no reason to be in
+          // console/Sentry output.
+          console.error('Sign up error:', {
+            code: signUpResult.data?.code,
+            error: signUpResult.data?.error,
+            msg: signUpResult.data?.msg,
+            error_description: signUpResult.data?.error_description,
+          });
           throw new Error(proxyErrorMessage(signUpResult.data));
         }
 

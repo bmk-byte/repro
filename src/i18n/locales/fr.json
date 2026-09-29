@@ -177,6 +177,7 @@
     "pleaseSelectOrganization": "Veuillez sélectionner votre organisation",
     "pleaseEnterOrganizationName": "Veuillez saisir le nom de votre organisation",
     "resetInstructionsSent": "Instructions envoyées. Vérifiez votre boîte de réception.",
+    "resetRateLimited": "Trop de demandes de réinitialisation. Veuillez réessayer plus tard.",
     "resetServiceUnavailable": "Le service de réinitialisation du mot de passe est temporairement indisponible. Veuillez réessayer plus tard ou contacter votre administrateur pour réinitialiser votre mot de passe manuellement.",
     "registrationFailed": "Échec de l'inscription. Veuillez réessayer.",
     "registrationSuccess": "Inscription réussie ! Vous pouvez maintenant vous connecter.",

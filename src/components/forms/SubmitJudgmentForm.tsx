@@ -401,11 +401,13 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
 
           if (uploadError) throw uploadError;
 
-          const { data: { publicUrl } } = supabase.storage
+          const { data, error: signError } = await supabase.storage
             .from(storageBucket)
-            .getPublicUrl(fileName);
+            .createSignedUrl(fileName, 3600);
 
-          return publicUrl;
+          if (signError || !data?.signedUrl) throw signError ?? new Error('Failed to sign uploaded file URL');
+
+          return data.signedUrl;
         });
 
         fileUrl = uploadResult;

@@ -32,12 +32,16 @@ const LandingFooter: React.FC = () => {
             </a>
           </div>
 
-          <div className="hidden md:flex items-center gap-4 text-xs text-stone-400">
-            <a href="#" className="hover:text-primary transition-colors">{t('footer.privacyPolicy')}</a>
-            <a href="#" className="hover:text-primary transition-colors">{t('footer.termsOfService')}</a>
-            <a href="#" className="hover:text-primary transition-colors">{t('footer.cookiePolicy')}</a>
-            <a href="#" className="termly-display-preferences hover:text-primary transition-colors">{t('footer.consentPreferences')}</a>
-          </div>
+          {/*
+            Privacy Policy / Terms of Service / Cookie Policy links are
+            intentionally omitted until the organization provides real
+            legal content for them — a dead `href="#"` link (or a live
+            link to a blank page) is worse than no link, since it implies
+            a policy exists when it doesn't. A "Consent Preferences" link
+            was also removed: it referenced a Termly widget that was never
+            actually loaded, and there is no cookie/analytics consent to
+            manage now that third-party tracking has been removed.
+          */}
         </div>
       </div>
     </footer>
