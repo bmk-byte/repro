@@ -24,7 +24,14 @@
 
   `legal-documents` is a superseded bucket with zero references anywhere in
   application code (confirmed via full-repo search before writing this
-  migration) — it is dropped outright rather than locked down.
+  migration, and confirmed via a live read-only query that it does not even
+  exist in production). Supabase blocks direct `DELETE` on
+  `storage.buckets`/`storage.objects` (a `protect_delete()` trigger requires
+  going through the Storage API instead — running a raw `DELETE` here
+  fails with `42501`), so this migration does not attempt to drop it via
+  SQL at all. If it's ever found to exist in some other environment, remove
+  it via the Supabase Dashboard's Storage UI or the Storage API, not a
+  migration.
 
   ## Buckets intentionally left untouched (public reference material, not
   case-specific)
@@ -34,16 +41,12 @@
     Resources-page material, meant for open access.
 */
 
--- 1. Drop the superseded, unreferenced bucket entirely.
-DELETE FROM storage.objects WHERE bucket_id = 'legal-documents';
-DELETE FROM storage.buckets WHERE id = 'legal-documents';
-
--- 2. Flip the four case-document buckets to private.
+-- 1. Flip the four case-document buckets to private.
 UPDATE storage.buckets
 SET public = false
 WHERE id IN ('case-documents', 'submission-documents', 'judgments', 'stage-documents');
 
--- 3. Replace each bucket's permissive SELECT policy with an
+-- 2. Replace each bucket's permissive SELECT policy with an
 --    authenticated-only equivalent. INSERT/UPDATE/DELETE policies were
 --    already `TO authenticated` and are left as-is.
 
