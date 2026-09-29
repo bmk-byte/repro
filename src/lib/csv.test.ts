@@ -33,6 +33,24 @@ describe('sanitizeCsvCell — formula/CSV injection prevention', () => {
     expect(sanitizeCsvCell('a\nb')).toBe('"a\nb"');
   });
 
+  it('quotes a value containing a bare carriage return, even when it does not itself start with a formula trigger', () => {
+    // Regression test: an embedded \r that isn't wrapped in quotes can be
+    // read by a spreadsheet application as a row break, exposing whatever
+    // follows it as an unguarded new cell — e.g. `safe\r=1+1` would
+    // otherwise be emitted as-is (no comma/quote/newline, and the value
+    // doesn't *start* with `=`), letting `=1+1` execute as its own,
+    // unquoted formula on the "next row".
+    expect(sanitizeCsvCell('safe\r=1+1')).toBe('"safe\r=1+1"');
+  });
+
+  it('neutralizes a formula trigger that only appears after an embedded carriage return', () => {
+    const result = sanitizeCsvCell('safe\r=1+1');
+    // The whole cell is quoted, so a spreadsheet reader treats the \r as
+    // literal content inside one cell rather than a row break — the
+    // `=1+1` segment is never exposed as its own, unquoted formula cell.
+    expect(result.startsWith('"') && result.endsWith('"')).toBe(true);
+  });
+
   it('applies both protections together when a formula-triggering value also needs quoting', () => {
     expect(sanitizeCsvCell('=A1,B1')).toBe('"\'=A1,B1"');
   });

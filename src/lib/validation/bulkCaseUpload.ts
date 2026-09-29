@@ -59,6 +59,19 @@ export interface ParsedRow {
 /** Minimal i18n shape this module needs — matches react-i18next's `t`. */
 export type Translate = (key: string, params?: Record<string, unknown>) => string;
 
+/**
+ * Narrows a ParsedRow field (typed as `string | string[] | boolean` since
+ * `data` holds every column's value in one map) down to `string`, for the
+ * fields that are always single-value text at runtime (title,
+ * nature_of_case, country, and the enum fields) — `multi` columns produce
+ * `string[]` and `regional_appeals` produces `boolean`, but nothing here
+ * ever reads those through this helper. Returns '' for anything else so
+ * callers can keep using falsy checks without a runtime throw.
+ */
+function asString(value: string | string[] | boolean | undefined): string {
+  return typeof value === 'string' ? value : '';
+}
+
 export function validateCaseRow(
   rawRow: Record<string, string>,
   rowNumber: number,
@@ -105,7 +118,7 @@ export function validateCaseRow(
     allowed.find(a => a.toLowerCase() === value.trim().toLowerCase()) ?? null;
 
   if (data.timeline_status) {
-    const matched = matchEnum(data.timeline_status, TIMELINE_STATUS_VALUES);
+    const matched = matchEnum(asString(data.timeline_status), TIMELINE_STATUS_VALUES);
     if (!matched) {
       errors.push(t('bulkCaseUpload.errors.invalidTimelineStatus', { value: data.timeline_status }));
     } else {
@@ -114,7 +127,7 @@ export function validateCaseRow(
   }
 
   if (data.judicial_body_type) {
-    const matched = matchEnum(data.judicial_body_type, JUDICIAL_BODY_TYPE_VALUES);
+    const matched = matchEnum(asString(data.judicial_body_type), JUDICIAL_BODY_TYPE_VALUES);
     if (!matched) {
       errors.push(t('bulkCaseUpload.errors.invalidJudicialBodyType', { value: data.judicial_body_type }));
     } else {
@@ -123,7 +136,7 @@ export function validateCaseRow(
   }
 
   if (data.legal_framework_type) {
-    const matched = matchEnum(data.legal_framework_type, LEGAL_FRAMEWORK_TYPE_VALUES);
+    const matched = matchEnum(asString(data.legal_framework_type), LEGAL_FRAMEWORK_TYPE_VALUES);
     if (!matched) {
       errors.push(t('bulkCaseUpload.errors.invalidLegalFrameworkType', { value: data.legal_framework_type }));
     } else {
@@ -165,8 +178,8 @@ export function validateCaseRow(
 export function markWithinFileDuplicates(rows: ParsedRow[], t: Translate): ParsedRow[] {
   const seen = new Map<string, number>(); // normalized tuple key -> first row number
   return rows.map(row => {
-    const title = row.data.title?.trim().toLowerCase();
-    const natureOfCase = row.data.nature_of_case?.trim().toLowerCase();
+    const title = asString(row.data.title).trim().toLowerCase();
+    const natureOfCase = asString(row.data.nature_of_case).trim().toLowerCase();
     if (!title || !natureOfCase) return row; // missing-required-field errors already cover this row
 
     const key = `${title}\u0000${row.data.country_id ?? ''}\u0000${natureOfCase}`;

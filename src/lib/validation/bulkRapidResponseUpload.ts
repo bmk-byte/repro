@@ -87,13 +87,13 @@ export function validateRapidResponseRow(
   const matchEnum = (value: string, allowed: string[]): string | null =>
     allowed.find(a => a.toLowerCase() === value.trim().toLowerCase()) ?? null;
 
-  data.priority_level = data.priority_level ? matchEnum(data.priority_level, PRIORITY_LEVELS) : 'Medium';
+  data.priority_level = data.priority_level ? (matchEnum(data.priority_level, PRIORITY_LEVELS) ?? '') : 'Medium';
   if (!data.priority_level) {
     errors.push(t('bulkUpload.errors.invalidPriorityLevel', { value: rawRow[COLUMNS[5].header] }));
     data.priority_level = 'Medium';
   }
 
-  data.rapid_response_stage = data.rapid_response_stage ? matchEnum(data.rapid_response_stage, STAGE_VALUES) : 'intake';
+  data.rapid_response_stage = data.rapid_response_stage ? (matchEnum(data.rapid_response_stage, STAGE_VALUES) ?? '') : 'intake';
   if (!data.rapid_response_stage) {
     errors.push(t('bulkUpload.errors.invalidStage', { value: rawRow[COLUMNS[6].header] }));
     data.rapid_response_stage = 'intake';

@@ -29,7 +29,13 @@ const FORMULA_TRIGGER_CHARS = ['=', '+', '-', '@', '\t', '\r'];
 export function sanitizeCsvCell(value: unknown): string {
   const str = value == null ? '' : String(value);
   const guarded = FORMULA_TRIGGER_CHARS.some(prefix => str.startsWith(prefix)) ? `'${str}` : str;
-  return guarded.includes(',') || guarded.includes('"') || guarded.includes('\n')
+  // A bare, unquoted \r (not just \n) must also force quoting: without
+  // quotes, a spreadsheet reader can treat an embedded carriage return as
+  // a row break, exposing whatever follows it as a new, unguarded cell —
+  // e.g. `safe\r=1+1` would otherwise be emitted as-is, letting `=1+1`
+  // read as its own formula cell on the "next row" despite this value
+  // itself not starting with a formula-trigger character.
+  return guarded.includes(',') || guarded.includes('"') || guarded.includes('\n') || guarded.includes('\r')
     ? `"${guarded.replace(/"/g, '""')}"`
     : guarded;
 }

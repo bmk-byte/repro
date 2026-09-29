@@ -8,7 +8,7 @@ const countryIdByName = new Map<string, string>([
   ['kenya', 'country-kenya-id'],
 ]);
 
-function buildValidRawRow(overrides: Partial<Record<string, string>> = {}): Record<string, string> {
+function buildValidRawRow(overrides: Record<string, string> = {}): Record<string, string> {
   const row: Record<string, string> = {};
   for (const col of COLUMNS) {
     if (col.key === 'country') { row[col.header] = 'Kenya'; continue; }

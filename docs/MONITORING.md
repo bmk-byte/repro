@@ -39,7 +39,7 @@ Roughly 14 of the ~38 files with `catch` blocks identified during this engagemen
 
 | Check | Where | Trigger | Blocking? |
 |---|---|---|---|
-| Type check (`tsc --noEmit`) | `.github/workflows/ci.yml` | push to `master`, PRs | Yes |
+| Type check — baseline-gated (`scripts/typecheck-baseline.mjs`, real `tsc -b`) | `.github/workflows/ci.yml` | push to `master`, PRs | **Yes**, for any increase over the recorded baseline — see "Type-check pathway" below |
 | Unit tests (`vitest run`) | `.github/workflows/ci.yml` | push to `master`, PRs | Yes |
 | Build (`vite build`) | `.github/workflows/ci.yml` | push to `master`, PRs | Yes |
 | Lint — changed lines only (`scripts/lint-diff.mjs`) | `.github/workflows/ci.yml` | push to `master`, PRs | **Yes**, for new errors on changed lines only — see "Lint pathway" below |
@@ -76,3 +76,26 @@ New **warnings** (not just errors) on changed lines are reported by the script b
 4. Once the full-repo lint step is close enough to clean, remove `continue-on-error: true` from `ci.yml` entirely and delete the diff-scoped step (the full scan will have caught up to it).
 
 Paying down the existing 492-error backlog itself was not attempted in this pass — that's a large, unrelated cleanup effort, not something to bundle into this engagement's diff. What *was* delivered is the mechanism that stops it from growing.
+
+## Type-check pathway
+
+**`npx tsc --noEmit` was a near no-op for the entire history of this CI workflow up to this discovery.** The root `tsconfig.json` declares no `include`/`files` of its own — it only lists TypeScript project references (`tsconfig.app.json` for `src/`, `tsconfig.node.json` for `vite.config.ts`). A bare `tsc` invocation ignores references entirely, so `npx tsc --noEmit` processed effectively one file and always exited 0 regardless of how many real type errors existed elsewhere. `package.json`'s `build` script (`tsc && vite build`) had the same problem — the `tsc` there was a no-op gate that never actually blocked a broken build. It has been removed from `build` accordingly (`vite build` alone was always the thing actually producing the deployable artifact).
+
+The correct invocation for a project-references setup is build mode: **`tsc -b`**. Running it for real for the first time (`npm run typecheck`) surfaced **47 genuine, pre-existing type errors across 17 files**, none introduced by the engagement that discovered this — they were simply never being checked:
+
+| File | Errors | Typical cause |
+|---|---|---|
+| `AnalyticsPage.tsx` | 9 | `Tab`/`TabPanel`-style components used with props (`value`, `connectionError`) their type signatures don't declare |
+| `HealthIndicatorIntegration.tsx` | 6 | Untyped Supabase query results (`any`) assigned into strict local interfaces (`HealthIndicator`, `HealthData`) with mismatched shapes |
+| `Auth.tsx` | 4 | Lucide icon components passed a `title` prop `LucideProps` doesn't declare |
+| `StakeholderAnalytics.tsx` | 4 | Implicit-`any` callback parameters (`caseItem`), one unused destructured var |
+| `ModerationPage.tsx` | 4 | Implicit-`any` callback parameters; one impossible string-literal comparison (`'approved'` vs `'rejected'`) worth a human look, not just a type annotation |
+| `RecentLegalUpdates.tsx`, `RapidResponseCasesPage.tsx`, `RapidResponseDashboard.tsx` | 1 each | Untyped Supabase query results assigned into stricter local interfaces (missing/renamed fields) |
+| `SubmitCaseForm.tsx`, `SubmitJudgmentForm.tsx`, `RapidResponseCaseForm.tsx` | 1–3 each | `react-hot-toast`'s `Toast` type doesn't declare `onClick`; one genuine out-of-scope reference (`CASE_CATEGORIES` used but not imported) in `SubmitCaseForm.tsx` |
+| `CaseStageProgress.tsx`, `charts/RankedBarChart.tsx`, `CasesPage.tsx`, `OutcomeMetricsDashboard.tsx` | 1–2 each | Narrowing gaps on discriminated unions; a Recharts custom-renderer prop-type mismatch; an unused variable |
+
+**Why this isn't a blocking full-repo `tsc -b` step outright**: same reasoning as the lint backlog above — making it blocking immediately would fail every PR regardless of what it changes. [`scripts/typecheck-baseline.mjs`](../scripts/typecheck-baseline.mjs) applies the equivalent of the lint diff-gate's intent through a simpler mechanism: it runs the real `tsc -b` from a clean build-info cache, counts total `error TS\d+:` diagnostics, and fails only if that count exceeds the recorded baseline (currently **47**, `BASELINE_ERROR_COUNT` in the script). A per-line diff gate like `lint-diff.mjs` wasn't used here because `tsc -b`'s project-reference build mode doesn't map cleanly onto "which line did this diff touch" the way a single-file ESLint run does — a total-count ratchet is the simpler, still-effective equivalent. A PR that fixes some of the 47 should lower `BASELINE_ERROR_COUNT` as part of that PR so the improvement is locked in and can't silently regress.
+
+**What this means for prior verification claims made before this discovery**: any earlier claim in this project's history of "TypeScript: no errors found" or similar was based on the no-op `tsc --noEmit`/`tsc && vite build` invocations and did not reflect a real type-check. It does not mean those changes introduced type errors — the 47 found are pre-existing and unrelated to that work — but it does mean type-correctness was not actually being verified the way it appeared to be.
+
+Paying down the 47-error backlog was not attempted in this pass, for the same reason the lint backlog wasn't: it touches 17 files across unrelated features, and bundling that into this engagement's diff would be scope creep. What was delivered is the mechanism that makes the check real and stops the count from growing.

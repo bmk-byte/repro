@@ -162,7 +162,7 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
           reportError(error, { context: 'bulkCaseUpload.row', rowNumber: row.rowNumber, category: 'DATA' });
           failures.push({
             rowNumber: row.rowNumber,
-            title: d.title,
+            title: typeof d.title === 'string' ? d.title : '',
             message: t('bulkCaseUpload.errors.unexpectedRowError'),
           });
         } else {

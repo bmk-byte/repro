@@ -22,10 +22,16 @@ jobs:
 
       - run: npm ci
 
-      # Blocking: catches real type regressions. This currently passes clean —
-      # keep it that way rather than loosening it.
-      - name: Type check
-        run: npx tsc --noEmit
+      # Blocking, but baseline-gated: `npx tsc --noEmit` was discovered to be
+      # a near no-op in this repo (root tsconfig.json uses project
+      # references with no include/files of its own, which a bare `tsc`
+      # ignores). The real check is `tsc -b`, which surfaced 47 genuine
+      # pre-existing errors across 17 files — see docs/MONITORING.md
+      # "Type-check pathway". This step fails only if the count goes UP from
+      # that recorded baseline, so new type errors are blocked without
+      # requiring the existing backlog to be fixed first.
+      - name: Type check (baseline-gated)
+        run: npm run typecheck:ci
 
       - name: Unit tests
         run: npm test

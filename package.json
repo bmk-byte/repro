@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "build:seo": "npm run build && npm run generate:sitemap",
+    "typecheck": "tsc -b",
+    "typecheck:ci": "node scripts/typecheck-baseline.mjs",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest run",

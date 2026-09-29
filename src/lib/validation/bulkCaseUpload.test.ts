@@ -11,7 +11,7 @@ const countryIdByName = new Map<string, string>([
   ['uganda', 'country-uganda-id'],
 ]);
 
-function buildValidRawRow(overrides: Partial<Record<string, string>> = {}): Record<string, string> {
+function buildValidRawRow(overrides: Record<string, string> = {}): Record<string, string> {
   const row: Record<string, string> = {};
   for (const col of COLUMNS) {
     if (col.key === 'regional_appeals') { row[col.header] = 'false'; continue; }
