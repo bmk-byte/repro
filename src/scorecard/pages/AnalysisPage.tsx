@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, FileJson, Copy, Check, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '../../components/ui';
+import { PublicScorecardChrome } from '../components/PublicScorecardChrome';
 import { supabase } from '../../lib/supabase';
 import { CrossCountryComparison } from '../components/analysis/CrossCountryComparison';
 import { IndicatorAnalysis } from '../components/analysis/IndicatorAnalysis';
@@ -127,19 +128,25 @@ export default function AnalysisPage() {
   };
 
   if (loading) {
-    return <AnalysisSkeleton />;
+    return (
+      <PublicScorecardChrome>
+        <AnalysisSkeleton />
+      </PublicScorecardChrome>
+    );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md px-6">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('analysisPage.unableToLoad')}</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => loadAnalysisData()}>{t('editor.tryAgain')}</Button>
+      <PublicScorecardChrome>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center max-w-md px-6">
+            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('analysisPage.unableToLoad')}</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button onClick={() => loadAnalysisData()}>{t('editor.tryAgain')}</Button>
+          </div>
         </div>
-      </div>
+      </PublicScorecardChrome>
     );
   }
 
@@ -167,7 +174,8 @@ export default function AnalysisPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <PublicScorecardChrome>
+      <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -262,5 +270,6 @@ export default function AnalysisPage() {
         </div>
       </div>
     </div>
+    </PublicScorecardChrome>
   );
 }

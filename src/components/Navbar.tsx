@@ -185,12 +185,16 @@ const Navbar: React.FC<NavbarProps> = ({
       <nav className="relative" role="navigation" aria-label={t('common.mainNavigationAriaLabel')}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              aria-label="ReproPulse - Home"
+            >
               <Scale className="h-7 w-7 text-primary" />
-              <span className="font-serif text-xl font-semibold text-primary" aria-label="ReproPulse - Home">
+              <span className="font-serif text-xl font-semibold text-primary">
                 ReproPulse
               </span>
-            </div>
+            </button>
 
             <div className="flex items-center gap-3">
               {isLandingPage && !isAuthenticated && (
@@ -266,7 +270,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
 
-              {(isAuthenticated || isLandingPage) && (
+              {(isAuthenticated || isLandingPage || onSignInClick) && (
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   aria-expanded={isMobileMenuOpen}
@@ -280,7 +284,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
               <LanguageSwitcher className="hidden sm:inline-flex" />
 
-              {!isAuthenticated && isLandingPage && onSignInClick && (
+              {!isAuthenticated && onSignInClick && (
                 <Button onClick={onSignInClick} className="hidden md:inline-flex">
                   {t('common.signIn')}
                 </Button>
@@ -467,7 +471,7 @@ const Navbar: React.FC<NavbarProps> = ({
               </>
             ) : (
               <>
-                {landingPageLinks.map((link) => (
+                {isLandingPage && landingPageLinks.map((link) => (
                   <button
                     key={link.id}
                     onClick={() => {

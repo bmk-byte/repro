@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button, Skeleton } from '../../components/ui';
+import { PublicScorecardChrome } from '../components/PublicScorecardChrome';
 import {
   ArrowLeft,
   ChevronDown,
@@ -270,35 +271,39 @@ export default function CountryDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-32 rounded-xl" />
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
+      <PublicScorecardChrome>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-32 rounded-xl" />
+            <div className="grid grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 rounded-xl" />
+              ))}
+            </div>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-16 rounded-xl" />
             ))}
           </div>
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-16 rounded-xl" />
-          ))}
         </div>
-      </div>
+      </PublicScorecardChrome>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md px-6">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('countryDetail.unableToLoad')}</h2>
-          <p className="text-gray-600 mb-6">{error || t('countryDetail.errorNotFound')}</p>
-          <Button onClick={() => navigate('/scorecard/analysis')}>
-            {t('countryDetail.backToAnalysis')}
-          </Button>
+      <PublicScorecardChrome>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center max-w-md px-6">
+            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('countryDetail.unableToLoad')}</h2>
+            <p className="text-gray-600 mb-6">{error || t('countryDetail.errorNotFound')}</p>
+            <Button onClick={() => navigate('/scorecard/analysis')}>
+              {t('countryDetail.backToAnalysis')}
+            </Button>
+          </div>
         </div>
-      </div>
+      </PublicScorecardChrome>
     );
   }
 
@@ -309,6 +314,7 @@ export default function CountryDetailPage() {
   const evidencedIndicators = indicatorScores.filter((s) => s.evidence_complete).length;
 
   return (
+    <PublicScorecardChrome>
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -453,5 +459,6 @@ export default function CountryDetailPage() {
         )}
       </div>
     </div>
+    </PublicScorecardChrome>
   );
 }
