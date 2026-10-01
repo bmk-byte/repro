@@ -17,6 +17,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
   // that must be admin-exclusive (e.g. the admin management panel).
   const [isModerator, setIsModerator] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isScorecardEditor, setIsScorecardEditor] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any | undefined>(undefined);
@@ -58,6 +59,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
         if (!isConnected || !user) {
           setIsModerator(false);
           setIsAdmin(false);
+          setIsScorecardEditor(false);
           setLoading(false);
           return;
         }
@@ -70,7 +72,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
         // the database regardless of what this code claims.
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('is_moderator, is_admin')
+          .select('is_moderator, is_admin, is_scorecard_editor')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -81,6 +83,7 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
             await supabase.auth.signOut();
             setIsModerator(false);
             setIsAdmin(false);
+            setIsScorecardEditor(false);
             setError('Session expired. Please sign in again.');
             toast.error('Your session has expired. Please sign in again.');
             return;
@@ -91,9 +94,11 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
           setError('Failed to verify your permissions. Please refresh the page.');
           setIsModerator(false);
           setIsAdmin(false);
+          setIsScorecardEditor(false);
         } else {
           setIsAdmin(profile?.is_admin || false);
           setIsModerator((profile?.is_moderator || false) || (profile?.is_admin || false));
+          setIsScorecardEditor(profile?.is_scorecard_editor || false);
         }
       } catch (err) {
         if (err && typeof err === 'object' && 'message' in err) {
@@ -125,10 +130,11 @@ export const useModeratorStatus = (props?: UseModeratorStatusProps) => {
       // User has been fetched and there is none
       setIsModerator(false);
       setIsAdmin(false);
+      setIsScorecardEditor(false);
       setLoading(false);
     }
     // user === undefined: still fetching initial user — keep loading: true
   }, [user, isConnected]);
 
-  return { isModerator, isAdmin, loading, error };
+  return { isModerator, isAdmin, isScorecardEditor, loading, error };
 };

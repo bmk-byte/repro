@@ -34,6 +34,10 @@ const AdminManagementPanel = lazy(() => import('./components/AdminManagementPane
 const ResourcesPage = lazy(() => import('./components/ResourcesPage'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 const RapidResponseCasesPage = lazy(() => import('./components/RapidResponseCasesPage'));
+const ScorecardPage = lazy(() => import('./scorecard/pages/ScorecardPage'));
+const ScorecardAnalysisPage = lazy(() => import('./scorecard/pages/AnalysisPage'));
+const ScorecardCountryDetailPage = lazy(() => import('./scorecard/pages/CountryDetailPage'));
+const ScorecardEditorAdminPanel = lazy(() => import('./scorecard/components/ScorecardEditorAdminPanel'));
 
 interface Profile {
   id: string;
@@ -104,7 +108,7 @@ function DashboardApp() {
   const retryBaseDelay = 1000; // Base delay in milliseconds
   const retryDelay = retryBaseDelay * Math.pow(2, retryCount); // Exponential backoff
 
-  const { isModerator, isAdmin, loading: moderatorLoading, error: moderatorError } = useModeratorStatus({ isConnected: connectionStatus === true });
+  const { isModerator, isAdmin, isScorecardEditor, loading: moderatorLoading, error: moderatorError } = useModeratorStatus({ isConnected: connectionStatus === true });
   devLog('App render - moderator status:', { isModerator, moderatorLoading, moderatorError });
 
   // Warm the lazy-loaded tab chunks in the background once signed in, so
@@ -460,6 +464,12 @@ function DashboardApp() {
               case 'admin-management':
                 return can({ isModerator, isAdmin }, 'admin:grant') ? <AdminManagementPanel /> : null;
 
+              case 'scorecard':
+                return isScorecardEditor ? <ScorecardPage /> : null;
+
+              case 'scorecard-editor-admin':
+                return can({ isModerator, isAdmin }, 'scorecard-editor:grant') ? <ScorecardEditorAdminPanel /> : null;
+
               case 'laws':
                 return <LawsRepository />;
 
@@ -524,6 +534,7 @@ function DashboardApp() {
         onLandingSectionChange={setLandingSection}
         isModerator={isModerator}
         isAdmin={isAdmin}
+        isScorecardEditor={isScorecardEditor}
         userProfile={userProfile}
         onSignInClick={() => {
           setAuthInitialMode('signIn');
@@ -619,6 +630,22 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/scorecard/analysis"
+            element={
+              <Suspense fallback={<TabFallback />}>
+                <ScorecardAnalysisPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/scorecard/analysis/country/:countryId"
+            element={
+              <Suspense fallback={<TabFallback />}>
+                <ScorecardCountryDetailPage />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<DashboardApp />} />
         </Routes>
       </BrowserRouter>

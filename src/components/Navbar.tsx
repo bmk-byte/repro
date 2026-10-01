@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet } from 'lucide-react';
+import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet, Award, UserCog } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Button, Badge, LanguageSwitcher } from './ui';
@@ -19,6 +19,8 @@ interface NavbarProps {
   isModerator?: boolean;
   /** Full-access admin, distinct from (and a superset of) moderator — see src/lib/permissions.ts. */
   isAdmin?: boolean;
+  /** Independent of the moderator/admin hierarchy — see src/lib/permissions.ts. */
+  isScorecardEditor?: boolean;
   userProfile?: any;
   onSignInClick?: () => void;
 }
@@ -33,6 +35,7 @@ const Navbar: React.FC<NavbarProps> = ({
   onLandingSectionChange,
   isModerator = false,
   isAdmin = false,
+  isScorecardEditor = false,
   userProfile,
   onSignInClick
 }) => {
@@ -125,6 +128,12 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'judgments', label: t('nav.judgments'), icon: Gavel },
     { id: 'laws', label: t('nav.laws'), icon: BookOpen },
     { id: 'resources', label: t('nav.resources'), icon: ScrollText },
+    // is_scorecard_editor is a separate flag from the moderator/admin role
+    // hierarchy — a case moderator is not automatically a scorecard editor,
+    // and vice versa (see src/lib/permissions.ts).
+    ...(isScorecardEditor ? [
+      { id: 'scorecard', label: t('nav.scorecard'), icon: Award }
+    ] : []),
     // Granting/revoking moderator status is admin-only (see
     // src/lib/permissions.ts) — a plain moderator no longer sees this tab.
     ...(isAdmin ? [
@@ -132,6 +141,9 @@ const Navbar: React.FC<NavbarProps> = ({
     ] : []),
     ...(isAdmin ? [
       { id: 'admin-management', label: t('nav.admins'), icon: KeyRound }
+    ] : []),
+    ...(isAdmin ? [
+      { id: 'scorecard-editor-admin', label: t('nav.scorecardEditors'), icon: UserCog }
     ] : []),
     { id: 'settings', label: t('nav.settings'), icon: Settings }
   ];

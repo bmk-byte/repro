@@ -87,6 +87,8 @@
     "resources": "Ressources",
     "moderators": "Modérateurs",
     "admins": "Administrateurs",
+    "scorecard": "Tableau de bord",
+    "scorecardEditors": "Éditeurs du tableau de bord",
     "settings": "Paramètres",
     "navigateTo": "Aller à {{label}}",
     "mainNavigationAriaLabel": "Navigation principale",

@@ -12,6 +12,8 @@ import analyticsEn from './locales/analytics.en.json';
 import analyticsFr from './locales/analytics.fr.json';
 import miscEn from './locales/misc.en.json';
 import miscFr from './locales/misc.fr.json';
+import scorecardEn from './locales/scorecard.en.json';
+import scorecardFr from './locales/scorecard.fr.json';
 import { getLanguagePreference } from '../lib/languagePreference';
 
 // Split into multiple namespaces (rather than one giant translation.json) so
@@ -21,7 +23,7 @@ import { getLanguagePreference } from '../lib/languagePreference';
 // covered first: nav, auth, settings, landing, dashboard, cases, judgments,
 // laws, resources, footer.
 i18n.use(initReactI18next).init({
-  ns: ['translation', 'forms', 'moderation', 'rapidResponse', 'analytics', 'misc'],
+  ns: ['translation', 'forms', 'moderation', 'rapidResponse', 'analytics', 'misc', 'scorecard'],
   defaultNS: 'translation',
   resources: {
     en: {
@@ -31,6 +33,7 @@ i18n.use(initReactI18next).init({
       rapidResponse: rapidResponseEn,
       analytics: analyticsEn,
       misc: miscEn,
+      scorecard: scorecardEn,
     },
     fr: {
       translation: fr,
@@ -39,6 +42,7 @@ i18n.use(initReactI18next).init({
       rapidResponse: rapidResponseFr,
       analytics: analyticsFr,
       misc: miscFr,
+      scorecard: scorecardFr,
     },
   },
   lng: getLanguagePreference(),

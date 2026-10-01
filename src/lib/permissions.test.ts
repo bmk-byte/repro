@@ -103,7 +103,7 @@ describe('permissions.ts — permission boundaries / edge cases', () => {
     const validPermissions: Permission[] = [
       'case:moderate', 'case:approve', 'judgment:moderate', 'rapid_response:manage',
       'moderator:grant', 'moderator:revoke', 'law:upload', 'resource:upload',
-      'admin:grant', 'admin:revoke',
+      'admin:grant', 'admin:revoke', 'scorecard-editor:grant', 'scorecard-editor:revoke',
     ];
     for (const perms of Object.values(ROLE_PERMISSIONS)) {
       for (const p of perms) {

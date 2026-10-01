@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, ChevronDown, ChevronUp, X, CircleAlert as AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -22,6 +23,7 @@ interface CasesPageProps {
 
 const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [cases, setCases] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -29,7 +31,10 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   const [filters, setFilters] = React.useState({
     status: '',
     type: '',
-    country: '',
+    // Pre-filled from `?country=<id>` when arriving via the scorecard's
+    // "Related Litigation" link (see src/scorecard/pages/CountryDetailPage.tsx)
+    // — the only cross-tab deep link this page supports today.
+    country: searchParams.get('country') || '',
     category: '',
     partner: ''
   });
@@ -48,6 +53,20 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
 
   // Use the custom hook for moderator status
   const { isModerator } = useModeratorStatus();
+
+  // The `country` param (if any) has already been consumed into `filters`
+  // above — drop it from the URL so later filter changes don't fight with
+  // a stale deep-link value.
+  React.useEffect(() => {
+    if (searchParams.has('country')) {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('country');
+        return next;
+      }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     const fetchUserInfo = async () => {

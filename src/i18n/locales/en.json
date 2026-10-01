@@ -87,6 +87,8 @@
     "resources": "Resources",
     "moderators": "Moderators",
     "admins": "Admins",
+    "scorecard": "Scorecard",
+    "scorecardEditors": "Scorecard Editors",
     "settings": "Settings",
     "navigateTo": "Navigate to {{label}}",
     "mainNavigationAriaLabel": "Main navigation",

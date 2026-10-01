@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { toast } from '../lib/toast';
 import DocumentModal from './DocumentModal';
 import { LoadingState } from './ui';
+import PolicyContextCard from '../scorecard/components/PolicyContextCard';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -275,6 +276,9 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
 
       {/* Content */}
       <div className="p-6">
+        <div className="mb-6">
+          <PolicyContextCard countryId={caseData.country_id} countryName={caseData.countries?.name} />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Case Information */}
           <div className="space-y-6">

@@ -30,7 +30,9 @@ export type Permission =
   | 'law:upload'         // upload a law document directly (bypassing submission review)
   | 'resource:upload'    // upload a resource document directly
   | 'admin:grant'        // grant admin status to another user
-  | 'admin:revoke';      // revoke admin status from another user
+  | 'admin:revoke'       // revoke admin status from another user
+  | 'scorecard-editor:grant'   // grant scorecard-editor status to another user
+  | 'scorecard-editor:revoke'; // revoke scorecard-editor status from another user
 
 const MODERATOR_PERMISSIONS: Permission[] = [
   'case:moderate',
@@ -51,6 +53,13 @@ const ADMIN_PERMISSIONS: Permission[] = [
   'moderator:revoke',
   'admin:grant',
   'admin:revoke',
+  // scorecard-editor is a separate, independent flag from the
+  // moderator/admin role hierarchy (a case moderator is not automatically
+  // a scorecard editor, and vice versa).
+  // Who may grant/revoke that flag, however, is admin-only, same as every
+  // other role-management permission here.
+  'scorecard-editor:grant',
+  'scorecard-editor:revoke',
 ];
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {

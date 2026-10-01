@@ -8,6 +8,7 @@ import { reportError } from '../lib/errorReporting';
 import DocumentModal from './DocumentModal';
 import CaseProgressTracker from './CaseProgressTracker';
 import { LoadingState } from './ui';
+import PolicyContextCard from '../scorecard/components/PolicyContextCard';
 
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -290,6 +291,9 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
 
       {/* Content */}
       <div className="p-6">
+        <div className="mb-6">
+          <PolicyContextCard countryId={caseData.country_id} countryName={caseData.countries?.name} />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Case Information */}
           <div className="space-y-6">
