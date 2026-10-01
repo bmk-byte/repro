@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet, Award, UserCog } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
@@ -40,10 +41,13 @@ const Navbar: React.FC<NavbarProps> = ({
   onSignInClick
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = React.useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
   const userMenuRef = React.useRef<HTMLDivElement>(null);
+  const [adminDropdownOpen, setAdminDropdownOpen] = React.useState(false);
+  const adminMenuRef = React.useRef<HTMLDivElement>(null);
 
   // Set up real-time subscription for notifications if user is a moderator
   React.useEffect(() => {
@@ -96,6 +100,27 @@ const Navbar: React.FC<NavbarProps> = ({
     };
   }, [userDropdownOpen]);
 
+  // Close the admin menu on outside click or Escape
+  React.useEffect(() => {
+    if (!adminDropdownOpen) return;
+
+    const handleClick = (e: MouseEvent) => {
+      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
+        setAdminDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAdminDropdownOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [adminDropdownOpen]);
+
   const clearNotifications = () => {
     setNotificationCount(0);
     toast.success(t('common.notificationsCleared'));
@@ -134,19 +159,20 @@ const Navbar: React.FC<NavbarProps> = ({
     ...(isScorecardEditor ? [
       { id: 'scorecard', label: t('nav.scorecard'), icon: Award }
     ] : []),
-    // Granting/revoking moderator status is admin-only (see
-    // src/lib/permissions.ts) — a plain moderator no longer sees this tab.
-    ...(isAdmin ? [
-      { id: 'moderator-admin', label: t('nav.moderators'), icon: ShieldCheck }
-    ] : []),
-    ...(isAdmin ? [
-      { id: 'admin-management', label: t('nav.admins'), icon: KeyRound }
-    ] : []),
-    ...(isAdmin ? [
-      { id: 'scorecard-editor-admin', label: t('nav.scorecardEditors'), icon: UserCog }
-    ] : []),
     { id: 'settings', label: t('nav.settings'), icon: Settings }
   ];
+
+  // Admin-only management screens — grouped under a single "Admin" dropdown
+  // instead of flat top-level tabs, since the nav bar was running out of
+  // room as these were added one at a time. Granting/revoking moderator
+  // status is admin-only (see src/lib/permissions.ts) — a plain moderator
+  // no longer sees any of this.
+  const adminMenuItems = isAdmin ? [
+    { id: 'moderator-admin', label: t('nav.moderators'), icon: ShieldCheck },
+    { id: 'admin-management', label: t('nav.admins'), icon: KeyRound },
+    { id: 'scorecard-editor-admin', label: t('nav.scorecardEditors'), icon: UserCog },
+  ] : [];
+  const isAdminSectionActive = adminMenuItems.some((item) => item.id === activeTab);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -181,6 +207,12 @@ const Navbar: React.FC<NavbarProps> = ({
                       {link.name}
                     </button>
                   ))}
+                  <button
+                    onClick={() => navigate('/scorecard/analysis')}
+                    className="text-sm font-medium text-stone-600 hover:text-primary transition-colors"
+                  >
+                    {t('nav.scorecard')}
+                  </button>
                 </div>
               )}
 
@@ -289,6 +321,53 @@ const Navbar: React.FC<NavbarProps> = ({
                 );
               })}
 
+              {adminMenuItems.length > 0 && (
+                <div className="relative" ref={adminMenuRef}>
+                  <button
+                    onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
+                    aria-haspopup="menu"
+                    aria-expanded={adminDropdownOpen}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isAdminSectionActive
+                        ? 'bg-primary text-white'
+                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                    }`}
+                  >
+                    <KeyRound className="h-4 w-4" />
+                    <span>{t('nav.admin')}</span>
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+
+                  {adminDropdownOpen && (
+                    <div role="menu" className="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-raised border border-stone-100 py-1 z-50">
+                      {adminMenuItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            role="menuitem"
+                            onClick={() => {
+                              setActiveTab?.(item.id);
+                              setAdminDropdownOpen(false);
+                            }}
+                            onMouseEnter={() => prefetchRoute(item.id)}
+                            className={`flex items-center w-full px-4 py-2 text-sm ${
+                              isActive
+                                ? 'bg-primary text-white'
+                                : 'text-stone-700 hover:bg-stone-100'
+                            }`}
+                          >
+                            <Icon className="h-4 w-4 mr-2" />
+                            {item.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
                 onClick={handleSignOut}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors ml-4"
@@ -342,6 +421,36 @@ const Navbar: React.FC<NavbarProps> = ({
                   );
                 })}
 
+                {adminMenuItems.length > 0 && (
+                  <div className="pt-2 mt-2 border-t border-stone-200">
+                    <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-stone-400">
+                      {t('nav.admin')}
+                    </p>
+                    {adminMenuItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.id;
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setActiveTab?.(item.id);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className={`flex items-center w-full px-3 py-2 rounded-md text-base font-medium ${
+                            isActive
+                              ? 'bg-primary text-white'
+                              : 'text-stone-700 hover:text-stone-900 hover:bg-stone-50'
+                          }`}
+                        >
+                          <Icon className="h-5 w-5 mr-3" />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -374,6 +483,15 @@ const Navbar: React.FC<NavbarProps> = ({
                     {link.name}
                   </button>
                 ))}
+                <button
+                  onClick={() => {
+                    navigate('/scorecard/analysis');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-stone-900 hover:bg-stone-50"
+                >
+                  {t('nav.scorecard')}
+                </button>
                 {onSignInClick && (
                   <Button
                     onClick={() => {

@@ -6,7 +6,7 @@ import { CountrySelector } from '../components/CountrySelector';
 import { PillarCard } from '../components/PillarCard';
 import { ScoreInputTable } from '../components/ScoreInputTable';
 import { CompositeResults } from '../components/CompositeResults';
-import { WelcomeModal } from '../components/WelcomeModal';
+import { ScorecardGuide } from '../components/ScorecardGuide';
 import { IndicatorDetailModal } from '../components/IndicatorDetailModal';
 import { EvidenceModal } from '../components/EvidenceModal';
 import { PillarDetailModal } from '../components/PillarDetailModal';
@@ -44,7 +44,7 @@ import { calculateFullScorecard, generateInsights } from '../lib/scoring';
  */
 export default function ScorecardPage() {
   const { t } = useTranslation('scorecard');
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [guideExpanded, setGuideExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -75,12 +75,12 @@ export default function ScorecardPage() {
   useEffect(() => {
     const hasVisited = localStorage.getItem('maputo-scorecard-visited');
     if (hasVisited) {
-      setShowWelcome(false);
+      setGuideExpanded(false);
     }
   }, []);
 
-  const handleCloseWelcome = () => {
-    setShowWelcome(false);
+  const handleToggleGuide = () => {
+    setGuideExpanded((prev) => !prev);
     localStorage.setItem('maputo-scorecard-visited', 'true');
   };
 
@@ -327,8 +327,6 @@ export default function ScorecardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {showWelcome && <WelcomeModal onClose={handleCloseWelcome} />}
-
       {selectedIndicator && (
         <IndicatorDetailModal
           indicator={selectedIndicator}
@@ -426,8 +424,11 @@ export default function ScorecardPage() {
             )}
 
             <button
-              onClick={() => setShowWelcome(true)}
-              className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+              onClick={handleToggleGuide}
+              aria-pressed={guideExpanded}
+              className={`p-2 rounded-lg transition-colors ${
+                guideExpanded ? 'text-primary-600 bg-primary-50' : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
+              }`}
               title={t('editor.aboutThisTool')}
             >
               <Info className="w-5 h-5" />
@@ -446,6 +447,10 @@ export default function ScorecardPage() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mt-4">
+          <ScorecardGuide expanded={guideExpanded} onToggle={handleToggleGuide} />
         </div>
 
         <div className="mt-4">
