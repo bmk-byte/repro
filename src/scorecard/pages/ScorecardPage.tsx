@@ -44,7 +44,9 @@ import { calculateFullScorecard, generateInsights } from '../lib/scoring';
  */
 export default function ScorecardPage() {
   const { t } = useTranslation('scorecard');
-  const [guideExpanded, setGuideExpanded] = useState(true);
+  const [guideExpanded, setGuideExpanded] = useState(
+    () => !localStorage.getItem('maputo-scorecard-visited')
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -71,13 +73,6 @@ export default function ScorecardPage() {
   const [initError, setInitError] = useState<string | null>(null);
   const [countryLoadError, setCountryLoadError] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const hasVisited = localStorage.getItem('maputo-scorecard-visited');
-    if (hasVisited) {
-      setGuideExpanded(false);
-    }
-  }, []);
 
   const handleToggleGuide = () => {
     setGuideExpanded((prev) => !prev);
