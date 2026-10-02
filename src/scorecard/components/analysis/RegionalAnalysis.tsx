@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Globe as GlobeIcon, LayoutGrid, BarChart3, Table2 } from 'lucide-react';
 import type { RegionalAnalysisData } from '../../lib/api';
 import type { ScorecardPillar as Pillar } from '../../types/database';
 import { BarChart, BarChartData } from '../charts/BarChart';
@@ -11,11 +12,11 @@ interface RegionalAnalysisProps {
   pillars: Pillar[];
 }
 
-type ViewTab = 'globe' | 'overview' | 'chart' | 'table';
+type ViewMode = 'globe' | 'overview' | 'chart' | 'table';
 
 export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
   const { t } = useTranslation('scorecard');
-  const [activeView, setActiveView] = useState<ViewTab>('globe');
+  const [activeView, setActiveView] = useState<ViewMode>('globe');
   const [selectedRegion, setSelectedRegion] = useState<RegionalAnalysisData | null>(null);
 
   const regionalScores: BarChartData[] = data.map((region) => ({
@@ -27,41 +28,52 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
 
   const totalCountries = data.reduce((sum, region) => sum + region.countries.length, 0);
 
-  const viewTabs: { id: ViewTab; label: string }[] = [
-    { id: 'globe', label: t('regionalAnalysis.tabGlobe') },
-    { id: 'overview', label: t('regionalAnalysis.tabOverview') },
-    { id: 'chart', label: t('regionalAnalysis.tabChart') },
-    { id: 'table', label: t('regionalAnalysis.tabTable') },
+  // A display-mode toggle, not a second navigation layer — deliberately
+  // icon-only (no text labels, no description subtext) so it reads as "how
+  // do you want to see this" rather than a second tab bar stacked inside
+  // AnalysisPage's own tabs (src/components/ui/Tabs.tsx).
+  const viewModes: { id: ViewMode; icon: typeof GlobeIcon; label: string }[] = [
+    { id: 'globe', icon: GlobeIcon, label: t('regionalAnalysis.tabGlobe') },
+    { id: 'overview', icon: LayoutGrid, label: t('regionalAnalysis.tabOverview') },
+    { id: 'chart', icon: BarChart3, label: t('regionalAnalysis.tabChart') },
+    { id: 'table', icon: Table2, label: t('regionalAnalysis.tabTable') },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-stone-200 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{t('regionalAnalysis.heading')}</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-xl font-bold text-stone-900">{t('regionalAnalysis.heading')}</h2>
+            <p className="text-sm text-stone-600 mt-1">
               {t('regionalAnalysis.summary', { regions: data.length, countries: totalCountries })}
             </p>
           </div>
 
-          <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
-            {viewTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveView(tab.id);
-                  if (tab.id !== 'globe') setSelectedRegion(null);
-                }}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  activeView === tab.id
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex bg-stone-100 rounded-lg p-1 gap-1" role="group" aria-label={t('regionalAnalysis.viewMode')}>
+            {viewModes.map((mode) => {
+              const Icon = mode.icon;
+              const isActive = activeView === mode.id;
+              return (
+                <button
+                  key={mode.id}
+                  onClick={() => {
+                    setActiveView(mode.id);
+                    if (mode.id !== 'globe') setSelectedRegion(null);
+                  }}
+                  title={mode.label}
+                  aria-label={mode.label}
+                  aria-pressed={isActive}
+                  className={`p-2 rounded-md transition-all ${
+                    isActive
+                      ? 'bg-white text-stone-900 shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -83,9 +95,9 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center px-8">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-4">
                       <svg
-                        className="w-8 h-8 text-gray-400"
+                        className="w-8 h-8 text-stone-400"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -98,10 +110,10 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
                         />
                       </svg>
                     </div>
-                    <h3 className="text-base font-semibold text-gray-700 mb-2">
+                    <h3 className="text-base font-semibold text-stone-700 mb-2">
                       {t('regionalAnalysis.selectRegion')}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-stone-500">
                       {t('regionalAnalysis.selectRegionHint')}
                     </p>
 
@@ -110,27 +122,27 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
                         const score = d.averageCompositeScore;
                         const barColor =
                           score >= 60
-                            ? 'bg-green-500'
+                            ? 'bg-success'
                             : score >= 40
-                            ? 'bg-yellow-400'
-                            : 'bg-primary-500';
+                            ? 'bg-warning'
+                            : 'bg-danger';
                         return (
                           <button
                             key={d.region}
                             onClick={() => setSelectedRegion(d)}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg border border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all text-left"
+                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg border border-stone-100 hover:border-stone-300 hover:bg-stone-50 transition-all text-left"
                           >
-                            <span className="text-sm font-medium text-gray-800 flex-1">
+                            <span className="text-sm font-medium text-stone-800 flex-1">
                               {d.region}
                             </span>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="w-20 h-1.5 bg-stone-200 rounded-full overflow-hidden">
                                 <div
                                   className={`h-1.5 rounded-full ${barColor}`}
                                   style={{ width: `${score}%` }}
                                 />
                               </div>
-                              <span className="text-sm font-bold text-gray-700 w-10 text-right">
+                              <span className="text-sm font-bold text-stone-700 w-10 text-right">
                                 {score.toFixed(1)}
                               </span>
                             </div>
@@ -150,22 +162,22 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
             {data.map((region) => (
               <div
                 key={region.region}
-                className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow cursor-pointer"
+                className="border border-stone-200 rounded-lg p-5 hover:shadow-raised transition-shadow cursor-pointer"
                 onClick={() => {
                   setSelectedRegion(region);
                   setActiveView('globe');
                 }}
               >
-                <h3 className="font-bold text-gray-900 mb-3">{region.region}</h3>
+                <h3 className="font-bold text-stone-900 mb-3">{region.region}</h3>
 
                 <div className="mb-4">
                   <div className="flex items-baseline justify-between mb-1">
-                    <span className="text-sm text-gray-600">{t('regionalAnalysis.averageScore')}</span>
+                    <span className="text-sm text-stone-600">{t('regionalAnalysis.averageScore')}</span>
                     <span className="text-2xl font-bold text-primary-600">
                       {region.averageCompositeScore.toFixed(1)}
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                  <div className="w-full h-2 bg-stone-200 rounded-full">
                     <div
                       className="h-2 bg-primary-600 rounded-full"
                       style={{ width: `${region.averageCompositeScore}%` }}
@@ -175,27 +187,27 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">{t('regionDrillDown.countriesInRegion')}</span>
-                    <span className="font-medium text-gray-900">{region.countries.length}</span>
+                    <span className="text-stone-600">{t('regionDrillDown.countriesInRegion')}</span>
+                    <span className="font-medium text-stone-900">{region.countries.length}</span>
                   </div>
 
                   <div className="text-sm">
-                    <div className="text-gray-600 mb-1">{t('regionDrillDown.tierDistribution')}</div>
+                    <div className="text-stone-600 mb-1">{t('regionDrillDown.tierDistribution')}</div>
                     <div className="flex gap-2">
                       <div
-                        className="bg-green-600 text-white px-2 py-1 rounded text-xs"
+                        className="bg-success text-white px-2 py-1 rounded text-xs"
                         title={t('tier.progressive')}
                       >
                         {region.tierDistribution.Progressive}
                       </div>
                       <div
-                        className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
+                        className="bg-warning text-white px-2 py-1 rounded text-xs"
                         title={t('tier.emergent')}
                       >
                         {region.tierDistribution.Emergent}
                       </div>
                       <div
-                        className="bg-primary-600 text-white px-2 py-1 rounded text-xs"
+                        className="bg-danger text-white px-2 py-1 rounded text-xs"
                         title={t('tier.regressive')}
                       >
                         {region.tierDistribution.Regressive}
@@ -205,20 +217,20 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
                 </div>
 
                 <div>
-                  <div className="text-sm text-gray-600 mb-2">{t('regionDrillDown.pillarAverages')}</div>
+                  <div className="text-sm text-stone-600 mb-2">{t('regionDrillDown.pillarAverages')}</div>
                   <div className="space-y-1">
                     {pillars.slice(0, 4).map((pillar) => {
                       const avg = region.pillarAverages.get(pillar.id) || 0;
                       return (
                         <div key={pillar.id} className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-gray-500 w-8">{pillar.code}</span>
-                          <div className="flex-1 h-1.5 bg-gray-200 rounded-full">
+                          <span className="text-xs font-mono text-stone-500 w-8">{pillar.code}</span>
+                          <div className="flex-1 h-1.5 bg-stone-200 rounded-full">
                             <div
                               className="h-1.5 bg-primary-500 rounded-full"
                               style={{ width: `${avg}%` }}
                             />
                           </div>
-                          <span className="text-xs text-gray-600 w-10 text-right">
+                          <span className="text-xs text-stone-600 w-10 text-right">
                             {avg.toFixed(0)}
                           </span>
                         </div>
@@ -243,19 +255,19 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
       )}
 
       {activeView === 'table' && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">{t('regionalAnalysis.pillarPerformanceByRegion')}</h3>
+        <div className="bg-white rounded-lg border border-stone-200 p-6">
+          <h3 className="text-lg font-bold text-stone-900 mb-4">{t('regionalAnalysis.pillarPerformanceByRegion')}</h3>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-stone-200">
+              <thead className="bg-stone-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider">
                     {t('regionalAnalysis.region')}
                   </th>
                   {pillars.map((pillar) => (
                     <th
                       key={pillar.id}
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider"
                       title={pillar.title}
                     >
                       {pillar.code}
@@ -263,18 +275,18 @@ export function RegionalAnalysis({ data, pillars }: RegionalAnalysisProps) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-stone-200">
                 {data.map((region) => (
-                  <tr key={region.region} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{region.region}</td>
+                  <tr key={region.region} className="hover:bg-stone-50">
+                    <td className="px-4 py-3 text-sm font-medium text-stone-900">{region.region}</td>
                     {pillars.map((pillar) => {
                       const avg = region.pillarAverages.get(pillar.id) || 0;
                       const colorClass =
                         avg >= 60
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-success-light text-success-dark'
                           : avg >= 40
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-primary-100 text-primary-800';
+                          ? 'bg-warning-light text-warning-dark'
+                          : 'bg-danger-light text-danger-dark';
                       return (
                         <td key={pillar.id} className="px-4 py-3 text-sm">
                           <span className={`inline-flex px-2 py-1 rounded font-medium ${colorClass}`}>

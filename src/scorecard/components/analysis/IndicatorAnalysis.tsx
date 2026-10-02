@@ -44,8 +44,8 @@ export function IndicatorAnalysis({ data, indicators, pillars = [] }: IndicatorA
 
   if (!selectedIndicator) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <p className="text-gray-600">{t('indicatorAnalysis.noIndicatorsAvailable')}</p>
+      <div className="bg-white rounded-lg border border-stone-200 p-6">
+        <p className="text-stone-600">{t('indicatorAnalysis.noIndicatorsAvailable')}</p>
       </div>
     );
   }
@@ -83,18 +83,18 @@ export function IndicatorAnalysis({ data, indicators, pillars = [] }: IndicatorA
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">{t('indicatorAnalysis.heading')}</h2>
+      <div className="bg-white rounded-lg border border-stone-200 p-6">
+        <h2 className="text-xl font-bold text-stone-900 mb-4">{t('indicatorAnalysis.heading')}</h2>
 
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               {t('indicatorAnalysis.selectPillar')}
             </label>
             <select
               value={selectedPillarId}
               onChange={(e) => handlePillarChange(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
             >
               {pillarList.map((pillar) => (
                 <option key={pillar.id} value={pillar.id}>
@@ -105,7 +105,7 @@ export function IndicatorAnalysis({ data, indicators, pillars = [] }: IndicatorA
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               {t('indicatorAnalysis.selectIndicator')}
             </label>
             <select
@@ -114,7 +114,7 @@ export function IndicatorAnalysis({ data, indicators, pillars = [] }: IndicatorA
                 const indicator = filteredIndicators.find((i) => i.id === e.target.value);
                 setSelectedIndicator(indicator || null);
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
             >
               {filteredIndicators.map((indicator) => (
                 <option key={indicator.id} value={indicator.id}>
@@ -125,61 +125,61 @@ export function IndicatorAnalysis({ data, indicators, pillars = [] }: IndicatorA
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 className="font-medium text-gray-900 mb-2">{selectedIndicator.title}</h3>
-          <p className="text-sm text-gray-600">{selectedIndicator.definition}</p>
+        <div className="bg-stone-50 rounded-lg p-4 mb-6">
+          <h3 className="font-medium text-stone-900 mb-2">{selectedIndicator.title}</h3>
+          <p className="text-sm text-stone-600">{selectedIndicator.definition}</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-primary-50 rounded-lg p-4">
-            <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.average')}</div>
+            <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.average')}</div>
             <div className="text-2xl font-bold text-primary-600">{average.toFixed(1)}</div>
           </div>
-          <div className="bg-green-50 rounded-lg p-4">
-            <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.median')}</div>
-            <div className="text-2xl font-bold text-green-600">{median.toFixed(1)}</div>
+          <div className="bg-stone-50 rounded-lg p-4">
+            <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.median')}</div>
+            <div className="text-2xl font-bold text-stone-900">{median.toFixed(1)}</div>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.highest')}</div>
-            <div className="text-2xl font-bold text-gray-900">{max.toFixed(1)}</div>
+          <div className="bg-stone-50 rounded-lg p-4">
+            <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.highest')}</div>
+            <div className="text-2xl font-bold text-stone-900">{max.toFixed(1)}</div>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.lowest')}</div>
-            <div className="text-2xl font-bold text-gray-900">{min.toFixed(1)}</div>
+          <div className="bg-stone-50 rounded-lg p-4">
+            <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.lowest')}</div>
+            <div className="text-2xl font-bold text-stone-900">{min.toFixed(1)}</div>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.countries')}</div>
-            <div className="text-2xl font-bold text-gray-900">{scores.length}</div>
+          <div className="bg-stone-50 rounded-lg p-4">
+            <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.countries')}</div>
+            <div className="text-2xl font-bold text-stone-900">{scores.length}</div>
           </div>
         </div>
 
         <div className="mb-6">
-          <h3 className="font-medium text-gray-900 mb-3">{t('indicatorAnalysis.performanceDistribution')}</h3>
+          <h3 className="font-medium text-stone-900 mb-3">{t('indicatorAnalysis.performanceDistribution')}</h3>
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.high')}</div>
-              <div className="text-xl font-bold text-green-700">{distribution.high}</div>
-              <div className="text-xs text-gray-500">
+            <div className="bg-success-light border border-success/30 rounded-lg p-4">
+              <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.high')}</div>
+              <div className="text-xl font-bold text-success-dark">{distribution.high}</div>
+              <div className="text-xs text-stone-500">
                 {scores.length > 0
                   ? ((distribution.high / scores.length) * 100).toFixed(0)
                   : 0}
                 %
               </div>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.medium')}</div>
-              <div className="text-xl font-bold text-yellow-700">{distribution.medium}</div>
-              <div className="text-xs text-gray-500">
+            <div className="bg-warning-light border border-warning/30 rounded-lg p-4">
+              <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.medium')}</div>
+              <div className="text-xl font-bold text-warning-dark">{distribution.medium}</div>
+              <div className="text-xs text-stone-500">
                 {scores.length > 0
                   ? ((distribution.medium / scores.length) * 100).toFixed(0)
                   : 0}
                 %
               </div>
             </div>
-            <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">{t('indicatorAnalysis.low')}</div>
-              <div className="text-xl font-bold text-primary-700">{distribution.low}</div>
-              <div className="text-xs text-gray-500">
+            <div className="bg-danger-light border border-danger/30 rounded-lg p-4">
+              <div className="text-sm text-stone-600 mb-1">{t('indicatorAnalysis.low')}</div>
+              <div className="text-xl font-bold text-danger-dark">{distribution.low}</div>
+              <div className="text-xs text-stone-500">
                 {scores.length > 0 ? ((distribution.low / scores.length) * 100).toFixed(0) : 0}
                 %
               </div>

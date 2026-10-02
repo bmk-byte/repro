@@ -100,17 +100,17 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
   };
 
   const getScoreColor = (score: number): string => {
-    if (score >= 70) return 'bg-green-100 text-green-800';
-    if (score >= 40) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-primary-100 text-primary-800';
+    if (score >= 70) return 'bg-success-light text-success-dark';
+    if (score >= 40) return 'bg-warning-light text-warning-dark';
+    return 'bg-danger-light text-danger-dark';
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white rounded-lg border border-stone-200 p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">{t('crossCountryComparison.heading')}</h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <h2 className="text-xl font-bold text-stone-900">{t('crossCountryComparison.heading')}</h2>
+          <p className="text-sm text-stone-600 mt-1">
             {t('crossCountryComparison.subheading', { count: filteredData.length })}
           </p>
         </div>
@@ -120,8 +120,8 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-stone-200">
+          <thead className="bg-stone-50">
             <tr>
               <th className="px-4 py-3 text-left">
                 <input
@@ -138,7 +138,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                 />
               </th>
               <th
-                className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
                 onClick={() => handleSort('country')}
               >
                 <div className="flex items-center gap-1">
@@ -147,7 +147,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                 </div>
               </th>
               <th
-                className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
                 onClick={() => handleSort('region')}
               >
                 <div className="flex items-center gap-1">
@@ -156,7 +156,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                 </div>
               </th>
               <th
-                className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
                 onClick={() => handleSort('composite')}
               >
                 <div className="flex items-center gap-1">
@@ -165,7 +165,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                 </div>
               </th>
               <th
-                className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
                 onClick={() => handleSort('tier')}
               >
                 <div className="flex items-center gap-1">
@@ -176,7 +176,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
               {pillars.map((pillar) => (
                 <th
                   key={pillar.id}
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
                   onClick={() => handleSort(pillar.id)}
                   title={pillar.title}
                 >
@@ -188,7 +188,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-stone-200">
             {sortedData.map((countryData) => (
               <tr
                 key={countryData.country.id}
@@ -206,13 +206,13 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                     className="rounded"
                   />
                 </td>
-                <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                <td className="px-4 py-3 text-sm font-medium text-stone-900">
                   <div className="flex items-center gap-1.5">
                     {countryData.country.name}
                     <ChevronRight className="w-3.5 h-3.5 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
+                <td className="px-4 py-3 text-sm text-stone-600">
                   {countryData.country.region}
                 </td>
                 <td className="px-4 py-3 text-sm">
@@ -226,7 +226,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                       {countryData.submission.composite_score.toFixed(1)}
                     </span>
                   ) : (
-                    <span className="text-gray-400">{t('countryDetail.notAvailable')}</span>
+                    <span className="text-stone-400">{t('countryDetail.notAvailable')}</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-sm">
@@ -235,7 +235,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                       {t(`tier.${countryData.submission.tier.toLowerCase()}`)}
                     </Badge>
                   ) : (
-                    <span className="text-gray-400">{t('countryDetail.notAvailable')}</span>
+                    <span className="text-stone-400">{t('countryDetail.notAvailable')}</span>
                   )}
                 </td>
                 {pillars.map((pillar) => {
@@ -257,12 +257,12 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                               }}
                             />
                           </div>
-                          <span className="text-gray-700">
+                          <span className="text-stone-700">
                             {pillarResult.average_score.toFixed(1)}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-gray-400">{t('countryDetail.notAvailable')}</span>
+                        <span className="text-stone-400">{t('countryDetail.notAvailable')}</span>
                       )}
                     </td>
                   );

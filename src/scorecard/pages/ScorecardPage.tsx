@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info, ChevronDown, ChevronUp, Eye, CheckCircle, AlertCircle, X } from 'lucide-react';
-import { Button, LoadingState } from '../../components/ui';
+import { Button, LoadingState, Breadcrumbs } from '../../components/ui';
 import { CountrySelector } from '../components/CountrySelector';
 import { PillarCard } from '../components/PillarCard';
 import { ScoreInputTable } from '../components/ScoreInputTable';
@@ -301,7 +301,7 @@ export default function ScorecardPage() {
 
   if (loading && countries.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <LoadingState label={t('editor.loading')} />
       </div>
     );
@@ -309,11 +309,11 @@ export default function ScorecardPage() {
 
   if (initError) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <div className="text-center max-w-md px-6">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('editor.unableToLoad')}</h2>
-          <p className="text-gray-600 mb-6">{initError}</p>
+          <AlertCircle className="w-16 h-16 text-danger/60 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-stone-900 mb-2">{t('editor.unableToLoad')}</h2>
+          <p className="text-stone-600 mb-6">{initError}</p>
           <Button onClick={loadInitialData}>{t('editor.tryAgain')}</Button>
         </div>
       </div>
@@ -321,7 +321,7 @@ export default function ScorecardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-stone-50">
       {selectedIndicator && (
         <IndicatorDetailModal
           indicator={selectedIndicator}
@@ -358,11 +358,11 @@ export default function ScorecardPage() {
       )}
 
       {publishSuccess && (
-        <div className="fixed top-4 right-4 z-50 bg-green-50 border border-green-200 rounded-lg shadow-lg p-4 flex items-center gap-3 animate-slide-in">
-          <CheckCircle className="w-5 h-5 text-green-600" />
+        <div className="fixed top-4 right-4 z-50 bg-success-light border border-success/30 rounded-lg shadow-lg p-4 flex items-center gap-3 animate-slide-in">
+          <CheckCircle className="w-5 h-5 text-success" />
           <div>
-            <p className="font-semibold text-green-900">{t('editor.publishedTitle')}</p>
-            <p className="text-sm text-green-700">{t('editor.publishedDescription')}</p>
+            <p className="font-semibold text-success-dark">{t('editor.publishedTitle')}</p>
+            <p className="text-sm text-success-dark">{t('editor.publishedDescription')}</p>
           </div>
         </div>
       )}
@@ -388,12 +388,19 @@ export default function ScorecardPage() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <Breadcrumbs
+          className="mb-4"
+          items={[
+            { label: t('analysisPage.breadcrumbScorecards') },
+            { label: selectedCountry ? selectedCountry.name : t('editor.heading') },
+          ]}
+        />
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-stone-900">
               {t('editor.heading')}
             </h1>
-            <p className="text-sm text-gray-600">{t('editor.subheading')}</p>
+            <p className="text-sm text-stone-600">{t('editor.subheading')}</p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -404,13 +411,13 @@ export default function ScorecardPage() {
                     onClick={() => setShowPublishModal(true)}
                     disabled={currentSubmission.composite_score === null}
                     loading={publishing}
-                    className="!bg-green-600 hover:!bg-green-700"
+                    className="!bg-success hover:!bg-success-dark"
                     icon={<Eye className="w-4 h-4" />}
                   >
                     {publishing ? t('editor.publishing') : t('editor.publishScorecard')}
                   </Button>
                 ) : (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 font-medium rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-success-light text-success-dark font-medium rounded-lg border border-success/30">
                     <CheckCircle className="w-4 h-4" />
                     {t('status.published')}
                   </div>
@@ -422,7 +429,7 @@ export default function ScorecardPage() {
               onClick={handleToggleGuide}
               aria-pressed={guideExpanded}
               className={`p-2 rounded-lg transition-colors ${
-                guideExpanded ? 'text-primary-600 bg-primary-50' : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
+                guideExpanded ? 'text-primary-600 bg-primary-50' : 'text-stone-600 hover:text-primary-600 hover:bg-primary-50'
               }`}
               title={t('editor.aboutThisTool')}
             >
@@ -430,7 +437,7 @@ export default function ScorecardPage() {
             </button>
 
             {lastSaved && (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-stone-500">
                 {t('editor.lastSaved', { time: lastSaved.toLocaleTimeString() })}
               </div>
             )}
@@ -460,34 +467,34 @@ export default function ScorecardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!selectedCountry ? (
           <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
+            <div className="text-stone-400 mb-4">
               <svg className="w-24 h-24 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-700 mb-2">
+            <h2 className="text-2xl font-bold text-stone-700 mb-2">
               {t('editor.selectCountryToBegin')}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-stone-600">
               {t('editor.selectCountryHint')}
             </p>
           </div>
         ) : (
           <div className="space-y-8">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg border border-stone-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900">
+                  <h2 className="text-3xl font-bold text-stone-900">
                     {selectedCountry.name}
                   </h2>
-                  <p className="text-gray-600">{selectedCountry.region}</p>
+                  <p className="text-stone-600">{selectedCountry.region}</p>
                 </div>
                 {currentSubmission && (
                   <div className="text-right flex flex-col items-end gap-2">
                     <StatusBadge status={currentSubmission.status} />
                     <div className="flex items-baseline gap-2">
-                      <div className="text-sm text-gray-600">{t('editor.version')}</div>
-                      <div className="text-2xl font-bold text-gray-900">
+                      <div className="text-sm text-stone-600">{t('editor.version')}</div>
+                      <div className="text-2xl font-bold text-stone-900">
                         {currentSubmission.version}
                       </div>
                     </div>
@@ -529,7 +536,7 @@ export default function ScorecardPage() {
 
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">{t('editor.scoreIndicators')}</h2>
+                <h2 className="text-2xl font-bold text-stone-900">{t('editor.scoreIndicators')}</h2>
                 <button
                   onClick={() => {
                     if (expandedPillars.size === pillars.length) {
@@ -559,22 +566,22 @@ export default function ScorecardPage() {
                 const isExpanded = expandedPillars.has(pillar.id);
 
                 return (
-                  <div key={pillar.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div key={pillar.id} className="border border-stone-200 rounded-lg overflow-hidden">
                     <button
                       onClick={() => togglePillar(pillar.id)}
-                      className="w-full px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between"
+                      className="w-full px-6 py-4 bg-stone-50 hover:bg-stone-100 transition-colors flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-sm font-bold text-primary-600">
                           {pillar.code}
                         </span>
-                        <span className="font-bold text-gray-900">{pillar.title}</span>
-                        <span className="text-sm text-gray-600">{t('editor.indicatorCount', { count: pillarIndicators.length })}</span>
+                        <span className="font-bold text-stone-900">{pillar.title}</span>
+                        <span className="text-sm text-stone-600">{t('editor.indicatorCount', { count: pillarIndicators.length })}</span>
                       </div>
                       {isExpanded ? (
-                        <ChevronUp className="w-5 h-5 text-gray-600" />
+                        <ChevronUp className="w-5 h-5 text-stone-600" />
                       ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-600" />
+                        <ChevronDown className="w-5 h-5 text-stone-600" />
                       )}
                     </button>
 

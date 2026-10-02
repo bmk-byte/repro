@@ -42,6 +42,7 @@
     "errorLoadFailed": "Failed to load country data. Please try again.",
     "unableToLoad": "Unable to Load Country Data",
     "backToAnalysis": "Back to Analysis",
+    "breadcrumbAnalysis": "Analysis",
     "liveUpdate": "Live update",
     "countryCode": "Country Code: {{code}}",
     "compositeScore": "Composite Score",
@@ -233,6 +234,7 @@
     "top20Title": "Top 20 Countries - {{code}}"
   },
   "regionalAnalysis": {
+    "viewMode": "View mode",
     "tabGlobe": "Globe",
     "tabOverview": "Overview",
     "tabChart": "Chart",
@@ -296,7 +298,14 @@
     "tabRegionalLabel": "Regional",
     "tabRegionalDescription": "Compare performance by region",
     "tabCorrelationLabel": "Insights",
-    "tabCorrelationDescription": "Discover correlations and patterns"
+    "tabCorrelationDescription": "Discover correlations and patterns",
+    "breadcrumbHome": "Home",
+    "breadcrumbScorecards": "Scorecards",
+    "kpiCountriesAssessed": "Countries Assessed",
+    "kpiOfTotal": "of {{total}} total",
+    "kpiPublished": "Published",
+    "kpiIndicators": "Indicators",
+    "kpiPillars": "Pillars"
   },
   "radarChart": {
     "primary": "Primary",

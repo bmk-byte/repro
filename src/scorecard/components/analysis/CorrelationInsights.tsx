@@ -129,33 +129,33 @@ export function CorrelationInsights({ data, indicators, pillars }: CorrelationIn
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">{t('correlationInsights.heading')}</h2>
-        <p className="text-sm text-gray-600 mb-6">
+      <div className="bg-white rounded-lg border border-stone-200 p-6">
+        <h2 className="text-xl font-bold text-stone-900 mb-4">{t('correlationInsights.heading')}</h2>
+        <p className="text-sm text-stone-600 mb-6">
           {t('correlationInsights.subheading')}
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-5">
-            <h3 className="font-medium text-green-900 mb-3">
+          <div className="bg-success-light border border-success/30 rounded-lg p-5">
+            <h3 className="font-medium text-success-dark mb-3">
               {t('correlationInsights.topPositive')}
             </h3>
             <div className="space-y-3">
               {topPositiveCorrelations.map((item, index) => (
                 <div key={item!.indicator.id} className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                  <div className="flex-shrink-0 w-8 h-8 bg-success text-white rounded-full flex items-center justify-center font-bold text-sm">
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">
+                    <div className="text-sm font-medium text-stone-900 truncate">
                       {item!.indicator.code} - {item!.indicator.title}
                     </div>
-                    <div className="text-xs text-gray-600">
+                    <div className="text-xs text-stone-600">
                       {t('correlationInsights.correlationSample', { correlation: item!.correlation.toFixed(3), n: item!.sampleSize })}
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <div className="text-lg font-bold text-green-600">
+                    <div className="text-lg font-bold text-success">
                       {(item!.correlation * 100).toFixed(0)}%
                     </div>
                   </div>
@@ -166,7 +166,7 @@ export function CorrelationInsights({ data, indicators, pillars }: CorrelationIn
 
           <div className="bg-primary-50 border border-primary-200 rounded-lg p-5">
             <h3 className="font-medium text-primary-900 mb-3">{t('correlationInsights.keyInsights')}</h3>
-            <div className="space-y-3 text-sm text-gray-700">
+            <div className="space-y-3 text-sm text-stone-700">
               {topPositiveCorrelations.length > 0 && (
                 <>
                   <p>
@@ -207,65 +207,65 @@ export function CorrelationInsights({ data, indicators, pillars }: CorrelationIn
         colorScheme="blue"
       />
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg border border-stone-200 p-6">
+        <h3 className="text-lg font-bold text-stone-900 mb-4">
           {t('correlationInsights.allIndicatorsHeading')}
         </h3>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-stone-200">
+            <thead className="bg-stone-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider">
                   {t('correlationInsights.rank')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider">
                   {t('scoreInputTable.indicator')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider">
                   {t('correlationInsights.correlation')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider">
                   {t('correlationInsights.sampleSize')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider">
                   {t('correlationInsights.strength')}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-stone-200">
               {indicatorToCompositeCorrelations.slice(0, 15).map((item, index) => {
                 const absCorr = Math.abs(item!.correlation);
                 const strength =
                   absCorr > 0.7 ? t('correlationInsights.strong') : absCorr > 0.4 ? t('correlationInsights.moderate') : t('correlationInsights.weak');
                 const strengthColor =
                   absCorr > 0.7
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-success-light text-success-dark'
                     : absCorr > 0.4
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-gray-100 text-gray-800';
+                    ? 'bg-warning-light text-warning-dark'
+                    : 'bg-stone-100 text-stone-800';
 
                 return (
-                  <tr key={item!.indicator.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
+                  <tr key={item!.indicator.id} className="hover:bg-stone-50">
+                    <td className="px-4 py-3 text-sm text-stone-900">{index + 1}</td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="font-medium text-gray-900">{item!.indicator.code}</div>
-                      <div className="text-gray-600">{item!.indicator.title}</div>
+                      <div className="font-medium text-stone-900">{item!.indicator.code}</div>
+                      <div className="text-stone-600">{item!.indicator.title}</div>
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex items-center gap-2">
-                        <div className="w-20 h-2 bg-gray-200 rounded-full">
+                        <div className="w-20 h-2 bg-stone-200 rounded-full">
                           <div
                             className="h-2 bg-primary-600 rounded-full"
                             style={{ width: `${absCorr * 100}%` }}
                           />
                         </div>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-stone-900">
                           {item!.correlation.toFixed(3)}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{item!.sampleSize}</td>
+                    <td className="px-4 py-3 text-sm text-stone-600">{item!.sampleSize}</td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${strengthColor}`}>
                         {strength}

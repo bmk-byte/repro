@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, FileJson, Copy, Check, AlertCircle, RefreshCw } from 'lucide-react';
-import { Button } from '../../components/ui';
+import { Download, FileJson, Copy, Check, AlertCircle, RefreshCw, Flag, CheckCircle2, ListChecks, Layers } from 'lucide-react';
+import { Button, Breadcrumbs, KpiCard, Tabs } from '../../components/ui';
 import { PublicScorecardChrome } from '../components/PublicScorecardChrome';
 import { supabase } from '../../lib/supabase';
 import { CrossCountryComparison } from '../components/analysis/CrossCountryComparison';
@@ -33,6 +34,7 @@ type TabType = 'comparison' | 'indicator' | 'regional' | 'correlation';
  */
 export default function AnalysisPage() {
   const { t } = useTranslation('scorecard');
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('comparison');
@@ -138,11 +140,11 @@ export default function AnalysisPage() {
   if (error) {
     return (
       <PublicScorecardChrome>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-stone-50 flex items-center justify-center">
           <div className="text-center max-w-md px-6">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('analysisPage.unableToLoad')}</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <AlertCircle className="w-16 h-16 text-danger/60 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-stone-900 mb-2">{t('analysisPage.unableToLoad')}</h2>
+            <p className="text-stone-600 mb-6">{error}</p>
             <Button onClick={() => loadAnalysisData()}>{t('editor.tryAgain')}</Button>
           </div>
         </div>
@@ -173,23 +175,34 @@ export default function AnalysisPage() {
     },
   ];
 
+  const countriesAssessed = countriesData.filter((d) => d.submission).length;
+  const publishedCount = countriesData.filter((d) => d.submission?.status === 'published').length;
+
   return (
     <PublicScorecardChrome>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
+          <Breadcrumbs
+            className="mb-4"
+            items={[
+              { label: t('analysisPage.breadcrumbHome'), onClick: () => navigate('/') },
+              { label: t('analysisPage.breadcrumbScorecards') },
+            ]}
+          />
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-gray-900">{t('analysisPage.heading')}</h1>
+                <h1 className="text-3xl font-bold text-stone-900">{t('analysisPage.heading')}</h1>
                 {liveUpdate && (
-                  <div className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                  <div className="flex items-center gap-1.5 text-xs text-success-dark bg-success-light border border-success/30 px-2.5 py-1 rounded-full">
                     <RefreshCw className="w-3 h-3 animate-spin" />
                     {t('analysisPage.updating')}
                   </div>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-stone-500 mt-1">
                 {t('analysisPage.subheading')}
               </p>
             </div>
@@ -221,26 +234,36 @@ export default function AnalysisPage() {
             </div>
           </div>
 
-          <div className="mt-6 border-b border-gray-200">
-            <nav className="flex gap-2 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-3 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-primary-600 text-primary-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex flex-col items-start">
-                    <span>{tab.label}</span>
-                    <span className="text-xs text-gray-500 mt-0.5">{tab.description}</span>
-                  </div>
-                </button>
-              ))}
-            </nav>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+            <KpiCard
+              label={t('analysisPage.kpiCountriesAssessed')}
+              value={countriesAssessed}
+              icon={<Flag className="w-4 h-4" />}
+              hint={t('analysisPage.kpiOfTotal', { total: countriesData.length })}
+            />
+            <KpiCard
+              label={t('analysisPage.kpiPublished')}
+              value={publishedCount}
+              icon={<CheckCircle2 className="w-4 h-4" />}
+            />
+            <KpiCard
+              label={t('analysisPage.kpiIndicators')}
+              value={indicators.length}
+              icon={<ListChecks className="w-4 h-4" />}
+            />
+            <KpiCard
+              label={t('analysisPage.kpiPillars')}
+              value={pillars.length}
+              icon={<Layers className="w-4 h-4" />}
+            />
           </div>
+
+          <Tabs
+            className="mt-6"
+            tabs={tabs}
+            activeId={activeTab}
+            onChange={(id) => setActiveTab(id as TabType)}
+          />
         </div>
 
         <div className="pb-8">

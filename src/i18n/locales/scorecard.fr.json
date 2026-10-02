@@ -42,6 +42,7 @@
     "errorLoadFailed": "Échec du chargement des données du pays. Veuillez réessayer.",
     "unableToLoad": "Impossible de charger les données du pays",
     "backToAnalysis": "Retour à l'analyse",
+    "breadcrumbAnalysis": "Analyse",
     "liveUpdate": "Mise à jour en direct",
     "countryCode": "Code pays : {{code}}",
     "compositeScore": "Score composite",
@@ -233,6 +234,7 @@
     "top20Title": "Top 20 des pays - {{code}}"
   },
   "regionalAnalysis": {
+    "viewMode": "Mode d'affichage",
     "tabGlobe": "Globe",
     "tabOverview": "Aperçu",
     "tabChart": "Graphique",
@@ -296,7 +298,14 @@
     "tabRegionalLabel": "Régional",
     "tabRegionalDescription": "Comparer la performance par région",
     "tabCorrelationLabel": "Constats",
-    "tabCorrelationDescription": "Découvrir les corrélations et tendances"
+    "tabCorrelationDescription": "Découvrir les corrélations et tendances",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbScorecards": "Tableaux de bord",
+    "kpiCountriesAssessed": "Pays évalués",
+    "kpiOfTotal": "sur {{total}} au total",
+    "kpiPublished": "Publiés",
+    "kpiIndicators": "Indicateurs",
+    "kpiPillars": "Piliers"
   },
   "radarChart": {
     "primary": "Principal",
