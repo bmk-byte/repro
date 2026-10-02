@@ -18,7 +18,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { fetchCountryDetailData, type CountryDetailData } from '../lib/api';
-import { supabase } from '../../lib/supabase';
 import { getPerformanceLevel } from '../lib/scoring';
 import type {
   ScorecardPillar as Pillar,
@@ -230,43 +229,22 @@ export default function CountryDetailPage() {
     loadData();
   }, [loadData]);
 
+  // A live realtime subscription here would mean every anonymous visitor to
+  // this public, no-login page opens a permanent WAL-tailing connection for
+  // a submission that only a handful of editors change occasionally — this
+  // was one of the largest sources of Supabase Realtime query volume in the
+  // whole app. A periodic silent refetch gets the same "stays reasonably
+  // fresh" outcome at a fraction of the connection cost.
   useEffect(() => {
-    if (!countryId || !data?.submission?.id) return;
+    if (!countryId) return;
 
-    const submissionId = data.submission.id;
+    const timer = setInterval(() => {
+      setLiveIndicator(true);
+      loadData().then(() => setTimeout(() => setLiveIndicator(false), 1500));
+    }, 120_000);
 
-    const channel = supabase
-      .channel(`scorecard-country-detail-${countryId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'scorecard_indicator_scores', filter: `submission_id=eq.${submissionId}` },
-        () => {
-          setLiveIndicator(true);
-          loadData().then(() => setTimeout(() => setLiveIndicator(false), 2000));
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'scorecard_pillar_results', filter: `submission_id=eq.${submissionId}` },
-        () => {
-          setLiveIndicator(true);
-          loadData().then(() => setTimeout(() => setLiveIndicator(false), 2000));
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'scorecard_submissions', filter: `id=eq.${submissionId}` },
-        () => {
-          setLiveIndicator(true);
-          loadData().then(() => setTimeout(() => setLiveIndicator(false), 2000));
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [countryId, data?.submission?.id, loadData]);
+    return () => clearInterval(timer);
+  }, [countryId, loadData]);
 
   if (loading) {
     return (

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Download, FileJson, Copy, Check, AlertCircle, RefreshCw, Flag, CheckCircle2, ListChecks, Layers } from 'lucide-react';
 import { Button, Breadcrumbs, KpiCard, Tabs } from '../../components/ui';
 import { PublicScorecardChrome } from '../components/PublicScorecardChrome';
-import { supabase } from '../../lib/supabase';
 import { CrossCountryComparison } from '../components/analysis/CrossCountryComparison';
 import { IndicatorAnalysis } from '../components/analysis/IndicatorAnalysis';
 import { RegionalAnalysis } from '../components/analysis/RegionalAnalysis';
@@ -46,7 +45,7 @@ export default function AnalysisPage() {
 
   const [copied, setCopied] = useState(false);
   const [liveUpdate, setLiveUpdate] = useState(false);
-  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadAnalysisData = useCallback(async (silent = false) => {
     try {
@@ -76,27 +75,24 @@ export default function AnalysisPage() {
     loadAnalysisData();
   }, [loadAnalysisData]);
 
+  // A live realtime subscription here would mean every anonymous visitor to
+  // this public, no-login page opens a permanent WAL-tailing connection for
+  // data that only a handful of editors change occasionally — that's the
+  // single largest source of Supabase Realtime query volume in the whole
+  // app (see supabase/migrations/20261001075948_create_scorecard_schema.sql
+  // for why this page has no auth gate at all). A periodic silent refetch
+  // gets the same "stays reasonably fresh" outcome at a fraction of the
+  // connection cost.
   useEffect(() => {
-    const handleChange = () => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = setTimeout(() => {
-        setLiveUpdate(true);
-        loadAnalysisData(true).then(() => {
-          setTimeout(() => setLiveUpdate(false), 2500);
-        });
-      }, 800);
-    };
-
-    const channel = supabase
-      .channel('scorecard-analysis-page-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'scorecard_submissions' }, handleChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'scorecard_pillar_results' }, handleChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'scorecard_indicator_scores' }, handleChange)
-      .subscribe();
+    refreshTimerRef.current = setInterval(() => {
+      setLiveUpdate(true);
+      loadAnalysisData(true).then(() => {
+        setTimeout(() => setLiveUpdate(false), 1500);
+      });
+    }, 120_000);
 
     return () => {
-      supabase.removeChannel(channel);
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     };
   }, [loadAnalysisData]);
 
