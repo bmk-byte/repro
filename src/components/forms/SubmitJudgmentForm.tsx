@@ -106,6 +106,11 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
   const { loadDraft, saveDraft, clearDraft } = useFormDraft(draftKey, { formData: initialFormData, currentStep: 0 });
   const draftLoaded = useRef(false);
 
+  // Synchronous guard against double submission — see SubmitCaseForm.tsx for
+  // why the `loading` state flag alone isn't enough to prevent a double
+  // click/submit from both entering handleSubmit before React re-renders.
+  const submittingRef = useRef(false);
+
   // Load saved draft on mount (before first render of form data)
   useEffect(() => {
     const draft = loadDraft();
@@ -377,6 +382,8 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       return;
     }
 
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
 
     try {
@@ -574,6 +581,7 @@ const SubmitJudgmentForm: React.FC<SubmitJudgmentFormProps> = ({
       );
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 

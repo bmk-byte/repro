@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload, X, ChevronRight, ChevronLeft, CircleAlert as AlertCircle, Check } from 'lucide-react';
 import { useDropzone, FileRejection } from 'react-dropzone';
-import { supabase } from '../../lib/supabase';
+import { supabase, handleSupabaseError } from '../../lib/supabase';
 import { toast } from '../../lib/toast';
 import { reportError } from '../../lib/errorReporting';
 import MultiStepFormProgress from './MultiStepFormProgress';
@@ -78,6 +78,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
   const draftKey = isDirectUpload ? 'strategic-case-direct' : 'strategic-case-submission';
   const { loadDraft, saveDraft, clearDraft } = useFormDraft(draftKey, { formData: initialFormData, currentStep: 0 });
   const draftLoaded = useRef(false);
+
+  // Synchronous guard against double submission. `loading` alone isn't
+  // enough: two click/submit events dispatched in the same tick both read
+  // the pre-re-render `disabled={loading}` value before React commits the
+  // state update that would disable the button, so both can enter
+  // handleSubmit. A ref check is synchronous and closes that gap.
+  const submittingRef = useRef(false);
 
   // Load saved draft on mount (before first render of form data)
   useEffect(() => {
@@ -344,6 +351,8 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       return;
     }
 
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
 
     try {
@@ -524,12 +533,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       toast.error(
         <div>
           <p className="font-medium">{t('submitCaseForm.toasts.submitErrorTitle')}</p>
-          <p className="text-sm mt-1">{error.message || t('submitCaseForm.toasts.failedToSubmitFallback')}</p>
+          <p className="text-sm mt-1">{handleSupabaseError(error) || t('submitCaseForm.toasts.failedToSubmitFallback')}</p>
         </div>,
         { duration: 5000 }
       );
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
