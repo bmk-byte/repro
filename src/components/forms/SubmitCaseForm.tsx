@@ -11,18 +11,13 @@ import { createSafeDisplayName, safeFileExtension } from '../../lib/sanitize';
 import { Input, Select, Textarea, Button, TagListInput } from '../ui';
 import { sendEmail } from '../../lib/email';
 import { renderEmail } from '../../lib/emailTemplates';
+import { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 interface SubmitCaseFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   isDirectUpload?: boolean;
 }
-
-// Re-exported for backward compatibility — the canonical definition now
-// lives in src/constants/caseCategories.ts (a side-effect-free module, so
-// validation logic and tests can use it without pulling in this
-// component's full dependency chain, including the Supabase client).
-export { CASE_CATEGORIES } from '../../constants/caseCategories';
 
 const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
   onSuccess,

@@ -32,7 +32,7 @@ import { unlinkSync } from 'node:fs';
 
 // Ratchet this DOWN as pre-existing errors get fixed; never raise it to
 // paper over a newly introduced error.
-const BASELINE_ERROR_COUNT = 47;
+const BASELINE_ERROR_COUNT = 45;
 
 const tscBin = fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url));
 
