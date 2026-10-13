@@ -43,7 +43,6 @@ export const COLUMNS: ColumnDef[] = [
   { key: 'action_taken', header: 'Action Taken', required: true, example: 'Petition filed in High Court' },
   { key: 'action_timeframe', header: 'Action Timeframe', required: true, example: 'Q1 2025' },
   { key: 'next_steps', header: 'Next Steps', required: true, example: 'Awaiting hearing date' },
-  { key: 'partner', header: 'Partner Organization', required: false, example: 'Example Partner Org' },
   { key: 'client_name', header: 'Client Name', required: false, example: '' },
   { key: 'client_email', header: 'Client Email', required: false, example: '' },
   { key: 'client_phone', header: 'Client Phone', required: false, example: '' },

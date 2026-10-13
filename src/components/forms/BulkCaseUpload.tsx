@@ -104,6 +104,18 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
       if (userError) throw userError;
       if (!user) throw new Error(t('common.noAuthenticatedUser'));
 
+      // Partner Organization is never taken from the CSV — always the
+      // uploader's own account, so every row in the batch is reliably
+      // attributed regardless of what the spreadsheet contained.
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      if (!profile?.organization) throw new Error(t('bulkCaseUpload.errors.noOrganizationOnFile'));
+      const partner = profile.organization;
+
       // Fail open: only an explicit `false` blocks — an RPC error (e.g.
       // offline) shouldn't itself lock the partner out of bulk uploading.
       const { data: allowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
@@ -135,7 +147,7 @@ const BulkCaseUpload: React.FC<BulkCaseUploadProps> = ({ onDone }) => {
           status: 'pending',
           tracking_period: d.tracking_period,
           programme: d.programme,
-          partner: d.partner,
+          partner,
           nature_of_case: d.nature_of_case,
           action_taken: d.action_taken,
           action_timeframe: d.action_timeframe,

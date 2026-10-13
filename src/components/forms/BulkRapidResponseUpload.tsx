@@ -118,6 +118,18 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
       if (userError) throw userError;
       if (!user) throw new Error(t('caseForm.errors.userNotAuthenticated'));
 
+      // Partner Organization is never taken from the CSV — always the
+      // uploader's own account, matching the single-case Rapid Response
+      // form (see RapidResponseCaseForm.tsx).
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      if (!profile?.organization) throw new Error(t('caseForm.errors.noOrganizationOnFile'));
+      const partner = profile.organization;
+
       // Fail open: only an explicit `false` blocks. Higher cap than the
       // partner-facing bulk upload since this is a trusted, direct-insert
       // moderator path.
@@ -181,7 +193,7 @@ const BulkRapidResponseUpload: React.FC<BulkRapidResponseUploadProps> = ({ onDon
           action_taken: d.action_taken,
           action_timeframe: d.action_timeframe,
           next_steps: d.next_steps,
-          partner: d.partner,
+          partner,
           case_categories: [d.case_category],
           case_type: 'rapid-response',
           moderation_status: 'approved',

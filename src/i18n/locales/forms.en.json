@@ -96,7 +96,8 @@
       "rateLimited": "Too many bulk uploads. Please try again later.",
       "submitFailed": "Failed to submit cases",
       "unexpectedRowError": "This row could not be saved due to an unexpected error",
-      "duplicateRowInFile": "This row duplicates row {{row}} of this file (same title, country, and nature of case)"
+      "duplicateRowInFile": "This row duplicates row {{row}} of this file (same title, country, and nature of case)",
+      "noOrganizationOnFile": "Your account has no organization on file, so we can't attribute this upload to a partner. Please ask an admin to set your organization before submitting."
     }
   },
   "submitCaseForm": {

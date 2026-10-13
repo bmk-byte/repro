@@ -28,7 +28,6 @@ export const COLUMNS: ColumnDef[] = [
   { key: 'country', header: 'Country', required: true, example: 'Kenya' },
   { key: 'tracking_period', header: 'Tracking Period', required: true, example: '2024-2025' },
   { key: 'programme', header: 'Programme', required: true, example: 'Reproductive Rights Litigation' },
-  { key: 'partner', header: 'Partner', required: true, example: 'Example Partner Org' },
   { key: 'nature_of_case', header: 'Nature of Case', required: true, example: 'Constitutional challenge' },
   { key: 'action_taken', header: 'Action Taken', required: true, example: 'Petition filed in High Court' },
   { key: 'action_timeframe', header: 'Action Timeframe', required: true, example: 'Q1 2025' },
