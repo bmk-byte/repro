@@ -300,13 +300,20 @@ const sections: LegalSection[] = [
           delete, or obtain a copy of your personal data, restrict or object to its processing,
           and withdraw consent where consent is the basis for processing.
         </P>
+        <P>
+          You can delete your own Account yourself, at any time, from Settings &rarr; Security
+          &rarr; Delete Account — this removes your name, email, phone number, and organization,
+          revokes any elevated access, and disables sign-in. It does not delete Case Records or
+          Judgment Records you submitted; as explained in Section 3, those remain visible
+          platform-wide, now attributed to a deleted account rather than to you by name.
+        </P>
         <Callout title="Current limitation">
-          The Platform does not yet provide self-service tools for these requests. Contact{' '}
-          <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> and
-          we will process the request
-          manually. For a Case Subject (who is not an Account Holder and cannot contact us
-          directly through the Platform), requests should generally be directed to the Partner
-          Organization that submitted their case, who can in turn contact us.
+          Access, correction, and data-export requests don't yet have a self-service tool.
+          Contact <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> and
+          we will process the request manually. For a Case Subject (who is not an Account
+          Holder and cannot contact us directly through the Platform), requests should
+          generally be directed to the Partner Organization that submitted their case, who can
+          in turn contact us.
         </Callout>
       </>
     ),

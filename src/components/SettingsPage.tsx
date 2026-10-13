@@ -8,7 +8,7 @@ import { reportError } from '../lib/errorReporting';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { usePasswordStrength } from '../hooks/usePasswordStrength';
 import { getToastsEnabled, setToastsEnabled } from '../lib/toastPreference';
-import { LoadingState, Input, Button, PasswordStrengthMeter, LanguageSwitcher } from './ui';
+import { LoadingState, Input, Button, PasswordStrengthMeter, LanguageSwitcher, ConfirmDialog } from './ui';
 
 const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -19,6 +19,8 @@ const SettingsPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
   const [toastsEnabled, setToastsEnabledState] = useState(getToastsEnabled());
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const { requirements: passwordRequirements, strength: passwordStrength, isValid: passwordIsValid } = usePasswordStrength(newPassword);
 
   // Use the moderator status hook
@@ -53,6 +55,25 @@ const SettingsPage: React.FC = () => {
       toast.error(t('settings.unableToUpdatePassword'));
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(t('settings.accountDeleted'));
+      await supabase.auth.signOut();
+      window.location.assign('/');
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      reportError(err, { context: 'SettingsPage.handleDeleteAccount', category: 'RELIABILITY' });
+      toast.error(t('settings.unableToDeleteAccount'));
+      setDeletingAccount(false);
+      setDeleteAccountOpen(false);
     }
   };
 
@@ -202,6 +223,19 @@ const SettingsPage: React.FC = () => {
                       {t('settings.lastLogin', { date: new Date(user?.last_sign_in_at || Date.now()).toLocaleString() })}
                     </p>
                   </div>
+
+                  <div className="bg-danger-light/40 border border-danger/30 p-4 rounded-lg">
+                    <h3 className="text-md font-medium text-stone-900">{t('settings.deleteAccount')}</h3>
+                    <p className="mt-1 text-sm text-stone-600">{t('settings.deleteAccountDescription')}</p>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      className="mt-3"
+                      onClick={() => setDeleteAccountOpen(true)}
+                    >
+                      {t('settings.deleteAccount')}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -303,6 +337,17 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteAccountOpen}
+        onClose={() => setDeleteAccountOpen(false)}
+        onConfirm={handleDeleteAccount}
+        title={t('settings.deleteAccountConfirmTitle')}
+        description={t('settings.deleteAccountConfirmDescription')}
+        confirmLabel={t('settings.deleteAccountConfirmButton')}
+        confirmVariant="danger"
+        loading={deletingAccount}
+      />
     </div>
   );
 };

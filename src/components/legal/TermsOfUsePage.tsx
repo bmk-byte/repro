@@ -371,13 +371,23 @@ const sections: LegalSection[] = [
     id: 'data-export',
     title: 'Data Export and Account Closure',
     content: (
-      <Callout title="Current limitation">
-        The Platform does not currently provide a self-service way to export your account
-        data or request account deletion. Until that capability is built, contact{' '}
-        <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> to
-        request a copy of your data or closure of your Account, and we will process the
-        request manually. See the Privacy Policy, Section 19, for data subject rights generally.
-      </Callout>
+      <>
+        <P>
+          You can delete your own Account at any time from Settings &rarr; Security &rarr;
+          Delete Account. This removes your name, email, phone number, and organization from
+          your profile, revokes any Moderator/Admin/Scorecard Editor access, and disables
+          sign-in permanently. It does not delete Case Records or Judgment Records you
+          submitted — consistent with Section 10, those remain on the Platform, attributed to
+          a deleted account rather than to you by name.
+        </P>
+        <Callout title="Current limitation">
+          The Platform does not yet provide a self-service way to export a copy of your
+          account data before deleting it. Contact{' '}
+          <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> to
+          request a copy first, and we will process that request manually. See the Privacy
+          Policy, Section 19, for data subject rights generally.
+        </Callout>
+      </>
     ),
   },
   {
