@@ -15,14 +15,11 @@ const LandingFooter: React.FC = () => {
           <span>{t('footer.copyright')}</span>
           <a href="mailto:info@afyanahaki.org" className="hover:text-primary transition-colors">info@afyanahaki.org</a>
           <a href="tel:+256414660733" className="hidden sm:inline hover:text-primary transition-colors">+256 414 660 733</a>
+          <Link to="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link>
+          <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-xs text-stone-400">
-            <Link to="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link>
-            <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-          </div>
-
           <div className="flex items-center gap-3">
             <a href="#" className="text-stone-400 hover:text-primary transition-colors" aria-label={t('footer.linkedinAria')}>
               <Linkedin className="h-3.5 w-3.5" />

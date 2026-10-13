@@ -88,6 +88,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   const [customOrganization, setCustomOrganization] = useState('');
   const [showCustomOrganization, setShowCustomOrganization] = useState(false);
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signUp');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationState>({ email: '', password: '', organization: '' });
@@ -214,6 +215,14 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
     // Validate custom organization if "Other" is selected
     if (isSignUp && selectedOrganization === OTHER_ORGANIZATION_VALUE && !customOrganization.trim()) {
       toast.error(t('auth.pleaseEnterOrganizationName'));
+      setShakeAnimation(true);
+      setTimeout(() => setShakeAnimation(false), 500);
+      return;
+    }
+
+    // Require agreement to the Terms of Use and Privacy Policy before an account is created.
+    if (isSignUp && !agreedToTerms) {
+      toast.error(t('auth.pleaseAgreeToTerms'));
       setShakeAnimation(true);
       setTimeout(() => setShakeAnimation(false), 500);
       return;
@@ -357,6 +366,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
     setSelectedOrganization('');
     setCustomOrganization('');
     setShowCustomOrganization(false);
+    setAgreedToTerms(false);
     setValidationErrors({ email: '', password: '', organization: '' });
     setIsSignUp(!isSignUp);
     setPasswordTouched(false);
@@ -575,6 +585,27 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                         {t('auth.forgotPassword')}
                       </button>
                     </div>
+                  )}
+
+                  {!isForgotPassword && isSignUp && (
+                    <label className="flex items-start gap-2 text-sm text-stone-600">
+                      <input
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        className="mt-0.5 rounded border-stone-300 text-primary focus:ring-primary"
+                      />
+                      <span>
+                        {t('auth.agreeToTermsPrefix')}{' '}
+                        <a href="/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                          {t('auth.termsOfUse')}
+                        </a>{' '}
+                        {t('auth.agreeToTermsAnd')}{' '}
+                        <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                          {t('auth.privacyPolicy')}
+                        </a>
+                      </span>
+                    </label>
                   )}
 
                   <Button type="submit" loading={loading} size="lg" className="w-full">
