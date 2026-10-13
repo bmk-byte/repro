@@ -153,6 +153,8 @@
       "programmePlaceholder": "ex. : Programme LIRA",
       "partnerLabel": "Organisation partenaire",
       "partnerPlaceholder": "ex. : Afya Na Haki",
+      "partnerAutoFilledHelper": "Rempli automatiquement à partir de votre compte, afin que les soumissions soient attribuées de manière fiable à votre organisation.",
+      "partnerNoProfileOrgHelper": "Aucune organisation n'est enregistrée sur votre compte — saisissez-la manuellement, ou demandez à un administrateur de la définir sur votre profil.",
       "courtLabel": "Tribunal",
       "courtPlaceholder": "ex. : Haute Cour du Kenya",
       "natureOfCaseLabel": "Nature de l'affaire",

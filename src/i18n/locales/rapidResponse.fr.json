@@ -29,6 +29,8 @@
       "partnerOrganization": "Organisation partenaire",
       "partnerOrganizationPlaceholder": "ex. Afya Na Haki, KELIN, CEHURD",
       "partnerOrganizationHelper": "Indiquez le nom de l'organisation partenaire impliquée dans ce dossier",
+      "partnerOrganizationAutoFilledHelper": "Rempli automatiquement à partir de votre compte, afin que les dossiers soient attribués de manière fiable à votre organisation.",
+      "partnerOrganizationNoProfileOrgHelper": "Aucune organisation n'est enregistrée sur votre compte — saisissez-la manuellement, ou demandez à un administrateur de la définir sur votre profil.",
       "deadlineDate": "Date d'échéance",
       "deadlineDescription": "Description de l'échéance",
       "deadlineDescriptionPlaceholder": "Décrivez cette échéance",

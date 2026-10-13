@@ -132,6 +132,34 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
     fetchCountries();
   }, []);
 
+  // The submitter's own organization, read from their profile — undefined
+  // while loading, null once loaded if their profile has none on file.
+  // Not fetched for isDirectUpload (moderators entering a case on behalf of
+  // a partner that isn't necessarily their own) — that path keeps manual entry.
+  const [userOrganization, setUserOrganization] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (isDirectUpload) return;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('organization')
+        .eq('id', user.id)
+        .maybeSingle();
+      setUserOrganization(data?.organization ?? null);
+    })();
+  }, [isDirectUpload]);
+
+  // Once the submitter's organization is known, lock the Partner
+  // Organization field to it rather than relying on them to type it
+  // correctly — but never clobber a value already restored from a draft.
+  useEffect(() => {
+    if (isDirectUpload || !userOrganization) return;
+    setFormData(prev => prev.partner ? prev : { ...prev, partner: userOrganization });
+  }, [isDirectUpload, userOrganization]);
+
   const fetchCountries = async () => {
     try {
       const { data, error } = await supabase
@@ -613,16 +641,29 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
               placeholder={t('submitCaseForm.step1.programmePlaceholder')}
             />
 
-            <Input
-              label={t('submitCaseForm.step1.partnerLabel')}
-              name="partner"
-              required
-              value={formData.partner}
-              onChange={handleInputChange}
-              onBlur={() => markTouched('partner')}
-              error={fieldError('partner', t('submitCaseForm.step1.partnerLabel'), !formData.partner)}
-              placeholder={t('submitCaseForm.step1.partnerPlaceholder')}
-            />
+            {!isDirectUpload && userOrganization ? (
+              <Input
+                label={t('submitCaseForm.step1.partnerLabel')}
+                name="partner"
+                required
+                value={formData.partner}
+                readOnly
+                disabled
+                helperText={t('submitCaseForm.step1.partnerAutoFilledHelper')}
+              />
+            ) : (
+              <Input
+                label={t('submitCaseForm.step1.partnerLabel')}
+                name="partner"
+                required
+                value={formData.partner}
+                onChange={handleInputChange}
+                onBlur={() => markTouched('partner')}
+                error={fieldError('partner', t('submitCaseForm.step1.partnerLabel'), !formData.partner)}
+                placeholder={t('submitCaseForm.step1.partnerPlaceholder')}
+                helperText={!isDirectUpload && userOrganization === null ? t('submitCaseForm.step1.partnerNoProfileOrgHelper') : undefined}
+              />
+            )}
 
             <Input
               label={t('submitCaseForm.step1.courtLabel')}

@@ -29,6 +29,8 @@
       "partnerOrganization": "Partner Organization",
       "partnerOrganizationPlaceholder": "e.g., Afya Na Haki, KELIN, CEHURD",
       "partnerOrganizationHelper": "Enter the name of the partner organization involved in this case",
+      "partnerOrganizationAutoFilledHelper": "Automatically set from your account, so cases are reliably attributed to your organization.",
+      "partnerOrganizationNoProfileOrgHelper": "Your account has no organization on file — enter it manually, or ask an admin to set it on your profile.",
       "deadlineDate": "Deadline Date",
       "deadlineDescription": "Deadline Description",
       "deadlineDescriptionPlaceholder": "Describe this deadline",
