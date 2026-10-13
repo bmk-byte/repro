@@ -27,7 +27,7 @@
       "clientEmail": "E-mail du/de la client(e)",
       "clientPhone": "Téléphone du/de la client(e)",
       "partnerOrganization": "Organisation partenaire",
-      "partnerOrganizationPlaceholder": "ex. Afya Na Haki, Programme LIRA, KELIN",
+      "partnerOrganizationPlaceholder": "ex. Afya Na Haki, KELIN, CEHURD",
       "partnerOrganizationHelper": "Indiquez le nom de l'organisation partenaire impliquée dans ce dossier",
       "deadlineDate": "Date d'échéance",
       "deadlineDescription": "Description de l'échéance",
