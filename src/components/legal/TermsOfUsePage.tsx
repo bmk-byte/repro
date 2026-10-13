@@ -13,9 +13,9 @@ const sections: LegalSection[] = [
     content: (
       <>
         <P>
-          ReproPulse ("the Platform") is operated by <Placeholder>[PLATFORM LEGAL NAME]</Placeholder>,
-          an organization operating the Afya na Haki LIRA Programme (together, "Afya na Haki,"
-          "we," "us," or "our"), registered at <Placeholder>[REGISTERED BUSINESS ADDRESS]</Placeholder>.
+          ReproPulse ("the Platform") is operated by ReproPulse, part of Afya na Haki's LIRA
+          Programme (together, "Afya na Haki," "we," "us," or "our"), registered at Plot 6105
+          Valley Road, Canaan Sites, Nakwero, Uganda.
           ReproPulse tracks reproductive-rights litigation, judgments, and legal frameworks
           across African countries on behalf of a coalition of partner organizations, and
           publishes an aggregate, country-level Maputo Protocol Scorecard that anyone can
@@ -66,9 +66,9 @@ const sections: LegalSection[] = [
         promptly obtain, any authorization your organization requires for you to submit case
         and judgment data on its behalf. The Platform does not independently verify an
         applicant's employment or authority within the organization they select at
-        registration; Partner Organizations are responsible for promptly notifying
-        <Placeholder>[PRIVACY CONTACT EMAIL]</Placeholder> if someone registers under their
-        name without authorization.
+        registration; Partner Organizations are responsible for promptly notifying{' '}
+        <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> if
+        someone registers under their name without authorization.
       </P>
     ),
   },
@@ -108,7 +108,8 @@ const sections: LegalSection[] = [
         </P>
         <P>
           You are responsible for maintaining the confidentiality of your credentials and for
-          all activity under your Account. Notify <Placeholder>[GENERAL SUPPORT EMAIL]</Placeholder>
+          all activity under your Account. Notify{' '}
+          <a href="mailto:info@afyanahaki.org" className="text-primary hover:underline">info@afyanahaki.org</a>{' '}
           immediately if you suspect unauthorized access. We may suspend an Account showing
           signs of compromise pending investigation.
         </P>
@@ -307,7 +308,7 @@ const sections: LegalSection[] = [
     content: (
       <P>
         The Platform's software, design, branding, and the Afya na Haki name and marks are
-        owned by <Placeholder>[PLATFORM LEGAL NAME]</Placeholder> or its licensors. You receive
+        owned by ReproPulse or its licensors. You receive
         a limited, non-exclusive, non-transferable license to use the Platform in accordance
         with these Terms. Nothing here transfers ownership of Afya na Haki's intellectual
         property to you or your organization.
@@ -360,7 +361,8 @@ const sections: LegalSection[] = [
         suspected unauthorized use, a legal or regulatory requirement, or risk to a Case
         Subject's safety, with or without notice depending on severity. A Partner Organization
         may request that an individual's Account be revoked (for example, when they leave the
-        organization) by contacting <Placeholder>[GENERAL SUPPORT EMAIL]</Placeholder> or an
+        organization) by contacting{' '}
+        <a href="mailto:info@afyanahaki.org" className="text-primary hover:underline">info@afyanahaki.org</a> or an
         Admin.
       </P>
     ),
@@ -371,10 +373,10 @@ const sections: LegalSection[] = [
     content: (
       <Callout title="Current limitation">
         The Platform does not currently provide a self-service way to export your account
-        data or request account deletion. Until that capability is built, contact
-        <Placeholder> [PRIVACY CONTACT EMAIL]</Placeholder> to request a copy of your data or
-        closure of your Account, and we will process the request manually. See the Privacy
-        Policy, Section 19, for data subject rights generally.
+        data or request account deletion. Until that capability is built, contact{' '}
+        <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> to
+        request a copy of your data or closure of your Account, and we will process the
+        request manually. See the Privacy Policy, Section 19, for data subject rights generally.
       </Callout>
     ),
   },
@@ -420,9 +422,10 @@ const sections: LegalSection[] = [
     title: 'Dispute Resolution, Governing Law, and Jurisdiction',
     content: (
       <P>
-        These Terms are governed by the laws of <Placeholder>[GOVERNING LAW AND JURISDICTION]</Placeholder>,
-        without regard to conflict-of-law principles, subject to confirmation by qualified
-        local counsel given the Platform's use across multiple African jurisdictions.
+        These Terms are governed by the laws of the Republic of Uganda, without regard to
+        conflict-of-law principles. Afya na Haki is based in Uganda, and Ugandan courts have
+        jurisdiction over any dispute arising from these Terms, notwithstanding the Platform's
+        use across multiple African jurisdictions.
       </P>
     ),
   },
@@ -465,9 +468,9 @@ const sections: LegalSection[] = [
     title: 'Contact Information and Notices',
     content: (
       <P>
-        Questions about these Terms: <a href="mailto:info@afyanahaki.org" className="text-primary hover:underline">info@afyanahaki.org</a>{' '}
-        or <Placeholder>[GENERAL SUPPORT EMAIL]</Placeholder>. Formal legal notices should be
-        sent to <Placeholder>[REGISTERED BUSINESS ADDRESS]</Placeholder>.
+        Questions about these Terms: <a href="mailto:info@afyanahaki.org" className="text-primary hover:underline">info@afyanahaki.org</a>.
+        Formal legal notices should be sent to Plot 6105 Valley Road, Canaan Sites, Nakwero,
+        Uganda.
       </P>
     ),
   },
@@ -479,7 +482,7 @@ export default function TermsOfUsePage() {
       <LegalPageLayout
         title="Terms of Use"
         description="These Terms govern your use of ReproPulse, the Afya na Haki platform tracking reproductive-rights litigation, judgments, and legal frameworks across Africa."
-        effectiveDate="[EFFECTIVE DATE]"
+        effectiveDate="1 August 2025"
         lastUpdated="16 October 2026"
         sections={sections}
         otherDocLabel="Read our Privacy Policy"

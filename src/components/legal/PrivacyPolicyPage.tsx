@@ -12,9 +12,9 @@ const sections: LegalSection[] = [
     title: 'Introduction and Scope',
     content: (
       <P>
-        This Privacy Policy explains how <Placeholder>[PLATFORM LEGAL NAME]</Placeholder>,
-        operating ReproPulse as part of the Afya na Haki LIRA Programme ("Afya na Haki," "we,"
-        "us"), collects, uses, shares, retains, and protects personal data in connection with
+        This Privacy Policy explains how ReproPulse, operated as part of the Afya na Haki LIRA
+        Programme ("Afya na Haki," "we," "us"), collects, uses, shares, retains, and protects
+        personal data in connection with
         the Platform — both for signed-in Account Holders and for Case Subjects whose data
         appears in case and judgment records submitted by Partner Organizations. It applies to
         the public Scorecard pages (no account needed) and to every signed-in area of the
@@ -35,9 +35,8 @@ const sections: LegalSection[] = [
           hosting it.
         </P>
         <P>
-          Contact: <Placeholder>[PLATFORM LEGAL NAME]</Placeholder>,{' '}
-          <Placeholder>[REGISTERED BUSINESS ADDRESS]</Placeholder>,{' '}
-          <Placeholder>[PRIVACY CONTACT EMAIL]</Placeholder>.
+          Contact: ReproPulse, Plot 6105 Valley Road, Canaan Sites, Nakwero, Uganda,{' '}
+          <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a>.
         </P>
       </>
     ),
@@ -235,11 +234,13 @@ const sections: LegalSection[] = [
     title: 'Data Storage, Retention, and Deletion',
     content: (
       <Callout title="Retention periods pending confirmation">
-        We do not yet operate a published retention schedule. Account data, case/judgment
-        records, and audit logs are currently retained indefinitely pending a documented
-        schedule: <Placeholder>[RETENTION PERIODS]</Placeholder>. We recommend adopting and
-        publishing a retention schedule, particularly for Case Subject data, as a priority
-        follow-up to this policy (see the accompanying implementation checklist).
+        Account data, case/judgment records, and audit logs are retained for as long as the
+        Afya na Haki LIRA Programme continues and the litigation matters they relate to remain
+        relevant to it, rather than for a fixed calendar period. This reflects the Platform's
+        purpose as a running, historical record for the Programme's advocacy work. We recommend
+        defining more specific review points within that framework — particularly for directly
+        identifying client data (e.g. Rapid Response contact details) — as a priority follow-up
+        to this policy (see the accompanying implementation checklist).
       </Callout>
     ),
   },
@@ -300,8 +301,9 @@ const sections: LegalSection[] = [
           and withdraw consent where consent is the basis for processing.
         </P>
         <Callout title="Current limitation">
-          The Platform does not yet provide self-service tools for these requests. Contact
-          <Placeholder> [PRIVACY CONTACT EMAIL]</Placeholder> and we will process the request
+          The Platform does not yet provide self-service tools for these requests. Contact{' '}
+          <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> and
+          we will process the request
           manually. For a Case Subject (who is not an Account Holder and cannot contact us
           directly through the Platform), requests should generally be directed to the Partner
           Organization that submitted their case, who can in turn contact us.
@@ -314,7 +316,7 @@ const sections: LegalSection[] = [
     title: 'How to Exercise These Rights',
     content: (
       <P>
-        Email <Placeholder>[PRIVACY CONTACT EMAIL]</Placeholder> describing the request and,
+        Email <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> describing the request and,
         where applicable, which Case Record it concerns. We will confirm receipt and aim to
         respond within the time limits applicable law requires, verifying your identity (or
         your organization's authority to act for a Case Subject) before acting on the request.
@@ -326,8 +328,8 @@ const sections: LegalSection[] = [
     title: 'Withdrawal of Consent and Objection',
     content: (
       <P>
-        Where processing rests on consent, you may withdraw it at any time by contacting
-        <Placeholder> [PRIVACY CONTACT EMAIL]</Placeholder>; this does not affect the lawfulness
+        Where processing rests on consent, you may withdraw it at any time by contacting{' '}
+        <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a>; this does not affect the lawfulness
         of processing carried out before withdrawal. You may object to processing based on
         legitimate interest; we will consider the objection and respond.
       </P>
@@ -378,8 +380,8 @@ const sections: LegalSection[] = [
     title: 'Complaints',
     content: (
       <P>
-        If you have a concern about how we handle personal data, contact
-        <Placeholder> [PRIVACY CONTACT EMAIL]</Placeholder> first so we can try to resolve it.
+        If you have a concern about how we handle personal data, contact{' '}
+        <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a> first so we can try to resolve it.
         You may also have the right to lodge a complaint with Uganda's Personal Data
         Protection Office, or with the relevant supervisory authority in your own country,
         depending on applicable law.
@@ -402,9 +404,9 @@ const sections: LegalSection[] = [
     title: 'Contact Details',
     content: (
       <P>
-        Privacy requests: <Placeholder>[PRIVACY CONTACT EMAIL]</Placeholder>. General
+        Privacy requests: <a href="mailto:itsupport@afyanahaki.org" className="text-primary hover:underline">itsupport@afyanahaki.org</a>. General
         questions: <a href="mailto:info@afyanahaki.org" className="text-primary hover:underline">info@afyanahaki.org</a>.
-        Postal address: <Placeholder>[REGISTERED BUSINESS ADDRESS]</Placeholder>.
+        Postal address: Plot 6105 Valley Road, Canaan Sites, Nakwero, Uganda.
       </P>
     ),
   },
@@ -416,7 +418,7 @@ export default function PrivacyPolicyPage() {
       <LegalPageLayout
         title="Privacy Policy"
         description="How ReproPulse collects, uses, shares, retains, and protects personal data — for signed-in Account Holders and for the people described in case and judgment records."
-        effectiveDate="[EFFECTIVE DATE]"
+        effectiveDate="1 August 2025"
         lastUpdated="16 October 2026"
         sections={sections}
         otherDocLabel="Read our Terms of Use"
