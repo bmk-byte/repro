@@ -45,7 +45,7 @@ export function LegalPageLayout({
     <div className="min-h-screen bg-stone-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <header className="mb-8 max-w-3xl">
-          <h1 className="text-3xl font-bold text-stone-900">{title}</h1>
+          <h1 className="text-3xl font-serif font-bold text-stone-900">{title}</h1>
           <p className="mt-3 text-stone-600">{description}</p>
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
             <span>Effective: {effectiveDate}</span>
@@ -100,7 +100,7 @@ export function LegalPageLayout({
             <div className="bg-white border border-stone-200 rounded-xl divide-y divide-stone-100">
               {sections.map((s, i) => (
                 <section key={s.id} id={s.id} className="scroll-mt-6 p-6 md:p-8">
-                  <h2 className="text-xl font-semibold text-stone-900 mb-3">
+                  <h2 className="text-xl font-serif font-semibold text-stone-900 mb-3">
                     <span className="text-primary mr-2">{i + 1}.</span>
                     {s.title}
                   </h2>
