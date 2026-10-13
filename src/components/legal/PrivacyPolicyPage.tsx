@@ -53,14 +53,15 @@ const sections: LegalSection[] = [
         </P>
         <UL>
           <li>A submission you make awaits review visible only to you and to Moderators/Admins while pending.</li>
-          <li>Once approved (or uploaded directly by a Moderator/Admin), a case or judgment record becomes visible to <strong>every signed-in user across every Partner Organization</strong> — not restricted to your own organization.</li>
-          <li>Published judgment records are visible to any authenticated user regardless of role or organization.</li>
-          <li>A small number of Moderator accounts have organization-scoped visibility limits on the Cases area; most Moderator accounts can see all cases platform-wide. We are reviewing this access model and recommend treating any case or judgment record you submit as visible platform-wide, not organization-confidential, when deciding what to submit.</li>
+          <li>Once approved (or uploaded directly by a Moderator/Admin), a case or judgment record becomes visible to <strong>every signed-in user across every Partner Organization</strong> — not restricted to your own organization. This is an intentional design choice, confirmed by Afya na Haki: the Platform exists to give the coalition a shared, cross-organizational view of reproductive-rights litigation for coordinated advocacy, not a siloed per-organization database.</li>
+          <li>Published judgment records are visible to any authenticated user regardless of role or organization, for the same reason.</li>
+          <li>Moderator accounts affiliated with Afya na Haki itself can see every case for platform-oversight purposes. Moderator accounts affiliated with any other Partner Organization can see only the cases they personally uploaded — not every case belonging to their organization, and not every case platform-wide. This scoping is the default for every Partner Organization's moderators, not a privilege limited to a named list.</li>
         </UL>
         <P>
-          We do not currently offer per-organization data isolation for published records. If
-          your organization needs a matter kept confidential from other Partner Organizations,
-          do not submit it to the Platform.
+          We do not offer per-organization confidentiality for <em>published</em> case or
+          judgment records — that visibility is by design, described above. If a matter must
+          be kept confidential from other Partner Organizations entirely, do not submit it to
+          the Platform; submit it through your organization's own channels instead.
         </P>
       </>
     ),
