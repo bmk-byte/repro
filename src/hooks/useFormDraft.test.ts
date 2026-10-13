@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useFormDraft } from './useFormDraft';
+import { useFormDraft, clearAllFormDrafts } from './useFormDraft';
 
 /**
  * Regression guard for a real bug: useFormDraft used to seed localStorage
@@ -59,5 +59,46 @@ describe('useFormDraft', () => {
 
     const { result } = renderHook(() => useFormDraft('test-form', { name: '' }));
     expect(result.current.loadDraft()).toBeNull();
+  });
+
+  describe('draft expiry (a client\'s name/email/phone shouldn\'t sit in localStorage forever)', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('a draft older than 7 days is treated as expired and removed', () => {
+      vi.useFakeTimers();
+      const { result } = renderHook(() => useFormDraft('test-form', { name: '' }));
+
+      act(() => {
+        result.current.saveDraft({ name: 'Jane Doe' });
+      });
+      expect(result.current.loadDraft()).toEqual({ name: 'Jane Doe' });
+
+      vi.advanceTimersByTime(8 * 24 * 60 * 60 * 1000);
+
+      expect(result.current.loadDraft()).toBeNull();
+      expect(localStorage.getItem('form-draft:test-form')).toBeNull();
+    });
+
+    it('a draft saved before expiry tracking existed (no envelope) is treated as expired, not trusted', () => {
+      localStorage.setItem('form-draft:test-form', JSON.stringify({ name: 'Old shape' }));
+      const { result } = renderHook(() => useFormDraft('test-form', { name: '' }));
+      expect(result.current.loadDraft()).toBeNull();
+    });
+  });
+
+  describe('clearAllFormDrafts', () => {
+    it('removes every saved draft across different forms, and nothing else', () => {
+      localStorage.setItem('form-draft:case-submission', JSON.stringify({ savedAt: Date.now(), data: { title: 'x' } }));
+      localStorage.setItem('form-draft:judgment-submission', JSON.stringify({ savedAt: Date.now(), data: { citation: 'y' } }));
+      localStorage.setItem('unrelated-key', 'should survive');
+
+      clearAllFormDrafts();
+
+      expect(localStorage.getItem('form-draft:case-submission')).toBeNull();
+      expect(localStorage.getItem('form-draft:judgment-submission')).toBeNull();
+      expect(localStorage.getItem('unrelated-key')).toBe('should survive');
+    });
   });
 });

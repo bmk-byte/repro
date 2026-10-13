@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Button, Badge, LanguageSwitcher } from './ui';
 import { prefetchRoute } from '../lib/routePrefetch';
+import { clearAllFormDrafts } from '../hooks/useFormDraft';
 
 interface NavbarProps {
   className?: string;
@@ -176,6 +177,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    clearAllFormDrafts();
     setActiveTab?.('dashboard');
     setUserDropdownOpen(false);
   };
