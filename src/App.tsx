@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
@@ -38,6 +38,8 @@ const ScorecardPage = lazy(() => import('./scorecard/pages/ScorecardPage'));
 const ScorecardAnalysisPage = lazy(() => import('./scorecard/pages/AnalysisPage'));
 const ScorecardCountryDetailPage = lazy(() => import('./scorecard/pages/CountryDetailPage'));
 const ScorecardEditorAdminPanel = lazy(() => import('./scorecard/components/ScorecardEditorAdminPanel'));
+const TermsOfUsePage = lazy(() => import('./components/legal/TermsOfUsePage'));
+const PrivacyPolicyPage = lazy(() => import('./components/legal/PrivacyPolicyPage'));
 
 interface Profile {
   id: string;
@@ -578,6 +580,13 @@ function DashboardApp() {
             renderContent()
           )}
       </div>
+      {session && (
+        <footer className="flex-shrink-0 border-t border-stone-200 bg-white px-4 py-2 text-xs text-stone-500 flex items-center justify-center gap-4">
+          <span>© {new Date().getFullYear()} Afya na Haki</span>
+          <Link to="/terms-of-use" className="hover:text-primary">Terms of Use</Link>
+          <Link to="/privacy-policy" className="hover:text-primary">Privacy Policy</Link>
+        </footer>
+      )}
     </div>
   );
 }
@@ -643,6 +652,22 @@ export default function App() {
             element={
               <Suspense fallback={<TabFallback />}>
                 <ScorecardCountryDetailPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/terms-of-use"
+            element={
+              <Suspense fallback={<TabFallback />}>
+                <TermsOfUsePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/privacy-policy"
+            element={
+              <Suspense fallback={<TabFallback />}>
+                <PrivacyPolicyPage />
               </Suspense>
             }
           />

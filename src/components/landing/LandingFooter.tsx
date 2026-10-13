@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 
@@ -17,6 +18,11 @@ const LandingFooter: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 text-xs text-stone-400">
+            <Link to="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link>
+            <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+          </div>
+
           <div className="flex items-center gap-3">
             <a href="#" className="text-stone-400 hover:text-primary transition-colors" aria-label={t('footer.linkedinAria')}>
               <Linkedin className="h-3.5 w-3.5" />
@@ -33,14 +39,10 @@ const LandingFooter: React.FC = () => {
           </div>
 
           {/*
-            Privacy Policy / Terms of Service / Cookie Policy links are
-            intentionally omitted until the organization provides real
-            legal content for them — a dead `href="#"` link (or a live
-            link to a blank page) is worse than no link, since it implies
-            a policy exists when it doesn't. A "Consent Preferences" link
-            was also removed: it referenced a Termly widget that was never
-            actually loaded, and there is no cookie/analytics consent to
-            manage now that third-party tracking has been removed.
+            A "Consent Preferences" link was removed separately: it
+            referenced a Termly widget that was never actually loaded, and
+            there is no cookie/analytics consent to manage now that
+            third-party tracking has been removed.
           */}
         </div>
       </div>
