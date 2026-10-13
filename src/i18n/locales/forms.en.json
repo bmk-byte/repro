@@ -107,7 +107,8 @@
       "caseSubmittedTitle": "Case submitted successfully!",
       "caseSubmittedBody": "Your case has been sent for review. You'll be notified when it's approved.",
       "submitErrorTitle": "Error submitting case:",
-      "failedToSubmitFallback": "Failed to submit case"
+      "failedToSubmitFallback": "Failed to submit case",
+      "noOrganizationOnFile": "Your account has no organization on file, so we can't attribute this submission to a partner. Please ask an admin to set your organization before submitting."
     },
     "steps": {
       "basicInfo": "Basic Info",
@@ -153,8 +154,6 @@
       "programmePlaceholder": "e.g., LIRA Programme",
       "partnerLabel": "Partner Organization",
       "partnerPlaceholder": "e.g., Afya Na Haki",
-      "partnerAutoFilledHelper": "Automatically set from your account, so submissions are reliably attributed to your organization.",
-      "partnerNoProfileOrgHelper": "Your account has no organization on file — enter it manually, or ask an admin to set it on your profile.",
       "courtLabel": "Court",
       "courtPlaceholder": "e.g., High Court of Kenya",
       "natureOfCaseLabel": "Nature of Case",

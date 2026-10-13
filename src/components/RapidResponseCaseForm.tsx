@@ -87,34 +87,6 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
   const [editingDeadlineIndex, setEditingDeadlineIndex] = useState<number | null>(null);
   const isEditing = !!caseData;
 
-  // The submitter's own organization, read from their profile — undefined
-  // while loading, null once loaded if their profile has none on file. Only
-  // fetched for a new case: editing an existing one keeps whatever partner
-  // it already has, since the editor may not be who originally filed it.
-  const [userOrganization, setUserOrganization] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    if (isEditing) return;
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('organization')
-        .eq('id', user.id)
-        .maybeSingle();
-      setUserOrganization(data?.organization ?? null);
-    })();
-  }, [isEditing]);
-
-  // Lock the Partner Organization field to the submitter's own organization
-  // rather than relying on them to type it correctly — but never clobber a
-  // value already restored from a draft.
-  useEffect(() => {
-    if (isEditing || !userOrganization) return;
-    setFormData(prev => prev.partner ? prev : { ...prev, partner: userOrganization });
-  }, [isEditing, userOrganization]);
-
   // Fields touched (blurred) so far — inline errors only show for a field
   // once the user has actually interacted with it, matching the validate-on-
   // blur pattern used in SubmitCaseForm.tsx.
@@ -388,10 +360,28 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error(t('caseForm.errors.userNotAuthenticated'));
 
+      // Partner Organization is never taken from form input for a new case
+      // — always the submitter's own account, read fresh right here so it
+      // can't be stale or tampered with via form state. Editing an existing
+      // case leaves its partner untouched (the editor may not be who
+      // originally filed it).
+      let partner = formData.partner;
+      if (!isEditing) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('organization')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profileError) throw profileError;
+        if (!profile?.organization) throw new Error(t('caseForm.errors.noOrganizationOnFile'));
+        partner = profile.organization;
+      }
+
       // Prepare case data - transform case_category to case_categories array
       const { case_category, ...restFormData } = formData;
       const caseDataToSubmit = {
         ...restFormData,
+        partner,
         case_type: 'rapid-response',
         key_deadlines: deadlines,
         moderation_status: 'approved',
@@ -701,30 +691,10 @@ const RapidResponseCaseForm: React.FC<RapidResponseCaseFormProps> = ({
           />
         </div>
 
-        {/* Partner Organization */}
-        <div className="space-y-6 md:col-span-2">
-          <h3 className="text-lg font-medium text-stone-900">{t('caseForm.sections.partnerOrganization')}</h3>
-
-          {!isEditing && userOrganization ? (
-            <Input
-              label={t('caseForm.fields.partnerOrganization')}
-              name="partner"
-              value={formData.partner}
-              readOnly
-              disabled
-              helperText={t('caseForm.fields.partnerOrganizationAutoFilledHelper')}
-            />
-          ) : (
-            <Input
-              label={t('caseForm.fields.partnerOrganization')}
-              name="partner"
-              value={formData.partner}
-              onChange={handleInputChange}
-              placeholder={t('caseForm.fields.partnerOrganizationPlaceholder')}
-              helperText={!isEditing && userOrganization === null ? t('caseForm.fields.partnerOrganizationNoProfileOrgHelper') : t('caseForm.fields.partnerOrganizationHelper')}
-            />
-          )}
-        </div>
+        {/* Partner Organization isn't collected here any more — it's set
+            automatically from the submitter's own account when a new case
+            is created (see handleSubmit), so it can't drift from free-text
+            entry. Editing an existing case leaves its partner untouched. */}
 
         {/* Key Deadlines */}
         <div className="space-y-4 md:col-span-2">

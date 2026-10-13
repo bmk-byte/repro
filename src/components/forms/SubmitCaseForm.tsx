@@ -132,34 +132,6 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
     fetchCountries();
   }, []);
 
-  // The submitter's own organization, read from their profile — undefined
-  // while loading, null once loaded if their profile has none on file.
-  // Not fetched for isDirectUpload (moderators entering a case on behalf of
-  // a partner that isn't necessarily their own) — that path keeps manual entry.
-  const [userOrganization, setUserOrganization] = useState<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    if (isDirectUpload) return;
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('organization')
-        .eq('id', user.id)
-        .maybeSingle();
-      setUserOrganization(data?.organization ?? null);
-    })();
-  }, [isDirectUpload]);
-
-  // Once the submitter's organization is known, lock the Partner
-  // Organization field to it rather than relying on them to type it
-  // correctly — but never clobber a value already restored from a draft.
-  useEffect(() => {
-    if (isDirectUpload || !userOrganization) return;
-    setFormData(prev => prev.partner ? prev : { ...prev, partner: userOrganization });
-  }, [isDirectUpload, userOrganization]);
-
   const fetchCountries = async () => {
     try {
       const { data, error } = await supabase
@@ -333,7 +305,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
         return [
           !formData.tracking_period && t('submitCaseForm.fields.trackingPeriod'),
           !formData.programme && t('submitCaseForm.fields.programme'),
-          !formData.partner && t('submitCaseForm.fields.partner'),
+          isDirectUpload && !formData.partner && t('submitCaseForm.fields.partner'),
           !formData.nature_of_case && t('submitCaseForm.fields.natureOfCase'),
           !formData.action_taken && t('submitCaseForm.fields.actionTaken'),
           !formData.action_timeframe && t('submitCaseForm.fields.actionTimeframe'),
@@ -389,6 +361,21 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
       if (userError) throw userError;
       if (!user) throw new Error(t('common.noAuthenticatedUser'));
 
+      // Partner Organization is never taken from form input for a regular
+      // submission — always the submitter's own account, read fresh right
+      // here so it can't be stale or tampered with via form state.
+      let partner = formData.partner;
+      if (!isDirectUpload) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('organization')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profileError) throw profileError;
+        if (!profile?.organization) throw new Error(t('submitCaseForm.toasts.noOrganizationOnFile'));
+        partner = profile.organization;
+      }
+
       // Upload file if present
       let fileUrl = '';
       if (file) {
@@ -428,7 +415,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             moderation_status: 'approved',
             tracking_period: formData.tracking_period,
             programme: formData.programme,
-            partner: formData.partner,
+            partner,
             nature_of_case: formData.nature_of_case,
             action_taken: formData.action_taken,
             action_timeframe: formData.action_timeframe,
@@ -468,7 +455,7 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
             // Additional fields
             tracking_period: formData.tracking_period,
             programme: formData.programme,
-            partner: formData.partner,
+            partner,
             nature_of_case: formData.nature_of_case,
             action_taken: formData.action_taken,
             action_timeframe: formData.action_timeframe,
@@ -641,17 +628,13 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
               placeholder={t('submitCaseForm.step1.programmePlaceholder')}
             />
 
-            {!isDirectUpload && userOrganization ? (
-              <Input
-                label={t('submitCaseForm.step1.partnerLabel')}
-                name="partner"
-                required
-                value={formData.partner}
-                readOnly
-                disabled
-                helperText={t('submitCaseForm.step1.partnerAutoFilledHelper')}
-              />
-            ) : (
+            {/* Partner Organization isn't collected here for a regular
+                submission — it's set automatically from the submitter's own
+                account at submit time (see handleSubmit), so it can't drift
+                from free-text entry. Direct uploads (moderators entering a
+                case on behalf of a partner that isn't necessarily their own
+                account) keep manual entry. */}
+            {isDirectUpload && (
               <Input
                 label={t('submitCaseForm.step1.partnerLabel')}
                 name="partner"
@@ -661,7 +644,6 @@ const SubmitCaseForm: React.FC<SubmitCaseFormProps> = ({
                 onBlur={() => markTouched('partner')}
                 error={fieldError('partner', t('submitCaseForm.step1.partnerLabel'), !formData.partner)}
                 placeholder={t('submitCaseForm.step1.partnerPlaceholder')}
-                helperText={!isDirectUpload && userOrganization === null ? t('submitCaseForm.step1.partnerNoProfileOrgHelper') : undefined}
               />
             )}
 

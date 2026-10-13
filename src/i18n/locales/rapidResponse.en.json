@@ -29,8 +29,6 @@
       "partnerOrganization": "Partner Organization",
       "partnerOrganizationPlaceholder": "e.g., Afya Na Haki, KELIN, CEHURD",
       "partnerOrganizationHelper": "Enter the name of the partner organization involved in this case",
-      "partnerOrganizationAutoFilledHelper": "Automatically set from your account, so cases are reliably attributed to your organization.",
-      "partnerOrganizationNoProfileOrgHelper": "Your account has no organization on file — enter it manually, or ask an admin to set it on your profile.",
       "deadlineDate": "Deadline Date",
       "deadlineDescription": "Deadline Description",
       "deadlineDescriptionPlaceholder": "Describe this deadline",
@@ -108,7 +106,8 @@
       "fileNotAccepted": "That file could not be accepted.",
       "failedToLoadCountries": "Failed to load countries",
       "userNotAuthenticated": "User not authenticated",
-      "errorSavingCase": "An error occurred while saving the case"
+      "errorSavingCase": "An error occurred while saving the case",
+      "noOrganizationOnFile": "Your account has no organization on file, so we can't attribute this case to a partner. Please ask an admin to set your organization before submitting."
     },
     "toasts": {
       "draftRestored": "Restored your previous draft. You can continue where you left off."

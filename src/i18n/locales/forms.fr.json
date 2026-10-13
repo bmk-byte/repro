@@ -107,7 +107,8 @@
       "caseSubmittedTitle": "Affaire soumise avec succès !",
       "caseSubmittedBody": "Votre affaire a été envoyée pour examen. Vous serez averti(e) dès son approbation.",
       "submitErrorTitle": "Erreur lors de la soumission de l'affaire :",
-      "failedToSubmitFallback": "Échec de la soumission de l'affaire"
+      "failedToSubmitFallback": "Échec de la soumission de l'affaire",
+      "noOrganizationOnFile": "Aucune organisation n'est enregistrée sur votre compte, nous ne pouvons donc pas attribuer cette soumission à un partenaire. Veuillez demander à un administrateur de définir votre organisation avant de soumettre."
     },
     "steps": {
       "basicInfo": "Informations de base",
@@ -153,8 +154,6 @@
       "programmePlaceholder": "ex. : Programme LIRA",
       "partnerLabel": "Organisation partenaire",
       "partnerPlaceholder": "ex. : Afya Na Haki",
-      "partnerAutoFilledHelper": "Rempli automatiquement à partir de votre compte, afin que les soumissions soient attribuées de manière fiable à votre organisation.",
-      "partnerNoProfileOrgHelper": "Aucune organisation n'est enregistrée sur votre compte — saisissez-la manuellement, ou demandez à un administrateur de la définir sur votre profil.",
       "courtLabel": "Tribunal",
       "courtPlaceholder": "ex. : Haute Cour du Kenya",
       "natureOfCaseLabel": "Nature de l'affaire",

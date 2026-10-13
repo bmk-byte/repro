@@ -29,8 +29,6 @@
       "partnerOrganization": "Organisation partenaire",
       "partnerOrganizationPlaceholder": "ex. Afya Na Haki, KELIN, CEHURD",
       "partnerOrganizationHelper": "Indiquez le nom de l'organisation partenaire impliquée dans ce dossier",
-      "partnerOrganizationAutoFilledHelper": "Rempli automatiquement à partir de votre compte, afin que les dossiers soient attribués de manière fiable à votre organisation.",
-      "partnerOrganizationNoProfileOrgHelper": "Aucune organisation n'est enregistrée sur votre compte — saisissez-la manuellement, ou demandez à un administrateur de la définir sur votre profil.",
       "deadlineDate": "Date d'échéance",
       "deadlineDescription": "Description de l'échéance",
       "deadlineDescriptionPlaceholder": "Décrivez cette échéance",
@@ -108,7 +106,8 @@
       "fileNotAccepted": "Ce fichier n'a pas pu être accepté.",
       "failedToLoadCountries": "Échec du chargement des pays",
       "userNotAuthenticated": "Utilisateur non authentifié",
-      "errorSavingCase": "Une erreur est survenue lors de l'enregistrement du dossier"
+      "errorSavingCase": "Une erreur est survenue lors de l'enregistrement du dossier",
+      "noOrganizationOnFile": "Aucune organisation n'est enregistrée sur votre compte, nous ne pouvons donc pas attribuer ce dossier à un partenaire. Veuillez demander à un administrateur de définir votre organisation avant de soumettre."
     },
     "toasts": {
       "draftRestored": "Votre brouillon précédent a été restauré. Vous pouvez reprendre là où vous en étiez."
