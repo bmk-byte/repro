@@ -82,6 +82,8 @@
     "currentModeratorsCount": "Current moderators ({{count}})",
     "loading": "Loading…",
     "noModeratorsFound": "No moderators found.",
+    "searchPlaceholder": "Search by name, email, or organization",
+    "noSearchResults": "No moderators match your search.",
     "revoke": "Revoke",
     "enterValidEmail": "Enter a valid email address.",
     "grantedAccessSuccess": "Granted moderator access to {{email}}.",
@@ -102,6 +104,8 @@
     "currentAdminsCount": "Current admins ({{count}})",
     "loading": "Loading…",
     "noAdminsFound": "No admins found.",
+    "searchPlaceholder": "Search by name, email, or organization",
+    "noSearchResults": "No admins match your search.",
     "revoke": "Revoke",
     "enterValidEmail": "Enter a valid email address.",
     "grantedAccessSuccess": "Granted admin access to {{email}}.",
@@ -234,5 +238,15 @@
     "submissionDate": "Submission Date:",
     "country": "Country:",
     "viewDocument": "View Document"
+  },
+  "userAccessLogPanel": {
+    "heading": "User Access Log",
+    "subheading": "When each user last signed in.",
+    "loading": "Loading access log…",
+    "searchPlaceholder": "Search by name, email, or organization",
+    "noSearchResults": "No users match your search.",
+    "emptyTitle": "No users found",
+    "emptyDescription": "User access history will appear here once accounts exist.",
+    "neverSignedIn": "Never signed in"
   }
 }

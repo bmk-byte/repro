@@ -323,6 +323,8 @@
     "editorsTitleCount": "Scorecard editors ({{count}})",
     "loading": "Loading…",
     "noEditorsFound": "No scorecard editors found.",
+    "searchPlaceholder": "Search by name, email, or organization",
+    "noSearchResults": "No scorecard editors match your search.",
     "revoke": "Revoke",
     "grantConfirmTitle": "Grant scorecard-editor access?",
     "grantConfirmDescription": "{{email}} will be able to score and publish scorecard submissions.",

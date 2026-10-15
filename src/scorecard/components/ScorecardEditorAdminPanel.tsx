@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Award, ShieldOff, UserPlus } from 'lucide-react';
+import { Award, ShieldOff, UserPlus, Search } from 'lucide-react';
 import { toast } from '../../lib/toast';
 import { supabase } from '../../lib/supabase';
 import { handleQueryError } from '../../lib/errorHandling';
@@ -31,6 +31,17 @@ const ScorecardEditorAdminPanel: React.FC = () => {
   const [submitting, setSubmitting] = React.useState(false);
   const [pendingGrantEmail, setPendingGrantEmail] = React.useState<string | null>(null);
   const [pendingRevoke, setPendingRevoke] = React.useState<ScorecardEditor | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredEditors = React.useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return editors;
+    return editors.filter((editor) =>
+      (editor.full_name || '').toLowerCase().includes(term) ||
+      editor.email.toLowerCase().includes(term) ||
+      (editor.organization || '').toLowerCase().includes(term)
+    );
+  }, [editors, searchTerm]);
 
   const fetchEditors = React.useCallback(async () => {
     try {
@@ -125,18 +136,32 @@ const ScorecardEditorAdminPanel: React.FC = () => {
       </Card>
 
       <Card padding="none">
-        <div className="px-6 py-4 border-b border-stone-100">
+        <div className="px-6 py-4 border-b border-stone-100 space-y-3">
           <h3 className="text-sm font-medium text-stone-700">
             {loading ? t('editorAdminPanel.editorsTitle') : t('editorAdminPanel.editorsTitleCount', { count: editors.length })}
           </h3>
+          {!loading && editors.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+              <input
+                type="text"
+                placeholder={t('editorAdminPanel.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-stone-300 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              />
+            </div>
+          )}
         </div>
         {loading ? (
           <div className="p-6 text-sm text-stone-500">{t('editorAdminPanel.loading')}</div>
         ) : editors.length === 0 ? (
           <div className="p-6 text-sm text-stone-500">{t('editorAdminPanel.noEditorsFound')}</div>
+        ) : filteredEditors.length === 0 ? (
+          <div className="p-6 text-sm text-stone-500">{t('editorAdminPanel.noSearchResults')}</div>
         ) : (
           <ul className="divide-y divide-stone-100">
-            {editors.map((editor) => (
+            {filteredEditors.map((editor) => (
               <li key={editor.id} className="flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-3">
                   <Award className="h-5 w-5 text-primary flex-shrink-0" />

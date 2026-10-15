@@ -323,6 +323,8 @@
     "editorsTitleCount": "Éditeurs du tableau de bord ({{count}})",
     "loading": "Chargement…",
     "noEditorsFound": "Aucun éditeur du tableau de bord trouvé.",
+    "searchPlaceholder": "Rechercher par nom, e-mail ou organisation",
+    "noSearchResults": "Aucun éditeur ne correspond à votre recherche.",
     "revoke": "Révoquer",
     "grantConfirmTitle": "Accorder l'accès éditeur du tableau de bord ?",
     "grantConfirmDescription": "{{email}} pourra évaluer et publier des soumissions du tableau de bord.",

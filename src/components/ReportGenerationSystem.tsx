@@ -5,6 +5,8 @@ import { Download, FileText, BarChartHorizontal, PieChart, RefreshCw } from 'luc
 import { toast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
 import { sanitizeCsvCell, downloadCsv } from '../lib/csv';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const RESTRICTED_ORGANIZATIONS = [
   'Women with a Mission',
@@ -159,40 +161,39 @@ const ReportGenerationSystem: React.FC = () => {
     return [header, '', ...lines].join('\r\n');
   };
 
-  // Open a printable HTML window (save as PDF via browser print dialog)
-  const openPrintWindow = (title: string, bodyHTML: string) => {
-    const win = window.open('', '_blank');
-    if (!win) { toast.error(t('reportGenerationSystem.popupBlocked')); return; }
-    win.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>${title}</title>
-        <style>
-          body { font-family: Arial, sans-serif; font-size: 12px; margin: 24px; color: #111; }
-          h1 { font-size: 18px; margin-bottom: 4px; }
-          .meta { font-size: 11px; color: #666; margin-bottom: 16px; }
-          table { border-collapse: collapse; width: 100%; margin-top: 16px; }
-          th { background: #8b1a1a; color: #fff; text-align: left; padding: 8px 10px; font-size: 11px; }
-          td { border: 1px solid #ddd; padding: 6px 10px; vertical-align: top; }
-          tr:nth-child(even) td { background: #f9f9f9; }
-          .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-          .stat { background: #f4f4f4; padding: 12px; border-radius: 4px; }
-          .stat .label { font-size: 10px; color: #666; text-transform: uppercase; }
-          .stat .value { font-size: 20px; font-weight: bold; margin-top: 4px; }
-          @media print { @page { margin: 1cm; } }
-        </style>
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <div class="meta">Generated: ${new Date().toLocaleString()}</div>
-        ${bodyHTML}
-        <script>window.onload = () => { window.print(); }</script>
-      </body>
-      </html>
-    `);
-    win.document.close();
+  // Build a PDF file in-memory and trigger an automatic browser download.
+  const downloadPdfReport = (
+    title: string,
+    stats: [string, string | number][],
+    tableHeaders: string[],
+    tableRows: (string | number)[][],
+    filename: string
+  ) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text(title, 14, 18);
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 24);
+
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    let statsY = 34;
+    stats.forEach(([label, value]) => {
+      doc.text(`${label}: ${value}`, 14, statsY);
+      statsY += 6;
+    });
+
+    autoTable(doc, {
+      startY: statsY + 4,
+      head: [tableHeaders],
+      body: tableRows.map(row => row.map(cell => (cell ?? '').toString())),
+      headStyles: { fillColor: [139, 26, 26] },
+      styles: { fontSize: 8 },
+    });
+
+    doc.save(filename);
   };
 
   const handleGenerateReport = async () => {
@@ -251,23 +252,18 @@ const ReportGenerationSystem: React.FC = () => {
           Array.isArray((c as any).case_categories) ? (c as any).case_categories.join(', ') : ((c as any).case_categories ?? ''),
         ]);
 
-        const statsHTML = `
-          <div class="stat-grid">
-            <div class="stat"><div class="label">Total Cases</div><div class="value">${cases.length}</div></div>
-            <div class="stat"><div class="label">Completed</div><div class="value">${cases.filter((c: any) => c.status === 'completed').length}</div></div>
-            <div class="stat"><div class="label">Metrics</div><div class="value" style="font-size:13px">${selectedMetrics.map(m => metricLabels[m]).join(', ')}</div></div>
-          </div>
-        `;
-
-        const tableHTML = `
-          <table>
-            <thead><tr>${tableHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-            <tbody>${tableRows.map(row => `<tr>${row.map(cell => `<td>${cell ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>
-          </table>
-        `;
-
-        openPrintWindow('Custom Report', statsHTML + tableHTML);
-        toast.success(t('reportGenerationSystem.printDialogOpened'));
+        downloadPdfReport(
+          'Custom Report',
+          [
+            ['Total Cases', cases.length],
+            ['Completed', cases.filter((c: any) => c.status === 'completed').length],
+            ['Metrics', selectedMetrics.map(m => metricLabels[m]).join(', ')],
+          ],
+          tableHeaders,
+          tableRows,
+          `report-${dateSuffix}.pdf`
+        );
+        toast.success(t('reportGenerationSystem.downloadedPdf', { count: cases.length }));
       }
 
     } catch (err) {

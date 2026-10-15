@@ -82,6 +82,8 @@
     "currentModeratorsCount": "Modérateurs actuels ({{count}})",
     "loading": "Chargement…",
     "noModeratorsFound": "Aucun modérateur trouvé.",
+    "searchPlaceholder": "Rechercher par nom, e-mail ou organisation",
+    "noSearchResults": "Aucun modérateur ne correspond à votre recherche.",
     "revoke": "Révoquer",
     "enterValidEmail": "Saisissez une adresse e-mail valide.",
     "grantedAccessSuccess": "Accès modérateur accordé à {{email}}.",
@@ -102,6 +104,8 @@
     "currentAdminsCount": "Administrateurs actuels ({{count}})",
     "loading": "Chargement…",
     "noAdminsFound": "Aucun administrateur trouvé.",
+    "searchPlaceholder": "Rechercher par nom, e-mail ou organisation",
+    "noSearchResults": "Aucun administrateur ne correspond à votre recherche.",
     "revoke": "Révoquer",
     "enterValidEmail": "Saisissez une adresse e-mail valide.",
     "grantedAccessSuccess": "Accès administrateur accordé à {{email}}.",
@@ -234,5 +238,15 @@
     "submissionDate": "Date de soumission :",
     "country": "Pays :",
     "viewDocument": "Voir le document"
+  },
+  "userAccessLogPanel": {
+    "heading": "Journal d'accès des utilisateurs",
+    "subheading": "Date de la dernière connexion de chaque utilisateur.",
+    "loading": "Chargement du journal d'accès…",
+    "searchPlaceholder": "Rechercher par nom, e-mail ou organisation",
+    "noSearchResults": "Aucun utilisateur ne correspond à votre recherche.",
+    "emptyTitle": "Aucun utilisateur trouvé",
+    "emptyDescription": "L'historique d'accès des utilisateurs apparaîtra ici une fois des comptes créés.",
+    "neverSignedIn": "Jamais connecté"
   }
 }

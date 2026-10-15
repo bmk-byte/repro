@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import ProfileSettingsForm from './ProfileSettingsForm';
-import { User, Bell, Lock, Shield } from 'lucide-react';
+import UserAccessLogPanel from './UserAccessLogPanel';
+import { User, Bell, Lock, Shield, Clock } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { reportError } from '../lib/errorReporting';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
@@ -24,7 +25,7 @@ const SettingsPage: React.FC = () => {
   const { requirements: passwordRequirements, strength: passwordStrength, isValid: passwordIsValid } = usePasswordStrength(newPassword);
 
   // Use the moderator status hook
-  const { isModerator, loading: moderatorLoading } = useModeratorStatus();
+  const { isModerator, isAdmin, loading: moderatorLoading } = useModeratorStatus();
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,6 +168,19 @@ const SettingsPage: React.FC = () => {
                 >
                   <Shield className="mr-3 h-5 w-5" />
                   {t('settings.moderation')}
+                </button>
+              )}
+              {isAdmin && (
+                <button
+                  onClick={() => setActiveTab('accessLogs')}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    activeTab === 'accessLogs'
+                      ? 'bg-primary text-white'
+                      : 'text-stone-700 hover:bg-stone-100'
+                  }`}
+                >
+                  <Clock className="mr-3 h-5 w-5" />
+                  {t('settings.accessLogs')}
                 </button>
               )}
             </nav>
@@ -332,6 +346,13 @@ const SettingsPage: React.FC = () => {
                     Moderation settings are currently view-only. Contact a system administrator to change these settings.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'accessLogs' && isAdmin && (
+              <div className="p-6">
+                <h2 className="text-lg font-medium text-stone-900 mb-6">{t('settings.accessLogs')}</h2>
+                <UserAccessLogPanel />
               </div>
             )}
           </div>

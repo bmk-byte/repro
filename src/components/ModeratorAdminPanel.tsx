@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, ShieldOff, UserPlus, ScrollText } from 'lucide-react';
+import { ShieldCheck, ShieldOff, UserPlus, ScrollText, Search } from 'lucide-react';
 import { toast } from '../lib/toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
 import { handleQueryError } from '../lib/errorHandling';
@@ -150,6 +150,17 @@ const ModeratorAdminPanel: React.FC = () => {
   const [submitting, setSubmitting] = React.useState(false);
   const [pendingGrantEmail, setPendingGrantEmail] = React.useState<string | null>(null);
   const [pendingRevoke, setPendingRevoke] = React.useState<Moderator | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredModerators = React.useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return moderators;
+    return moderators.filter((mod) =>
+      (mod.full_name || '').toLowerCase().includes(term) ||
+      mod.email.toLowerCase().includes(term) ||
+      (mod.organization || '').toLowerCase().includes(term)
+    );
+  }, [moderators, searchTerm]);
 
   const fetchModerators = React.useCallback(async () => {
     try {
@@ -260,18 +271,32 @@ const ModeratorAdminPanel: React.FC = () => {
       </Card>
 
       <Card padding="none">
-        <div className="px-6 py-4 border-b border-stone-100">
+        <div className="px-6 py-4 border-b border-stone-100 space-y-3">
           <h3 className="text-sm font-medium text-stone-700">
             {t('moderatorAdminPanel.currentModeratorsCount', { count: loading ? 0 : moderators.length })}
           </h3>
+          {!loading && moderators.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+              <input
+                type="text"
+                placeholder={t('moderatorAdminPanel.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-stone-300 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              />
+            </div>
+          )}
         </div>
         {loading ? (
           <div className="p-6 text-sm text-stone-500">{t('moderatorAdminPanel.loading')}</div>
         ) : moderators.length === 0 ? (
           <div className="p-6 text-sm text-stone-500">{t('moderatorAdminPanel.noModeratorsFound')}</div>
+        ) : filteredModerators.length === 0 ? (
+          <div className="p-6 text-sm text-stone-500">{t('moderatorAdminPanel.noSearchResults')}</div>
         ) : (
           <ul className="divide-y divide-stone-100">
-            {moderators.map((mod) => (
+            {filteredModerators.map((mod) => (
               <li key={mod.id} className="flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0" />
