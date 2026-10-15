@@ -256,7 +256,7 @@ const ReportGenerationSystem: React.FC = () => {
           'Custom Report',
           [
             ['Total Cases', cases.length],
-            ['Completed', cases.filter((c) => (c as any).status === 'completed').length],
+            ['Completed', cases.filter((c) => (c as { status?: string }).status === 'completed').length],
             ['Metrics', selectedMetrics.map(m => metricLabels[m]).join(', ')],
           ],
           tableHeaders,
