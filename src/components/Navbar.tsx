@@ -282,7 +282,7 @@ const Navbar: React.FC<NavbarProps> = ({
       {isAuthenticated && (
         <nav className="hidden md:block bg-stone-50 border-t border-stone-200" role="navigation" aria-label={t('common.dashboardNavigationAriaLabel')}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-1 py-2">
+            <div className="flex flex-wrap items-center gap-1 py-2">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -293,7 +293,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => setActiveTab?.(item.id)}
                     onMouseEnter={() => prefetchRoute(item.id)}
                     onFocus={() => prefetchRoute(item.id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                       isActive
                         ? 'bg-primary text-white'
                         : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
@@ -329,7 +329,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors ml-4"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 whitespace-nowrap transition-colors ml-auto"
               >
                 <LogOut className="h-4 w-4" />
                 <span>{t('common.signOut')}</span>

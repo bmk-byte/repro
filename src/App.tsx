@@ -140,6 +140,15 @@ function DashboardApp() {
     return schedulePrefetchAllRoutes();
   }, [session]);
 
+  // The sign-in screen must never show while a session exists. Several paths
+  // open it on a suspected expired login (stale refresh token at start-up,
+  // another tab refreshing), but a session can come back afterwards through
+  // a silent refresh that never reached the code that hides it, leaving the
+  // signed-in navbar above a sign-in form.
+  React.useEffect(() => {
+    if (session) setShowAuthModal(false);
+  }, [session]);
+
   const checkConnection = React.useCallback(async () => {
     try {
       setLoading(true);
@@ -382,7 +391,7 @@ function DashboardApp() {
   };
 
   const renderContent = () => {
-    if (showAuthModal) {
+    if (showAuthModal && !session) {
       return (
         <motion.div
           initial={{ opacity: 0 }}

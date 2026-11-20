@@ -64,7 +64,7 @@ export default function NavDropdown({ label, icon: Icon, items, activeTab, onSel
         onMouseEnter={() => items.forEach((item) => prefetchRoute(item.id))}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${triggerTone}`}
+        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${triggerTone}`}
       >
         <Icon className="h-4 w-4" />
         <span>{label}</span>

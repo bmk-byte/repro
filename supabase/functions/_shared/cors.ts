@@ -8,9 +8,9 @@
 // value (a `Vary: Origin` header tells caches the response depends on it).
 //
 // `ALLOWED_ORIGIN` (a Supabase Edge Function secret, not committed anywhere)
-// lets a staging/preview/local-dev deployment add its own origin without a
-// code change — unset in production, where only the canonical domain below
-// is needed.
+// adds extra origins without a code change, e.g. local dev and Vercel
+// preview URLs. It accepts a comma-separated list, e.g.
+//   http://localhost:5173,https://repro-ahaki-repropulse.vercel.app
 
 // The live site, per the Vercel project's domains. The apex 308-redirects
 // to www, but is listed too so a request that reaches it still works. (This
@@ -19,8 +19,11 @@
 const PRODUCTION_ORIGINS = ['https://www.repropulse.com', 'https://repropulse.com'];
 
 function getAllowedOrigins(): string[] {
-  const extra = Deno.env.get('ALLOWED_ORIGIN');
-  return extra ? [...PRODUCTION_ORIGINS, extra] : PRODUCTION_ORIGINS;
+  const extra = (Deno.env.get('ALLOWED_ORIGIN') ?? '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+  return [...PRODUCTION_ORIGINS, ...extra];
 }
 
 /**
