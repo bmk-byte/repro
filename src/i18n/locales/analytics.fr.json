@@ -59,9 +59,8 @@
     "caseVolumeByCountry": "Volume de dossiers par pays",
     "totalCasesSeries": "Total des dossiers",
     "noCountryData": "Aucune donnée par pays disponible",
-    "successRateByCountry": "Taux de réussite par pays",
-    "successRateSeries": "Taux de réussite (%)",
-    "noSuccessRateData": "Aucune donnée de taux de réussite disponible",
+    "resolvedByCountry": "Dossiers résolus par pays",
+    "resolvedSeries": "Dossiers résolus",
     "topCaseCountries": "Pays comptant le plus de dossiers",
     "casesCount": "{{count}} dossiers",
     "regionalDistribution": "Répartition régionale"
@@ -117,58 +116,30 @@
     }
   },
   "outcomeMetrics": {
-    "noData": "Aucune donnée sur les résultats disponible",
-    "loadError": "Échec du chargement des indicateurs de résultats. Veuillez réessayer plus tard.",
-    "title": "Tableau de bord des résultats",
+    "emptyTitle": "Aucun statut de dossier renseigné pour le moment",
+    "noData": "Les résultats apparaîtront ici dès que les dossiers approuvés auront un statut (déposé, en cours, résolu ou rejeté).",
+    "loadError": "Échec du chargement des résultats des dossiers. Veuillez réessayer plus tard.",
+    "title": "Résultats des dossiers",
     "allJurisdictions": "Toutes les juridictions",
-    "loading": "Chargement des indicateurs de résultats…",
+    "loading": "Chargement des résultats des dossiers…",
     "retry": "Réessayer",
-    "unknownJurisdiction": "Inconnue",
-    "outcomes": {
-      "won": "Gagnés",
-      "lost": "Perdus",
-      "settled": "Réglés à l'amiable",
+    "status": {
+      "filed": "Déposé",
       "ongoing": "En cours",
-      "dismissed": "Rejetés"
+      "resolved": "Résolu",
+      "dismissed": "Rejeté"
     },
-    "percentOfTotalCases": "{{percent}} % du total des dossiers",
-    "caseOutcomes": {
-      "title": "Issues des dossiers",
-      "noData": "Aucune donnée sur les résultats disponible"
+    "percentOfCasesWithStatus": "{{percent}} % des dossiers avec un statut",
+    "statusShare": {
+      "title": "Répartition des dossiers par statut"
     },
-    "seriesNameCases": "Dossiers",
-    "outcomeDistribution": {
-      "title": "Répartition des résultats",
-      "noData": "Aucune donnée de répartition des résultats disponible"
+    "byCourt": {
+      "title": "Statut par juridiction (8 premières)",
+      "noData": "Aucune juridiction renseignée pour ces dossiers"
     },
     "tooltip": {
       "cases": "{{count}} dossiers",
-      "count": "Nombre",
-      "percent": "{{value}} %",
-      "successRate": "Taux de réussite"
-    },
-    "successRateByJurisdiction": {
-      "title": "Taux de réussite par juridiction",
-      "seriesName": "Taux de réussite",
-      "noData": "Aucune donnée de taux de réussite par juridiction disponible"
-    },
-    "resolutionProgress": {
-      "title": "Progression du règlement des dossiers",
-      "overallResolutionRate": "Taux de règlement global",
-      "resolvedVsTotal": "Dossiers réglés c. total des dossiers",
-      "resolvedOfTotal": "{{resolved}} sur {{total}} dossiers",
-      "successRateLabel": "Taux de réussite",
-      "successfulOutcomes": "Issues favorables",
-      "caseCompletion": "Clôture des dossiers",
-      "completedCasesLabel": "Dossiers clôturés",
-      "casesCount": "{{count}} dossiers"
-    },
-    "footer": {
-      "overallSuccessRate": "Taux de réussite global",
-      "basedOnResolvedCases": "Calculé sur les dossiers réglés",
-      "kpiTitle": "Indicateurs clés de performance",
-      "totalCases": "Total des dossiers : {{count}}",
-      "resolutionRate": "Taux de règlement : {{percent}} %"
+      "count": "Nombre"
     }
   },
   "performanceMetrics": {
@@ -187,48 +158,45 @@
     "emptyState": "Aucune donnée de règlement de dossiers disponible"
   },
   "performanceTracking": {
-    "noData": "Aucune donnée de performance disponible",
-    "loadError": "Échec du chargement des données de performance. Veuillez réessayer plus tard.",
-    "title": "Suivi de la performance",
+    "emptyTitle": "Aucune donnée de dossier pour le moment",
+    "noData": "Les chiffres apparaîtront ici dès que des dossiers approuvés vous seront accessibles.",
+    "loadError": "Échec du chargement des données de dossiers. Veuillez réessayer plus tard.",
+    "title": "Activité des dossiers par organisation",
     "allOrganizations": "Toutes les organisations",
-    "loading": "Chargement des données de performance…",
+    "loading": "Chargement des données de dossiers…",
     "retry": "Réessayer",
-    "unknownOrg": "Inconnue",
+    "unknownOrg": "Aucune organisation renseignée",
     "stats": {
-      "avgProcessingTime": {
-        "title": "Délai de traitement moyen",
-        "subtitle": "Du dépôt au règlement"
+      "approvedCases": {
+        "title": "Dossiers approuvés",
+        "subtitle": "Visibles pour vous"
       },
-      "kpiAchievement": {
-        "title": "Réalisation des objectifs",
-        "subtitle": "Moyenne entre les organisations"
+      "resolvedCases": {
+        "title": "Résolus",
+        "subtitle": "{{rate}} % des dossiers avec un statut",
+        "noStatus": "Aucun statut de dossier renseigné"
       },
-      "collaborationScore": {
-        "title": "Indice de collaboration",
-        "subtitle": "Coopération inter-organisations"
+      "activeCases": {
+        "title": "Actifs",
+        "subtitle": "Déposés ou en cours"
       },
-      "strategicCases": {
-        "title": "Dossiers stratégiques",
-        "subtitle": "Contentieux à fort impact"
+      "organizations": {
+        "title": "Organisations",
+        "subtitle": "Avec des dossiers approuvés"
       }
     },
-    "daysValue": "{{count}} jours",
-    "orgKpiDashboard": {
-      "title": "Tableau de bord des objectifs par organisation",
-      "seriesName": "Réalisation des objectifs (%)",
-      "noData": "Aucune donnée d'objectifs par organisation disponible"
+    "statusLabels": {
+      "filed": "Déposé",
+      "ongoing": "En cours",
+      "resolved": "Résolu",
+      "dismissed": "Rejeté"
     },
-    "processingTimeTrends": {
-      "title": "Tendances des délais de traitement",
-      "avgSeriesName": "Délai de traitement moyen (jours)",
-      "targetSeriesName": "Délai cible (jours)",
-      "noData": "Aucune donnée de délai de traitement disponible"
+    "byOrganization": {
+      "title": "Dossiers par organisation et statut"
     },
-    "orgPerformance": {
-      "title": "Performance par organisation"
-    },
-    "processingTimeByOrg": {
-      "title": "Délai de traitement par organisation"
+    "monthly": {
+      "title": "Dossiers soumis par mois",
+      "seriesName": "Dossiers soumis"
     }
   },
   "timeline": {
@@ -342,6 +310,9 @@
     }
   },
   "healthIndicators": {
+    "emptyTitleNoData": "Aucune donnée d'indicateur de santé pour le moment",
+    "emptyDescriptionNoData": "Les indicateurs de santé apparaîtront ici une fois que les données par pays (mortalité maternelle, accès à la contraception, santé des adolescents, signalement des VSBG) auront été ajoutées.",
+    "emptyTitleFilters": "Rien pour ces filtres",
     "noCountries": "Aucun pays trouvé dans la base de données.",
     "loadCountriesError": "Échec du chargement des pays. Veuillez réessayer plus tard.",
     "noDataFilters": "Aucune donnée d'indicateur de santé disponible pour les filtres sélectionnés.",

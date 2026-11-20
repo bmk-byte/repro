@@ -8,7 +8,6 @@ import CaseCard from './CaseCard';
 import CaseDetails from './CaseDetails';
 import EditCaseModal from './EditCaseModal';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
-import { RESTRICTED_ORGANIZATIONS } from '../constants/organizations';
 import { fetchCountries } from '../lib/data/countries';
 import { fetchLitigationCases, fetchCaseFilterOptions } from '../lib/data/cases';
 import { Button, Select, Badge, EmptyState, SkeletonCard } from './ui';
@@ -24,6 +23,11 @@ interface CasesPageProps {
 const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  // Partner-organization moderators only see cases they uploaded (enforced
+  // by the database; see 20261120140000_restrict_partner_moderators_to_own_cases.sql).
+  // Say so, so a shorter list doesn't look like missing data.
+  const isPartnerModerator = !!userProfile?.is_moderator &&
+    !String(userProfile?.email ?? '').toLowerCase().endsWith('@afyanahaki.org');
   const [cases, setCases] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -47,8 +51,6 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   const [countries, setCountries] = React.useState<{id: string, name: string}[]>([]);
   const [categories, setCategories] = React.useState<string[]>([]);
   const [partners, setPartners] = React.useState<string[]>([]);
-  const [userOrganization, setUserOrganization] = React.useState<string | null>(null);
-  const [accessScope, setAccessScope] = React.useState<'global' | 'organization'>('global');
   const [fetchError, setFetchError] = React.useState<string | null>(null);
 
   // Use the custom hook for moderator status
@@ -69,38 +71,6 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
   }, []);
 
   React.useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('organization, email, is_moderator')
-            .eq('id', user.id)
-            .maybeSingle();
-
-          if (profile) {
-            setUserOrganization(profile.organization);
-            const isAfyanahaki = profile.is_moderator && (profile.email?.endsWith('@afyanahaki.org') || false);
-
-            // If afyanahaki or not a moderator, user has global access
-            // If restricted organization moderator, user has organization-only access
-            if (isAfyanahaki || !profile.is_moderator) {
-              setAccessScope('global');
-            } else if (RESTRICTED_ORGANIZATIONS.includes(profile.organization || '')) {
-              setAccessScope('organization');
-            } else {
-              setAccessScope('global');
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        toast.error(t('cases.failedToLoadProfile'));
-      }
-    };
-
-    fetchUserInfo();
     fetchFilterOptions();
   }, []);
 
@@ -287,12 +257,10 @@ const CasesPage: React.FC<CasesPageProps> = ({ userProfile }) => {
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-stone-900">{t('cases.title')}</h1>
         <p className="mt-2 text-stone-600">{t('cases.subtitle')}</p>
-        {accessScope === 'organization' && userOrganization && (
+        {isPartnerModerator && (
           <div className="mt-3 p-3 bg-info-light border border-info/20 rounded-md flex items-start gap-2">
             <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-info-dark">
-              {t('cases.orgScopeNotice', { organization: userOrganization })}
-            </p>
+            <p className="text-sm text-info-dark">{t('cases.ownCasesNotice')}</p>
           </div>
         )}
       </div>

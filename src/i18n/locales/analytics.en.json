@@ -59,9 +59,8 @@
     "caseVolumeByCountry": "Case Volume by Country",
     "totalCasesSeries": "Total Cases",
     "noCountryData": "No country data available",
-    "successRateByCountry": "Success Rate by Country",
-    "successRateSeries": "Success Rate (%)",
-    "noSuccessRateData": "No success rate data available",
+    "resolvedByCountry": "Resolved Cases by Country",
+    "resolvedSeries": "Resolved cases",
     "topCaseCountries": "Top Case Countries",
     "casesCount": "{{count}} cases",
     "regionalDistribution": "Regional Distribution"
@@ -117,58 +116,30 @@
     }
   },
   "outcomeMetrics": {
-    "noData": "No outcome data available",
-    "loadError": "Failed to load outcome metrics. Please try again later.",
-    "title": "Outcome Metrics Dashboard",
-    "allJurisdictions": "All Jurisdictions",
-    "loading": "Loading outcome metrics…",
+    "emptyTitle": "No case statuses recorded yet",
+    "noData": "Outcomes appear here once approved cases have a status (filed, ongoing, resolved or dismissed).",
+    "loadError": "Failed to load case outcomes. Please try again later.",
+    "title": "Case Outcomes",
+    "allJurisdictions": "All courts",
+    "loading": "Loading case outcomes…",
     "retry": "Retry",
-    "unknownJurisdiction": "Unknown",
-    "outcomes": {
-      "won": "Won",
-      "lost": "Lost",
-      "settled": "Settled",
+    "status": {
+      "filed": "Filed",
       "ongoing": "Ongoing",
+      "resolved": "Resolved",
       "dismissed": "Dismissed"
     },
-    "percentOfTotalCases": "{{percent}}% of total cases",
-    "caseOutcomes": {
-      "title": "Case Outcomes",
-      "noData": "No outcome data available"
+    "percentOfCasesWithStatus": "{{percent}}% of cases with a status",
+    "statusShare": {
+      "title": "Share of cases by status"
     },
-    "seriesNameCases": "Cases",
-    "outcomeDistribution": {
-      "title": "Outcome Distribution",
-      "noData": "No outcome distribution data available"
+    "byCourt": {
+      "title": "Status by court (top 8)",
+      "noData": "No court recorded on these cases"
     },
     "tooltip": {
       "cases": "{{count}} cases",
-      "count": "Count",
-      "percent": "{{value}}%",
-      "successRate": "Success Rate"
-    },
-    "successRateByJurisdiction": {
-      "title": "Success Rate by Jurisdiction",
-      "seriesName": "Success Rate",
-      "noData": "No jurisdiction success rate data available"
-    },
-    "resolutionProgress": {
-      "title": "Case Resolution Progress",
-      "overallResolutionRate": "Overall Resolution Rate",
-      "resolvedVsTotal": "Resolved vs. Total Cases",
-      "resolvedOfTotal": "{{resolved}} of {{total}} cases",
-      "successRateLabel": "Success Rate",
-      "successfulOutcomes": "Successful outcomes",
-      "caseCompletion": "Case Completion",
-      "completedCasesLabel": "Completed cases",
-      "casesCount": "{{count}} cases"
-    },
-    "footer": {
-      "overallSuccessRate": "Overall Success Rate",
-      "basedOnResolvedCases": "Based on resolved cases",
-      "kpiTitle": "Key Performance Indicators",
-      "totalCases": "Total Cases: {{count}}",
-      "resolutionRate": "Resolution Rate: {{percent}}%"
+      "count": "Count"
     }
   },
   "performanceMetrics": {
@@ -187,48 +158,45 @@
     "emptyState": "No case resolution data available"
   },
   "performanceTracking": {
-    "noData": "No performance data available",
-    "loadError": "Failed to load performance data. Please try again later.",
-    "title": "Performance Tracking",
+    "emptyTitle": "No case data yet",
+    "noData": "Figures appear here once approved cases are available to you.",
+    "loadError": "Failed to load case data. Please try again later.",
+    "title": "Case Activity by Organization",
     "allOrganizations": "All Organizations",
-    "loading": "Loading performance data…",
+    "loading": "Loading case data…",
     "retry": "Retry",
-    "unknownOrg": "Unknown",
+    "unknownOrg": "No organization recorded",
     "stats": {
-      "avgProcessingTime": {
-        "title": "Avg. Processing Time",
-        "subtitle": "From filing to resolution"
+      "approvedCases": {
+        "title": "Approved cases",
+        "subtitle": "Visible to you"
       },
-      "kpiAchievement": {
-        "title": "KPI Achievement",
-        "subtitle": "Average across organizations"
+      "resolvedCases": {
+        "title": "Resolved",
+        "subtitle": "{{rate}}% of cases with a status",
+        "noStatus": "No case statuses recorded"
       },
-      "collaborationScore": {
-        "title": "Collaboration Score",
-        "subtitle": "Inter-organization cooperation"
+      "activeCases": {
+        "title": "Active",
+        "subtitle": "Filed or ongoing"
       },
-      "strategicCases": {
-        "title": "Strategic Cases",
-        "subtitle": "High-impact litigation"
+      "organizations": {
+        "title": "Organizations",
+        "subtitle": "With approved cases"
       }
     },
-    "daysValue": "{{count}} days",
-    "orgKpiDashboard": {
-      "title": "Organization KPI Dashboard",
-      "seriesName": "KPI Achievement (%)",
-      "noData": "No organization KPI data available"
+    "statusLabels": {
+      "filed": "Filed",
+      "ongoing": "Ongoing",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
     },
-    "processingTimeTrends": {
-      "title": "Processing Time Trends",
-      "avgSeriesName": "Avg. Processing Time (days)",
-      "targetSeriesName": "Target Time (days)",
-      "noData": "No processing time data available"
+    "byOrganization": {
+      "title": "Cases by organization and status"
     },
-    "orgPerformance": {
-      "title": "Organization Performance"
-    },
-    "processingTimeByOrg": {
-      "title": "Processing Time by Organization"
+    "monthly": {
+      "title": "Cases submitted per month",
+      "seriesName": "Cases submitted"
     }
   },
   "timeline": {
@@ -342,6 +310,9 @@
     }
   },
   "healthIndicators": {
+    "emptyTitleNoData": "No health indicator data yet",
+    "emptyDescriptionNoData": "Health indicators appear here once country data (maternal mortality, contraceptive access, adolescent health, SGBV reporting) has been added.",
+    "emptyTitleFilters": "Nothing for these filters",
     "noCountries": "No countries found in the database.",
     "loadCountriesError": "Failed to load countries. Please try again later.",
     "noDataFilters": "No health indicator data available for the selected filters.",

@@ -8,18 +8,6 @@ import DocumentModal from './DocumentModal';
 import { LoadingState } from './ui';
 import PolicyContextCard from '../scorecard/components/PolicyContextCard';
 
-const RESTRICTED_ORGANIZATIONS = [
-  'Women with a Mission',
-  'Islamic Women\'s Initiative for Justice Law and Peace',
-  'SPRINGS PUBLIC INTEREST HUB',
-  'Center for Health, Human Rights and Development',
-  'THE AFRICAN INSTITUTE FOR INVESTIGATIVE JOURNALISM',
-  'Centre for Women Justice Uganda',
-  'FEMME FORTE',
-  'Ubuntu Justice center',
-  'Dumaic Global Health'
-];
-
 const STATUS_KEYS: Record<string, string> = {
   pending: 'common.statusPending',
   in_progress: 'common.statusInProgress',
@@ -45,37 +33,9 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
   const [loading, setLoading] = React.useState(true);
   const [showDocumentModal, setShowDocumentModal] = React.useState(false);
   const [accessDenied, setAccessDenied] = React.useState(false);
-  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
-  const [userOrganization, setUserOrganization] = React.useState<string | null>(null);
-  const [isAfyanahakiModerator, setIsAfyanahakiModerator] = React.useState(false);
 
   React.useEffect(() => {
-    const initializeAndFetch = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setCurrentUserId(user.id);
-
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('organization, email, is_moderator')
-            .eq('id', user.id)
-            .maybeSingle();
-
-          if (profile) {
-            setUserOrganization(profile.organization);
-            const isAfyanahaki = profile.is_moderator && (profile.email?.endsWith('@afyanahaki.org') || false);
-            setIsAfyanahakiModerator(isAfyanahaki);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        toast.error(t('cases.failedToLoadPermissions'));
-      }
-      await fetchCaseDetails();
-    };
-
-    initializeAndFetch();
+    fetchCaseDetails();
   }, [caseId]);
 
   const fetchCaseDetails = async () => {
@@ -113,23 +73,10 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
         return;
       }
 
-      // Check authorization
-      if (isModerator && !isAfyanahakiModerator && RESTRICTED_ORGANIZATIONS.includes(userOrganization || '')) {
-        // Restricted organization moderators can only see their own cases
-        // (afyanahaki.org moderators are exempt from this, matching
-        // CasesPage.tsx/RapidResponseCasesPage.tsx's access-scope logic)
-        if (data.user_id !== currentUserId) {
-          setAccessDenied(true);
-          return;
-        }
-      } else if (!isModerator && currentUserId) {
-        // Regular users can only see their own cases
-        if (data.user_id !== currentUserId) {
-          setAccessDenied(true);
-          return;
-        }
-      }
-      // afyanahaki.org moderators and other moderators can see all cases
+      // Access is decided by the database's row-level security: a case the
+      // user may not read comes back empty (handled above). The page used to
+      // add its own organization checks on top, from an outdated copy of the
+      // partner list, which made it disagree with the Cases list.
 
       setCaseData(data);
     } catch (error) {

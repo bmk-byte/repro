@@ -12,7 +12,7 @@ import { CHART_COLORS } from '../lib/chartColors';
 interface CountryData {
   name: string;
   total: number;
-  success: number;
+  resolved: number;
 }
 
 interface Country {
@@ -100,8 +100,7 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
         .from('cases')
         .select(`
           country_id,
-          status,
-          client_satisfaction
+          timeline_status
         `)
         .in('country_id', countryIds)
         .eq('moderation_status', 'approved');
@@ -115,20 +114,15 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
         const countryCases = caseCounts?.filter(c => c.country_id === country.id) || [];
         const totalCount = countryCases.length;
 
-        const completedCases = countryCases.filter(c =>
-          c.status === 'completed' && c.client_satisfaction !== null
-        );
-
-        let successRate = 0;
-        if (completedCases.length > 0) {
-          const avgSatisfaction = completedCases.reduce((sum, c) => sum + (c.client_satisfaction || 0), 0) / completedCases.length;
-          successRate = Math.round((avgSatisfaction / 5) * 100);
-        }
+        // Recorded status only. A former "success rate" here was derived
+        // from a client-satisfaction field no form fills in, so it was
+        // always 0%.
+        const resolvedCount = countryCases.filter(c => c.timeline_status === 'resolved').length;
 
         return {
           name: country.name,
           total: totalCount,
-          success: successRate
+          resolved: resolvedCount
         };
       });
 
@@ -250,21 +244,21 @@ const GeographicIntelligence: React.FC<GeographicIntelligenceProps> = ({
             </div>
 
             <div>
-              <Title>{t('geographicIntelligence.successRateByCountry')}</Title>
+              <Title>{t('geographicIntelligence.resolvedByCountry')}</Title>
               {countryData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={countryData.slice(0, 5)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
-                    <YAxis domain={[0, 100]} />
+                    <YAxis allowDecimals={false} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="success" name={t('geographicIntelligence.successRateSeries')} fill={CHART_COLORS.success} />
+                    <Bar dataKey="resolved" name={t('geographicIntelligence.resolvedSeries')} fill={CHART_COLORS.success} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="flex justify-center items-center h-64">
-                  <Text>{t('geographicIntelligence.noSuccessRateData')}</Text>
+                  <Text>{t('geographicIntelligence.noCountryData')}</Text>
                 </div>
               )}
             </div>

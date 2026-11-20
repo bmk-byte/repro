@@ -5,7 +5,7 @@ import { supabase, handleSupabaseError } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { reportError } from '../lib/errorReporting';
 import { sanitizeURL, sanitizeText, sanitizePhone, safeFileExtension } from '../lib/sanitize';
-import { Badge, Spinner, Button, Input } from './ui';
+import { Badge, Spinner, Button, Input, Select } from './ui';
 import { useModeratorStatus } from '../hooks/useModeratorStatus';
 
 interface ProfileSettingsFormProps {
@@ -44,18 +44,31 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
     full_name: '', profession: '', organization: '', phone_number: '',
   });
   const [editErrors, setEditErrors] = useState<Partial<Record<keyof EditableFields, string>>>({});
+  // Country feeds the public "Where we work" map (countries only, never
+  // names or counts). Stored on profiles only, not auth metadata.
+  const [countryId, setCountryId] = useState('');
+  const [editCountryId, setEditCountryId] = useState('');
+  const [countryOptions, setCountryOptions] = useState<{ id: string; name: string }[]>([]);
+  const countryName = countryOptions.find((c) => c.id === countryId)?.name ?? '';
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('profession, organization, phone_number, email, receive_notifications')
+          .select('profession, organization, phone_number, email, receive_notifications, country_id')
           .eq('id', user.id)
           .single();
 
         if (error) throw error;
         setReceiveNotifications(data?.receive_notifications ?? true);
+        setCountryId(data?.country_id ?? '');
+
+        const { data: countryRows } = await supabase
+          .from('countries')
+          .select('id, name')
+          .order('name');
+        setCountryOptions(countryRows ?? []);
 
         if (!user?.user_metadata?.profession && data?.profession) {
           setProfession(data.profession);
@@ -163,6 +176,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       organization: organization,
       phone_number: phoneNumber,
     });
+    setEditCountryId(countryId);
     setEditErrors({});
     setIsEditingProfile(true);
   };
@@ -209,7 +223,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
 
       const { error: profileError } = await supabase
         .from('profiles')
-        .update(updates)
+        .update({ ...updates, country_id: editCountryId || null })
         .eq('id', user.id);
 
       if (profileError) throw profileError;
@@ -223,6 +237,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
       setProfession(updates.profession);
       setOrganization(updates.organization);
       setPhoneNumber(updates.phone_number);
+      setCountryId(editCountryId);
       setIsEditingProfile(false);
       toast.success(t('profileSettingsForm.profileUpdated'));
     } catch (error) {
@@ -398,6 +413,19 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
               error={editErrors.phone_number}
               placeholder="+1234567890"
             />
+            {countryOptions.length > 0 && (
+              <Select
+                label={t('profileSettingsForm.country')}
+                value={editCountryId}
+                onChange={(e) => setEditCountryId(e.target.value)}
+                helperText={t('profileSettingsForm.countryHelp')}
+              >
+                <option value="">{t('profileSettingsForm.countryNotSet')}</option>
+                {countryOptions.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </Select>
+            )}
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={cancelEditingProfile} disabled={savingProfile}>
@@ -416,6 +444,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user }) => {
               { label: t('profileSettingsForm.profession'), value: profession },
               { label: t('profileSettingsForm.organization'), value: organization },
               { label: t('profileSettingsForm.phoneNumber'), value: phoneNumber },
+              { label: t('profileSettingsForm.country'), value: countryName },
             ].map(({ label, value }) => (
               <div key={label}>
                 <span className="block text-sm font-medium text-stone-700">{label}</span>

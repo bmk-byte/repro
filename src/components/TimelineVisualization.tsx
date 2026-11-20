@@ -22,7 +22,6 @@ const TimelineVisualization: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = React.useState<string>('all');
   const [countries, setCountries] = React.useState<{id: string, name: string}[]>([]);
-  const [averageResolutionTime, setAverageResolutionTime] = React.useState<number>(0);
   const [caseAging, setCaseAging] = React.useState<{
     lessThan30: number;
     between30And90: number;
@@ -78,7 +77,6 @@ const TimelineVisualization: React.FC = () => {
 
       if (!cases || cases.length === 0) {
         setData([]);
-        setAverageResolutionTime(0);
         setCaseAging({ lessThan30: 0, between30And90: 0, moreThan90: 0 });
         setError(t('timeline.noData'));
         return;
@@ -87,9 +85,6 @@ const TimelineVisualization: React.FC = () => {
       // Process timeline data
       const timelineData = processTimelineData(cases);
       setData(timelineData);
-
-      // Calculate average resolution time based on case age
-      calculateResolutionTime(cases);
 
       // Calculate case aging
       calculateCaseAging(cases);
@@ -139,30 +134,6 @@ const TimelineVisualization: React.FC = () => {
       name,
       ...counts
     }));
-  };
-
-  const calculateResolutionTime = (cases: any[]) => {
-    // Filter for resolved cases and calculate average time from creation to now
-    const resolvedCases = cases.filter(c =>
-      (c.timeline_status === 'resolved' || c.status === 'completed') &&
-      c.created_at
-    );
-
-    if (resolvedCases.length === 0) {
-      setAverageResolutionTime(0);
-      return;
-    }
-
-    // Calculate average time from creation to now
-    const totalDays = resolvedCases.reduce((sum, c) => {
-      const createdDate = new Date(c.created_at);
-      const today = new Date();
-      const diffTime = Math.abs(today.getTime() - createdDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return sum + diffDays;
-    }, 0);
-
-    setAverageResolutionTime(Math.round(totalDays / resolvedCases.length));
   };
 
   const calculateCaseAging = (cases: any[]) => {
@@ -324,22 +295,20 @@ const TimelineVisualization: React.FC = () => {
 
           <div className="mt-6 p-4 bg-stone-50 rounded-lg">
             <Flex>
+              {/* "Average resolution time" was removed: it measured from
+                  creation to today, not to resolution. Case aging is kept,
+                  since time-open-so-far is the right measure for open cases. */}
               <div>
-                <Text className="font-medium">{t('timeline.avgResolutionTime.title')}</Text>
-                <Text className="mt-1 text-2xl font-bold">{t('timeline.avgResolutionTime.value', { count: averageResolutionTime })}</Text>
-                <Text className="text-stone-500 text-sm">{t('timeline.avgResolutionTime.subtitle')}</Text>
-              </div>
-              <div className="text-right">
                 <Text className="font-medium">{t('timeline.caseAging.title')}</Text>
-                <div className="flex items-center mt-1 justify-end">
+                <div className="flex items-center mt-1">
                   <div className="w-2 h-2 rounded-full bg-success mr-1"></div>
                   <Text className="text-sm">{t('timeline.caseAging.lessThan30', { value: caseAging.lessThan30 })}</Text>
                 </div>
-                <div className="flex items-center justify-end">
+                <div className="flex items-center">
                   <div className="w-2 h-2 rounded-full bg-warning mr-1"></div>
                   <Text className="text-sm">{t('timeline.caseAging.between30And90', { value: caseAging.between30And90 })}</Text>
                 </div>
-                <div className="flex items-center justify-end">
+                <div className="flex items-center">
                   <div className="w-2 h-2 rounded-full bg-danger mr-1"></div>
                   <Text className="text-sm">{t('timeline.caseAging.moreThan90', { value: caseAging.moreThan90 })}</Text>
                 </div>

@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Database, TrendingUp, BarChart3, Search,
   HeartPulse, Baby, UserCheck, Scale as Scales, Droplets, ShieldAlert,
-  Scale, Users, Lightbulb, Quote,
+  Scale, Users, Lightbulb,
 } from 'lucide-react';
 
 // Keep in sync with Navbar.tsx's `landingPageLinks` ids — that's the only
 // place these panels are selected from now (see LandingPage.tsx's comment).
-export type TabId = 'features' | 'thematic' | 'benefits' | 'testimonials';
+export type TabId = 'features' | 'thematic' | 'benefits' | 'reach';
+
+// Lazy so the globe library only downloads when this panel is opened.
+const ReachPanel = lazy(() => import('./ReachPanel'));
 
 const FEATURE_ICONS = [
   <Database className="h-5 w-5" />, <TrendingUp className="h-5 w-5" />,
@@ -27,7 +30,6 @@ const BENEFIT_ICONS = [
 ];
 
 interface TitleDescriptionItem { title: string; description: string }
-interface TestimonialItem { quote: string; author: string; role: string }
 
 const panelTransition = { duration: 0.25 };
 
@@ -79,37 +81,18 @@ const BenefitsPanel = () => {
   );
 };
 
-const TestimonialsPanel = () => {
-  const { t } = useTranslation();
-  const items = t('landing.testimonialItems', { returnObjects: true }) as TestimonialItem[];
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {items.map((item, i) => (
-        <div key={i} className="enhanced-card p-4 sm:p-5">
-          <div className="inline-flex p-2 bg-primary/10 rounded-lg mb-3">
-            <Quote className="h-5 w-5 text-primary" />
-          </div>
-          <p className="text-xs sm:text-sm text-stone-600 italic mb-3 leading-relaxed">"{item.quote}"</p>
-          <p className="font-semibold text-stone-900 text-sm">{item.author}</p>
-          <p className="text-xs text-stone-500">{item.role}</p>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const PANELS: Record<TabId, React.FC> = {
+const PANELS: Record<TabId, React.ComponentType> = {
   features: FeaturesPanel,
   thematic: ThematicPanel,
   benefits: BenefitsPanel,
-  testimonials: TestimonialsPanel,
+  reach: ReachPanel,
 };
 
 const HEADING_KEYS: Record<TabId, string> = {
   features: 'landing.featuresHeading',
   thematic: 'landing.thematicHeading',
   benefits: 'landing.benefitsHeading',
-  testimonials: 'landing.testimonialsHeading',
+  reach: 'landing.reachHeading',
 };
 
 interface LandingTabsProps {
@@ -145,7 +128,9 @@ const LandingTabs: React.FC<LandingTabsProps> = ({ activeTab }) => {
               <h2 className="section-title !text-white">{heading.title}</h2>
               <p className="mt-1.5 text-sm text-stone-300">{heading.subtitle}</p>
             </div>
-            <ActivePanel />
+            <Suspense fallback={null}>
+              <ActivePanel />
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </div>

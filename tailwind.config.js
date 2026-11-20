@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // @tremor/react ships its own Tailwind class names, so its files must be
+  // scanned or its components render half-styled (no card background, and
+  // Tailwind's default blue ring as the card border).
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}', './node_modules/@tremor/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -56,6 +59,38 @@ export default {
           light: '#DBEAFE',
           dark: '#1E3A8A',
         },
+        // Tremor design tokens, mapped onto this app's palette (maroon brand,
+        // warm stone neutrals) instead of Tremor's default blue/gray.
+        tremor: {
+          brand: {
+            faint: '#FEF2F2',
+            muted: '#FECACA',
+            subtle: '#B73538',
+            DEFAULT: '#9C1D20',
+            emphasis: '#7A1518',
+            inverted: '#FFFFFF',
+          },
+          background: {
+            muted: '#FAF9F7',
+            subtle: '#F3F1ED',
+            DEFAULT: '#FFFFFF',
+            emphasis: '#524A3C',
+          },
+          border: { DEFAULT: '#E7E3DB' },
+          ring: { DEFAULT: '#E7E3DB' },
+          content: {
+            subtle: '#B3A996',
+            DEFAULT: '#69604F',
+            emphasis: '#524A3C',
+            strong: '#25211A',
+            inverted: '#FFFFFF',
+          },
+        },
+      },
+      // Any `ring-*` without an explicit colour falls back to this instead of
+      // Tailwind's default semi-transparent blue.
+      ringColor: {
+        DEFAULT: '#E7E3DB',
       },
       screens: {
         xs: '480px',
@@ -75,17 +110,27 @@ export default {
         '3xl': ['1.875rem', { lineHeight: '1.25' }],
         '4xl': ['2.25rem', { lineHeight: '1.15' }],
         '5xl': ['3rem', { lineHeight: '1.1' }],
+        'tremor-label': ['0.75rem', { lineHeight: '1rem' }],
+        'tremor-default': ['0.875rem', { lineHeight: '1.25rem' }],
+        'tremor-title': ['1.125rem', { lineHeight: '1.75rem' }],
+        'tremor-metric': ['1.875rem', { lineHeight: '2.25rem' }],
       },
       borderRadius: {
         md: '0.5rem',
         lg: '0.75rem',
         xl: '1rem',
+        'tremor-small': '0.375rem',
+        'tremor-default': '0.75rem',
+        'tremor-full': '9999px',
       },
       boxShadow: {
         sm: '0 1px 2px rgba(37,33,26,0.06)',
         card: '0 1px 2px rgba(37,33,26,0.05), 0 4px 12px -4px rgba(37,33,26,0.10)',
         raised: '0 4px 16px -4px rgba(37,33,26,0.14), 0 2px 6px -2px rgba(37,33,26,0.08)',
         modal: '0 12px 40px -8px rgba(37,33,26,0.28)',
+        'tremor-input': '0 1px 2px rgba(37,33,26,0.06)',
+        'tremor-card': '0 1px 2px rgba(37,33,26,0.05), 0 4px 12px -4px rgba(37,33,26,0.10)',
+        'tremor-dropdown': '0 4px 16px -4px rgba(37,33,26,0.14), 0 2px 6px -2px rgba(37,33,26,0.08)',
       },
     },
   },

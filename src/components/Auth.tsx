@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { supabase, supabaseUrl, supabaseAnonKey, handleSupabaseError } from '../lib/supabase';
@@ -20,6 +20,7 @@ interface ValidationState {
   password: string;
   organization: string;
   customOrganization?: string;
+  country?: string;
   terms?: string;
 }
 
@@ -91,6 +92,26 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   const [showCustomOrganization, setShowCustomOrganization] = useState(false);
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signUp');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [countryId, setCountryId] = useState('');
+  const [countryOptions, setCountryOptions] = useState<{ id: string; name: string }[]>([]);
+
+  // Country list for sign-up. It feeds the public "Where we work" map, which
+  // shows countries only, never counts. If the list can't load, sign-up is
+  // not blocked (country is then skipped rather than required).
+  useEffect(() => {
+    if (!isSignUp || countryOptions.length > 0) return;
+    supabase
+      .from('countries')
+      .select('id, name')
+      .order('name')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error loading countries for sign-up:', error);
+          return;
+        }
+        setCountryOptions(data ?? []);
+      });
+  }, [isSignUp, countryOptions.length]);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationState>({ email: '', password: '', organization: '' });
@@ -216,10 +237,11 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         isSignUp && selectedOrganization === OTHER_ORGANIZATION_VALUE && !customOrganization.trim()
           ? t('auth.pleaseEnterOrganizationName')
           : '',
+      country: isSignUp && countryOptions.length > 0 && !countryId ? t('auth.pleaseSelectCountry') : '',
       terms: isSignUp && !agreedToTerms ? t('auth.pleaseAgreeToTerms') : '',
     };
     setValidationErrors(prev => ({ ...prev, ...signUpErrors }));
-    const signUpValid = !signUpErrors.organization && !signUpErrors.customOrganization && !signUpErrors.terms;
+    const signUpValid = !signUpErrors.organization && !signUpErrors.customOrganization && !signUpErrors.country && !signUpErrors.terms;
 
     if (!isEmailValid || !isPasswordValid || !signUpValid) {
       // Move focus to the first field that needs attention.
@@ -228,6 +250,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
         !isPasswordValid && 'password',
         signUpErrors.organization && 'organization',
         signUpErrors.customOrganization && 'customOrganization',
+        signUpErrors.country && 'country',
         signUpErrors.terms && 'agreeToTerms',
       ].find(Boolean);
       if (firstInvalid) {
@@ -251,6 +274,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
             phone_number: phoneNumber.trim(),
             profession: profession.trim(),
             organization: organization.trim(),
+            ...(countryId ? { country_id: countryId } : {}),
           },
         });
 
@@ -490,6 +514,27 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                             }
                           />
                         </motion.div>
+                      )}
+
+                      {countryOptions.length > 0 && (
+                        <Select
+                          label={t('auth.country')}
+                          id="country"
+                          name="country"
+                          required
+                          value={countryId}
+                          onChange={(e) => {
+                            setCountryId(e.target.value);
+                            setValidationErrors(prev => ({ ...prev, country: '' }));
+                          }}
+                          error={validationErrors.country}
+                          helperText={t('auth.countryHelp')}
+                        >
+                          <option value="">{t('auth.countrySelectPlaceholder')}</option>
+                          {countryOptions.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </Select>
                       )}
                     </div>
                   )}

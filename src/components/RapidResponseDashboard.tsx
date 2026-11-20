@@ -52,7 +52,6 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
     totalCases: 0,
     activeCases: 0,
     completedCases: 0,
-    averageResolutionTime: 0,
     priorityDistribution: [] as { name: string; value: number }[],
     stageDistribution: [] as { name: string; value: number }[],
     categoryDistribution: [] as { name: string; value: number }[],
@@ -322,26 +321,6 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
       const activeCases = filteredCases.filter(c => c.status === 'in_progress' || c.status === 'pending').length;
       const completedCases = filteredCases.filter(c => c.status === 'completed').length;
 
-      // Calculate average resolution time (in days) for completed cases
-      let totalResolutionTime = 0;
-      let completedCasesWithTime = 0;
-
-      filteredCases.forEach(caseItem => {
-        if (caseItem.status === 'completed') {
-          const createdDate = new Date(caseItem.created_at);
-          const now = new Date();
-          const diffTime = Math.abs(now.getTime() - createdDate.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
-          totalResolutionTime += diffDays;
-          completedCasesWithTime++;
-        }
-      });
-
-      const averageResolutionTime = completedCasesWithTime > 0 
-        ? Math.round(totalResolutionTime / completedCasesWithTime) 
-        : 0;
-
       // Calculate priority distribution
       const priorityCounts: Record<string, number> = {
         'Urgent': 0,
@@ -466,7 +445,6 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
         totalCases,
         activeCases,
         completedCases,
-        averageResolutionTime,
         priorityDistribution,
         stageDistribution,
         recentActivity,
@@ -735,30 +713,23 @@ const RapidResponseDashboard: React.FC<RapidResponseDashboardProps> = ({
           </Card>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* "Average resolution time" was removed: it counted days from a
+              case's creation to today, not to when it was completed. */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DashboardCard
               title={t('dashboard.stats.totalCases')}
               value={stats.totalCases}
-              change="+0.0%"
               type="cases"
             />
             <DashboardCard
               title={t('dashboard.stats.activeCases')}
               value={stats.activeCases}
-              change="+0.0%"
-              type="judgments"
+              type="active"
             />
             <DashboardCard
               title={t('dashboard.stats.completedCases')}
               value={stats.completedCases}
-              change="+0.0%"
               type="success"
-            />
-            <DashboardCard
-              title={t('dashboard.stats.avgResolutionTime')}
-              value={t('dashboard.stats.daysSuffix', { count: stats.averageResolutionTime })}
-              change="+0.0%"
-              type="cases"
             />
           </div>
 

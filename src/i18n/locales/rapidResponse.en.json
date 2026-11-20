@@ -177,7 +177,6 @@
   "casesPage": {
     "pageTitle": "Rapid Response Cases",
     "pageSubtitle": "Track and manage time-sensitive legal response cases",
-    "orgAccessNotice": "You are viewing cases uploaded by <strong>{{organization}}</strong> only. Cases from other organizations are not visible.",
     "tabs": {
       "dashboard": "Dashboard",
       "allCases": "All Cases"

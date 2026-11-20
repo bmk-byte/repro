@@ -8,71 +8,42 @@ import { sanitizeCsvCell, downloadCsv } from '../lib/csv';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const RESTRICTED_ORGANIZATIONS = [
-  'Women with a Mission',
-  "Islamic Women's Initiative for Justice Law and Peace",
-  'SPRINGS PUBLIC INTEREST HUB',
-  'Center for Health, Human Rights and Development',
-  'THE AFRICAN INSTITUTE FOR INVESTIGATIVE JOURNALISM',
-  'Centre for Women Justice Uganda',
-  'FEMME FORTE',
-  'Ubuntu Justice center',
-  'Dumaic Global Health'
-];
-
 const ReportGenerationSystem: React.FC = () => {
   const { t } = useTranslation('misc');
   const [selectedMetrics, setSelectedMetrics] = React.useState<string[]>([]);
   const [selectedFormat, setSelectedFormat] = React.useState<string>('pdf');
   const [dateRange, setDateRange] = React.useState<[string, string]>(['', '']);
   const [loading, setLoading] = React.useState(false);
+  // Only counts taken straight from case records. "Success rate" (built
+  // from a satisfaction field no form fills in) and "processing time"
+  // (measured to today, not to resolution) were removed as invented.
   const [reportStats, setReportStats] = React.useState({
     totalCases: 0,
     completedCases: 0,
-    successRate: 0,
-    avgProcessingTime: 0
   });
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
-  const [userOrganization, setUserOrganization] = React.useState<string | null>(null);
-  const [isModerator, setIsModerator] = React.useState(false);
 
   React.useEffect(() => {
     const initialize = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUserId(user.id);
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('organization, is_moderator')
-          .eq('id', user.id)
-          .maybeSingle();
-        if (profile) {
-          setUserOrganization(profile.organization);
-          setIsModerator(profile.is_moderator || false);
-        }
-      }
+      if (user) setCurrentUserId(user.id);
       await fetchReportStats();
     };
     initialize();
   }, []);
 
+  // Which cases are included is decided by the database's access rules,
+  // the same ones the Cases page uses.
   const buildBaseQuery = () => {
-    const isAfyanahakiModerator = isModerator && userOrganization === 'Afya na Haki';
-    const isRestricted = RESTRICTED_ORGANIZATIONS.includes(userOrganization || '');
-
     let q = supabase
       .from('cases')
       .select(`
         id, case_filed, case_summary, status, created_at,
-        priority_level, case_categories, partner, client_satisfaction,
+        priority_level, case_categories, partner,
         countries (name),
         profiles:user_id (full_name, organization)
       `)
       .eq('moderation_status', 'approved');
-
-    if (!isAfyanahakiModerator && (isRestricted || !isModerator) && currentUserId) {
-      q = q.eq('user_id', currentUserId);
-    }
 
     if (dateRange[0]) q = q.gte('created_at', dateRange[0]);
     if (dateRange[1]) q = q.lte('created_at', dateRange[1] + 'T23:59:59');
@@ -83,32 +54,16 @@ const ReportGenerationSystem: React.FC = () => {
   const fetchReportStats = async () => {
     try {
       setLoading(true);
-      const isAfyanahakiModerator = isModerator && userOrganization === 'Afya na Haki';
-      const isRestricted = RESTRICTED_ORGANIZATIONS.includes(userOrganization || '');
-
-      let q = supabase
+      const { data: cases } = await supabase
         .from('cases')
-        .select('id, status, created_at, client_satisfaction, user_id')
+        .select('id, status')
         .eq('moderation_status', 'approved');
-
-      if (!isAfyanahakiModerator && (isRestricted || !isModerator) && currentUserId) {
-        q = q.eq('user_id', currentUserId);
-      }
-
-      const { data: cases } = await q;
       if (!cases || cases.length === 0) return;
 
-      const totalCases = cases.length;
-      const completedCases = cases.filter(c => c.status === 'completed').length;
-      const scores = cases.filter(c => c.status === 'completed' && c.client_satisfaction).map(c => c.client_satisfaction);
-      const avg = scores.length ? scores.reduce((s: number, v: number) => s + v, 0) / scores.length : 0;
-      const successRate = Math.round((avg / 5) * 100);
-      const times = cases.filter(c => c.status === 'completed' && c.created_at).map(c =>
-        Math.ceil(Math.abs(Date.now() - new Date(c.created_at).getTime()) / 86400000)
-      );
-      const avgProcessingTime = times.length ? Math.round(times.reduce((s, v) => s + v, 0) / times.length) : 0;
-
-      setReportStats({ totalCases, completedCases, successRate, avgProcessingTime });
+      setReportStats({
+        totalCases: cases.length,
+        completedCases: cases.filter(c => c.status === 'completed').length,
+      });
     } catch (err) {
       console.error('Error fetching report stats:', err);
     } finally {
@@ -120,7 +75,7 @@ const ReportGenerationSystem: React.FC = () => {
   const buildCSVFromCases = (cases: any[], metrics: string[]): string => {
     const headerMap: Record<string, string[]> = {
       case_volume: ['Case Title', 'Status', 'Date Filed'],
-      success_rates: ['Case Title', 'Status', 'Client Satisfaction'],
+      success_rates: ['Case Title', 'Status'],
       geographic: ['Case Title', 'Country'],
       timeline: ['Case Title', 'Date Filed', 'Status'],
       stakeholders: ['Case Title', 'Partner Organization', 'Submitted By', 'Organization'],
@@ -139,7 +94,6 @@ const ReportGenerationSystem: React.FC = () => {
         'Case Title': c.case_filed,
         'Status': c.status,
         'Date Filed': c.created_at ? new Date(c.created_at).toLocaleDateString() : '',
-        'Client Satisfaction': c.client_satisfaction ?? '',
         'Country': (c.countries as any)?.name ?? '',
         'Partner Organization': c.partner ?? '',
         'Submitted By': (c.profiles as any)?.full_name ?? '',
@@ -235,7 +189,7 @@ const ReportGenerationSystem: React.FC = () => {
       } else if (selectedFormat === 'pdf') {
         const metricLabels: Record<string, string> = {
           case_volume: 'Case Volume',
-          success_rates: 'Success Rates',
+          success_rates: 'Case Status',
           geographic: 'Geographical Distribution',
           timeline: 'Timeline Analysis',
           stakeholders: 'Stakeholder Analysis',
@@ -289,36 +243,22 @@ const ReportGenerationSystem: React.FC = () => {
 
     setLoading(true);
     try {
-      const isAfyanahakiModerator = isModerator && userOrganization === 'Afya na Haki';
-      const isRestricted = RESTRICTED_ORGANIZATIONS.includes(userOrganization || '');
-
-      let q = supabase
+      const { data: cases, error } = await supabase
         .from('cases')
-        .select('id, case_filed, status, created_at, client_satisfaction, priority_level, case_categories, partner, countries(name), profiles:user_id(full_name, organization)')
+        .select('id, case_filed, status, created_at, priority_level, case_categories, partner, countries(name), profiles:user_id(full_name, organization)')
         .eq('moderation_status', 'approved');
-
-      if (!isAfyanahakiModerator && (isRestricted || !isModerator) && currentUserId) {
-        q = q.eq('user_id', currentUserId);
-      }
-
-      const { data: cases, error } = await q;
       if (error) throw error;
 
       const dateSuffix = new Date().toISOString().slice(0, 10);
 
       if (type === 'performance') {
-        const completedCases = (cases || []).filter((c: any) => c.status === 'completed');
-        const scores = completedCases.filter((c: any) => c.client_satisfaction).map((c: any) => c.client_satisfaction);
-        const avgScore = scores.length ? (scores.reduce((s: number, v: number) => s + v, 0) / scores.length).toFixed(2) : 'N/A';
-
+        const countStatus = (status: string) => (cases || []).filter((c) => c.status === status).length;
         const rows: [string, unknown][] = [
           ['Total Cases', cases?.length ?? 0],
-          ['Completed Cases', completedCases.length],
-          ['In Progress', (cases || []).filter((c: any) => c.status === 'in_progress').length],
-          ['Pending', (cases || []).filter((c: any) => c.status === 'pending').length],
-          ['Avg Client Satisfaction', avgScore],
-          ['Success Rate', reportStats.successRate + '%'],
-          ['Avg Processing Time (days)', reportStats.avgProcessingTime],
+          ['Completed', countStatus('completed')],
+          ['In Progress', countStatus('in_progress')],
+          ['Pending', countStatus('pending')],
+          ['On Hold', countStatus('on_hold')],
         ];
         const csv = buildSummaryCSV('Performance Summary Report', rows);
         downloadCsv(csv, `performance-summary-${dateSuffix}.csv`);
@@ -343,8 +283,6 @@ const ReportGenerationSystem: React.FC = () => {
         });
         const rows: [string, unknown][] = [
           ['Total Cases', cases?.length ?? 0],
-          ['Avg Processing Time (days)', reportStats.avgProcessingTime],
-          ['Success Rate', reportStats.successRate + '%'],
           ['', ''],
           ['Category', 'Count'],
           ...Object.entries(byCategory).sort((a, b) => (b[1] as number) - (a[1] as number)) as [string, unknown][],
@@ -390,7 +328,6 @@ const ReportGenerationSystem: React.FC = () => {
             <div className="mt-2 text-xs text-stone-500">
               <div>{t('reportGenerationSystem.totalCases', { count: reportStats.totalCases })}</div>
               <div>{t('reportGenerationSystem.completed', { count: reportStats.completedCases })}</div>
-              <div>{t('reportGenerationSystem.successRate', { rate: reportStats.successRate })}</div>
             </div>
           </div>
 
@@ -423,8 +360,7 @@ const ReportGenerationSystem: React.FC = () => {
               <Download className="h-5 w-5 text-primary" />
             </Flex>
             <div className="mt-2 text-xs text-stone-500">
-              <div>{t('reportGenerationSystem.avgProcessingTime', { days: reportStats.avgProcessingTime })}</div>
-              <div>{t('reportGenerationSystem.successMetrics', { status: reportStats.successRate > 0 ? t('reportGenerationSystem.available') : t('reportGenerationSystem.none') })}</div>
+              <div>{t('reportGenerationSystem.totalCases', { count: reportStats.totalCases })}</div>
             </div>
           </div>
         </div>

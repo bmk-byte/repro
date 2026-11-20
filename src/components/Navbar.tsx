@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet, Award, UserCog, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
-import { Button, Badge, LanguageSwitcher } from './ui';
+import { Button, LanguageSwitcher } from './ui';
 import { prefetchRoute } from '../lib/routePrefetch';
 import { clearAllFormDrafts } from '../hooks/useFormDraft';
 import NavDropdown, { type NavMenuItem } from './NavDropdown';
@@ -113,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({
     { name: t('landing.features'), id: 'features' },
     { name: t('landing.focusAreas'), id: 'thematic' },
     { name: t('landing.benefits'), id: 'benefits' },
-    { name: t('landing.testimonials'), id: 'testimonials' },
+    { name: t('landing.reach'), id: 'reach' },
   ];
 
   const navigationItems = [
@@ -121,19 +121,23 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'analytics', label: t('nav.analytics'), icon: BarChart2 },
     ...(isModerator ? [
       { id: 'moderation', label: t('nav.moderation'), icon: Shield },
-      { id: 'rapid-response', label: t('nav.rapidResponse'), icon: AlertOctagon, badge: t('nav.rapidResponseBadge') }
+      { id: 'rapid-response', label: t('nav.rapidResponse'), icon: AlertOctagon }
     ] : []),
     { id: 'cases', label: t('nav.cases'), icon: Scale },
-    { id: 'judgments', label: t('nav.judgments'), icon: Gavel },
-    { id: 'laws', label: t('nav.laws'), icon: BookOpen },
-    { id: 'resources', label: t('nav.resources'), icon: ScrollText },
     // is_scorecard_editor is a separate flag from the moderator/admin role
     // hierarchy — a case moderator is not automatically a scorecard editor,
     // and vice versa (see src/lib/permissions.ts).
     ...(isScorecardEditor ? [
       { id: 'scorecard', label: t('nav.scorecard'), icon: Award }
     ] : []),
-    { id: 'settings', label: t('nav.settings'), icon: Settings }
+  ];
+
+  // Reference material grouped under one "Library" menu so the bar fits on
+  // one row. Settings lives in the user menu (top right) instead.
+  const libraryMenuItems: NavMenuItem[] = [
+    { id: 'judgments', label: t('nav.judgments'), icon: Gavel },
+    { id: 'laws', label: t('nav.laws'), icon: BookOpen },
+    { id: 'resources', label: t('nav.resources'), icon: ScrollText },
   ];
 
   // Admin-only management screens — grouped under a single "Admin" dropdown
@@ -244,6 +248,17 @@ const Navbar: React.FC<NavbarProps> = ({
                       </div>
                       <button
                         role="menuitem"
+                        onClick={() => {
+                          setActiveTab?.('settings');
+                          setUserDropdownOpen(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-stone-700 hover:bg-stone-100"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        {t('nav.settings')}
+                      </button>
+                      <button
+                        role="menuitem"
                         onClick={handleSignOut}
                         className="flex items-center w-full px-4 py-2 text-sm text-stone-700 hover:bg-stone-100"
                       >
@@ -303,12 +318,19 @@ const Navbar: React.FC<NavbarProps> = ({
                   >
                     <Icon className="h-4 w-4" />
                     <span>{item.label}</span>
-                    {item.badge && (
-                      <Badge tone="primary">{item.badge}</Badge>
-                    )}
                   </button>
                 );
               })}
+
+              <NavDropdown
+                label={t('nav.library')}
+                icon={BookOpen}
+                items={libraryMenuItems}
+                activeTab={activeTab}
+                onSelect={selectTab}
+              />
+
+              <div className="ml-auto" />
 
               <NavDropdown
                 label={t('nav.new')}
@@ -326,14 +348,6 @@ const Navbar: React.FC<NavbarProps> = ({
                 activeTab={activeTab}
                 onSelect={selectTab}
               />
-
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 whitespace-nowrap transition-colors ml-auto"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>{t('common.signOut')}</span>
-              </button>
             </div>
           </div>
         </nav>
@@ -371,16 +385,12 @@ const Navbar: React.FC<NavbarProps> = ({
                     >
                       <Icon className="h-5 w-5 mr-3" />
                       {item.label}
-                      {item.badge && (
-                        <span className="ml-2">
-                          <Badge tone="primary">{item.badge}</Badge>
-                        </span>
-                      )}
                     </button>
                   );
                 })}
 
                 {[
+                  { key: 'library', title: t('nav.library'), items: libraryMenuItems },
                   { key: 'new', title: t('nav.new'), items: createMenuItems },
                   { key: 'admin', title: t('nav.admin'), items: adminMenuItems },
                 ].filter((section) => section.items.length > 0).map((section) => (
@@ -412,6 +422,21 @@ const Navbar: React.FC<NavbarProps> = ({
                     })}
                   </div>
                 ))}
+
+                <button
+                  onClick={() => {
+                    setActiveTab?.('settings');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center w-full px-3 py-2 rounded-md text-base font-medium mt-2 border-t border-stone-200 pt-3 ${
+                    activeTab === 'settings'
+                      ? 'bg-primary text-white'
+                      : 'text-stone-700 hover:text-stone-900 hover:bg-stone-50'
+                  }`}
+                >
+                  <Settings className="h-5 w-5 mr-3" />
+                  {t('nav.settings')}
+                </button>
 
                 <button
                   onClick={() => {

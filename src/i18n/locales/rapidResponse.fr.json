@@ -177,7 +177,6 @@
   "casesPage": {
     "pageTitle": "Dossiers de réponse rapide",
     "pageSubtitle": "Suivez et gérez les dossiers d'intervention juridique urgents",
-    "orgAccessNotice": "Vous ne visualisez que les dossiers soumis par <strong>{{organization}}</strong>. Les dossiers d'autres organisations ne sont pas visibles.",
     "tabs": {
       "dashboard": "Tableau de bord",
       "allCases": "Tous les dossiers"

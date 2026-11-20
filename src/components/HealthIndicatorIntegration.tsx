@@ -5,7 +5,7 @@ import { Activity, TrendingUp, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '../lib/toast';
 import { supabase, handleSupabaseError } from '../lib/supabase';
-import { LoadingState, ErrorState, Button } from './ui';
+import { LoadingState, ErrorState, EmptyState, Button } from './ui';
 import { CHART_COLORS } from '../lib/chartColors';
 
 interface HealthData {
@@ -53,6 +53,13 @@ const HealthIndicatorIntegration: React.FC = () => {
   const [countries, setCountries] = React.useState<{id: string, name: string}[]>([]);
   const [selectedCountry, setSelectedCountry] = React.useState<string>('all');
   const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear());
+  // Years that actually have indicator data, newest first. Until it's known
+  // (null) no data fetch runs, so the panel doesn't flash "no data" for the
+  // current year before switching to the latest year that has data.
+  const [availableYears, setAvailableYears] = React.useState<number[] | null>(null);
+  // "No rows" is a normal state, not a failure: shown as an empty state,
+  // while `error` is reserved for requests that actually failed.
+  const [isEmpty, setIsEmpty] = React.useState(false);
   const [indicatorStats, setIndicatorStats] = React.useState<Record<string, {value: number, change: string}>>({
     maternal_mortality: {value: 0, change: '0%'},
     contraceptive_access: {value: 0, change: '0%'},
@@ -72,11 +79,35 @@ const HealthIndicatorIntegration: React.FC = () => {
 
   React.useEffect(() => {
     fetchCountries();
+    fetchAvailableYears();
   }, []);
 
   React.useEffect(() => {
+    if (availableYears === null) return;
     fetchHealthData();
-  }, [selectedIndicator, selectedCountry, selectedYear]);
+  }, [selectedIndicator, selectedCountry, selectedYear, availableYears]);
+
+  // Open on the most recent year that has data rather than always the
+  // current calendar year, which is usually still empty.
+  const fetchAvailableYears = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('health_indicators')
+        .select('year')
+        .order('year', { ascending: false });
+      if (error) throw error;
+      const years = Array.from(new Set((data ?? []).map((row) => row.year as number))).filter(Boolean);
+      if (years.length > 0) setSelectedYear(years[0]);
+      setAvailableYears(years);
+    } catch (err) {
+      console.error('Error fetching health indicator years:', err);
+      setAvailableYears([]);
+    }
+  };
+
+  const yearOptions = availableYears && availableYears.length > 0
+    ? availableYears
+    : Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
   const fetchCountries = async () => {
     try {
@@ -91,7 +122,7 @@ const HealthIndicatorIntegration: React.FC = () => {
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        setError(t('healthIndicators.noCountries'));
+        setCountries([]);
         return;
       }
 
@@ -108,6 +139,7 @@ const HealthIndicatorIntegration: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setIsEmpty(false);
 
       let query = supabase
         .from('health_indicators')
@@ -133,7 +165,7 @@ const HealthIndicatorIntegration: React.FC = () => {
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        setError(t('healthIndicators.noDataFilters'));
+        setIsEmpty(true);
         setHealthData([]);
         setCorrelationData([]);
         setIndicatorStats({
@@ -440,7 +472,7 @@ const HealthIndicatorIntegration: React.FC = () => {
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
               className="px-3 py-1.5 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+              {yearOptions.map(year => (
                 <option key={year} value={year}>{year}</option>
               ))}
             </select>
@@ -452,6 +484,17 @@ const HealthIndicatorIntegration: React.FC = () => {
         ) : error ? (
           <div className="flex justify-center items-center h-64">
             <ErrorState description={error} action={<Button onClick={fetchHealthData}>{t('healthIndicators.retry')}</Button>} />
+          </div>
+        ) : isEmpty ? (
+          <div className="flex justify-center items-center h-64">
+            <EmptyState
+              title={availableYears && availableYears.length === 0
+                ? t('healthIndicators.emptyTitleNoData')
+                : t('healthIndicators.emptyTitleFilters')}
+              description={availableYears && availableYears.length === 0
+                ? t('healthIndicators.emptyDescriptionNoData')
+                : t('healthIndicators.noDataFilters')}
+            />
           </div>
         ) : (
           <>

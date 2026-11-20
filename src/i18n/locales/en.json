@@ -77,7 +77,6 @@
     "uploadCase": "Upload Case",
     "moderation": "Moderation",
     "rapidResponse": "Rapid Response",
-    "rapidResponseBadge": "New",
     "submitCase": "Submit Case",
     "submitJudgment": "Submit Judgment",
     "bulkUploadCases": "Bulk Upload Cases",
@@ -89,6 +88,7 @@
     "admins": "Admins",
     "admin": "Admin",
     "new": "New",
+    "library": "Library",
     "scorecard": "Scorecard",
     "scorecardEditors": "Scorecard Editors",
     "settings": "Settings",
@@ -102,7 +102,12 @@
     "features": "Features",
     "focusAreas": "Focus Areas",
     "benefits": "Benefits",
-    "testimonials": "Testimonials",
+    "reach": "Where We Work",
+    "reachLoading": "Loading map",
+    "reachEmpty": "Countries will appear here as our network grows.",
+    "reachError": "The map could not be loaded right now. Please try again later.",
+    "reachCountriesCount_one": "Active in {{count}} country",
+    "reachCountriesCount_other": "Active in {{count}} countries",
     "heroBadge": "LIRA Programme",
     "heroTitlePrefix": "Advancing",
     "heroTypedText": "Reproductive Justice",
@@ -112,10 +117,10 @@
     "featuresHeading": { "title": "Powerful Features", "subtitle": "Everything you need to manage and analyze reproductive justice cases effectively." },
     "thematicHeading": { "title": "Our Thematic Focus", "subtitle": "Exploring key legal areas in reproductive justice across Africa." },
     "benefitsHeading": { "title": "Benefits", "subtitle": "Empowering different stakeholders in the pursuit of reproductive justice." },
-    "testimonialsHeading": { "title": "What Users Say", "subtitle": "Hear from our community of legal professionals, policymakers, and activists." },
+    "reachHeading": { "title": "Where We Work", "subtitle": "Countries where our network is documenting cases and where our members are based. Updated automatically." },
     "featureItems": [
       { "title": "Searchable Case Database", "description": "Access a comprehensive database of reproductive justice cases across Africa." },
-      { "title": "AI-Powered Analysis", "description": "Leverage advanced AI to identify legal trends and patterns." },
+      { "title": "Trend Analysis", "description": "Spot legal trends and patterns across countries, case types and outcomes." },
       { "title": "Interactive Visualizations", "description": "Explore data through dynamic charts and visual representations." },
       { "title": "Advanced Search", "description": "Find relevant cases and documents with powerful search capabilities." }
     ],
@@ -131,11 +136,6 @@
       { "title": "Legal Professionals", "description": "Access comprehensive case management tools and legal resources to effectively handle reproductive justice cases." },
       { "title": "Policymakers", "description": "Make informed decisions with data-driven insights and trend analysis across multiple jurisdictions." },
       { "title": "Activists", "description": "Stay informed about legal developments and collaborate with stakeholders to drive meaningful change." }
-    ],
-    "testimonialItems": [
-      { "quote": "ReproPulse has revolutionized how we manage and track reproductive justice cases across our network.", "author": "Dr. Jessica Oreoluwa Oga", "role": "Head of Regionalism, Afya Na Haki" },
-      { "quote": "The data insights provided by ReproPulse have been invaluable in shaping our advocacy strategy.", "author": "Mr. Ibrahim Nsereko", "role": "Head of Advocacy Capacity Enhancement, Afya Na Haki" },
-      { "quote": "A game-changer for reproductive rights activism in Africa. The collaborative features are exceptional.", "author": "Koomson Nana", "role": "Reproductive Rights Activist" }
     ]
   },
   "auth": {
@@ -181,6 +181,10 @@
     "pleaseSelectOrganization": "Please select your organization",
     "pleaseEnterOrganizationName": "Please enter your organization name",
     "pleaseAgreeToTerms": "Please agree to the Terms of Use and Privacy Policy to continue",
+    "country": "Country",
+    "countrySelectPlaceholder": "Select the country you work in",
+    "countryHelp": "Shown publicly only as a highlighted country on our map, never with your name.",
+    "pleaseSelectCountry": "Please select your country",
     "agreeToTermsPrefix": "I agree to the",
     "agreeToTermsAnd": "and",
     "termsOfUse": "Terms of Use",
@@ -212,6 +216,7 @@
     "title": "Dashboard",
     "subtitle": "An overview of cases, judgments, and recent activity.",
     "loading": "Loading dashboard…",
+    "vsLastMonth": "vs last month",
     "cases": "Cases",
     "judgments": "Judgments",
     "analytics": "Analytics",
@@ -221,7 +226,7 @@
   "cases": {
     "title": "Cases",
     "subtitle": "Browse and manage litigation cases submitted through the case upload form",
-    "orgScopeNotice": "You are viewing cases uploaded by {{organization}} only. Cases from other organizations are not visible.",
+    "ownCasesNotice": "As a partner-organization moderator, you see the cases you uploaded.",
     "searchLabel": "Search cases by title or summary",
     "searchPlaceholder": "Search cases by title or summary...",
     "litigation": "Litigation",

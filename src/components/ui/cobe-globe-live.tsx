@@ -5,7 +5,8 @@ export interface LiveMarker {
   id: string
   location: [number, number]
   country: string
-  caseCount: number
+  /** Omit to label the marker with the country name only (public pages). */
+  caseCount?: number
 }
 
 interface GlobeLiveProps {
@@ -200,7 +201,9 @@ export function GlobeLive({
               borderLeft: "1px solid rgba(255,255,255,0.2)",
             }}
           >
-            {m.country}: {m.caseCount.toLocaleString()} cases
+            {m.caseCount === undefined
+              ? m.country
+              : `${m.country}: ${m.caseCount.toLocaleString()} cases`}
           </span>
         </div>
       ))}

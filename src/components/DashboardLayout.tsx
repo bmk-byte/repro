@@ -19,9 +19,11 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error, setActiveTab }) => {
   const { t } = useTranslation();
-  const [changeStats, setChangeStats] = useState({
-    cases: '+0.0%',
-    judgments: '+0.0%'
+  // null = nothing real to compare against (no earlier data, or the lookup
+  // failed); the card then shows no change line instead of "+0.0%".
+  const [changeStats, setChangeStats] = useState<{ cases: number | null; judgments: number | null }>({
+    cases: null,
+    judgments: null,
   });
 
   React.useEffect(() => {
@@ -46,21 +48,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
         .lt('created_at', currentPeriodStart.toISOString());
 
       // Calculate percentage changes
-      const casesChange = prevTotalCount ? ((stats.totalCases - prevTotalCount) / prevTotalCount) * 100 : 0;
-      const judgmentsChange = prevJudgmentsCount ? ((stats.totalJudgments - prevJudgmentsCount) / prevJudgmentsCount) * 100 : 0;
-
-      // Format changes with + or - sign
       setChangeStats({
-        cases: `${casesChange >= 0 ? '+' : ''}${casesChange.toFixed(1)}%`,
-        judgments: `${judgmentsChange >= 0 ? '+' : ''}${judgmentsChange.toFixed(1)}%`
+        cases: prevTotalCount ? ((stats.totalCases - prevTotalCount) / prevTotalCount) * 100 : null,
+        judgments: prevJudgmentsCount ? ((stats.totalJudgments - prevJudgmentsCount) / prevJudgmentsCount) * 100 : null,
       });
     } catch (err) {
       handleQueryError(err);
       // Use default values if calculation fails
-      setChangeStats({
-        cases: '+0.0%',
-        judgments: '+0.0%'
-      });
+      setChangeStats({ cases: null, judgments: null });
     }
   };
 
@@ -85,14 +80,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ stats, loading, error
             <DashboardCard
               title={t('dashboard.cases')}
               value={stats.totalCases.toString()}
-              change={changeStats.cases}
+              changePercent={changeStats.cases}
+              changeLabel={t('dashboard.vsLastMonth')}
               type="cases"
               onClick={() => setActiveTab('cases')}
             />
             <DashboardCard
               title={t('dashboard.judgments')}
               value={stats.totalJudgments.toString()}
-              change={changeStats.judgments}
+              changePercent={changeStats.judgments}
+              changeLabel={t('dashboard.vsLastMonth')}
               type="judgments"
               onClick={() => setActiveTab('judgments')}
             />

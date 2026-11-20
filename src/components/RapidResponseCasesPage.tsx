@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, CircleAlert as AlertCircle, Download, FileSpreadsheet } from 'lucide-react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Search, Filter, Plus, TriangleAlert as AlertTriangle, FileText, ChevronDown, ChevronUp, X, Shield, Download, FileSpreadsheet } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { sanitizeOrFilterTerm } from '../lib/sanitize';
 import { toast } from '../lib/toast';
@@ -15,18 +15,6 @@ import { useModeratorStatus } from '../hooks/useModeratorStatus';
 import { can } from '../lib/permissions';
 import { LoadingState, Badge } from './ui';
 import type { BadgeProps } from './ui';
-
-const RESTRICTED_ORGANIZATIONS = [
-  'Women with a Mission',
-  'Islamic Women\'s Initiative for Justice Law and Peace',
-  'SPRINGS PUBLIC INTEREST HUB',
-  'Center for Health, Human Rights and Development',
-  'THE AFRICAN INSTITUTE FOR INVESTIGATIVE JOURNALISM',
-  'Centre for Women Justice Uganda',
-  'FEMME FORTE',
-  'Ubuntu Justice center',
-  'Dumaic Global Health'
-];
 
 const PAGE_SIZE = 50;
 
@@ -59,8 +47,6 @@ const RapidResponseCasesPage: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
   const [partnerOrganizations, setPartnerOrganizations] = useState<string[]>([]);
   const [countries, setCountries] = useState<{id: string, name: string}[]>([]);
-  const [userOrganization, setUserOrganization] = useState<string | null>(null);
-  const [accessScope, setAccessScope] = useState<'global' | 'organization'>('global');
 
   // Use the moderator status hook to check if the user is a moderator
   const { isModerator, isAdmin, loading: moderatorLoading, error: moderatorError } = useModeratorStatus();
@@ -81,27 +67,6 @@ const RapidResponseCasesPage: React.FC = () => {
       if (user) {
         setCurrentUserId(user.id);
 
-        // Fetch user's organization and access level
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('organization, email, is_moderator')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (profile) {
-          setUserOrganization(profile.organization);
-          const isAfyanahaki = profile.is_moderator && (profile.email?.endsWith('@afyanahaki.org') || false);
-
-          // If afyanahaki or not a moderator, user has global access
-          // If restricted organization moderator, user has organization-only access
-          if (isAfyanahaki || !profile.is_moderator) {
-            setAccessScope('global');
-          } else if (RESTRICTED_ORGANIZATIONS.includes(profile.organization || '')) {
-            setAccessScope('organization');
-          } else {
-            setAccessScope('global');
-          }
-        }
       }
     } catch (err) {
       console.error('Error fetching current user:', err);
@@ -235,15 +200,7 @@ const RapidResponseCasesPage: React.FC = () => {
         .eq('case_type', 'rapid-response')
         .eq('moderation_status', 'approved');
 
-      // Apply access control based on organization
-      if (isModerator && RESTRICTED_ORGANIZATIONS.includes(userOrganization || '')) {
-        // Restricted organization moderators can only see their own cases
-        query = query.eq('user_id', currentUserId);
-      } else if (!isModerator && currentUserId) {
-        // Regular users can only see their own cases
-        query = query.eq('user_id', currentUserId);
-      }
-      // afyanahaki.org moderators and other moderators see all cases (no additional filter needed)
+      // Which cases appear is decided by the database's access rules.
 
       // Apply filters
       if (filters.priority) {
@@ -1042,19 +999,6 @@ const RapidResponseCasesPage: React.FC = () => {
           <p className="mt-1 text-sm text-stone-500">
             {t('casesPage.pageSubtitle')}
           </p>
-          {accessScope === 'organization' && userOrganization && (
-            <div className="mt-3 p-3 bg-info-light border border-info/30 rounded-md flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-info-dark">
-                <Trans
-                  i18nKey="casesPage.orgAccessNotice"
-                  ns="rapidResponse"
-                  values={{ organization: userOrganization }}
-                  components={{ strong: <strong /> }}
-                />
-              </p>
-            </div>
-          )}
         </div>
 
         {!selectedCase && !showForm && (

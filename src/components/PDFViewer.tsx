@@ -7,7 +7,14 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import { getFreshFileUrl } from '../lib/storage';
 import { LoadingState } from './ui';
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+// Bundle the worker that matches the installed pdfjs-dist version. It
+// previously pointed at /pdf.worker.min.js, a file that never existed in
+// public/, so the server answered with the app's index.html and every PDF
+// preview failed to start its worker.
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url
+).toString();
 
 interface PDFViewerProps {
   fileUrl: string;

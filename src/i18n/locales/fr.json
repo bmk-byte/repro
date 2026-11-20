@@ -77,7 +77,6 @@
     "uploadCase": "Ajouter un dossier",
     "moderation": "Modération",
     "rapidResponse": "Réponse rapide",
-    "rapidResponseBadge": "Nouveau",
     "submitCase": "Soumettre un dossier",
     "submitJudgment": "Soumettre une décision",
     "bulkUploadCases": "Importation groupée de dossiers",
@@ -89,6 +88,7 @@
     "admins": "Administrateurs",
     "admin": "Admin",
     "new": "Nouveau",
+    "library": "Bibliothèque",
     "scorecard": "Tableau de bord",
     "scorecardEditors": "Éditeurs du tableau de bord",
     "settings": "Paramètres",
@@ -102,7 +102,12 @@
     "features": "Fonctionnalités",
     "focusAreas": "Axes thématiques",
     "benefits": "Avantages",
-    "testimonials": "Témoignages",
+    "reach": "Où nous intervenons",
+    "reachLoading": "Chargement de la carte",
+    "reachEmpty": "Les pays apparaîtront ici à mesure que notre réseau s'agrandit.",
+    "reachError": "La carte ne peut pas être chargée pour le moment. Veuillez réessayer plus tard.",
+    "reachCountriesCount_one": "Présent dans {{count}} pays",
+    "reachCountriesCount_other": "Présent dans {{count}} pays",
     "heroBadge": "Programme LIRA",
     "heroTitlePrefix": "Faire progresser",
     "heroTypedText": "la justice reproductive",
@@ -112,10 +117,10 @@
     "featuresHeading": { "title": "Fonctionnalités puissantes", "subtitle": "Tout ce dont vous avez besoin pour gérer et analyser efficacement les dossiers de justice reproductive." },
     "thematicHeading": { "title": "Nos axes thématiques", "subtitle": "Exploration des principaux domaines juridiques de la justice reproductive en Afrique." },
     "benefitsHeading": { "title": "Avantages", "subtitle": "Donner aux différentes parties prenantes les moyens d'agir pour la justice reproductive." },
-    "testimonialsHeading": { "title": "Ce que disent nos utilisateurs", "subtitle": "Découvrez les témoignages de notre communauté de juristes, décideurs politiques et militants." },
+    "reachHeading": { "title": "Où nous intervenons", "subtitle": "Pays où notre réseau documente des dossiers et où nos membres sont basés. Mis à jour automatiquement." },
     "featureItems": [
       { "title": "Base de données de dossiers consultable", "description": "Accédez à une base de données complète des dossiers de justice reproductive à travers l'Afrique." },
-      { "title": "Analyse assistée par IA", "description": "Exploitez une IA avancée pour identifier les tendances et schémas juridiques." },
+      { "title": "Analyse des tendances", "description": "Repérez les tendances et schémas juridiques par pays, type de dossier et résultat." },
       { "title": "Visualisations interactives", "description": "Explorez les données à travers des graphiques dynamiques et des représentations visuelles." },
       { "title": "Recherche avancée", "description": "Trouvez les dossiers et documents pertinents grâce à des fonctions de recherche puissantes." }
     ],
@@ -131,11 +136,6 @@
       { "title": "Professionnels du droit", "description": "Accédez à des outils complets de gestion de dossiers et à des ressources juridiques pour traiter efficacement les dossiers de justice reproductive." },
       { "title": "Décideurs politiques", "description": "Prenez des décisions éclairées grâce à des analyses de données et de tendances couvrant plusieurs juridictions." },
       { "title": "Militants", "description": "Restez informé des évolutions juridiques et collaborez avec les parties prenantes pour un changement significatif." }
-    ],
-    "testimonialItems": [
-      { "quote": "ReproPulse a révolutionné la façon dont nous gérons et suivons les dossiers de justice reproductive au sein de notre réseau.", "author": "Dr Jessica Oreoluwa Oga", "role": "Responsable régionale, Afya Na Haki" },
-      { "quote": "Les informations tirées des données de ReproPulse ont été précieuses pour orienter notre stratégie de plaidoyer.", "author": "M. Ibrahim Nsereko", "role": "Responsable du renforcement des capacités de plaidoyer, Afya Na Haki" },
-      { "quote": "Un tournant décisif pour le militantisme en faveur des droits reproductifs en Afrique. Les fonctionnalités collaboratives sont exceptionnelles.", "author": "Koomson Nana", "role": "Militante pour les droits reproductifs" }
     ]
   },
   "auth": {
@@ -181,6 +181,10 @@
     "pleaseSelectOrganization": "Veuillez sélectionner votre organisation",
     "pleaseEnterOrganizationName": "Veuillez saisir le nom de votre organisation",
     "pleaseAgreeToTerms": "Veuillez accepter les Conditions d'utilisation et la Politique de confidentialité pour continuer",
+    "country": "Pays",
+    "countrySelectPlaceholder": "Sélectionnez le pays où vous travaillez",
+    "countryHelp": "Affiché publiquement uniquement comme pays mis en évidence sur notre carte, jamais avec votre nom.",
+    "pleaseSelectCountry": "Veuillez sélectionner votre pays",
     "agreeToTermsPrefix": "J'accepte les",
     "agreeToTermsAnd": "et la",
     "termsOfUse": "Conditions d'utilisation",
@@ -212,6 +216,7 @@
     "title": "Tableau de bord",
     "subtitle": "Vue d'ensemble des dossiers, décisions et activités récentes.",
     "loading": "Chargement du tableau de bord…",
+    "vsLastMonth": "par rapport au mois dernier",
     "cases": "Dossiers",
     "judgments": "Décisions",
     "analytics": "Statistiques",
@@ -221,7 +226,7 @@
   "cases": {
     "title": "Dossiers",
     "subtitle": "Parcourez et gérez les dossiers de contentieux soumis via le formulaire de dépôt de dossier",
-    "orgScopeNotice": "Vous consultez uniquement les dossiers déposés par {{organization}}. Les dossiers d'autres organisations ne sont pas visibles.",
+    "ownCasesNotice": "En tant que modérateur d’une organisation partenaire, vous voyez les dossiers que vous avez téléversés.",
     "searchLabel": "Rechercher des dossiers par titre ou résumé",
     "searchPlaceholder": "Rechercher des dossiers par titre ou résumé...",
     "litigation": "Contentieux",

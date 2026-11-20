@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import { toast } from '../lib/toast';
-import { reportError } from '../lib/errorReporting';
 import DocumentModal from './DocumentModal';
 import CaseProgressTracker from './CaseProgressTracker';
 import { LoadingState } from './ui';
@@ -13,18 +12,6 @@ import PolicyContextCard from '../scorecard/components/PolicyContextCard';
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
 };
-
-const RESTRICTED_ORGANIZATIONS = [
-  'Women with a Mission',
-  'Islamic Women\'s Initiative for Justice Law and Peace',
-  'SPRINGS PUBLIC INTEREST HUB',
-  'Center for Health, Human Rights and Development',
-  'THE AFRICAN INSTITUTE FOR INVESTIGATIVE JOURNALISM',
-  'Centre for Women Justice Uganda',
-  'FEMME FORTE',
-  'Ubuntu Justice center',
-  'Dumaic Global Health'
-];
 
 interface RapidResponseCaseDetailsProps {
   caseId: string;
@@ -49,35 +36,9 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
-  const [userOrganization, setUserOrganization] = useState<string | null>(null);
 
   useEffect(() => {
-    const initializeAndFetch = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('organization, email, is_moderator')
-            .eq('id', user.id)
-            .maybeSingle();
-
-          if (profile) {
-            setUserOrganization(profile.organization);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        // Non-fatal: the case details themselves still load below via
-        // fetchCaseDetails(); this only affects org-restricted display
-        // logic, so no toast — but reported since it could otherwise mask
-        // a real access-control display bug.
-        reportError(error, { context: 'RapidResponseCaseDetails.fetchUserInfo', category: 'DATA' });
-      }
-      await fetchCaseDetails();
-    };
-
-    initializeAndFetch();
+    fetchCaseDetails();
   }, [caseId]);
 
   const fetchCaseDetails = async () => {
@@ -121,20 +82,10 @@ const RapidResponseCaseDetails: React.FC<RapidResponseCaseDetailsProps> = ({
         return;
       }
 
-      // Check authorization
-      if (isModerator && RESTRICTED_ORGANIZATIONS.includes(userOrganization || '')) {
-        // Restricted organization moderators can only see their own cases
-        if (data.user_id !== currentUserId) {
-          setAccessDenied(true);
-          return;
-        }
-      } else if (!isModerator && currentUserId) {
-        // Regular users can only see their own cases
-        if (data.user_id !== currentUserId) {
-          setAccessDenied(true);
-          return;
-        }
-      }
+      // Access is decided by the database's row-level security: a case the
+      // user may not read comes back empty (handled above). The page used to
+      // add its own organization checks on top, from an outdated copy of the
+      // partner list, which made it disagree with the Cases list.
 
       devLog('Case details fetched:', data);
       setCaseData(data);
