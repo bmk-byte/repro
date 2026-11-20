@@ -321,6 +321,11 @@ export async function fetchAllCountriesAnalysisData(): Promise<CountryAnalysisDa
   const { data: submissions, error: submissionsError } = await supabase
     .from('scorecard_submissions')
     .select('*, scorecard_pillar_results(*), scorecard_indicator_scores(*)')
+    // Public analysis shows published assessments only. Without this filter
+    // a signed-in scorecard editor (whose RLS allows every row) saw draft
+    // scores here and in the CSV/JSON exports, and anonymous visitors saw
+    // 'submitted' scores that were still under review.
+    .eq('status', 'published')
     .order('version', { ascending: false });
 
   if (submissionsError) throw submissionsError;
@@ -421,7 +426,12 @@ export interface RegionalAnalysisData {
 }
 
 export async function fetchRegionalAnalysisData(): Promise<RegionalAnalysisData[]> {
-  const analysisData = await fetchAllCountriesAnalysisData();
+  return buildRegionalAnalysis(await fetchAllCountriesAnalysisData());
+}
+
+// Pure grouping step, split out so a caller that already has the
+// per-country data (AnalysisPage) does not download it a second time.
+export function buildRegionalAnalysis(analysisData: CountryAnalysisData[]): RegionalAnalysisData[] {
 
   const regionMap = new Map<string, CountryAnalysisData[]>();
   analysisData.forEach((data) => {
@@ -453,6 +463,7 @@ export async function fetchRegionalAnalysisData(): Promise<RegionalAnalysisData[
 
     submissionsWithData.forEach((d) => {
       d.pillarResults.forEach((pr) => {
+        if (pr.average_score == null) return;
         if (!pillarScoresMap.has(pr.pillar_id)) {
           pillarScoresMap.set(pr.pillar_id, []);
         }
@@ -544,6 +555,7 @@ export async function fetchCountryDetailData(countryId: string): Promise<Country
       .from('scorecard_submissions')
       .select('*, scorecard_pillar_results(*), scorecard_indicator_scores(*)')
       .eq('country_id', countryId)
+      .eq('status', 'published')
       .order('version', { ascending: false })
       .limit(1)
       .maybeSingle(),

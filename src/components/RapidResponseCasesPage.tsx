@@ -128,7 +128,7 @@ const RapidResponseCasesPage: React.FC = () => {
         .order('full_name');
 
       if (error) throw error;
-      setTeamMembers(data || []);
+      setTeamMembers((data || []).map((p) => ({ id: p.id, name: p.full_name ?? '' })));
     } catch (err) {
       console.error('Error fetching team members:', err);
       reportError(err, { context: 'fetchTeamMembers', category: 'DATA' });

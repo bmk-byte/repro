@@ -38,7 +38,7 @@ const ScorecardEditorAdminPanel: React.FC = () => {
     if (!term) return editors;
     return editors.filter((editor) =>
       (editor.full_name || '').toLowerCase().includes(term) ||
-      editor.email.toLowerCase().includes(term) ||
+      (editor.email ?? '').toLowerCase().includes(term) ||
       (editor.organization || '').toLowerCase().includes(term)
     );
   }, [editors, searchTerm]);

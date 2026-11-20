@@ -133,8 +133,8 @@ const ResourcesPage: React.FC = () => {
     const term = searchTerm.toLowerCase();
     return resources.filter((resource) => {
       const matchesSearch =
-        resource.title.toLowerCase().includes(term) ||
-        resource.description.toLowerCase().includes(term) ||
+        (resource.title ?? '').toLowerCase().includes(term) ||
+        (resource.description ?? '').toLowerCase().includes(term) ||
         resource.tags.some((tag) => tag.toLowerCase().includes(term));
       const matchesType = selectedType === 'all' || resource.resource_type === selectedType;
       return matchesSearch && matchesType;

@@ -157,7 +157,7 @@ const ModeratorAdminPanel: React.FC = () => {
     if (!term) return moderators;
     return moderators.filter((mod) =>
       (mod.full_name || '').toLowerCase().includes(term) ||
-      mod.email.toLowerCase().includes(term) ||
+      (mod.email ?? '').toLowerCase().includes(term) ||
       (mod.organization || '').toLowerCase().includes(term)
     );
   }, [moderators, searchTerm]);

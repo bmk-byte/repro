@@ -8,7 +8,7 @@ export function normalizeScore(score: number, maxScore: number = 4): number {
 export function calculatePillarAverage(scores: ScorecardIndicatorScore[]): number {
   if (scores.length === 0) return 0;
 
-  const sum = scores.reduce((acc, score) => acc + score.normalized_score, 0);
+  const sum = scores.reduce((acc, score) => acc + (score.normalized_score ?? 0), 0);
   return sum / scores.length;
 }
 
@@ -21,7 +21,7 @@ export function calculateWeightedContribution(
 
 export function calculateCompositeScore(pillarResults: ScorecardPillarResultRow[]): number {
   return pillarResults.reduce(
-    (sum, result) => sum + result.weighted_contribution,
+    (sum, result) => sum + (result.weighted_contribution ?? 0),
     0
   );
 }

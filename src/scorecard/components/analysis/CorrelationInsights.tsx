@@ -42,7 +42,7 @@ export function CorrelationInsights({ data, indicators, pillars }: CorrelationIn
           const pr1 = countryData.pillarResults.find((pr) => pr.pillar_id === pillar1.id);
           const pr2 = countryData.pillarResults.find((pr) => pr.pillar_id === pillar2.id);
 
-          if (pr1 && pr2) {
+          if (pr1?.average_score != null && pr2?.average_score != null) {
             values1.push(pr1.average_score);
             values2.push(pr2.average_score);
           }
@@ -75,7 +75,7 @@ export function CorrelationInsights({ data, indicators, pillars }: CorrelationIn
           );
           const composite = countryData.submission?.composite_score;
 
-          if (score && composite !== null && composite !== undefined) {
+          if (score?.normalized_score != null && composite !== null && composite !== undefined) {
             indicatorScores.push(score.normalized_score);
             compositeScores.push(composite);
           }

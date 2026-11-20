@@ -10,7 +10,10 @@
     "retryConnection": "Retry Connection",
     "retryingConnection": "Retrying connection... Attempt {{count}} of {{max}}",
     "error": "Error:",
-    "statsLoadFailed": "Couldn't load dashboard summary numbers. The rest of the dashboard is unaffected."
+    "statsLoadFailed": "Couldn't load dashboard summary numbers. The rest of the dashboard is unaffected.",
+    "pageUnavailable": "This page isn't available",
+    "pageUnavailableDescription": "The page may have moved, or your account may not have access to it.",
+    "backToDashboard": "Back to dashboard"
   },
   "profileSettingsForm": {
     "loadFailed": "Failed to load your profile. Some fields may be out of date — try refreshing the page.",
@@ -148,7 +151,10 @@
   "errorBoundary": {
     "title": "Something went wrong",
     "description": "The dashboard encountered an unexpected error. Reloading the page should fix it.",
-    "reload": "Reload dashboard"
+    "reload": "Reload dashboard",
+    "sectionTitle": "This section couldn't load",
+    "sectionDescription": "The rest of the dashboard still works. Try again, or switch to another tab.",
+    "tryAgain": "Try again"
   },
   "pdfViewer": {
     "failedToLoad": "Failed to load PDF document. Please try again later or download the file.",

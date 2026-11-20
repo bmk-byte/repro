@@ -19,6 +19,8 @@ interface ValidationState {
   email: string;
   password: string;
   organization: string;
+  customOrganization?: string;
+  terms?: string;
 }
 
 // Login/signup go through the auth-login/auth-signup edge functions rather
@@ -134,6 +136,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   const handleOrganizationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedOrganization(value);
+    setValidationErrors(prev => ({ ...prev, organization: '', customOrganization: '' }));
 
     if (value === OTHER_ORGANIZATION_VALUE) {
       setShowCustomOrganization(true);
@@ -147,6 +150,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
   const handleCustomOrganizationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCustomOrganization(value);
+    if (value.trim()) setValidationErrors(prev => ({ ...prev, customOrganization: '' }));
     setOrganization(value.trim());
   };
 
@@ -204,31 +208,31 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
 
     const isPasswordValid = handlePasswordValidation();
 
-    // Validate organization is required during signup
-    if (isSignUp && !selectedOrganization) {
-      toast.error(t('auth.pleaseSelectOrganization'));
-      setShakeAnimation(true);
-      setTimeout(() => setShakeAnimation(false), 500);
-      return;
-    }
+    // Sign-up checks run together (not return-on-first-failure) so every
+    // problem is shown inline at once, rather than one toast per attempt.
+    const signUpErrors = {
+      organization: isSignUp && !selectedOrganization ? t('auth.pleaseSelectOrganization') : '',
+      customOrganization:
+        isSignUp && selectedOrganization === OTHER_ORGANIZATION_VALUE && !customOrganization.trim()
+          ? t('auth.pleaseEnterOrganizationName')
+          : '',
+      terms: isSignUp && !agreedToTerms ? t('auth.pleaseAgreeToTerms') : '',
+    };
+    setValidationErrors(prev => ({ ...prev, ...signUpErrors }));
+    const signUpValid = !signUpErrors.organization && !signUpErrors.customOrganization && !signUpErrors.terms;
 
-    // Validate custom organization if "Other" is selected
-    if (isSignUp && selectedOrganization === OTHER_ORGANIZATION_VALUE && !customOrganization.trim()) {
-      toast.error(t('auth.pleaseEnterOrganizationName'));
-      setShakeAnimation(true);
-      setTimeout(() => setShakeAnimation(false), 500);
-      return;
-    }
-
-    // Require agreement to the Terms of Use and Privacy Policy before an account is created.
-    if (isSignUp && !agreedToTerms) {
-      toast.error(t('auth.pleaseAgreeToTerms'));
-      setShakeAnimation(true);
-      setTimeout(() => setShakeAnimation(false), 500);
-      return;
-    }
-
-    if (!isEmailValid || !isPasswordValid) {
+    if (!isEmailValid || !isPasswordValid || !signUpValid) {
+      // Move focus to the first field that needs attention.
+      const firstInvalid = [
+        !isEmailValid && 'email',
+        !isPasswordValid && 'password',
+        signUpErrors.organization && 'organization',
+        signUpErrors.customOrganization && 'customOrganization',
+        signUpErrors.terms && 'agreeToTerms',
+      ].find(Boolean);
+      if (firstInvalid) {
+        requestAnimationFrame(() => document.getElementById(firstInvalid as string)?.focus());
+      }
       // Trigger shake animation for invalid form
       setShakeAnimation(true);
       setTimeout(() => setShakeAnimation(false), 500);
@@ -405,6 +409,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
           >
             <Card padding="none" className="p-6 sm:p-10">
                 <motion.form
+                    noValidate
                     className="space-y-6"
                     onSubmit={handleAuth}
                     animate={shakeAnimation ? { x: [0, -10, 10, -10, 10, 0] } : {}}
@@ -475,6 +480,7 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                             required
                             value={customOrganization}
                             onChange={handleCustomOrganizationChange}
+                            error={validationErrors.customOrganization}
                             placeholder={t('auth.organizationNamePlaceholder')}
                             rightElement={
                               <HelpCircle
@@ -588,11 +594,18 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                   )}
 
                   {!isForgotPassword && isSignUp && (
+                    <div>
                     <label className="flex items-start gap-2 text-sm text-stone-600">
                       <input
+                        id="agreeToTerms"
                         type="checkbox"
                         checked={agreedToTerms}
-                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        aria-invalid={!!validationErrors.terms}
+                        aria-describedby={validationErrors.terms ? 'agreeToTerms-error' : undefined}
+                        onChange={(e) => {
+                          setAgreedToTerms(e.target.checked);
+                          if (e.target.checked) setValidationErrors(prev => ({ ...prev, terms: '' }));
+                        }}
                         className="mt-0.5 rounded border-stone-300 text-primary focus:ring-primary"
                       />
                       <span>
@@ -606,6 +619,12 @@ const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'signIn' }
                         </a>
                       </span>
                     </label>
+                    {validationErrors.terms && (
+                      <p id="agreeToTerms-error" role="alert" className="mt-1 text-sm text-danger">
+                        {validationErrors.terms}
+                      </p>
+                    )}
+                    </div>
                   )}
 
                   <Button type="submit" loading={loading} size="lg" className="w-full">

@@ -191,7 +191,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                   <div>
                     <label className="text-sm font-medium text-stone-500">{t('judgments.categories')}</label>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {judgment.case_categories.map((category: string, idx: number) => (
+                      {(judgment.case_categories ?? []).map((category: string, idx: number) => (
                         <span 
                           key={idx}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-light text-info-dark"
@@ -219,7 +219,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                   <div className="mb-4">
                     <label className="text-sm font-medium text-stone-500">{t('judgments.litigants')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
-                      {judgment.litigants.map((litigant: string, idx: number) => (
+                      {(judgment.litigants ?? []).map((litigant: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{litigant}</li>
                       ))}
                     </ul>
@@ -229,7 +229,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                   <div>
                     <label className="text-sm font-medium text-stone-500">{t('judgments.defendingInstitutions')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
-                      {judgment.defending_institutions.map((institution: string, idx: number) => (
+                      {(judgment.defending_institutions ?? []).map((institution: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{institution}</li>
                       ))}
                     </ul>
@@ -263,7 +263,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                       <div className="mt-2">
                         <label className="text-sm font-medium text-stone-500">{t('judgments.regionalBodies')}</label>
                         <ul className="mt-1 list-disc list-inside space-y-1">
-                          {judgment.regional_bodies.map((body: string, idx: number) => (
+                          {(judgment.regional_bodies ?? []).map((body: string, idx: number) => (
                             <li key={idx} className="text-stone-700">{body}</li>
                           ))}
                         </ul>
@@ -295,7 +295,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                   <div className="mb-2">
                     <label className="text-sm font-medium text-stone-500">{t('judgments.domesticLaws')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
-                      {judgment.domestic_laws.map((law: string, idx: number) => (
+                      {(judgment.domestic_laws ?? []).map((law: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{law}</li>
                       ))}
                     </ul>
@@ -306,7 +306,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                   <div className="mb-2">
                     <label className="text-sm font-medium text-stone-500">{t('judgments.internationalLaws')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
-                      {judgment.international_laws.map((law: string, idx: number) => (
+                      {(judgment.international_laws ?? []).map((law: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{law}</li>
                       ))}
                     </ul>
@@ -317,7 +317,7 @@ const JudgmentDetails: React.FC<JudgmentDetailsProps> = ({
                   <div className="mb-2">
                     <label className="text-sm font-medium text-stone-500">{t('judgments.protocols')}</label>
                     <ul className="mt-1 list-disc list-inside space-y-1">
-                      {judgment.protocols.map((protocol: string, idx: number) => (
+                      {(judgment.protocols ?? []).map((protocol: string, idx: number) => (
                         <li key={idx} className="text-stone-700">{protocol}</li>
                       ))}
                     </ul>

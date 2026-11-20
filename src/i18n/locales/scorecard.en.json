@@ -28,6 +28,7 @@
     "equityPenaltyApplied": "equity penalty applied"
   },
   "countryDetail": {
+    "evidencePendingNote": "Evidence is still being attached for {{missing}} of {{scored}} scored indicators. These scores may be revised as sources are added.",
     "pillarLevel": {
       "high": "Strong",
       "medium": "Moderate",
@@ -153,6 +154,8 @@
     "indicatorsInPillar": "Indicators in This Pillar ({{count}})"
   },
   "publishConfirmation": {
+    "evidenceMissingLabel": "Evidence missing:",
+    "evidenceMissingDetail": "{{missing}} of {{scored}} scored indicators have no completed evidence. Public readers will see a notice that evidence is pending.",
     "title": "Publish Scorecard",
     "confirmPublish": "Confirm Publish",
     "willMakeVisibleStrong": "Publishing this scorecard will make it visible to all users",
@@ -249,6 +252,9 @@
     "region": "Region"
   },
   "crossCountryComparison": {
+    "exportSelected": "Export selected (CSV)",
+    "clearSelection": "Clear selection",
+    "selectAll": "Select all countries",
     "heading": "Cross-Country Comparison",
     "subheading": "Compare performance across {{count}} countries",
     "exportData": "Export Data",
@@ -285,6 +291,10 @@
     "updating": "Updating...",
     "subheading": "Country alignment with Article 14(2)(c) on safe abortion — published assessments only.",
     "copyToClipboard": "Copy to clipboard",
+    "export": "Export",
+    "csvDescription": "Spreadsheet of every country, pillar and indicator",
+    "jsonDescription": "Full dataset for analysts and developers",
+    "copyDescription": "Paste the table straight into a spreadsheet or document",
     "copied": "Copied!",
     "copy": "Copy",
     "exportAsJson": "Export as JSON",

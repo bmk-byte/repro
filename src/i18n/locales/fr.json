@@ -88,6 +88,7 @@
     "moderators": "Modérateurs",
     "admins": "Administrateurs",
     "admin": "Admin",
+    "new": "Nouveau",
     "scorecard": "Tableau de bord",
     "scorecardEditors": "Éditeurs du tableau de bord",
     "settings": "Paramètres",
@@ -349,7 +350,7 @@
     "newResourceAdded": "Une nouvelle ressource a été ajoutée"
   },
   "footer": {
-    "copyright": "© 2025 Programme LIRA, Afya na Haki",
+    "copyright": "© {{year}} Programme LIRA, Afya na Haki",
     "linkedinAria": "Visitez notre page LinkedIn",
     "facebookAria": "Visitez notre page Facebook",
     "twitterAria": "Visitez notre page Twitter",

@@ -535,7 +535,7 @@ const LawsRepository = () => {
       .map(([country, docs]) => {
         const filteredDocs = docs.filter(doc =>
           (!selectedType || doc.type === selectedType) &&
-          (!searchTerm || doc.title.toLowerCase().includes(searchTerm.toLowerCase()))
+          (!searchTerm || (doc.title ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
         );
         return { country, filteredDocs };
       })

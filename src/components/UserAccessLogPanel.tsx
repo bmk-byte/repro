@@ -49,7 +49,7 @@ const UserAccessLogPanel: React.FC = () => {
     if (!term) return logs;
     return logs.filter((log) =>
       (log.full_name || '').toLowerCase().includes(term) ||
-      log.email.toLowerCase().includes(term) ||
+      (log.email ?? '').toLowerCase().includes(term) ||
       (log.organization || '').toLowerCase().includes(term)
     );
   }, [logs, searchTerm]);

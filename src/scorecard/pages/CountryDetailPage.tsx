@@ -164,7 +164,7 @@ function PillarSection({ pillar, pillarResult, indicators, indicatorScores }: Pi
                           {indicator.code}
                         </span>
                         {indScore && (
-                          <RawScoreDots score={indScore.score} max={indicator.max_score} />
+                          <RawScoreDots score={indScore.score ?? 0} max={indicator.max_score} />
                         )}
                         {!indScore && (
                           <span className="text-xs text-stone-400">{t('countryDetail.notScored')}</span>
@@ -287,7 +287,7 @@ export default function CountryDetailPage() {
   const { country, submission, pillarResults, indicatorScores, pillars, indicators } = data;
 
   const totalIndicators = indicators.length;
-  const scoredIndicators = indicatorScores.filter((s) => s.score > 0).length;
+  const scoredIndicators = indicatorScores.filter((s) => (s.score ?? 0) > 0).length;
   const evidencedIndicators = indicatorScores.filter((s) => s.evidence_complete).length;
 
   return (
@@ -348,6 +348,20 @@ export default function CountryDetailPage() {
               <AlertCircle className="w-4 h-4 text-warning-dark flex-shrink-0 mt-0.5" />
               <p className="text-sm text-warning-dark">
                 {t('countryDetail.equityPenaltyNote')}
+              </p>
+            </div>
+          )}
+
+          {/* Tells readers when published scores aren't yet backed by
+              attached evidence, so they can weigh them accordingly. */}
+          {submission && scoredIndicators > 0 && evidencedIndicators < scoredIndicators && (
+            <div className="mt-4 flex items-start gap-2 p-3 bg-stone-50 border border-stone-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-stone-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-stone-700">
+                {t('countryDetail.evidencePendingNote', {
+                  missing: scoredIndicators - evidencedIndicators,
+                  scored: scoredIndicators,
+                })}
               </p>
             </div>
           )}

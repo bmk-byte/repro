@@ -305,7 +305,7 @@ const CaseDetails: React.FC<CaseDetailsProps> = ({
                   <div>
                     <label className="text-sm font-medium text-stone-500">{t('cases.categories')}</label>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {caseData.case_categories.map((category: string, idx: number) => (
+                      {(caseData.case_categories ?? []).map((category: string, idx: number) => (
                         <span 
                           key={idx}
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(category)}`}

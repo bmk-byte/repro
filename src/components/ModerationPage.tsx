@@ -533,12 +533,7 @@ const ModerationPage = () => {
           // The database trigger will handle moving the data to the appropriate table
           devLog(`Approving submission with ID ${id} from table ${tableName}`);
           
-          const updateData: any = { status };
-          
-          // Add feedback if provided for rejected submissions
-          if (status === 'rejected' && feedback) {
-            updateData.feedback = feedback;
-          }
+          const updateData = { status };
           
           await queryWithRetry(async () => {
             const { error } = await supabase

@@ -27,12 +27,12 @@ export function exportToCSV(data: CountryAnalysisData[], pillars: Pillar[], indi
 
     pillars.forEach((pillar) => {
       const pillarResult = countryData.pillarResults.find((pr) => pr.pillar_id === pillar.id);
-      row.push(pillarResult?.average_score.toFixed(2) || 'N/A');
+      row.push(pillarResult?.average_score?.toFixed(2) ?? 'N/A');
     });
 
     indicators.forEach((indicator) => {
       const score = countryData.indicatorScores.find((s) => s.indicator_id === indicator.id);
-      row.push(score?.normalized_score.toFixed(2) || 'N/A');
+      row.push(score?.normalized_score?.toFixed(2) ?? 'N/A');
     });
 
     return row;

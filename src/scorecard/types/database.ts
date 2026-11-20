@@ -49,8 +49,8 @@ export interface ScorecardIndicatorScore {
   id: string;
   submission_id: string;
   indicator_id: string;
-  score: number;
-  normalized_score: number;
+  score: number | null;
+  normalized_score: number | null;
   evidence_notes: string | null;
   evidence_complete: boolean;
   last_edited_by: string | null;
@@ -61,8 +61,8 @@ export interface ScorecardPillarResultRow {
   id: string;
   submission_id: string;
   pillar_id: string;
-  average_score: number;
-  weighted_contribution: number;
+  average_score: number | null;
+  weighted_contribution: number | null;
   updated_at: string;
 }
 

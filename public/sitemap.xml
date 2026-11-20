@@ -6,7 +6,7 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://repropulseafyanahaki.org/</loc>
+    <loc>https://www.repropulse.com/</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- About page -->
   <url>
-    <loc>https://repropulseafyanahaki.org/about</loc>
+    <loc>https://www.repropulse.com/about</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -22,28 +22,28 @@
 
   <!-- Main sections -->
   <url>
-    <loc>https://repropulseafyanahaki.org/cases</loc>
+    <loc>https://www.repropulse.com/cases</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://repropulseafyanahaki.org/judgments</loc>
+    <loc>https://www.repropulse.com/judgments</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://repropulseafyanahaki.org/laws</loc>
+    <loc>https://www.repropulse.com/laws</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://repropulseafyanahaki.org/resources</loc>
+    <loc>https://www.repropulse.com/resources</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -51,14 +51,14 @@
 
   <!-- Submission pages -->
   <url>
-    <loc>https://repropulseafyanahaki.org/submit-case</loc>
+    <loc>https://www.repropulse.com/submit-case</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://repropulseafyanahaki.org/submit-judgment</loc>
+    <loc>https://www.repropulse.com/submit-judgment</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -66,7 +66,7 @@
 
   <!-- Contact page -->
   <url>
-    <loc>https://repropulseafyanahaki.org/contact</loc>
+    <loc>https://www.repropulse.com/contact</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

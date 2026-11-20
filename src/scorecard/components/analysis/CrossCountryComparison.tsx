@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronUp, ChevronDown, ChevronRight, Download } from 'lucide-react';
 import type { CountryAnalysisData } from '../../lib/api';
@@ -9,7 +9,8 @@ import { Badge, Button } from '../../../components/ui';
 interface CrossCountryComparisonProps {
   data: CountryAnalysisData[];
   pillars: Pillar[];
-  onExport: () => void;
+  /** Exports the given countries as CSV. */
+  onExport: (countryIds: string[]) => void;
 }
 
 type SortField = 'country' | 'region' | 'composite' | 'tier' | string;
@@ -114,18 +115,16 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
             {t('crossCountryComparison.subheading', { count: filteredData.length })}
           </p>
         </div>
-        <Button onClick={onExport} icon={<Download className="w-4 h-4" />}>
-          {t('crossCountryComparison.exportData')}
-        </Button>
       </div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-stone-200">
           <thead className="bg-stone-50">
             <tr>
-              <th className="px-4 py-3 text-left">
+              <th className="sticky left-0 z-20 w-12 min-w-[3rem] bg-stone-50 px-4 py-3 text-left">
                 <input
                   type="checkbox"
+                  aria-label={t('crossCountryComparison.selectAll')}
                   checked={selectedCountries.size === filteredData.length && filteredData.length > 0}
                   onChange={(e) => {
                     if (e.target.checked) {
@@ -138,7 +137,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                 />
               </th>
               <th
-                className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
+                className="sticky left-12 z-20 bg-stone-50 px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100 shadow-[inset_-1px_0_0_theme(colors.stone.200)]"
                 onClick={() => handleSort('country')}
               >
                 <div className="flex items-center gap-1">
@@ -176,13 +175,16 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
               {pillars.map((pillar) => (
                 <th
                   key={pillar.id}
-                  className="px-4 py-3 text-left text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
+                  className="px-4 py-3 text-left align-top text-xs font-medium text-stone-700 uppercase tracking-wider cursor-pointer hover:bg-stone-100"
                   onClick={() => handleSort(pillar.id)}
                   title={pillar.title}
                 >
                   <div className="flex items-center gap-1">
                     {pillar.code}
                     <SortIcon field={pillar.id} />
+                  </div>
+                  <div className="mt-0.5 w-28 line-clamp-2 normal-case tracking-normal font-normal text-stone-500">
+                    {pillar.title}
                   </div>
                 </th>
               ))}
@@ -196,21 +198,26 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                 onClick={() => navigate(`/scorecard/analysis/country/${countryData.country.id}`)}
               >
                 <td
-                  className="px-4 py-3"
+                  className="sticky left-0 z-10 w-12 min-w-[3rem] bg-white group-hover:bg-primary-50 px-4 py-3 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <input
                     type="checkbox"
+                    aria-label={countryData.country.name}
                     checked={selectedCountries.has(countryData.country.id)}
                     onChange={() => toggleCountrySelection(countryData.country.id)}
                     className="rounded"
                   />
                 </td>
-                <td className="px-4 py-3 text-sm font-medium text-stone-900">
-                  <div className="flex items-center gap-1.5">
+                <td className="sticky left-12 z-10 bg-white group-hover:bg-primary-50 px-4 py-3 text-sm font-medium text-stone-900 transition-colors shadow-[inset_-1px_0_0_theme(colors.stone.200)]">
+                  <Link
+                    to={`/scorecard/analysis/country/${countryData.country.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1.5 rounded hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
                     {countryData.country.name}
-                    <ChevronRight className="w-3.5 h-3.5 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-primary-400 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity" />
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-sm text-stone-600">
                   {countryData.country.region}
@@ -244,7 +251,7 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
                   );
                   return (
                     <td key={pillar.id} className="px-4 py-3 text-sm">
-                      {pillarResult ? (
+                      {pillarResult?.average_score != null ? (
                         <div className="flex items-center gap-2">
                           <div
                             className="h-2 rounded-full bg-primary-200"
@@ -274,10 +281,18 @@ export function CrossCountryComparison({ data, pillars, onExport }: CrossCountry
       </div>
 
       {selectedCountries.size > 0 && (
-        <div className="mt-4 p-4 bg-primary-50 rounded-lg">
-          <p className="text-sm text-primary-900">
+        <div className="sticky bottom-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary-50 p-4 shadow-sm">
+          <p className="text-sm font-medium text-primary-900">
             {t('crossCountryComparison.countriesSelected', { count: selectedCountries.size })}
           </p>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={() => setSelectedCountries(new Set())}>
+              {t('crossCountryComparison.clearSelection')}
+            </Button>
+            <Button onClick={() => onExport([...selectedCountries])} icon={<Download className="w-4 h-4" />}>
+              {t('crossCountryComparison.exportSelected')}
+            </Button>
+          </div>
         </div>
       )}
     </div>

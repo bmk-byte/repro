@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, FileJson, Copy, Check, AlertCircle, RefreshCw, Flag, CheckCircle2, ListChecks, Layers } from 'lucide-react';
+import { Download, FileJson, Copy, AlertCircle, RefreshCw, Flag, CheckCircle2, ListChecks, Layers } from 'lucide-react';
 import { Button, Breadcrumbs, KpiCard, Tabs } from '../../components/ui';
 import { PublicScorecardChrome } from '../components/PublicScorecardChrome';
 import { CrossCountryComparison } from '../components/analysis/CrossCountryComparison';
@@ -10,7 +10,7 @@ import { RegionalAnalysis } from '../components/analysis/RegionalAnalysis';
 import { CorrelationInsights } from '../components/analysis/CorrelationInsights';
 import {
   fetchAllCountriesAnalysisData,
-  fetchRegionalAnalysisData,
+  buildRegionalAnalysis,
   fetchPillars,
   fetchIndicators,
   type CountryAnalysisData,
@@ -18,6 +18,8 @@ import {
 } from '../lib/api';
 import type { ScorecardPillar as Pillar, ScorecardIndicator as Indicator } from '../types/database';
 import { exportToCSV, exportToJSON, downloadCSV, copyToClipboard } from '../lib/export';
+import { ExportMenu } from '../components/ExportMenu';
+import { toast } from '../../lib/toast';
 import { AnalysisSkeleton } from '../components/SkeletonLoader';
 
 type TabType = 'comparison' | 'indicator' | 'regional' | 'correlation';
@@ -43,7 +45,6 @@ export default function AnalysisPage() {
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [indicators, setIndicators] = useState<Indicator[]>([]);
 
-  const [copied, setCopied] = useState(false);
   const [liveUpdate, setLiveUpdate] = useState(false);
   const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -51,16 +52,15 @@ export default function AnalysisPage() {
     try {
       if (!silent) setLoading(true);
       setError(null);
-      const [countriesAnalysis, regionalAnalysis, pillarsData, indicatorsData] =
+      const [countriesAnalysis, pillarsData, indicatorsData] =
         await Promise.all([
           fetchAllCountriesAnalysisData(),
-          fetchRegionalAnalysisData(),
           fetchPillars(),
           fetchIndicators(),
         ]);
 
       setCountriesData(countriesAnalysis);
-      setRegionalData(regionalAnalysis);
+      setRegionalData(buildRegionalAnalysis(countriesAnalysis));
       setPillars(pillarsData);
       setIndicators(indicatorsData);
     } catch (err) {
@@ -96,9 +96,15 @@ export default function AnalysisPage() {
     };
   }, [loadAnalysisData]);
 
-  const handleExportCSV = () => {
-    const csv = exportToCSV(countriesData, pillars, indicators);
-    downloadCSV(csv, `maputo-scorecard-analysis-${new Date().toISOString().split('T')[0]}.csv`);
+  // With countryIds, exports only those countries (the comparison table's
+  // "Export selected" action); otherwise exports every country.
+  const handleExportCSV = (countryIds?: string[]) => {
+    const rows = countryIds?.length
+      ? countriesData.filter((d) => countryIds.includes(d.country.id))
+      : countriesData;
+    const csv = exportToCSV(rows, pillars, indicators);
+    const suffix = countryIds?.length ? '-selected' : '';
+    downloadCSV(csv, `maputo-scorecard-analysis${suffix}-${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handleExportJSON = () => {
@@ -121,8 +127,7 @@ export default function AnalysisPage() {
   const handleCopyData = async () => {
     const csv = exportToCSV(countriesData, pillars, indicators);
     await copyToClipboard(csv);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    toast.success(t('analysisPage.copied'));
   };
 
   if (loading) {
@@ -203,31 +208,32 @@ export default function AnalysisPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleCopyData}
-                variant="secondary"
-                title={t('analysisPage.copyToClipboard')}
-                icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              >
-                {copied ? t('analysisPage.copied') : t('analysisPage.copy')}
-              </Button>
-              <Button
-                onClick={handleExportJSON}
-                variant="secondary"
-                title={t('analysisPage.exportAsJson')}
-                icon={<FileJson className="w-4 h-4" />}
-              >
-                {t('analysisPage.json')}
-              </Button>
-              <Button
-                onClick={handleExportCSV}
-                title={t('analysisPage.exportAsCsv')}
-                icon={<Download className="w-4 h-4" />}
-              >
-                {t('analysisPage.csv')}
-              </Button>
-            </div>
+            <ExportMenu
+              label={t('analysisPage.export')}
+              options={[
+                {
+                  key: 'csv',
+                  label: t('analysisPage.exportAsCsv'),
+                  description: t('analysisPage.csvDescription'),
+                  icon: <Download className="w-4 h-4" />,
+                  onSelect: () => handleExportCSV(),
+                },
+                {
+                  key: 'json',
+                  label: t('analysisPage.exportAsJson'),
+                  description: t('analysisPage.jsonDescription'),
+                  icon: <FileJson className="w-4 h-4" />,
+                  onSelect: handleExportJSON,
+                },
+                {
+                  key: 'copy',
+                  label: t('analysisPage.copyToClipboard'),
+                  description: t('analysisPage.copyDescription'),
+                  icon: <Copy className="w-4 h-4" />,
+                  onSelect: handleCopyData,
+                },
+              ]}
+            />
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">

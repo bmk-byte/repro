@@ -42,7 +42,7 @@ const AdminManagementPanel: React.FC = () => {
     if (!term) return admins;
     return admins.filter((admin) =>
       (admin.full_name || '').toLowerCase().includes(term) ||
-      admin.email.toLowerCase().includes(term) ||
+      (admin.email ?? '').toLowerCase().includes(term) ||
       (admin.organization || '').toLowerCase().includes(term)
     );
   }, [admins, searchTerm]);

@@ -10,7 +10,10 @@
     "retryConnection": "Réessayer la connexion",
     "retryingConnection": "Nouvelle tentative de connexion... Tentative {{count}} sur {{max}}",
     "error": "Erreur :",
-    "statsLoadFailed": "Impossible de charger les chiffres récapitulatifs du tableau de bord. Le reste du tableau de bord n'est pas affecté."
+    "statsLoadFailed": "Impossible de charger les chiffres récapitulatifs du tableau de bord. Le reste du tableau de bord n'est pas affecté.",
+    "pageUnavailable": "Cette page n'est pas disponible",
+    "pageUnavailableDescription": "La page a peut-être été déplacée, ou votre compte n'y a pas accès.",
+    "backToDashboard": "Retour au tableau de bord"
   },
   "profileSettingsForm": {
     "loadFailed": "Échec du chargement de votre profil. Certains champs peuvent être obsolètes — essayez d'actualiser la page.",
@@ -148,7 +151,10 @@
   "errorBoundary": {
     "title": "Une erreur s'est produite",
     "description": "Le tableau de bord a rencontré une erreur inattendue. Recharger la page devrait résoudre le problème.",
-    "reload": "Recharger le tableau de bord"
+    "reload": "Recharger le tableau de bord",
+    "sectionTitle": "Cette section n'a pas pu se charger",
+    "sectionDescription": "Le reste du tableau de bord fonctionne toujours. Réessayez ou passez à un autre onglet.",
+    "tryAgain": "Réessayer"
   },
   "pdfViewer": {
     "failedToLoad": "Échec du chargement du document PDF. Veuillez réessayer plus tard ou télécharger le fichier.",

@@ -1,4 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
+import type { Session } from '@supabase/supabase-js';
+import { lazyWithRetry } from './lib/chunkRecovery';
 import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,32 +16,32 @@ import { reportError } from './lib/errorReporting';
 import Navbar from './components/Navbar';
 import { useModeratorStatus } from './hooks/useModeratorStatus';
 import { can } from './lib/permissions';
-import { schedulePrefetchAllRoutes, prefetchRoute } from './lib/routePrefetch';
+import { schedulePrefetchAllRoutes } from './lib/routePrefetch';
 
 // Lazy-loaded: these pull in the heaviest dependencies (react-pdf/pdfjs-dist,
 // recharts/@tremor/@visx, framer-motion-heavy pages) and previously shipped
 // to every visitor — including anonymous landing-page traffic — regardless
 // of whether they were ever used. Splitting them into their own chunks means
 // they only download once a signed-in user actually opens that tab.
-const LawsRepository = lazy(() => import('./components/LawsRepository'));
-const JudgmentsPage = lazy(() => import('./components/JudgmentsPage'));
-const CasesPage = lazy(() => import('./components/CasesPage'));
-const DashboardLayout = lazy(() => import('./components/DashboardLayout'));
-const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
-const SubmissionForm = lazy(() => import('./components/SubmissionForm'));
-const BulkCaseUpload = lazy(() => import('./components/forms/BulkCaseUpload'));
-const ModerationPage = lazy(() => import('./components/ModerationPage'));
-const ModeratorAdminPanel = lazy(() => import('./components/ModeratorAdminPanel'));
-const AdminManagementPanel = lazy(() => import('./components/AdminManagementPanel'));
-const ResourcesPage = lazy(() => import('./components/ResourcesPage'));
-const SettingsPage = lazy(() => import('./components/SettingsPage'));
-const RapidResponseCasesPage = lazy(() => import('./components/RapidResponseCasesPage'));
-const ScorecardPage = lazy(() => import('./scorecard/pages/ScorecardPage'));
-const ScorecardAnalysisPage = lazy(() => import('./scorecard/pages/AnalysisPage'));
-const ScorecardCountryDetailPage = lazy(() => import('./scorecard/pages/CountryDetailPage'));
-const ScorecardEditorAdminPanel = lazy(() => import('./scorecard/components/ScorecardEditorAdminPanel'));
-const TermsOfUsePage = lazy(() => import('./components/legal/TermsOfUsePage'));
-const PrivacyPolicyPage = lazy(() => import('./components/legal/PrivacyPolicyPage'));
+const LawsRepository = lazyWithRetry(() => import('./components/LawsRepository'));
+const JudgmentsPage = lazyWithRetry(() => import('./components/JudgmentsPage'));
+const CasesPage = lazyWithRetry(() => import('./components/CasesPage'));
+const DashboardLayout = lazyWithRetry(() => import('./components/DashboardLayout'));
+const AnalyticsPage = lazyWithRetry(() => import('./components/AnalyticsPage'));
+const SubmissionForm = lazyWithRetry(() => import('./components/SubmissionForm'));
+const BulkCaseUpload = lazyWithRetry(() => import('./components/forms/BulkCaseUpload'));
+const ModerationPage = lazyWithRetry(() => import('./components/ModerationPage'));
+const ModeratorAdminPanel = lazyWithRetry(() => import('./components/ModeratorAdminPanel'));
+const AdminManagementPanel = lazyWithRetry(() => import('./components/AdminManagementPanel'));
+const ResourcesPage = lazyWithRetry(() => import('./components/ResourcesPage'));
+const SettingsPage = lazyWithRetry(() => import('./components/SettingsPage'));
+const RapidResponseCasesPage = lazyWithRetry(() => import('./components/RapidResponseCasesPage'));
+const ScorecardPage = lazyWithRetry(() => import('./scorecard/pages/ScorecardPage'));
+const ScorecardAnalysisPage = lazyWithRetry(() => import('./scorecard/pages/AnalysisPage'));
+const ScorecardCountryDetailPage = lazyWithRetry(() => import('./scorecard/pages/CountryDetailPage'));
+const ScorecardEditorAdminPanel = lazyWithRetry(() => import('./scorecard/components/ScorecardEditorAdminPanel'));
+const TermsOfUsePage = lazyWithRetry(() => import('./components/legal/TermsOfUsePage'));
+const PrivacyPolicyPage = lazyWithRetry(() => import('./components/legal/PrivacyPolicyPage'));
 
 interface Profile {
   id: string;
@@ -68,13 +70,29 @@ const TabFallback = () => {
   );
 };
 
+const PageUnavailable = ({ onBack }: { onBack: () => void }) => {
+  const { t } = useTranslation('misc');
+  return (
+    <div role="alert" className="mx-auto mt-10 max-w-md rounded-lg border border-stone-200 bg-white p-6 text-center shadow-sm">
+      <h2 className="text-lg font-semibold text-stone-900">{t('app.pageUnavailable')}</h2>
+      <p className="mt-2 text-sm text-stone-600">{t('app.pageUnavailableDescription')}</p>
+      <button
+        onClick={onBack}
+        className="mt-4 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-dark"
+      >
+        {t('app.backToDashboard')}
+      </button>
+    </div>
+  );
+};
+
 const devLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
 };
 
 function DashboardApp() {
   const { t } = useTranslation('misc');
-  const [session, setSession] = React.useState(null);
+  const [session, setSession] = React.useState<Session | null>(null);
   // Which panel the (unauthenticated) single-viewport landing page is
   // showing — driven by the top Navbar's landing links, not the URL, since
   // the landing page itself never navigates/scrolls.
@@ -220,6 +238,10 @@ function DashboardApp() {
       if (event === 'SIGNED_OUT' || !session) {
         signedInUserId.current = null;
         setUserProfile(null);
+        // Start the next person who signs in on this browser from the
+        // dashboard, not from whatever (possibly role-locked) tab the
+        // previous user was on.
+        if (event === 'SIGNED_OUT') setActiveTab('dashboard');
         return;
       }
 
@@ -243,7 +265,9 @@ function DashboardApp() {
       }
 
       setShowAuthModal(false);
-      setActiveTab('dashboard');
+      // Deliberately no navigation here: the URL already holds the page the
+      // user asked for (e.g. a /cases or /moderation link from an email),
+      // so signing in takes them there instead of always to the dashboard.
       fetchUserProfile(session.user.id);
     });
 
@@ -405,8 +429,15 @@ function DashboardApp() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5 }}
         >
+          <ErrorBoundary variant="section" name={`tab:${activeTab}`} resetKey={activeTab}>
           <Suspense fallback={<TabFallback />}>
           {(() => {
+            // Shown for unknown URLs and for role-locked tabs the user can't
+            // open — previously both rendered a blank page. Holds the loading
+            // bar until roles are known so permitted users never see it flash.
+            const unavailable = moderatorLoading ? <TabFallback /> : (
+              <PageUnavailable onBack={() => setActiveTab('dashboard')} />
+            );
             switch (activeTab) {
               case 'dashboard':
                 return <DashboardLayout
@@ -461,16 +492,16 @@ function DashboardApp() {
                 return <ModerationPage />;
 
               case 'moderator-admin':
-                return can({ isModerator, isAdmin }, 'moderator:grant') ? <ModeratorAdminPanel /> : null;
+                return can({ isModerator, isAdmin }, 'moderator:grant') ? <ModeratorAdminPanel /> : unavailable;
 
               case 'admin-management':
-                return can({ isModerator, isAdmin }, 'admin:grant') ? <AdminManagementPanel /> : null;
+                return can({ isModerator, isAdmin }, 'admin:grant') ? <AdminManagementPanel /> : unavailable;
 
               case 'scorecard':
-                return isScorecardEditor ? <ScorecardPage /> : null;
+                return isScorecardEditor ? <ScorecardPage /> : unavailable;
 
               case 'scorecard-editor-admin':
-                return can({ isModerator, isAdmin }, 'scorecard-editor:grant') ? <ScorecardEditorAdminPanel /> : null;
+                return can({ isModerator, isAdmin }, 'scorecard-editor:grant') ? <ScorecardEditorAdminPanel /> : unavailable;
 
               case 'laws':
                 return <LawsRepository />;
@@ -516,10 +547,11 @@ function DashboardApp() {
                 );
 
               default:
-                return null;
+                return unavailable;
             }
           })()}
           </Suspense>
+          </ErrorBoundary>
         </motion.div>
       </AnimatePresence>
     );
@@ -642,33 +674,41 @@ export default function App() {
           <Route
             path="/scorecard/analysis"
             element={
-              <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary variant="section" name="ScorecardAnalysisPage">
+                <Suspense fallback={<TabFallback />}>
                 <ScorecardAnalysisPage />
               </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="/scorecard/analysis/country/:countryId"
             element={
-              <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary variant="section" name="ScorecardCountryDetailPage">
+                <Suspense fallback={<TabFallback />}>
                 <ScorecardCountryDetailPage />
               </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="/terms-of-use"
             element={
-              <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary variant="section" name="TermsOfUsePage">
+                <Suspense fallback={<TabFallback />}>
                 <TermsOfUsePage />
               </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="/privacy-policy"
             element={
-              <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary variant="section" name="PrivacyPolicyPage">
+                <Suspense fallback={<TabFallback />}>
                 <PrivacyPolicyPage />
               </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route path="*" element={<DashboardApp />} />

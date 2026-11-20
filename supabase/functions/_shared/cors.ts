@@ -12,11 +12,15 @@
 // code change — unset in production, where only the canonical domain below
 // is needed.
 
-const PRODUCTION_ORIGIN = 'https://repropulseafyanahaki.org';
+// The live site, per the Vercel project's domains. The apex 308-redirects
+// to www, but is listed too so a request that reaches it still works. (This
+// previously named repropulseafyanahaki.org, which does not resolve —
+// deploying that would have blocked sign-in from the real site.)
+const PRODUCTION_ORIGINS = ['https://www.repropulse.com', 'https://repropulse.com'];
 
 function getAllowedOrigins(): string[] {
   const extra = Deno.env.get('ALLOWED_ORIGIN');
-  return extra ? [PRODUCTION_ORIGIN, extra] : [PRODUCTION_ORIGIN];
+  return extra ? [...PRODUCTION_ORIGINS, extra] : PRODUCTION_ORIGINS;
 }
 
 /**

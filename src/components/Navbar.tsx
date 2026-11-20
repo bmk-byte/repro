@@ -1,12 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet, Award, UserCog } from 'lucide-react';
+import { Scale, Menu, X, Bell, ChevronDown, LayoutDashboard, Upload, Shield, ShieldCheck, KeyRound, Send, Gavel, BookOpen, ScrollText, Settings, LogOut, User, AlertOctagon, BarChart2, FileSpreadsheet, Award, UserCog, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from '../lib/toast';
 import { Button, Badge, LanguageSwitcher } from './ui';
 import { prefetchRoute } from '../lib/routePrefetch';
 import { clearAllFormDrafts } from '../hooks/useFormDraft';
+import NavDropdown, { type NavMenuItem } from './NavDropdown';
 
 interface NavbarProps {
   className?: string;
@@ -47,8 +48,6 @@ const Navbar: React.FC<NavbarProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
   const userMenuRef = React.useRef<HTMLDivElement>(null);
-  const [adminDropdownOpen, setAdminDropdownOpen] = React.useState(false);
-  const adminMenuRef = React.useRef<HTMLDivElement>(null);
 
   // Set up real-time subscription for notifications if user is a moderator
   React.useEffect(() => {
@@ -101,27 +100,6 @@ const Navbar: React.FC<NavbarProps> = ({
     };
   }, [userDropdownOpen]);
 
-  // Close the admin menu on outside click or Escape
-  React.useEffect(() => {
-    if (!adminDropdownOpen) return;
-
-    const handleClick = (e: MouseEvent) => {
-      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
-        setAdminDropdownOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setAdminDropdownOpen(false);
-    };
-
-    document.addEventListener('mousedown', handleClick);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [adminDropdownOpen]);
-
   const clearNotifications = () => {
     setNotificationCount(0);
     toast.success(t('common.notificationsCleared'));
@@ -142,14 +120,9 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { id: 'analytics', label: t('nav.analytics'), icon: BarChart2 },
     ...(isModerator ? [
-      { id: 'upload-case', label: t('nav.uploadCase'), icon: Upload },
       { id: 'moderation', label: t('nav.moderation'), icon: Shield },
       { id: 'rapid-response', label: t('nav.rapidResponse'), icon: AlertOctagon, badge: t('nav.rapidResponseBadge') }
-    ] : [
-      { id: 'submit-case', label: t('nav.submitCase'), icon: Send },
-      { id: 'submit-judgment', label: t('nav.submitJudgment'), icon: Send },
-      { id: 'bulk-upload-cases', label: t('nav.bulkUploadCases'), icon: FileSpreadsheet }
-    ]),
+    ] : []),
     { id: 'cases', label: t('nav.cases'), icon: Scale },
     { id: 'judgments', label: t('nav.judgments'), icon: Gavel },
     { id: 'laws', label: t('nav.laws'), icon: BookOpen },
@@ -173,7 +146,17 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'admin-management', label: t('nav.admins'), icon: KeyRound },
     { id: 'scorecard-editor-admin', label: t('nav.scorecardEditors'), icon: UserCog },
   ] : [];
-  const isAdminSectionActive = adminMenuItems.some((item) => item.id === activeTab);
+
+  // Every "add content" destination lives under one "New" menu instead of
+  // two to three separate top-level tabs, which crowded the bar.
+  const createMenuItems: NavMenuItem[] = isModerator ? [
+    { id: 'upload-case', label: t('nav.uploadCase'), icon: Upload },
+  ] : [
+    { id: 'submit-case', label: t('nav.submitCase'), icon: Send },
+    { id: 'submit-judgment', label: t('nav.submitJudgment'), icon: Gavel },
+    { id: 'bulk-upload-cases', label: t('nav.bulkUploadCases'), icon: FileSpreadsheet },
+  ];
+  const selectTab = (id: string) => setActiveTab?.(id);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -327,52 +310,22 @@ const Navbar: React.FC<NavbarProps> = ({
                 );
               })}
 
-              {adminMenuItems.length > 0 && (
-                <div className="relative" ref={adminMenuRef}>
-                  <button
-                    onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
-                    aria-haspopup="menu"
-                    aria-expanded={adminDropdownOpen}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isAdminSectionActive
-                        ? 'bg-primary text-white'
-                        : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
-                    }`}
-                  >
-                    <KeyRound className="h-4 w-4" />
-                    <span>{t('nav.admin')}</span>
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
+              <NavDropdown
+                label={t('nav.new')}
+                icon={Plus}
+                items={createMenuItems}
+                activeTab={activeTab}
+                onSelect={selectTab}
+                emphasis
+              />
 
-                  {adminDropdownOpen && (
-                    <div role="menu" className="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-raised border border-stone-100 py-1 z-50">
-                      {adminMenuItems.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = activeTab === item.id;
-                        return (
-                          <button
-                            key={item.id}
-                            role="menuitem"
-                            onClick={() => {
-                              setActiveTab?.(item.id);
-                              setAdminDropdownOpen(false);
-                            }}
-                            onMouseEnter={() => prefetchRoute(item.id)}
-                            className={`flex items-center w-full px-4 py-2 text-sm ${
-                              isActive
-                                ? 'bg-primary text-white'
-                                : 'text-stone-700 hover:bg-stone-100'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4 mr-2" />
-                            {item.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
+              <NavDropdown
+                label={t('nav.admin')}
+                icon={KeyRound}
+                items={adminMenuItems}
+                activeTab={activeTab}
+                onSelect={selectTab}
+              />
 
               <button
                 onClick={handleSignOut}
@@ -427,12 +380,15 @@ const Navbar: React.FC<NavbarProps> = ({
                   );
                 })}
 
-                {adminMenuItems.length > 0 && (
-                  <div className="pt-2 mt-2 border-t border-stone-200">
+                {[
+                  { key: 'new', title: t('nav.new'), items: createMenuItems },
+                  { key: 'admin', title: t('nav.admin'), items: adminMenuItems },
+                ].filter((section) => section.items.length > 0).map((section) => (
+                  <div key={section.key} className="pt-2 mt-2 border-t border-stone-200">
                     <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-stone-400">
-                      {t('nav.admin')}
+                      {section.title}
                     </p>
-                    {adminMenuItems.map((item) => {
+                    {section.items.map((item) => {
                       const Icon = item.icon;
                       const isActive = activeTab === item.id;
 
@@ -455,7 +411,7 @@ const Navbar: React.FC<NavbarProps> = ({
                       );
                     })}
                   </div>
-                )}
+                ))}
 
                 <button
                   onClick={() => {

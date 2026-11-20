@@ -75,6 +75,16 @@
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
+}
+
+/* For horizontally scrolling strips (e.g. tabs) where an edge fade already
+   signals overflow and a scrollbar would just add visual noise. */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 ::-webkit-scrollbar-track {

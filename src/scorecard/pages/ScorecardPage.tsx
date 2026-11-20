@@ -261,8 +261,11 @@ export default function ScorecardPage() {
     const scoredIndicators = Array.from(scores.values()).filter(
       (score) => score.score !== null && score.score !== undefined
     ).length;
+    const evidencedIndicators = Array.from(scores.values()).filter(
+      (score) => score.evidence_complete
+    ).length;
 
-    return { totalIndicators, scoredIndicators };
+    return { totalIndicators, scoredIndicators, evidencedIndicators };
   };
 
   const calculateCurrentResults = () => {
@@ -351,6 +354,7 @@ export default function ScorecardPage() {
           countryName={selectedCountry.name}
           totalIndicators={calculateCompleteness().totalIndicators}
           scoredIndicators={calculateCompleteness().scoredIndicators}
+          evidencedIndicators={calculateCompleteness().evidencedIndicators}
           compositeScore={currentSubmission.composite_score}
           onConfirm={handlePublish}
           onCancel={() => setShowPublishModal(false)}

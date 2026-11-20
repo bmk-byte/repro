@@ -12,7 +12,7 @@ const LandingFooter: React.FC = () => {
     <footer className="flex-shrink-0 bg-[#0A1426] text-white" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5">
         <div className="flex items-center gap-4 text-xs text-stone-400">
-          <span>{t('footer.copyright')}</span>
+          <span>{t('footer.copyright', { year: new Date().getFullYear() })}</span>
           <a href="mailto:info@afyanahaki.org" className="hover:text-primary transition-colors">info@afyanahaki.org</a>
           <a href="tel:+256414660733" className="hidden sm:inline hover:text-primary transition-colors">+256 414 660 733</a>
           <Link to="/terms-of-use" className="hover:text-primary transition-colors">Terms of Use</Link>

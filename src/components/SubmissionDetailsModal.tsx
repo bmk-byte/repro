@@ -172,7 +172,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                       <div>
                         <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.categories')}</label>
                         <div className="mt-2 flex flex-wrap gap-2">
-                          {submission.case_categories.map((category: string, idx: number) => (
+                          {(submission.case_categories ?? []).map((category: string, idx: number) => (
                             <span 
                               key={idx}
                               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -219,7 +219,7 @@ const SubmissionDetailsModal: React.FC<SubmissionDetailsModalProps> = ({
                         <div>
                           <label className="text-sm font-medium text-stone-500">{t('submissionDetailsModal.litigants')}</label>
                           <ul className="mt-1 list-disc list-inside">
-                            {submission.litigants.map((litigant: string, idx: number) => (
+                            {(submission.litigants ?? []).map((litigant: string, idx: number) => (
                               <li key={idx}>{litigant}</li>
                             ))}
                           </ul>

@@ -28,6 +28,7 @@
     "equityPenaltyApplied": "pénalité d'équité appliquée"
   },
   "countryDetail": {
+    "evidencePendingNote": "Les preuves sont encore en cours d'ajout pour {{missing}} des {{scored}} indicateurs notés. Ces scores peuvent être révisés à mesure que les sources sont ajoutées.",
     "pillarLevel": {
       "high": "Solide",
       "medium": "Modéré",
@@ -153,6 +154,8 @@
     "indicatorsInPillar": "Indicateurs de ce pilier ({{count}})"
   },
   "publishConfirmation": {
+    "evidenceMissingLabel": "Preuves manquantes :",
+    "evidenceMissingDetail": "{{missing}} des {{scored}} indicateurs notés n'ont pas de preuves complètes. Les lecteurs verront un avis indiquant que les preuves sont en attente.",
     "title": "Publier le tableau de bord",
     "confirmPublish": "Confirmer la publication",
     "willMakeVisibleStrong": "La publication de ce tableau de bord le rendra visible à tous les utilisateurs",
@@ -249,6 +252,9 @@
     "region": "Région"
   },
   "crossCountryComparison": {
+    "exportSelected": "Exporter la sélection (CSV)",
+    "clearSelection": "Effacer la sélection",
+    "selectAll": "Sélectionner tous les pays",
     "heading": "Comparaison entre pays",
     "subheading": "Comparez la performance entre {{count}} pays",
     "exportData": "Exporter les données",
@@ -285,6 +291,10 @@
     "updating": "Mise à jour...",
     "subheading": "Alignement des pays avec l'article 14(2)(c) sur l'avortement sécurisé — évaluations publiées uniquement.",
     "copyToClipboard": "Copier dans le presse-papiers",
+    "export": "Exporter",
+    "csvDescription": "Tableur de tous les pays, piliers et indicateurs",
+    "jsonDescription": "Jeu de données complet pour analystes et développeurs",
+    "copyDescription": "Collez le tableau directement dans un tableur ou un document",
     "copied": "Copié !",
     "copy": "Copier",
     "exportAsJson": "Exporter en JSON",

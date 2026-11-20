@@ -6,6 +6,8 @@ interface PublishConfirmationModalProps {
   countryName: string;
   totalIndicators: number;
   scoredIndicators: number;
+  /** Scored indicators whose evidence has been marked complete. */
+  evidencedIndicators: number;
   compositeScore: number | null;
   onConfirm: () => void;
   onCancel: () => void;
@@ -15,6 +17,7 @@ export function PublishConfirmationModal({
   countryName,
   totalIndicators,
   scoredIndicators,
+  evidencedIndicators,
   compositeScore,
   onConfirm,
   onCancel,
@@ -62,6 +65,19 @@ export function PublishConfirmationModal({
               </div>
             )}
           </div>
+
+          {evidencedIndicators < scoredIndicators && (
+            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-800">
+                <strong>{t('publishConfirmation.evidenceMissingLabel')}</strong>{' '}
+                {t('publishConfirmation.evidenceMissingDetail', {
+                  missing: scoredIndicators - evidencedIndicators,
+                  scored: scoredIndicators,
+                })}
+              </div>
+            </div>
+          )}
 
           {isComplete ? (
             <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
